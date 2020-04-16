@@ -1,0 +1,14 @@
+execdir = .
+deterministic = True
+run_obj = quality
+overall_obj = par10
+par_factor = 10
+cost_for_crash = 2147483647.0
+cutoff = 1800.0
+memory_limit = 4000.0
+algo_runs_timelimit = inf
+wallclock_limit = 18000.0
+always_race_default = False
+ta_run_limit = inf
+initial_incumbent = DEFAULT
+pcs_fn = /home/muelleph/HPOlib3/experiments/cartpole_smac_sh/run_1608637542/configspace.json
