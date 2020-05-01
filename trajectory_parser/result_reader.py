@@ -1,12 +1,13 @@
-import json_tricks
+import os
+import json
 import numpy as np
 import pandas as pd
 from pathlib import Path
 from typing import List, Union, Dict, Optional
-from trajectory_parser import Run
+from trajectory_parser.run_result import Run
+from pprint import pprint
 
-
-class ResultReader():
+class ResultReader:
     def __init__(self):
         self.config_ids_to_configs = {}
         self.results = []
@@ -43,6 +44,30 @@ class ResultReader():
         trajectory = trajectory.add_suffix(suffix)
         return trajectory
 
+    def export_trajectory(self, output_path):
+        assert len(self.trajectory) != 0, "No trajectory available. Please read-in trajectory before."
+
+        output_path = Path(output_path)
+        if output_path.is_dir():
+            output_path = output_path / 'trajparser_traj.json'
+
+        # add incumbent to info
+        lines = []
+        for wallclock_time, entry in self.trajectory:
+            line = {"wallclock_time": entry.relative_finish_time,
+                    "evaluations": entry.info.get('evaluations', -1),
+                    "cost": entry.loss,
+                    "incumbent": self.config_ids_to_configs[entry.config_id],
+                    "origin": entry.info.get('origin')}
+            lines.append(json.dumps(line) + '\r\n')
+
+        with output_path.open('w', encoding='utf-8') as fh:
+            fh.writelines(lines)
+
+    def __repr__(self):
+        return f'Reader: {len(self.results)} results from {len(self.config_ids_to_configs)}\n' \
+               f'Trajectory: {self.trajectory}]'
+
 
 class SMACReader(ResultReader):
     def __init__(self):
@@ -51,17 +76,42 @@ class SMACReader(ResultReader):
     def read(self, file_path: Union[str, Path]):
         file_path = Path(file_path)
 
+        if file_path.is_dir():
+            traj_cands = list(file_path.glob('*traj*.json'))
+            assert len(traj_cands) != 0, f"no trajectory file in {file_path} found. Please give a direct path to the " \
+                                         f"json-trajectory file"
+
+            traj_cands_names = [p.name for p in traj_cands]
+            done = False
+            try:
+                file_path = traj_cands[traj_cands_names.index('traj.json')]
+                done = True
+            except ValueError:
+                pass
+            if not done:
+                try:
+                    file_path = traj_cands[traj_cands_names.index('traj_aclib2.json')]
+                    done = True
+                except ValueError:
+                    pass
+            if not done:
+                file_path = traj_cands[0]
+
         config_ids_to_configs = {}
         results = []
-        with (file_path / 'traj_aclib2.json').open('r') as fh:
+        with file_path.open('r') as fh:
             for i, line in enumerate(fh.readlines()):
-                run_dict = json_tricks.loads(line)
+                run_dict = json.loads(line)
                 config_ids_to_configs[i] = run_dict.get('incumbent')
                 run = Run()
                 run.set_values_smac(config_id=i,
                                     budget=i,
                                     wallclock_time=run_dict.get('wallclock_time'),
-                                    cost=run_dict.get('cost'))
+                                    cost=run_dict.get('cost'),
+                                    info={'origin': run_dict.get('origin'),
+                                          'evaluations': run_dict.get('evaluations')
+                                          }
+                                    )
                 results.append(run)
 
         self.config_ids_to_configs = config_ids_to_configs
@@ -88,8 +138,8 @@ class BOHBReader(ResultReader):
     def _read_bohb_confs(self, file_path: Path) -> Dict:
         config_ids_to_configs = {}
         with (file_path / 'configs.json').open('r') as fh:
-            for line in fh.readlines():
-                line = json_tricks.loads(line)
+            for i, line in enumerate(fh.readlines()):
+                line = json.loads(line)
 
                 if len(line) == 2:
                     (config_id, config), config_info = line, 'N/A'
@@ -97,6 +147,9 @@ class BOHBReader(ResultReader):
                     config_id, config, config_info = line
 
                 config_ids_to_configs[tuple(config_id)] = [config, config_info]
+                if i == 0:
+                    config_ids_to_configs[(-1, -1, -1)] = [config, config_info]
+
         return config_ids_to_configs
 
     def _read_bohb_res(self, file_path: Path) -> List:
@@ -106,13 +159,19 @@ class BOHBReader(ResultReader):
             # SMAC starts with an incumbent with cost infinity --> Append a starting run.
             run = Run()
             run.set_values_bohb(config_id=[-1, -1, -1], budget=0, time_stamps={'finished': 0},
-                                result={'loss': 2.147484e+09}, exception="", global_start_time=0)
+                                result={'loss': 2.147484e+09}, exception="", global_start_time=0, info={})
             results.append(run)
 
             for i, line in enumerate(fh.readlines()):
-                config_id, budget, time_stamps, result, exception = json_tricks.loads(line)
+                config_id, budget, time_stamps, result, exception = json.loads(line)
                 start_time = time_stamps.get('started') if i == 0 else start_time
+                _model_based_pick = self.config_ids_to_configs.get(tuple(config_id))[1].get('model_based_pick')
+                origin = 'Model' if _model_based_pick else 'Random'
+
                 run = Run()
-                run.set_values_bohb(config_id, budget, time_stamps, result, exception, global_start_time=start_time)
+                run.set_values_bohb(config_id, budget, time_stamps, result, exception, global_start_time=start_time,
+                                    info={'exception': exception,
+                                          'origin': origin,
+                                          })
                 results.append(run)
         return results

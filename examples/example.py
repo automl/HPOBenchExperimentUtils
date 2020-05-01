@@ -6,15 +6,18 @@ from trajectory_parser import SMACReader, BOHBReader
 
 
 file_path = Path('./example_data/cartpole_smac_hb/run_1608637542/')
-reader = SMACReader()
-reader.read(file_path)
-smac_traj = reader.get_trajectory_as_dataframe()
+smac_reader = SMACReader()
+smac_reader.read(file_path)
+smac_traj = smac_reader.get_trajectory_as_dataframe()
 
 
 file_path = Path('./example_data/cartpole_bohb/')
-reader = BOHBReader()
-reader.read(file_path)
-bohb_traj = reader.get_trajectory_as_dataframe()
+bohb_reader = BOHBReader()
+bohb_reader.read(file_path)
+bohb_traj = bohb_reader.get_trajectory_as_dataframe()
+
+smac_reader.export_trajectory(Path('./out_traj_smac.json'))
+bohb_reader.export_trajectory(Path('./out_traj_bohb.json'))
 
 df = pd.concat([smac_traj, bohb_traj], axis=1, sort=True)
 df = df.ffill().bfill()
