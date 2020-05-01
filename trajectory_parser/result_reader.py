@@ -2,16 +2,19 @@ import os
 import json
 import numpy as np
 import pandas as pd
+
+from copy import deepcopy
 from pathlib import Path
 from typing import List, Union, Dict, Optional
 from trajectory_parser.run_result import Run
-from pprint import pprint
+
 
 class ResultReader:
     def __init__(self):
         self.config_ids_to_configs = {}
         self.results = []
         self.trajectory = []
+        self.validated_trajectory = []
 
     def read(self, file_path: Union[str, Path]):
         raise NotImplementedError
@@ -36,7 +39,17 @@ class ResultReader:
         return trajectory
 
     def get_trajectory_as_dataframe(self, meaningful_budget: bool = True, suffix: Optional[str] = '') -> pd.DataFrame:
-        trajectory = self.get_trajectory()
+        return self._get_trajectory_as_dataframe(meaningful_budget, suffix, validated=True)
+
+    def get_validated_trajectory_as_dataframe(self, meaningful_budget: bool = True, suffix: Optional[str] = '') \
+            -> pd.DataFrame:
+        return self._get_trajectory_as_dataframe(meaningful_budget, suffix, validated=False)
+
+    def _get_trajectory_as_dataframe(self, meaningful_budget: bool = True, suffix: Optional[str] = '',
+                                     validated: bool = False) -> pd.DataFrame:
+        trajectory = self.get_trajectory() if not validated else self.validated_trajectory
+        assert len(trajectory) != 0, 'Please first read in run data before extracting the trajectory'
+
         trajectory = np.array([[finish_time, run.loss, run.budget if meaningful_budget else 1, run.config_id]
                                for finish_time, run in trajectory])
         trajectory = pd.DataFrame(trajectory, columns=['wallclock_time', 'cost', 'budget', 'config_id'])
@@ -45,15 +58,24 @@ class ResultReader:
         return trajectory
 
     def export_trajectory(self, output_path):
-        assert len(self.trajectory) != 0, "No trajectory available. Please read-in trajectory before."
+        self._export_trajectory(output_path, validated=False)
+
+    def export_validated_trajectory(self, output_path):
+        self._export_trajectory(output_path, validated=True)
+
+    def _export_trajectory(self, output_path, validated: bool = False):
+        trajectory = self.trajectory if not validated else self.validated_trajectory
+
+        assert len(trajectory) != 0, "No trajectory available. Please read-in trajectory before."
 
         output_path = Path(output_path)
         if output_path.is_dir():
-            output_path = output_path / 'trajparser_traj.json'
+            val_str = 'validated_' if validated else ''
+            output_path = output_path / f'trajparser_{val_str}traj.json'
 
         # add incumbent to info
         lines = []
-        for wallclock_time, entry in self.trajectory:
+        for wallclock_time, entry in trajectory:
             line = {"wallclock_time": entry.relative_finish_time,
                     "evaluations": entry.info.get('evaluations', -1),
                     "cost": entry.loss,
@@ -63,6 +85,21 @@ class ResultReader:
 
         with output_path.open('w', encoding='utf-8') as fh:
             fh.writelines(lines)
+
+    def get_configuration_ids_trajectory(self):
+        assert len(self.trajectory) != 0, 'Trajectory is still empty! Read Trajectory before calling this function'
+        return [entry.config_id for _, entry in self.trajectory]
+
+    def get_configurations_trajectory(self):
+        assert len(self.trajectory) != 0, 'Trajectory is still empty! Read Trajectory before calling this function'
+        return [self.config_ids_to_configs[config_id] for config_id in self.get_configuration_ids_trajectory()]
+
+    def add_validated_trajectory(self, validated_values: Dict):
+        self.validated_trajectory = deepcopy(self.trajectory)
+        for i, (_, entry) in enumerate(self.validated_trajectory):
+            if i == 0:
+                continue
+            entry.loss = validated_values[entry.config_id]
 
     def __repr__(self):
         return f'Reader: {len(self.results)} results from {len(self.config_ids_to_configs)}\n' \
@@ -121,6 +158,11 @@ class SMACReader(ResultReader):
             -> pd.DataFrame:
         return super(SMACReader, self).get_trajectory_as_dataframe(meaningful_budget=meaningful_budget, suffix=suffix)
 
+    def get_validated_trajectory_as_dataframe(self, meaningful_budget: bool = False,
+                                              suffix: Optional[str] = '_smac_valid') -> pd.DataFrame:
+        return super(SMACReader, self).get_validated_trajectory_as_dataframe(meaningful_budget=meaningful_budget,
+                                                                             suffix=suffix)
+
 
 class BOHBReader(ResultReader):
     def __init__(self):
@@ -134,6 +176,12 @@ class BOHBReader(ResultReader):
     def get_trajectory_as_dataframe(self, meaningful_budget: bool = True, suffix: Optional[str] = '_bohb') \
             -> pd.DataFrame:
         return super(BOHBReader, self).get_trajectory_as_dataframe(meaningful_budget=meaningful_budget, suffix=suffix)
+
+    def get_validated_trajectory_as_dataframe(self, meaningful_budget: bool = True,
+                                              suffix: Optional[str] = '_bohb_valid') -> pd.DataFrame:
+
+        return super(BOHBReader, self).get_validated_trajectory_as_dataframe(meaningful_budget=meaningful_budget,
+                                                                             suffix=suffix)
 
     def _read_bohb_confs(self, file_path: Path) -> Dict:
         config_ids_to_configs = {}
