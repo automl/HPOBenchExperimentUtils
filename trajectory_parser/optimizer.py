@@ -1,44 +1,21 @@
 import logging
-from enum import Enum
+from copy import deepcopy
 from time import time
-from typing import Union
 
 import numpy as np
-import pynisher
 from hpbandster.core import result as hpres, nameserver as hpns
 from hpbandster.optimizers import BOHB
 from smac.facade.smac_hpo_facade import SMAC4HPO
 from smac.intensification.hyperband import Hyperband
 from smac.intensification.successive_halving import SuccessiveHalving
 from smac.scenario.scenario import Scenario
+
 from trajectory_parser import BOHBReader, SMACReader
-from trajectory_parser.utils.runner_utils import CustomWorker
+from trajectory_parser.utils.optimizer_utils import CustomWorker
+from trajectory_parser.utils.runner_utils import OptimizerEnum
+from trajectory_parser.utils.utils import TimeoutException, time_limit
 
 logger = logging.getLogger('Optimizer')
-
-class OptimizerEnum(Enum):
-    BOHB = 1
-    SMAC = 2
-    HYPERBAND = 3
-    SUCCESSIVE_HALVING = 4
-
-
-def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]):
-    if isinstance(optimizer, OptimizerEnum):
-        return optimizer
-    if isinstance(optimizer, str):
-        if 'BOHB' in optimizer.upper():
-            return OptimizerEnum.BOHB
-        elif 'SMAC' in optimizer.upper():
-            return OptimizerEnum.SMAC
-        elif 'HYPERBAND' in optimizer.upper():
-            return OptimizerEnum.HYPERBAND
-        elif 'SUCCESSIVE_HALVING' in optimizer.upper():
-            return OptimizerEnum.SUCCESSIVE_HALVING
-        else:
-            raise ValueError(f'Unknown optimizer str. Must be one of BOHB|SMAC, but was {optimizer}')
-    else:
-        raise TypeError(f'Unknown optimizer type. Must be one of str|OptimizerEnum, but was {type(optimizer)}')
 
 
 class Optimizer:
@@ -73,8 +50,7 @@ class BOHBOptimizer(Optimizer):
                              working_directory=str(self.optimizer_settings['output_dir']))
         ns_host, ns_port = ns.start()
 
-        worker = CustomWorker(seed=self.seed,
-                              benchmark=self.benchmark,
+        worker = CustomWorker(benchmark=self.benchmark,
                               benchmark_settings=self.benchmark_settings,
                               nameserver=ns_host,
                               nameserver_port=ns_port,
@@ -93,10 +69,15 @@ class BOHBOptimizer(Optimizer):
                       result_logger=result_logger)
 
         # TODO: Do it the same way as in smac: try with finally
-        pynisher_obj = pynisher.enforce_limits(wall_time_in_s=self.optimizer_settings['time_limit_in_s'],
-                                               mem_in_mb=self.optimizer_settings['mem_limit_in_mb'])(master.run)
-        result = pynisher_obj(n_iterations=self.optimizer_settings['num_iterations'])
-        # result = master.run(n_iterations=self.settings['num_iterations'])
+        try:
+            with time_limit(self.optimizer_settings['time_limit_in_s']):
+                result = master.run(n_iterations=self.optimizer_settings['num_iterations'])
+        except TimeoutException:
+            for iteration in master.warmstart_iteration:
+                iteration.fix_timestamps(master.time_ref)
+            ws_data = [iteration.data for iteration in master.warmstart_iteration]
+            result = hpres.Result([deepcopy(iteration.data) for iteration in master.iterations]+ws_data, master.config)
+            logger.info('WALLCLOCK LIMIT REACHED')
 
         master.shutdown(shutdown_workers=True)
         ns.shutdown()
