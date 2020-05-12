@@ -17,7 +17,6 @@ logging.basicConfig(level=logging.DEBUG)
 
 from hpolib.benchmarks.rl.cartpole import CartpoleReduced as Benchmark
 from hpolib.util.rng_helper import get_rng
-from hpolib.util.example_utils import set_env_variables
 import hpbandster.core.nameserver as hpns
 import hpbandster.core.result as hpres
 from hpbandster.optimizers import BOHB
@@ -41,7 +40,7 @@ class CustomWorker(Worker):
                          'budget': result_dict['budget']}}
 
 
-def run_experiment(out_path):
+def run_experiment(out_path, seed):
 
     settings = {'min_budget': 1,
                 'max_budget': 5,  # Number of Agents, which are trained to solve the cartpole experiment
@@ -53,7 +52,7 @@ def run_experiment(out_path):
     settings.get('output_dir').mkdir(exist_ok=True)
 
     cs = Benchmark.get_configuration_space()
-    seed = get_rng(rng=0)
+    seed = get_rng(rng=seed)
     run_id = 'BOHB_on_cartpole'
 
     result_logger = hpres.json_result_logger(directory=str(settings.get('output_dir')), overwrite=True)
@@ -104,6 +103,7 @@ if __name__ == '__main__':
                                      description='HPOlib3 with BOHB on Cartpole',
                                      usage='%(prog)s --out_path <string>')
     parser.add_argument('--out_path', default='./cartpole_smac_hb', type=str)
+    parser.add_argument('--seed', default=0, type=int)
     args = parser.parse_args()
 
-    run_experiment(out_path=args.out_path)
+    run_experiment(out_path=args.out_path, seed=args.seed)

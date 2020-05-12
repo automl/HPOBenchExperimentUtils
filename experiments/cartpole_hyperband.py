@@ -8,13 +8,10 @@ We use SMAC with Hyperband.
 Please install the necessary dependencies via ``pip install .[cartpole_example]``
 """
 import logging
-import numpy as np
-import os
-
-from time import time
 from pathlib import Path
+from time import time
 
-from hpolib.util.example_utils import set_env_variables
+import numpy as np
 from hpolib.benchmarks.rl.cartpole import CartpoleReduced as Benchmark
 from smac.facade.smac_hpo_facade import SMAC4HPO
 from smac.intensification.hyperband import Hyperband
@@ -25,7 +22,7 @@ logging.basicConfig(level=logging.INFO)
 # set_env_variables()
 
 
-def run_experiment(out_path: str):
+def run_experiment(out_path: str, seed: int):
 
     out_path = Path(out_path)
     out_path.mkdir(exist_ok=True)
@@ -54,7 +51,7 @@ def run_experiment(out_path: str):
         return result_dict['function_value']
 
     smac = SMAC4HPO(scenario=scenario,
-                    rng=np.random.RandomState(42),
+                    rng=np.random.RandomState(seed),
                     tae_runner=optimization_function_wrapper,
                     intensifier=Hyperband,  # you can also change the intensifier to use like this!
                     intensifier_kwargs={'initial_budget': 1, 'max_budget': max_budget, 'eta': 3}
@@ -85,6 +82,7 @@ if __name__ == "__main__":
                                      description='HPOlib3 with HB on Cartpole',
                                      usage='%(prog)s --out_path <string>')
     parser.add_argument('--out_path', default='./cartpole_smac_hb', type=str)
+    parser.add_argument('--seed', default=0, type=int)
     args = parser.parse_args()
 
-    run_experiment(out_path=args.out_path)
+    run_experiment(out_path=args.out_path, seed=args.seed)
