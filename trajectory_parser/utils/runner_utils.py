@@ -25,9 +25,9 @@ def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]):
             return OptimizerEnum.BOHB
         elif 'SMAC' in optimizer.upper():
             return OptimizerEnum.SMAC
-        elif 'HYPERBAND' in optimizer.upper():
+        elif 'HYPERBAND' in optimizer.upper() or 'HB' == optimizer.upper():
             return OptimizerEnum.HYPERBAND
-        elif 'SUCCESSIVE_HALVING' in optimizer.upper():
+        elif 'SUCCESSIVE_HALVING' in optimizer.upper() or 'SH' == optimizer.upper():
             return OptimizerEnum.SUCCESSIVE_HALVING
         else:
             raise ValueError(f'Unknown optimizer str. Must be one of BOHB|SMAC, but was {optimizer}')

@@ -3,7 +3,7 @@ from importlib import import_module
 from pathlib import Path
 from typing import Union, Dict
 
-from trajectory_parser import BOHBOptimizer, SMACOptimizer
+from trajectory_parser import BOHBReader, SMACReader
 from trajectory_parser.utils.runner_utils import transform_unknown_params_to_dict, get_setting_per_benchmark, \
     OptimizerEnum, optimizer_str_to_enum
 
@@ -11,11 +11,11 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('BenchmarkRunner')
 
 
-def run_benchmark(optimizer: Union[OptimizerEnum, str],
-                  benchmark: str,
-                  output_dir: Union[Path, str],
-                  seed: int,
-                  **benchmark_params: Dict):
+def validate_benchmark(optimizer: Union[OptimizerEnum, str],
+                       benchmark: str,
+                       output_dir: Union[Path, str],
+                       seed: int,
+                       **benchmark_params: Dict):
 
     optimizer_enum = optimizer_str_to_enum(optimizer)
 
@@ -30,14 +30,9 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
 
     benchmark = benchmark_obj(**benchmark_params)  # Todo: Arguments for Benchmark? --> b(**benchmark_params)
 
-    # setup optimizer (either smac or bohb)
-    optimizer = BOHBOptimizer if optimizer_enum is OptimizerEnum.BOHB else SMACOptimizer
-    optimizer = optimizer(benchmark=benchmark, optimizer_settings=optimizer_settings,
-                          benchmark_settings=benchmark_settings, intensifier=optimizer_enum)
-    # optimizer.setup()
-    optimizer.run()
-
-    logger.info('Runner finished')
+    reader = BOHBReader() if optimizer_enum is OptimizerEnum.BOHB else SMACReader()
+    reader.read(file_path=output_dir)
+    reader.get_trajectory()
 
 
 if __name__ == "__main__":
@@ -61,4 +56,4 @@ if __name__ == "__main__":
     args, unknown = parser.parse_known_args()
     benchmark_params = transform_unknown_params_to_dict(unknown)
 
-    run_benchmark(**vars(args), **benchmark_params)
+    validate_benchmark(**vars(args), **benchmark_params)

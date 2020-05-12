@@ -1,5 +1,6 @@
 import logging
 from copy import deepcopy
+from pathlib import Path
 from time import time
 
 import numpy as np
@@ -11,7 +12,7 @@ from smac.intensification.successive_halving import SuccessiveHalving
 from smac.scenario.scenario import Scenario
 
 from trajectory_parser import BOHBReader, SMACReader
-from trajectory_parser.utils.optimizer_utils import CustomWorker
+from trajectory_parser.utils.optimizer_utils import CustomWorker, get_number_ta_runs
 from trajectory_parser.utils.runner_utils import OptimizerEnum
 from trajectory_parser.utils.utils import TimeoutException, time_limit
 
@@ -114,11 +115,17 @@ class SMACOptimizer(Optimizer):
         pass
 
     def run(self):
+        number_ta_runs = get_number_ta_runs(iterations=self.optimizer_settings['num_iterations'],
+                                            min_budget=self.optimizer_settings['min_budget'],
+                                            max_budget=self.optimizer_settings['max_budget'],
+                                            eta=self.optimizer_settings['eta'])
+
         scenario_dict = {"run_obj": "quality",
                          "wallclock-limit": self.optimizer_settings['time_limit_in_s'],
                          "cs": self.cs,
                          "deterministic": "true",
                          "limit_resources": True,
+                         "runcount-limit": number_ta_runs,  # max. number of function evaluations
                          "cutoff": self.optimizer_settings['cutoff_in_s'],
                          "memory_limit": self.optimizer_settings['mem_limit_in_mb'],
                          "output_dir": str(self.optimizer_settings['output_dir']),
@@ -144,10 +151,12 @@ class SMACOptimizer(Optimizer):
         finally:
             incumbent = smac.solver.incumbent
         end_time = time()
-        logger.info(f'Finished Optimization after {end_time - start_time:d}s. Incumbent is {incumbent}')
+        logger.info(f'Finished Optimization after {int(end_time - start_time):d}s. Incumbent is {incumbent}')
 
+        smac_output_dir = Path(smac.output_dir)
         smac_reader = SMACReader()
-        smac_reader.read(self.optimizer_settings['output_dir'])
+        smac_reader.read(smac_output_dir)
         smac_reader.get_trajectory()
-        smac_reader.export_trajectory(self.optimizer_settings['output_dir'] / 'out_traj_smac.json')
-        logger.info(f'Trajectory successfully exported to {self.optimizer_settings["output_dir"] / "out_traj_smac.json"}')
+        smac_reader.export_trajectory(smac_output_dir / 'out_traj_smac.json')
+        logger.info(f'Trajectory successfully exported to '
+                    f'{self.optimizer_settings["output_dir"] / "out_traj_smac.json"}')
