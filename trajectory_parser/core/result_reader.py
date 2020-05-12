@@ -5,7 +5,6 @@ from typing import List, Union, Dict, Optional
 
 import numpy as np
 import pandas as pd
-
 from trajectory_parser import Run
 
 
@@ -134,14 +133,23 @@ class SMACReader(ResultReader):
             if not done:
                 file_path = traj_cands[0]
 
+        config_id = 0
         config_ids_to_configs = {}
+        configs_to_config_ids = {}
         results = []
         with file_path.open('r') as fh:
             for i, line in enumerate(fh.readlines()):
                 run_dict = json.loads(line)
-                config_ids_to_configs[i] = run_dict.get('incumbent')
+                if isinstance(run_dict['incumbent'], list):
+                    run_dict['incumbent'] = run_dict['incumbent'][0]
+
+                if run_dict.get('incumbent') not in config_ids_to_configs.values():
+                    config_ids_to_configs[config_id] = run_dict.get('incumbent')
+                    configs_to_config_ids[str(run_dict.get('incumbent'))] = config_id
+                    config_id += 1
+
                 run = Run()
-                run.set_values_smac(config_id=i,
+                run.set_values_smac(config_id=configs_to_config_ids[str(run_dict.get('incumbent'))],
                                     budget=i,
                                     wallclock_time=run_dict.get('wallclock_time'),
                                     cost=run_dict.get('cost'),

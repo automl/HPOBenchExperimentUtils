@@ -50,7 +50,7 @@ def transform_unknown_params_to_dict(unknown_args: List):
     return benchmark_params
 
 
-def get_setting_per_benchmark(benchmark: str, seed: int, output_dir: Path):
+def get_setting_per_benchmark(benchmark: str, rng: int, output_dir: Path):
 
     if 'cartpolereduced' in benchmark.lower() or 'cartpolefull' in benchmark.lower():
         optimizer_settings = {'min_budget': 1,
@@ -87,7 +87,7 @@ def get_setting_per_benchmark(benchmark: str, seed: int, output_dir: Path):
     else:
         raise ValueError(f'Unknown Benchmark {benchmark}')
 
-    optimizer_settings.update({'seed': seed, 'output_dir': output_dir})
-    benchmark_settings.update({'seed': seed, 'output_dir': output_dir})
+    optimizer_settings.update({'rng': rng, 'output_dir': output_dir})
+    benchmark_settings.update({'rng': rng, 'output_dir': output_dir})
 
     return optimizer_settings, benchmark_settings

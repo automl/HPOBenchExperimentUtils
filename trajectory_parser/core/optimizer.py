@@ -10,8 +10,6 @@ from smac.facade.smac_hpo_facade import SMAC4HPO
 from smac.intensification.hyperband import Hyperband
 from smac.intensification.successive_halving import SuccessiveHalving
 from smac.scenario.scenario import Scenario
-
-from trajectory_parser import BOHBReader, SMACReader
 from trajectory_parser.utils.optimizer_utils import CustomWorker, get_number_ta_runs
 from trajectory_parser.utils.runner_utils import OptimizerEnum
 from trajectory_parser.utils.utils import TimeoutException, time_limit
@@ -20,10 +18,10 @@ logger = logging.getLogger('Optimizer')
 
 
 class Optimizer:
-    def __init__(self, benchmark, optimizer_settings, benchmark_settings, intensifier, seed=0):
+    def __init__(self, benchmark, optimizer_settings, benchmark_settings, intensifier, rng=0):
         self.benchmark = benchmark
         self.cs = benchmark.get_configuration_space()
-        self.seed = seed
+        self.rng = rng
         self.optimizer_settings = optimizer_settings
         self.benchmark_settings = benchmark_settings
         self.intensifier = intensifier
@@ -31,14 +29,14 @@ class Optimizer:
     def setup(self):
         raise NotImplementedError()
 
-    def run(self):
+    def run(self) -> Path:
         raise NotImplementedError()
 
 
 class BOHBOptimizer(Optimizer):
-    def __init__(self, benchmark, optimizer_settings, benchmark_settings, intensifier, seed=0):
-        super().__init__(benchmark, optimizer_settings, benchmark_settings, intensifier, seed)
-        self.run_id = f'BOHB_optimization_seed_{self.seed}'
+    def __init__(self, benchmark, optimizer_settings, benchmark_settings, intensifier, rng=0):
+        super().__init__(benchmark, optimizer_settings, benchmark_settings, intensifier, rng)
+        self.run_id = f'BOHB_optimization_seed_{self.rng}'
 
     def setup(self):
         pass
@@ -91,17 +89,12 @@ class BOHBOptimizer(Optimizer):
 
             logger.info(f'Inc Config:\n{inc_cfg}\n with Performance: {inc_value:.2f}')
 
-        bohb_reader = BOHBReader()
-        bohb_reader.read(self.optimizer_settings['output_dir'])
-        bohb_reader.get_trajectory()
-        bohb_reader.export_trajectory(self.optimizer_settings['output_dir'] / 'out_traj_bohb.json')
-        logger.info(f'Trajectory successfully exported to '
-                    f'{self.optimizer_settings["output_dir"] / "out_traj_bohb.json"}')
+        return self.optimizer_settings['output_dir']
 
 
 class SMACOptimizer(Optimizer):
-    def __init__(self, benchmark, optimizer_settings, benchmark_settings, intensifier, seed=0):
-        super().__init__(benchmark, optimizer_settings, benchmark_settings, intensifier, seed)
+    def __init__(self, benchmark, optimizer_settings, benchmark_settings, intensifier, rng=0):
+        super().__init__(benchmark, optimizer_settings, benchmark_settings, intensifier, rng)
 
         if intensifier is OptimizerEnum.HYPERBAND:
             self.intensifier = Hyperband
@@ -134,11 +127,12 @@ class SMACOptimizer(Optimizer):
 
         def optimization_function_wrapper(cfg, seed, instance, budget):
             """ Helper-function: simple wrapper to use the benchmark with smac"""
-            result_dict = self.benchmark.objective_function(cfg, budget=int(budget), **self.benchmark_settings)
+            fidelity = {self.benchmark_settings['fidelity_name']: self.benchmark_settings['fidelity_type'](budget)}
+            result_dict = self.benchmark.objective_function(cfg, **fidelity, **self.benchmark_settings)
             return result_dict['function_value']
 
         smac = SMAC4HPO(scenario=scenario,
-                        rng=np.random.RandomState(self.seed),
+                        rng=np.random.RandomState(self.rng),
                         tae_runner=optimization_function_wrapper,
                         intensifier=self.intensifier,  # you can also change the intensifier to use like this!
                         intensifier_kwargs={'initial_budget': self.optimizer_settings['min_budget'],
@@ -153,10 +147,4 @@ class SMACOptimizer(Optimizer):
         end_time = time()
         logger.info(f'Finished Optimization after {int(end_time - start_time):d}s. Incumbent is {incumbent}')
 
-        smac_output_dir = Path(smac.output_dir)
-        smac_reader = SMACReader()
-        smac_reader.read(smac_output_dir)
-        smac_reader.get_trajectory()
-        smac_reader.export_trajectory(smac_output_dir / 'out_traj_smac.json')
-        logger.info(f'Trajectory successfully exported to '
-                    f'{self.optimizer_settings["output_dir"] / "out_traj_smac.json"}')
+        return Path(smac.output_dir)
