@@ -13,17 +13,14 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('BenchmarkRunner')
 
 
-def validate_benchmark(optimizer: Union[OptimizerEnum, str],
-                       benchmark: str,
+def validate_benchmark(benchmark: str,
                        output_dir: Union[Path, str],
                        rng: int,
                        **benchmark_params: Dict):
 
-    optimizer_enum = optimizer_str_to_enum(optimizer)
+    output_dir = Path(output_dir)
 
-    output_dir = Path(output_dir) / f'{str(optimizer_enum)}-run-{rng}'
-    output_dir.mkdir(exist_ok=True, parents=True)
-
+    assert output_dir.is_dir(), f'Result folder doesn\"t exist: {output_dir}'
     optimizer_settings, benchmark_settings = get_setting_per_benchmark(benchmark, rng=rng, output_dir=output_dir)
 
     # Load benchmark
@@ -33,10 +30,11 @@ def validate_benchmark(optimizer: Union[OptimizerEnum, str],
     benchmark = benchmark_obj(**benchmark_params)  # Todo: Arguments for Benchmark? --> b(**benchmark_params)
 
     # first try to load already extracted trajectory file
-    unvalidated_trajectory = output_dir / f'traj_{str(optimizer_enum)}.json'
+    unvalidated_trajectory = output_dir / f'traj_hpolib.json'
     already_extracted = unvalidated_trajectory.exists()
+    bohb_run = len(list(unvalidated_trajectory.parent.glob('**/results.json'))) != 0
 
-    reader = SMACReader() if already_extracted or optimizer_enum is not OptimizerEnum.BOHB else BOHBReader()
+    reader = SMACReader() if already_extracted or bohb_run else BOHBReader()
     reader.read(file_path=unvalidated_trajectory if already_extracted else output_dir)
     reader.get_trajectory()
 
@@ -48,7 +46,6 @@ def validate_benchmark(optimizer: Union[OptimizerEnum, str],
 
     for traj_id in configurations_to_validate:
         config = configurations_to_validate[traj_id]
-        print(config)
         max_budget = optimizer_settings['max_budget']
         cast_to = benchmark_settings['fidelity_type']
         fidelity = {benchmark_settings['fidelity_name']: cast_to(max_budget)}
@@ -56,7 +53,7 @@ def validate_benchmark(optimizer: Union[OptimizerEnum, str],
         validated_loss[traj_id] = result_dict['function_value']
 
     reader.add_validated_trajectory(validated_loss)
-    traj_path = optimizer_settings['output_dir'] / f'validated_traj_{str(optimizer_enum)}.json'
+    traj_path = optimizer_settings['output_dir'] / f'traj_validated_hpolib.json'
 
     reader.export_validated_trajectory(traj_path)
 
@@ -66,14 +63,11 @@ if __name__ == "__main__":
                                      description='HPOlib3 validated a trajectory from a benchmark with a '
                                                  'unified interface',
                                      usage='%(prog)s --output_dir <str> '
-                                           '--optimizer [BOHB|SMAC|HYPERBAND|SUCCESSIVE_HALVING] '
                                            '--benchmark [xgboost|CartpoleFull|CartpoleReduced]'
                                            '--rng <int>'
                                            '[--benchmark_parameter1 value, ...]')
 
     parser.add_argument('--output_dir', required=True, type=str)
-    parser.add_argument('--optimizer', choices=['BOHB', 'SMAC', 'HYPERBAND', 'HB', 'SUCCESSIVE_HALVING', 'SH'], required=True,
-                        type=str)
     parser.add_argument('--benchmark', required=True, type=str)
     parser.add_argument('--rng', required=False, default=0, type=int)
 

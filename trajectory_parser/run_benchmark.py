@@ -28,16 +28,18 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
     module = import_module(f'hpolib.benchmarks.{benchmark_settings["import_from"]}')
     benchmark_obj = getattr(module, benchmark_settings['import_benchmark'])
 
-    benchmark = benchmark_obj(**benchmark_params)  # Todo: Arguments for Benchmark? --> b(**benchmark_params)
+    benchmark = benchmark_obj(**benchmark_params)
 
-    # setup optimizer (either smac or bohb)
+    # Setup optimizer (either smac or bohb)
     optimizer = BOHBOptimizer if optimizer_enum is OptimizerEnum.BOHB else SMACOptimizer
     optimizer = optimizer(benchmark=benchmark, optimizer_settings=optimizer_settings,
                           benchmark_settings=benchmark_settings, intensifier=optimizer_enum,
                           rng=rng)
     # optimizer.setup()
     run_dir = optimizer.run()
-    traj_path = output_dir / f'traj_{str(optimizer_enum)}.json'
+
+    # Export the trajectory
+    traj_path = output_dir / f'traj_hpolib.json'
     logger.info('Runner finished')
 
     reader = BOHBReader() if optimizer_enum is OptimizerEnum.BOHB else SMACReader()
@@ -54,13 +56,13 @@ if __name__ == "__main__":
                                      description='HPOlib3 running different benchmarks on different optimizer with a '
                                                  'unified interface',
                                      usage='%(prog)s --output_dir <str> '
-                                           '--optimizer [BOHB|SMAC|HYPERBAND|SUCCESSIVE_HALVING] '
+                                           '--optimizer [BOHB|HYPERBAND|SUCCESSIVE_HALVING] '
                                            '--benchmark [xgboost|CartpoleFull|CartpoleReduced]'
                                            '--rng <int>'
                                            '[--benchmark_parameter1 value, ...]')
 
     parser.add_argument('--output_dir', required=True, type=str)
-    parser.add_argument('--optimizer', choices=['BOHB', 'SMAC', 'HYPERBAND', 'HB', 'SUCCESSIVE_HALVING', 'SH'], required=True,
+    parser.add_argument('--optimizer', choices=['BOHB', 'HYPERBAND', 'HB', 'SUCCESSIVE_HALVING', 'SH'], required=True,
                         type=str)
     parser.add_argument('--benchmark', required=True, type=str)
     parser.add_argument('--rng', required=False, default=0, type=int)

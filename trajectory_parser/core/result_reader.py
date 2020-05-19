@@ -70,7 +70,7 @@ class ResultReader:
         output_path = Path(output_path)
         if output_path.is_dir():
             val_str = 'validated_' if validated else ''
-            output_path = output_path / f'trajparser_{val_str}traj.json'
+            output_path = output_path / f'traj_{val_str}hpolib.json'
 
         # add incumbent to info
         lines = []

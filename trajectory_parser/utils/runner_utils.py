@@ -12,7 +12,6 @@ class OptimizerEnum(Enum):
         return str(self.value)
 
     BOHB = 'bohb'
-    SMAC = 'smac'
     HYPERBAND = 'hyperband'
     SUCCESSIVE_HALVING = 'succesive_halving'
 
@@ -23,8 +22,6 @@ def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]):
     if isinstance(optimizer, str):
         if 'BOHB' in optimizer.upper():
             return OptimizerEnum.BOHB
-        elif 'SMAC' in optimizer.upper():
-            return OptimizerEnum.SMAC
         elif 'HYPERBAND' in optimizer.upper() or 'HB' == optimizer.upper():
             return OptimizerEnum.HYPERBAND
         elif 'SUCCESSIVE_HALVING' in optimizer.upper() or 'SH' == optimizer.upper():
