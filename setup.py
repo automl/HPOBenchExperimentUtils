@@ -15,7 +15,7 @@ setuptools.setup(
     long_description=read_file('README.md'),
     long_description_content_type='text/markdown',
     license='Apache-2.0',
-    version=read_file('trajectory_parser/__version__.py').split()[-1].strip('\''),
+    version=read_file('HPOlibExperimentUtils/__version__.py').split()[-1].strip('\''),
     packages=setuptools.find_packages(exclude=['*.tests', '*.tests.*',
                                                'tests.*', 'tests'],),
     python_requires='>=3.6, <3.8',

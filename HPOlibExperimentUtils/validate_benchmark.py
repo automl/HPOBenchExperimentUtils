@@ -5,8 +5,8 @@ from importlib import import_module
 from pathlib import Path
 from typing import Union, Dict
 
-from trajectory_parser import BOHBReader, SMACReader
-from trajectory_parser.utils.runner_utils import transform_unknown_params_to_dict, get_setting_per_benchmark, \
+from HPOlibExperimentUtils import BOHBReader, SMACReader
+from HPOlibExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_setting_per_benchmark, \
     OptimizerEnum, optimizer_str_to_enum
 
 logging.basicConfig(level=logging.DEBUG)

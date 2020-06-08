@@ -13,7 +13,7 @@ import pickle
 
 from collections import OrderedDict
 from pathlib import Path
-from trajectory_parser import BOHBReader
+from HPOlibExperimentUtils import BOHBReader
 
 logging.basicConfig(level=logging.DEBUG)
 

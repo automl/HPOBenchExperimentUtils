@@ -10,9 +10,9 @@ from smac.facade.smac_hpo_facade import SMAC4HPO
 from smac.intensification.hyperband import Hyperband
 from smac.intensification.successive_halving import SuccessiveHalving
 from smac.scenario.scenario import Scenario
-from trajectory_parser.utils.optimizer_utils import CustomWorker, get_number_ta_runs
-from trajectory_parser.utils.runner_utils import OptimizerEnum
-from trajectory_parser.utils.utils import TimeoutException, time_limit
+from HPOlibExperimentUtils.utils.optimizer_utils import CustomWorker, get_number_ta_runs
+from HPOlibExperimentUtils.utils.runner_utils import OptimizerEnum
+from HPOlibExperimentUtils.utils.utils import TimeoutException, time_limit
 
 logger = logging.getLogger('Optimizer')
 

@@ -5,7 +5,7 @@ from typing import List, Union, Dict, Optional
 
 import numpy as np
 import pandas as pd
-from trajectory_parser import Run
+from HPOlibExperimentUtils import Run
 
 
 class ResultReader:

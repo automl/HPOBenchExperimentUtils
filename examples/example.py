@@ -2,7 +2,7 @@ import pandas as pd
 
 from matplotlib import pyplot as plt
 from pathlib import Path
-from trajectory_parser import SMACReader, BOHBReader
+from HPOlibExperimentUtils import SMACReader, BOHBReader
 
 
 file_path = Path('./example_data/cartpole_smac_hb/run_1608637542/')
