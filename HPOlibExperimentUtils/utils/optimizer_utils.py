@@ -1,18 +1,21 @@
 import logging
+from typing import Union, Optional, Dict, Any
+
 import numpy as np
 from hpbandster.core.worker import Worker
-from typing import Union, Optional
+from hpolib.abstract_benchmark import AbstractBenchmark
 
 logger = logging.getLogger('Optimizer Utils')
 
 
 class CustomWorker(Worker):
-    def __init__(self, benchmark, benchmark_settings, *args, **kwargs):
+    """ A generic worker for optimizing with BOHB. """
+    def __init__(self, benchmark : AbstractBenchmark, benchmark_settings: Dict, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.benchmark = benchmark
         self.benchmark_settings = benchmark_settings
 
-    def compute(self, config, budget, **kwargs):
+    def compute(self, config: Dict, budget: Any, **kwargs) -> Dict:
         fidelity = {self.benchmark_settings['fidelity_name']: self.benchmark_settings['fidelity_type'](budget)}
 
         result_dict = self.benchmark.objective_function(config, **fidelity, **self.benchmark_settings)

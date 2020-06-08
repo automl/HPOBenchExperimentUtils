@@ -54,16 +54,11 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(prog='HPOlib3 Wrapper',
                                      description='HPOlib3 running different benchmarks on different optimizer with a '
-                                                 'unified interface',
-                                     usage='%(prog)s --output_dir <str> '
-                                           '--optimizer [BOHB|HYPERBAND|SUCCESSIVE_HALVING] '
-                                           '--benchmark [xgboost|CartpoleFull|CartpoleReduced]'
-                                           '--rng <int>'
-                                           '[--benchmark_parameter1 value, ...]')
+                                                 'unified interface')
 
     parser.add_argument('--output_dir', required=True, type=str)
-    parser.add_argument('--optimizer', choices=['BOHB', 'HYPERBAND', 'HB', 'SUCCESSIVE_HALVING', 'SH'], required=True,
-                        type=str)
+    parser.add_argument('--optimizer', choices=['BOHB', 'HYPERBAND', 'HB', 'SUCCESSIVE_HALVING', 'SH'],
+                        required=True, type=str)
     parser.add_argument('--benchmark', required=True, type=str)
     parser.add_argument('--rng', required=False, default=0, type=int)
 

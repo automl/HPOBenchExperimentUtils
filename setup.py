@@ -1,5 +1,19 @@
 # -*- encoding: utf-8 -*-
+import json
+import os
+
 import setuptools
+
+
+def get_extra_requirements():
+    """ Helper function to read in all extra requirement files in the extra
+        requirement folder. """
+    extra_requirements = {}
+    for file in os.listdir('./extra_requirements'):
+        with open(f'./extra_requirements/{file}', encoding='utf-8') as fh:
+            requirements = json.load(fh)
+            extra_requirements.update(requirements)
+    return extra_requirements
 
 
 def read_file(file_name):
@@ -20,6 +34,7 @@ setuptools.setup(
                                                'tests.*', 'tests'],),
     python_requires='>=3.6, <3.8',
     install_requires=read_file('./requirements.txt').split('\n'),
+    extras_require=get_extra_requirements(),
     test_suite='pytest',
     platforms=['Linux'],
     classifiers=[

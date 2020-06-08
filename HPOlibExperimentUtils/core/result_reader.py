@@ -1,11 +1,12 @@
 import json
-import numpy as np
-import pandas as pd
 from copy import deepcopy
 from pathlib import Path
 from typing import List, Union, Dict, Optional
 
-from HPOlibExperimentUtils import Run
+import numpy as np
+import pandas as pd
+
+from HPOlibExperimentUtils.core.run_result import Run
 
 
 class ResultReader:

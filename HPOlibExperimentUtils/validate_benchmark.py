@@ -6,8 +6,7 @@ from pathlib import Path
 from typing import Union, Dict
 
 from HPOlibExperimentUtils import BOHBReader, SMACReader
-from HPOlibExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_setting_per_benchmark, \
-    OptimizerEnum, optimizer_str_to_enum
+from HPOlibExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_setting_per_benchmark
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('BenchmarkRunner')
@@ -62,10 +61,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog='HPOlib3 Wrapper',
                                      description='HPOlib3 validated a trajectory from a benchmark with a '
                                                  'unified interface',
-                                     usage='%(prog)s --output_dir <str> '
-                                           '--benchmark [xgboost|CartpoleFull|CartpoleReduced]'
-                                           '--rng <int>'
-                                           '[--benchmark_parameter1 value, ...]')
+                                     )
 
     parser.add_argument('--output_dir', required=True, type=str)
     parser.add_argument('--benchmark', required=True, type=str)
