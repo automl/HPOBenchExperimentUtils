@@ -9,7 +9,7 @@ def read_file(file_name):
 
 
 setuptools.setup(
-    name='TrajectoryParser',
+    name='HPOlibExperimentUtils',
     author_email='muelleph@cs.uni-freiburg.de',
     description='Tool for parsing optimization trajectories of SMAC and BOHB',
     long_description=read_file('README.md'),

@@ -1,8 +1,7 @@
 import logging
-from typing import Union, Optional
-
 import numpy as np
 from hpbandster.core.worker import Worker
+from typing import Union, Optional
 
 logger = logging.getLogger('Optimizer Utils')
 
