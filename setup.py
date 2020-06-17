@@ -1,6 +1,5 @@
 # -*- encoding: utf-8 -*-
 import json
-import os
 
 import setuptools
 
@@ -9,7 +8,6 @@ def get_extra_requirements():
     """ Helper function to read in all extra requirement files in the extra
         requirement folder. """
     extra_requirements = {}
-    print(os.listdir())
     with open(f'./extra_requirements.json', encoding='utf-8') as fh:
         requirements = json.load(fh)
         extra_requirements.update(requirements)
