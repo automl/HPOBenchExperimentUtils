@@ -1,3 +1,4 @@
+import json
 import logging
 from enum import Enum
 from pathlib import Path
@@ -91,40 +92,16 @@ def get_setting_per_benchmark(benchmark: str, rng: int, output_dir: Path) -> Tup
     -------
         Tuple[Dict, Dict] - optimizer settings, benchmark settings
     """
-    if 'cartpolereduced' in benchmark.lower() or 'cartpolefull' in benchmark.lower():
-        optimizer_settings = {'min_budget': 1,
-                              'max_budget': 9,
-                              'num_iterations': 10,
-                              'eta': 3,
-                              'time_limit_in_s': 4000,
-                              'cutoff_in_s': 1800,
-                              'mem_limit_in_mb': 4000
-                              }
-        benchmark_settings = {'fidelity_name': 'budget',
-                              'fidelity_type': int,
-                              'import_from': 'rl.cartpole',
-                              'import_benchmark': 'CartpoleReduced'
-                                                  if 'cartpolereduced' in benchmark.lower() else 'CartpoleFull'
-                              }
+    experiment_settings_path = Path(__file__).absolute().parent.parent / 'experiment_settings.json'
 
-    elif 'xgboost' in benchmark.lower():
-        optimizer_settings = {'min_budget': 0.1,
-                              'max_budget': 1.0,
-                              'eta': 3,
-                              'num_iterations': 10,
-                              'time_limit_in_s': 4000,
-                              'cutoff_in_s': 1800,
-                              'mem_limit_in_mb': 4000,
-                              }
+    with experiment_settings_path.open('r') as fh:
+        experiment_settings = json.load(fh)
 
-        benchmark_settings = {'fidelity_name': 'subsample',
-                              'fidelity_type': float,
-                              'n_estimators': 128,
-                              'import_from': 'ml.xgboost_benchmark',
-                              'import_benchmark': 'XGBoostBenchmark'
-                              }
-    else:
-        raise ValueError(f'Unknown Benchmark {benchmark}')
+    assert benchmark.lower() in experiment_settings.keys(),\
+        f"benchmark name {benchmark.lower()} not found. Should be one of {', '.join(experiment_settings.keys())}"
+
+    optimizer_settings = experiment_settings[benchmark.lower()]['optimizer_settings']
+    benchmark_settings = experiment_settings[benchmark.lower()]['benchmark_settings']
 
     optimizer_settings.update({'rng': rng, 'output_dir': output_dir})
     benchmark_settings.update({'rng': rng, 'output_dir': output_dir})

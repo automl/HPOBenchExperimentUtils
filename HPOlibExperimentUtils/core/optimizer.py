@@ -1,16 +1,17 @@
 import logging
-import numpy as np
 from copy import deepcopy
+from pathlib import Path
+from time import time
+
+import numpy as np
 from hpbandster.core import result as hpres, nameserver as hpns
 from hpbandster.optimizers import BOHB
-from pathlib import Path
 from smac.facade.smac_hpo_facade import SMAC4HPO
 from smac.intensification.hyperband import Hyperband
 from smac.intensification.successive_halving import SuccessiveHalving
 from smac.scenario.scenario import Scenario
-from time import time
 
-from HPOlibExperimentUtils.utils.optimizer_utils import CustomWorker, get_number_ta_runs
+from HPOlibExperimentUtils.utils.optimizer_utils import CustomWorker, get_number_ta_runs, parse_fidelity_type
 from HPOlibExperimentUtils.utils.runner_utils import OptimizerEnum
 from HPOlibExperimentUtils.utils.utils import TimeoutException, time_limit
 
@@ -127,7 +128,8 @@ class SMACOptimizer(Optimizer):
 
         def optimization_function_wrapper(cfg, seed, instance, budget):
             """ Helper-function: simple wrapper to use the benchmark with smac"""
-            fidelity = {self.benchmark_settings['fidelity_name']: self.benchmark_settings['fidelity_type'](budget)}
+            fidelity_type = parse_fidelity_type(self.benchmark_settings['fidelity_type'])
+            fidelity = {self.benchmark_settings['fidelity_name']: fidelity_type(budget)}
             result_dict = self.benchmark.objective_function(cfg, **fidelity, **self.benchmark_settings)
             return result_dict['function_value']
 

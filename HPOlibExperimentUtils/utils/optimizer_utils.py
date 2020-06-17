@@ -16,13 +16,26 @@ class CustomWorker(Worker):
         self.benchmark_settings = benchmark_settings
 
     def compute(self, config: Dict, budget: Any, **kwargs) -> Dict:
-        fidelity = {self.benchmark_settings['fidelity_name']: self.benchmark_settings['fidelity_type'](budget)}
+
+        fidelity_type = parse_fidelity_type(self.benchmark_settings['fidelity_type'])
+        fidelity = {self.benchmark_settings['fidelity_name']: fidelity_type(budget)}
 
         result_dict = self.benchmark.objective_function(config, **fidelity, **self.benchmark_settings)
         return {'loss': result_dict['function_value'],
                 # TODO: add result dict in a generic fashion with also "non-pickable" return types.
                 'info': {k: v for k, v in result_dict.items()}
                 }
+
+
+def parse_fidelity_type(fidelity_type: str):
+    if fidelity_type.lower() == 'str':
+        return str
+    elif fidelity_type.lower() == 'int':
+        return int
+    elif fidelity_type.lower() == 'float':
+        return float
+    else:
+        raise ValueError(f'Unknown fidelity type: {fidelity_type}. Must be one of [str, int, float].')
 
 
 def get_sh_ta_runs(min_budget: Union[int, float], max_budget: Union[int, float], eta: int, n0: Optional[int] = None) \

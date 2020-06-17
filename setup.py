@@ -9,10 +9,10 @@ def get_extra_requirements():
     """ Helper function to read in all extra requirement files in the extra
         requirement folder. """
     extra_requirements = {}
-    for file in os.listdir('./extra_requirements'):
-        with open(f'./extra_requirements/{file}', encoding='utf-8') as fh:
-            requirements = json.load(fh)
-            extra_requirements.update(requirements)
+    print(os.listdir())
+    with open(f'./extra_requirements.json', encoding='utf-8') as fh:
+        requirements = json.load(fh)
+        extra_requirements.update(requirements)
     return extra_requirements
 
 
