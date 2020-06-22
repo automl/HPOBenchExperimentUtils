@@ -5,11 +5,15 @@ from importlib import import_module
 from pathlib import Path
 from typing import Union, Dict
 
+from hpolib.util.example_utils import set_env_variables_to_use_only_one_core
+
 from HPOlibExperimentUtils import BOHBReader, SMACReader
 from HPOlibExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_setting_per_benchmark
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('BenchmarkRunner')
+
+set_env_variables_to_use_only_one_core()
 
 
 def validate_benchmark(benchmark: str,
