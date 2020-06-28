@@ -21,30 +21,39 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
                   rng: int,
                   **benchmark_params: Dict):
 
+    logger.info(f'Start running benchmark.')
+
     optimizer_enum = optimizer_str_to_enum(optimizer)
+    logger.debug(f'Optimizer: {optimizer_enum}')
 
     output_dir = Path(output_dir) / f'{str(optimizer_enum)}-run-{rng}'
     output_dir.mkdir(exist_ok=True, parents=True)
+    logger.debug(f'Output dir: {output_dir}')
 
     optimizer_settings, benchmark_settings = get_setting_per_benchmark(benchmark, rng=rng, output_dir=output_dir)
-
+    logger.debug(f'Settings loaded')
+    
     # Load benchmark
     module = import_module(f'hpolib.benchmarks.{benchmark_settings["import_from"]}')
     benchmark_obj = getattr(module, benchmark_settings['import_benchmark'])
+    logger.debug(f'Benchmark {benchmark_settings["import_benchmark"]} successfully loaded')
 
     benchmark = benchmark_obj(**benchmark_params)
+    logger.debug(f'Benchmark initialized. Additional benchmark parameters {benchmark_params}')
 
     # Setup optimizer (either smac or bohb)
     optimizer = BOHBOptimizer if optimizer_enum is OptimizerEnum.BOHB else SMACOptimizer
     optimizer = optimizer(benchmark=benchmark, optimizer_settings=optimizer_settings,
                           benchmark_settings=benchmark_settings, intensifier=optimizer_enum,
                           rng=rng)
+    logger.debug(f'Optimizer initialized')
+
     # optimizer.setup()
     run_dir = optimizer.run()
+    logger.info(f'Optimizer finished')
 
     # Export the trajectory
     traj_path = output_dir / f'traj_hpolib.json'
-    logger.info('Runner finished')
 
     reader = BOHBReader() if optimizer_enum is OptimizerEnum.BOHB else SMACReader()
     reader.read(file_path=run_dir)

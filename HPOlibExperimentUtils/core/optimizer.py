@@ -130,7 +130,7 @@ class SMACOptimizer(Optimizer):
             """ Helper-function: simple wrapper to use the benchmark with smac"""
             fidelity_type = parse_fidelity_type(self.benchmark_settings['fidelity_type'])
             fidelity = {self.benchmark_settings['fidelity_name']: fidelity_type(budget)}
-            result_dict = self.benchmark.objective_function(cfg, **fidelity, **self.benchmark_settings)
+            result_dict = self.benchmark.objective_function(configuration=cfg, **fidelity, **self.benchmark_settings)
             return result_dict['function_value']
 
         smac = SMAC4HPO(scenario=scenario,
