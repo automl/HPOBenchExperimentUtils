@@ -14,7 +14,7 @@ class OptimizerEnum(Enum):
 
     BOHB = 'bohb'
     HYPERBAND = 'hyperband'
-    SUCCESSIVE_HALVING = 'succesive_halving'
+    SUCCESSIVE_HALVING = 'successive_halving'
 
 
 def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]) -> OptimizerEnum:
