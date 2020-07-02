@@ -5,7 +5,7 @@ from typing import Union, Dict
 
 from hpolib.util.example_utils import set_env_variables_to_use_only_one_core
 
-from HPOlibExperimentUtils import BOHBOptimizer, SMACOptimizer, BOHBReader, SMACReader
+from HPOlibExperimentUtils import BOHBOptimizer, SMACOptimizer, DragonflyOptimizer, BOHBReader, SMACReader
 from HPOlibExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_setting_per_benchmark, \
     OptimizerEnum, optimizer_str_to_enum
 
@@ -42,7 +42,15 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
     logger.debug(f'Benchmark initialized. Additional benchmark parameters {benchmark_params}')
 
     # Setup optimizer (either smac or bohb)
-    optimizer = BOHBOptimizer if optimizer_enum is OptimizerEnum.BOHB else SMACOptimizer
+    if optimizer_enum is OptimizerEnum.BOHB:
+        optimizer = BOHBOptimizer
+    elif optimizer_enum is OptimizerEnum.DRAGONFLY:
+        optimizer = DragonflyOptimizer
+    elif optimizer_enum is OptimizerEnum.HYPERBAND or optimizer_enum is OptimizerEnum.SUCCESSIVE_HALVING:
+        optimizer = SMACOptimizer
+    else:
+        raise ValueError(f'Unknown optimizer: {optimizer_enum}')
+
     optimizer = optimizer(benchmark=benchmark, optimizer_settings=optimizer_settings,
                           benchmark_settings=benchmark_settings, intensifier=optimizer_enum,
                           rng=rng)
@@ -55,6 +63,8 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
     # Export the trajectory
     traj_path = output_dir / f'traj_hpolib.json'
 
+    # TODO: DRAGONFLY - Support Reader for Dragonfly. If output of Dragonfly is equal to SMAC trajectory format,
+    #  we can use the SMAC-Reader.
     reader = BOHBReader() if optimizer_enum is OptimizerEnum.BOHB else SMACReader()
     reader.read(file_path=run_dir)
     reader.get_trajectory()
@@ -70,7 +80,8 @@ if __name__ == "__main__":
                                                  'unified interface')
 
     parser.add_argument('--output_dir', required=True, type=str)
-    parser.add_argument('--optimizer', choices=['BOHB', 'HYPERBAND', 'HB', 'SUCCESSIVE_HALVING', 'SH'],
+    parser.add_argument('--optimizer', choices=['BOHB', 'HYPERBAND', 'HB', 'SUCCESSIVE_HALVING', 'SH',
+                                                'DRAGONFLY', 'DF'],
                         required=True, type=str)
     parser.add_argument('--benchmark', required=True, type=str)
     parser.add_argument('--rng', required=False, default=0, type=int)

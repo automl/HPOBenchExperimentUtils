@@ -12,7 +12,7 @@ from HPOlibExperimentUtils.utils.runner_utils import transform_unknown_params_to
 from HPOlibExperimentUtils.utils.optimizer_utils import parse_fidelity_type
 
 logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger('BenchmarkRunner')
+logger = logging.getLogger('BenchmarkValidation')
 
 set_env_variables_to_use_only_one_core()
 
@@ -31,7 +31,7 @@ def validate_benchmark(benchmark: str,
     module = import_module(f'hpolib.benchmarks.{benchmark_settings["import_from"]}')
     benchmark_obj = getattr(module, benchmark_settings['import_benchmark'])
 
-    benchmark = benchmark_obj(**benchmark_params)  # Todo: Arguments for Benchmark? --> b(**benchmark_params)
+    benchmark = benchmark_obj(**benchmark_params)  # Todo (pm): Arguments for Benchmark? --> b(**benchmark_params)
 
     # first try to load already extracted trajectory file
     unvalidated_trajectory = output_dir / f'traj_hpolib.json'
@@ -40,6 +40,7 @@ def validate_benchmark(benchmark: str,
     logger.debug(f'Unvalidated Trajectory: {unvalidated_trajectory}\n'
                  f'Already extracted {already_extracted} - Bohb run: {bohb_run}')
 
+    # TODO: Adapt to Dragonfly usage
     reader = SMACReader() if already_extracted or bohb_run else BOHBReader()
     reader.read(file_path=unvalidated_trajectory if already_extracted else output_dir)
     reader.get_trajectory()
@@ -51,7 +52,7 @@ def validate_benchmark(benchmark: str,
         OrderedDict({traj_id: reader.config_ids_to_configs[traj_id] for traj_id in trajectory_ids})
     validated_loss = OrderedDict({traj_id: -1234 for traj_id in trajectory_ids})
 
-    for traj_id in configurations_to_validate:
+    for i, traj_id in enumerate(configurations_to_validate):
         config = configurations_to_validate[traj_id]
         max_budget = optimizer_settings['max_budget']
         cast_to = parse_fidelity_type(benchmark_settings['fidelity_type'])

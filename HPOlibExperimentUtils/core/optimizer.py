@@ -34,6 +34,34 @@ class Optimizer:
         raise NotImplementedError()
 
 
+class DragonflyOptimizer(Optimizer):
+    def __init__(self, benchmark, optimizer_settings, benchmark_settings, intensifier, rng=0):
+        super().__init__(benchmark, optimizer_settings, benchmark_settings, intensifier, rng)
+
+    def setup(self):
+        pass
+
+    def run(self) -> Path:
+        """
+        TODO: DRAGONFLY - This is the skeleton for the dragonfly optimizer.
+
+        Returns
+        -------
+        Path-object. Please return the path to directory where your trajectory lies. This path is then used to read in
+        the trajecotory and transform it to a uniform format. (If you have such a trajectory example for me,
+        i can do the further steps then.)
+        """
+
+
+        # Ok following
+        # https://stackoverflow.com/questions/2837214/python-popen-command-wait-until-the-command-is-finished
+        # call is the command to use.
+        import subprocess
+        subprocess.call(['ls -l', '>', 'text.txt'])
+
+        # or it is in the output folder then simply self.optimizer_settings['output_dir']
+        return Path('The Folder where your trajectory is')
+
 class BOHBOptimizer(Optimizer):
     def __init__(self, benchmark, optimizer_settings, benchmark_settings, intensifier, rng=0):
         super().__init__(benchmark, optimizer_settings, benchmark_settings, intensifier, rng)
@@ -42,7 +70,7 @@ class BOHBOptimizer(Optimizer):
     def setup(self):
         pass
 
-    def run(self):
+    def run(self) -> Path:
         result_logger = hpres.json_result_logger(directory=str(self.optimizer_settings['output_dir']), overwrite=True)
 
         ns = hpns.NameServer(run_id=self.run_id,
@@ -102,13 +130,12 @@ class SMACOptimizer(Optimizer):
         elif intensifier is OptimizerEnum.SUCCESSIVE_HALVING:
             self.intensifier = SuccessiveHalving
         else:
-            # TODO: Increase the supported intensifier
             raise ValueError('Currently no other intensifier is supported')
 
     def setup(self):
         pass
 
-    def run(self):
+    def run(self) -> Path:
         number_ta_runs = get_number_ta_runs(iterations=self.optimizer_settings['num_iterations'],
                                             min_budget=self.optimizer_settings['min_budget'],
                                             max_budget=self.optimizer_settings['max_budget'],

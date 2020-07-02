@@ -15,6 +15,7 @@ class OptimizerEnum(Enum):
     BOHB = 'bohb'
     HYPERBAND = 'hyperband'
     SUCCESSIVE_HALVING = 'successive_halving'
+    DRAGONFLY = 'dragonfly'
 
 
 def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]) -> OptimizerEnum:
@@ -40,8 +41,10 @@ def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]) -> OptimizerEnum
             return OptimizerEnum.HYPERBAND
         elif 'SUCCESSIVE_HALVING' in optimizer.upper() or 'SH' == optimizer.upper():
             return OptimizerEnum.SUCCESSIVE_HALVING
+        elif 'DRAGONFLY' in optimizer.upper() or 'DF' == optimizer.upper():
+            return OptimizerEnum.DRAGONFLY
         else:
-            raise ValueError(f'Unknown optimizer str. Must be one of BOHB|SMAC, but was {optimizer}')
+            raise ValueError(f'Unknown optimizer str. Must be one of BOHB|SMAC|DRAGONFLY, but was {optimizer}')
     else:
         raise TypeError(f'Unknown optimizer type. Must be one of str|OptimizerEnum, but was {type(optimizer)}')
 
@@ -49,7 +52,7 @@ def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]) -> OptimizerEnum
 def transform_unknown_params_to_dict(unknown_args: List) -> Dict:
     """
     Given a list of unknown parameters in form ['--name', '--value', ...], it transforms the list into a dictionary.
-    TODO: figure out how to find the right parameter type. Currently, it just casts it to an integer.
+    TODO (pm): figure out how to find the right parameter type. Currently, it just casts it to an integer.
 
     This function is used to extract the benchmark parameters (such as the task id for the xgboost benchmark) from the
     command line arguments.
@@ -100,6 +103,9 @@ def get_setting_per_benchmark(benchmark: str, rng: int, output_dir: Path) -> Tup
     assert benchmark.lower() in experiment_settings.keys(),\
         f"benchmark name {benchmark.lower()} not found. Should be one of {', '.join(experiment_settings.keys())}"
 
+    # TODO: DRAGONFLY - The experiment_settings.json contain also settings for the optimizer to make them comparable,
+    #       s.a. min or maximum budget and available runtime. It would be good to map the Dragonfly parameters to the
+    #       same parameters, such that the optimizers still comparable.
     optimizer_settings = experiment_settings[benchmark.lower()]['optimizer_settings']
     benchmark_settings = experiment_settings[benchmark.lower()]['benchmark_settings']
 

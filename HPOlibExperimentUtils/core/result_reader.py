@@ -111,6 +111,26 @@ class SMACReader(ResultReader):
         super(SMACReader, self).__init__()
 
     def read(self, file_path: Union[str, Path]):
+        """
+        Reads in the trajecotry file in SMACs Trajectory format and stores the trajectory in the SMACReader Object.
+
+        Example for SMAC trajectory file format  in examples / examples_data/cartpole_smac_hb/run_1608637542/traj.json
+
+        Parameters
+        ----------
+        file_path : Path
+            Either:
+            a path to the directory, where a 'traj.json' file or 'traj_aclib2.json' file is. It first tries to
+            parse 'traj.json' then 'traj_aclib2.json'. If no such file was found, an exception will be raised.
+
+            Or:
+            a path to the specific trajectory file, e.g. /paht/to/own_trajectory_file.json. The file has also to be in
+            SMAC trajectory file format.
+
+        Returns
+        -------
+
+        """
         file_path = Path(file_path)
 
         if file_path.is_dir():
