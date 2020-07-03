@@ -2,11 +2,13 @@ import logging
 from pathlib import Path
 
 from HPOlibExperimentUtils.optimizer.base_optimizer import Optimizer
+from HPOlibExperimentUtils.utils import dragonfly_utils
 
 logger = logging.getLogger('Optimizer')
 
 
 class DragonflyOptimizer(Optimizer):
+
     def __init__(self, benchmark, optimizer_settings, benchmark_settings, intensifier, rng=0):
         super().__init__(benchmark, optimizer_settings, benchmark_settings, intensifier, rng)
 
@@ -23,6 +25,20 @@ class DragonflyOptimizer(Optimizer):
         the trajecotory and transform it to a uniform format. (If you have such a trajectory example for me,
         i can do the further steps then.)
         """
+
+        # TODO: Update to include constraints and fidelities
+        from dragonfly import maximise_function, minimise_function
+        config, domain_parser = dragonfly_utils.configspace_to_dragonfly(self.cs)
+
+        fidelities = {}
+        benchmark_kwargs = {}
+
+        parse_domain = lambda x: {parser[0]: parser[1](val) for parser, val in zip(domain_parser, x)}
+        objective = lambda x: \
+            self.benchmark.objective_function(parse_domain(x), **fidelities, **benchmark_kwargs)['function_value']
+
+
+
 
         # Ok following
         # https://stackoverflow.com/questions/2837214/python-popen-command-wait-until-the-command-is-finished
