@@ -12,9 +12,7 @@ and the HPOlib3 ``pip install <dir of hpolib>``
 import logging
 from pathlib import Path
 
-from HPOlibExperimentUtils.core.optimizer import OptimizerEnum
-from HPOlibExperimentUtils.run_benchmark import run_benchmark
-from HPOlibExperimentUtils.validate_benchmark import validate_benchmark
+from HPOlibExperimentUtils import OptimizerEnum, run_benchmark, validate_benchmark
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('BOHB on cartpole')

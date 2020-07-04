@@ -5,7 +5,7 @@ from typing import Union, Dict
 
 from hpolib.util.example_utils import set_env_variables_to_use_only_one_core
 
-from HPOlibExperimentUtils import BOHBOptimizer, SMACOptimizer, DragonflyOptimizer, BOHBReader, SMACReader
+from HPOlibExperimentUtils import BOHBReader, SMACReader
 from HPOlibExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_setting_per_benchmark, \
     OptimizerEnum, optimizer_str_to_enum
 
@@ -43,10 +43,13 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
 
     # Setup optimizer (either smac or bohb)
     if optimizer_enum is OptimizerEnum.BOHB:
+        from HPOlibExperimentUtils.optimizer.bohb_optimizer import BOHBOptimizer
         optimizer = BOHBOptimizer
     elif optimizer_enum is OptimizerEnum.DRAGONFLY:
+        from HPOlibExperimentUtils.optimizer.dragonfly_optimizer import DragonflyOptimizer
         optimizer = DragonflyOptimizer
     elif optimizer_enum is OptimizerEnum.HYPERBAND or optimizer_enum is OptimizerEnum.SUCCESSIVE_HALVING:
+        from HPOlibExperimentUtils.optimizer.smac_optimizer import SMACOptimizer
         optimizer = SMACOptimizer
     else:
         raise ValueError(f'Unknown optimizer: {optimizer_enum}')
