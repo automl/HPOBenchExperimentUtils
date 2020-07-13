@@ -6,6 +6,11 @@ import numpy as np
 logger = logging.getLogger('Optimizer Utils')
 
 
+class Constants:
+    fixed_benchmark_settings = ['fidelity_name', 'fidelity_type', 'import_from', 'import_benchmark']
+    trajectory_filename = "traj_hpolib.json"
+
+
 def parse_fidelity_type(fidelity_type: str):
     if fidelity_type.lower() == 'str':
         return str
