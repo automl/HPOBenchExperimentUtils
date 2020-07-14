@@ -5,7 +5,13 @@ from typing import Union, Dict
 
 from hpolib.util.example_utils import set_env_variables_to_use_only_one_core
 
-from HPOlibExperimentUtils.utils.optimizer_utils import Constants
+try:
+    from HPOlibExperimentUtils.utils.optimizer_utils import Constants
+except:
+    import sys, os.path
+    sys.path.append(os.path.expandvars('$HPOEXPUTIL_PATH'))
+    from HPOlibExperimentUtils.utils.optimizer_utils import Constants
+
 from HPOlibExperimentUtils import BOHBReader, SMACReader
 from HPOlibExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_setting_per_benchmark, \
     OptimizerEnum, optimizer_str_to_enum

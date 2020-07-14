@@ -10,6 +10,8 @@ from dragonfly import minimise_function, \
     minimise_multifidelity_function, \
     multiobjective_minimise_functions
 
+from ConfigSpace import Configuration
+
 logger = logging.getLogger('Optimizer')
 
 
@@ -35,13 +37,17 @@ class DragonflyOptimizer(Optimizer):
         # TODO: Include usage of RNG for consistency
         config, domain_parser = configspace_to_dragonfly(self.cs)
 
-        fidelities = {key: value for key, value in self.benchmark_settings
+        fidelities = {key: value for key, value in self.benchmark_settings.items()
                       if key not in Constants.fixed_benchmark_settings}
 
-        parse_domain = lambda x: {parser[0]: parser[1](val) for parser, val in zip(domain_parser, x)}
+        parse_domain = lambda x: Configuration(
+            configuration_space=self.cs,
+            values = {parser[0]: parser[1](val) for parser, val in zip(domain_parser, x)}
+        )
         objective = lambda x: \
-            self.benchmark.objective_function(**parse_domain(x), **fidelities)['function_value']
+            self.benchmark.objective_function(parse_domain(x), **fidelities)['function_value']
 
+        self.optimizer_settings["max_or_min"] = "min"
         options, config = load_dragonfly_options(options=self.optimizer_settings, config=config)
         if hasattr(config, 'fidel_space'):
             raise RuntimeWarning("Multi-fidelity support is still under implementation and not yet supported. Ignoring "
