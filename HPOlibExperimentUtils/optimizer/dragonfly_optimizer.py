@@ -40,7 +40,7 @@ class DragonflyOptimizer(Optimizer):
         #               if key not in Constants.fixed_benchmark_settings}
         fidelities = {key: value for key, value in self.benchmark_settings.items()
                       if key in known_fidelities}
-        logger.debug(f"Using fidelities: %s" % (fidelities))
+        logger.debug(f"Using fidelities: %s" % fidelities)
         config, domain_parsers, fidelity_parsers = configspace_to_dragonfly(domain_cs=self.cs, fidely_cs=fidelities)
         fidelity_costs = [tup[2] for tup in fidelity_parsers] # Separate the costs
         fidelity_parsers = [(tup[0], tup[1]) for tup in fidelity_parsers]
@@ -53,8 +53,10 @@ class DragonflyOptimizer(Optimizer):
             raise ValueError('max_capital (time or number of evaluations) must be positive.')
 
         if hasattr(config, 'fidel_space'):
+            logger.debug("Using multi-fidelity optimization.")
             is_mf = True
         else:
+            logger.debug("Using single-fidelity optimization.")
             is_mf = False
 
         def parse_domain(x):
@@ -76,8 +78,8 @@ class DragonflyOptimizer(Optimizer):
             def cost(z):
                 return sum([c(v) for c, v in zip(fidelity_costs, z)])
 
-            logger.debug('Minimising multi-fidelity function on\n Fidelity-Space: %s.\n Domain: %s.\n'%(
-            config.fidel_space, config.domain))
+            logger.debug('Minimising multi-fidelity function on\n Fidelity-Space: %s.\n Domain: %s.\n' % (
+                config.fidel_space, config.domain))
             opt_val, opt_pt, history = minimise_multifidelity_function(
                 objective_mf, fidel_space=None, domain=None,
                 fidel_to_opt=config.fidel_to_opt, fidel_cost_func=cost,
@@ -85,12 +87,14 @@ class DragonflyOptimizer(Optimizer):
                 opt_method=options.opt_method, config=config, options=options,
                 reporter=options.report_progress)
         else:
+            print('Minimising function on Domain: %s.\n' % config.domain)
             opt_val, opt_pt, history = minimise_function(
                 objective, domain=None, max_capital=options.max_capital,
                 capital_type=options.capital_type, opt_method=options.opt_method,
                 config=config, options=options, reporter=options.report_progress)
 
-        generate_trajectory(history, save_file=self.optimizer_settings["output_dir"] / Constants.trajectory_filename)
+        generate_trajectory(history, save_file=self.optimizer_settings["output_dir"] / Constants.trajectory_filename,
+                            is_cp=True if isinstance(history.query_qinfos[0].point, list) else False)
 
         # Ok following
         # https://stackoverflow.com/questions/2837214/python-popen-command-wait-until-the-command-is-finished
