@@ -25,7 +25,7 @@
         "optimizer_settings":
             {"max_capital":  100, "capital_type":  "realtime"},
         "benchmark_settings":
-            {"fidelity_name": "subsample", "fidelity_type": "float", "n_estimators": 128, "import_from": "ml.xgboost_benchmark", "import_benchmark": "XGBoostBenchmark"}
+            {"import_from": "ml.xgboost_benchmark", "import_benchmark": "XGBoostBenchmark", "subsample":  "linear"}
     },
     "learna":
     {

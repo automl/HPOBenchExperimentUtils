@@ -1,7 +1,10 @@
-from math import log10
-from typing import List, Dict, Tuple, Union
+from math import log10, log2
+from typing import List, Dict, Tuple, Union, Optional
 from pathlib import Path
 from argparse import Namespace
+import logging
+
+logger = logging.getLogger('Dragonfly Utils')
 
 # -------------------------------Begin code adapted directly from the dragonfly repo------------------------------------
 
@@ -24,6 +27,8 @@ from dragonfly.opt.random_multiobjective_optimiser import \
     euclidean_random_multiobjective_optimiser_args, \
     cp_random_multiobjective_optimiser_args
 from dragonfly.utils.option_handler import load_options
+
+
 
 _dragonfly_args = [
     # get_option_specs('config', False, None, 'Path to the json or pb config file. '),
@@ -103,12 +108,59 @@ def _configspace_to_dragonfly_domain(hypers: List[Hyperparameter]) -> Tuple[Dict
 
     return domain, parser
 
+# TODO: Switch to ConfigurationSpace objects
+def _generate_xgboost_fidelity_space(fidel_dict: Dict) -> Tuple[Dict, List]:
+    """
+    Given a dict of fidelities read from experiment_settings.json for the xgboost benchmark, returns an appropriate
+    ConfigurationSpace object. Temporary hack until a more stable solution is found.
+    """
+    fspace = {}
+    parsers = []
 
-def configspace_to_dragonfly(cs: ConfigurationSpace, name="hpolib_benchmark") -> Tuple[Dict, List]:
-    domain, domain_parser = _configspace_to_dragonfly_domain(cs.get_hyperparameters())
+    key = 'subsample'
+    if key in fidel_dict:
+        fidel = {
+            'name': key,
+            'type': 'float',
+            'min': 0.1,
+            'max': 1.0
+        }
+        parser = lambda x: x
+        cost = lambda x: x
+        fspace[key] = fidel
+        parsers.append((key, parser, cost))
+
+    key = 'n_estimators'
+    if key in fidel_dict:
+        log = False if fidel_dict[key].lower() == 'linear' else True
+        fidel = {
+            'name': key,
+            'type': 'int',
+            'min': int(log2(1)) if log else 1,
+            'max': int(log2(128)) if log else 128
+        }
+        parser = (lambda x: 2 ** x) if log else (lambda x: x)
+        cost = lambda x: (x - fidel['min']) / (fidel['max'] - fidel['min'])
+        fspace[key] = fidel
+        parsers.append((key, parser, cost))
+
+    return fspace, parsers
+
+
+# TODO: Switch fidelities to ConfigurationSpace objects
+def configspace_to_dragonfly(domain_cs: ConfigurationSpace, name="hpolib_benchmark",
+                             fidely_cs: Dict = None) -> Tuple[Dict, List, Union[List, None]]:
+    domain, domain_parsers = _configspace_to_dragonfly_domain(domain_cs.get_hyperparameters())
     out = {'name': name, 'domain': domain}
-    return out, domain_parser
-    # TODO: Add support for converting constraints and fidelities
+    if fidely_cs:
+        fidelity_space, fidelity_parsers = _generate_xgboost_fidelity_space(fidely_cs)
+        out['fidel_space'] = fidelity_space
+        out['fidel_to_opt'] = [fidel['max'] for _, fidel in fidelity_space.items()]
+        logger.debug("Generated fidelity space %s\nfidelity optimization taret: %s" % (fidelity_space, out['fidel_to_opt']))
+        return out, domain_parsers, fidelity_parsers
+    else:
+        return out, domain_parsers, None
+    # TODO: Add support for converting constraints
 
 
 def generate_trajectory(history: Namespace, save_file: Path):

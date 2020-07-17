@@ -7,8 +7,7 @@ from HPOlibExperimentUtils.utils.dragonfly_utils import \
 from HPOlibExperimentUtils.utils.optimizer_utils import Constants
 
 from dragonfly import minimise_function, \
-    minimise_multifidelity_function, \
-    multiobjective_minimise_functions
+    minimise_multifidelity_function
 
 from ConfigSpace import Configuration
 
@@ -33,33 +32,63 @@ class DragonflyOptimizer(Optimizer):
         i can do the further steps then.)
         """
 
-        # TODO: Update to include constraints and fidelities
+        # TODO: Update to include constraints
+        # TODO: Update to use ConfigurationSpace objects for fidelities
         # TODO: Include usage of RNG for consistency
-        config, domain_parser = configspace_to_dragonfly(self.cs)
-
+        known_fidelities = ['n_estimators', 'subsample']
+        # fidelities = {key: value for key, value in self.benchmark_settings.items()
+        #               if key not in Constants.fixed_benchmark_settings}
         fidelities = {key: value for key, value in self.benchmark_settings.items()
-                      if key not in Constants.fixed_benchmark_settings}
-
-        parse_domain = lambda x: Configuration(
-            configuration_space=self.cs,
-            values = {parser[0]: parser[1](val) for parser, val in zip(domain_parser, x)}
-        )
-        objective = lambda x: \
-            self.benchmark.objective_function(parse_domain(x), **fidelities)['function_value']
+                      if key in known_fidelities}
+        logger.debug(f"Using fidelities: %s" % (fidelities))
+        config, domain_parsers, fidelity_parsers = configspace_to_dragonfly(domain_cs=self.cs, fidely_cs=fidelities)
+        fidelity_costs = [tup[2] for tup in fidelity_parsers] # Separate the costs
+        fidelity_parsers = [(tup[0], tup[1]) for tup in fidelity_parsers]
+        # config, domain_parsers = configspace_to_dragonfly(domain_cs=self.cs, fidely_cs=None)
 
         self.optimizer_settings["max_or_min"] = "min"
         options, config = load_dragonfly_options(options=self.optimizer_settings, config=config)
-        if hasattr(config, 'fidel_space'):
-            raise RuntimeWarning("Multi-fidelity support is still under implementation and not yet supported. Ignoring "
-                                 "assosciated settings.")
 
         if options.max_capital < 0:
             raise ValueError('max_capital (time or number of evaluations) must be positive.')
 
-        opt_val, opt_pt, history = minimise_function(
-            objective, domain=None, max_capital=options.max_capital,
-            capital_type=options.capital_type, opt_method=options.opt_method,
-            config=config, options=options, reporter=options.report_progress)
+        if hasattr(config, 'fidel_space'):
+            is_mf = True
+        else:
+            is_mf = False
+
+        def parse_domain(x):
+            return Configuration(
+                configuration_space=self.cs,
+                values={parser[0]: parser[1](val) for parser, val in zip(domain_parsers, x)}
+            )
+
+        def objective(x):
+            return self.benchmark.objective_function(parse_domain(x))['function_value']
+
+        if is_mf:
+            def parse_fidelities(z):
+                return {parser[0]: parser[1](val) for parser, val in zip(fidelity_parsers, z)}
+
+            def objective_mf(z, x):
+                return self.benchmark.objective_function(parse_domain(x), **parse_fidelities(z))['function_value']
+
+            def cost(z):
+                return sum([c(v) for c, v in zip(fidelity_costs, z)])
+
+            logger.debug('Minimising multi-fidelity function on\n Fidelity-Space: %s.\n Domain: %s.\n'%(
+            config.fidel_space, config.domain))
+            opt_val, opt_pt, history = minimise_multifidelity_function(
+                objective_mf, fidel_space=None, domain=None,
+                fidel_to_opt=config.fidel_to_opt, fidel_cost_func=cost,
+                max_capital=options.max_capital, capital_type=options.capital_type,
+                opt_method=options.opt_method, config=config, options=options,
+                reporter=options.report_progress)
+        else:
+            opt_val, opt_pt, history = minimise_function(
+                objective, domain=None, max_capital=options.max_capital,
+                capital_type=options.capital_type, opt_method=options.opt_method,
+                config=config, options=options, reporter=options.report_progress)
 
         generate_trajectory(history, save_file=self.optimizer_settings["output_dir"] / Constants.trajectory_filename)
 
