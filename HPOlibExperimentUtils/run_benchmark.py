@@ -6,11 +6,11 @@ from typing import Union, Dict
 from hpolib.util.example_utils import set_env_variables_to_use_only_one_core
 
 try:
-    from HPOlibExperimentUtils.utils.optimizer_utils import Constants
+    from HPOlibExperimentUtils.utils import Constants
 except:
     import sys, os.path
     sys.path.append(os.path.expandvars('$HPOEXPUTIL_PATH'))
-    from HPOlibExperimentUtils.utils.optimizer_utils import Constants
+    from HPOlibExperimentUtils.utils import Constants
 
 from HPOlibExperimentUtils import BOHBReader, SMACReader
 from HPOlibExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_setting_per_benchmark, \
@@ -71,7 +71,7 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
     logger.info(f'Optimizer finished')
 
     # Export the trajectory
-    traj_path = output_dir / f'{Constants.trajectory_filename}'
+    traj_path = output_dir / f'{Constants.common_trajectory_filename}'
 
     # TODO: DRAGONFLY - Support Reader for Dragonfly. If output of Dragonfly is equal to SMAC trajectory format,
     #  we can use the SMAC-Reader.

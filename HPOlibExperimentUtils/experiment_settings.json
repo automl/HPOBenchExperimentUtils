@@ -27,6 +27,27 @@
         "benchmark_settings":
             {"import_from": "ml.xgboost_benchmark", "import_benchmark": "XGBoostBenchmark", "subsample":  "linear"}
     },
+    "xgboost_dragonfly_subsample":
+    {
+        "optimizer_settings":
+            {"max_capital":  7200, "capital_type":  "realtime"},
+        "benchmark_settings":
+            {"import_from": "ml.xgboost_benchmark", "import_benchmark": "XGBoostBenchmark", "subsample":  "linear"}
+    },
+    "xgboost_dragonfly_nestimators_linear":
+    {
+        "optimizer_settings":
+            {"max_capital":  7200, "capital_type":  "realtime"},
+        "benchmark_settings":
+            {"import_from": "ml.xgboost_benchmark", "import_benchmark": "XGBoostBenchmark", "n_estimators":  "linear"}
+    },
+    "xgboost_dragonfly_nestimators_log":
+    {
+        "optimizer_settings":
+            {"max_capital":  7200, "capital_type":  "realtime"},
+        "benchmark_settings":
+            {"import_from": "ml.xgboost_benchmark", "import_benchmark": "XGBoostBenchmark", "n_estimators":  "log"}
+    },
     "learna":
     {
         "optimizer_settings":

@@ -4,7 +4,7 @@ from pathlib import Path
 from HPOlibExperimentUtils.optimizer.base_optimizer import Optimizer
 from HPOlibExperimentUtils.utils.dragonfly_utils import \
     configspace_to_dragonfly, load_dragonfly_options, generate_trajectory
-from HPOlibExperimentUtils.utils.optimizer_utils import Constants
+from HPOlibExperimentUtils.utils import Constants
 
 from dragonfly import minimise_function, \
     minimise_multifidelity_function
@@ -93,7 +93,7 @@ class DragonflyOptimizer(Optimizer):
                 capital_type=options.capital_type, opt_method=options.opt_method,
                 config=config, options=options, reporter=options.report_progress)
 
-        generate_trajectory(history, save_file=self.optimizer_settings["output_dir"] / Constants.trajectory_filename,
+        generate_trajectory(history, save_file=self.optimizer_settings["output_dir"] / Constants.smac_traj_filename,
                             is_cp=True if isinstance(history.query_qinfos[0].point, list) else False)
 
         # Ok following
