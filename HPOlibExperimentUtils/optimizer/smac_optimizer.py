@@ -45,13 +45,17 @@ class SMACOptimizer(Optimizer):
                          "memory_limit": self.optimizer_settings['mem_limit_in_mb'],
                          "output_dir": str(self.optimizer_settings['output_dir']),
                          }
+
         scenario = Scenario(scenario_dict)
 
         def optimization_function_wrapper(cfg, seed, instance, budget):
             """ Helper-function: simple wrapper to use the benchmark with smac"""
             fidelity_type = parse_fidelity_type(self.benchmark_settings['fidelity_type'])
             fidelity = {self.benchmark_settings['fidelity_name']: fidelity_type(budget)}
-            result_dict = self.benchmark.objective_function(configuration=cfg, **fidelity, **self.benchmark_settings)
+
+            result_dict = self.benchmark.objective_function(configuration=cfg,
+                                                            **fidelity,
+                                                            **self.benchmark_settings_for_sending)
             return result_dict['function_value']
 
         smac = SMAC4HPO(scenario=scenario,
@@ -62,6 +66,7 @@ class SMACOptimizer(Optimizer):
                                             'max_budget': self.optimizer_settings['max_budget'],
                                             'eta': self.optimizer_settings['eta']}
                         )
+
         start_time = time()
         try:
             smac.optimize()

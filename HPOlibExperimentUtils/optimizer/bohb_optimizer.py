@@ -33,6 +33,7 @@ class BOHBOptimizer(Optimizer):
 
         worker = CustomWorker(benchmark=self.benchmark,
                               benchmark_settings=self.benchmark_settings,
+                              benchmark_settings_for_sending=self.benchmark_settings_for_sending,
                               nameserver=ns_host,
                               nameserver_port=ns_port,
                               run_id=self.run_id)
@@ -77,18 +78,21 @@ class BOHBOptimizer(Optimizer):
 
 class CustomWorker(Worker):
     """ A generic worker for optimizing with BOHB. """
-    def __init__(self, benchmark : AbstractBenchmark, benchmark_settings: Dict, *args, **kwargs):
+    def __init__(self, benchmark : AbstractBenchmark,
+                 benchmark_settings: Dict,
+                 benchmark_settings_for_sending: Dict, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.benchmark = benchmark
         self.benchmark_settings = benchmark_settings
+        self.benchmark_settings_for_sending = benchmark_settings_for_sending
 
     def compute(self, config: Dict, budget: Any, **kwargs) -> Dict:
 
         fidelity_type = parse_fidelity_type(self.benchmark_settings['fidelity_type'])
         fidelity = {self.benchmark_settings['fidelity_name']: fidelity_type(budget)}
 
-        result_dict = self.benchmark.objective_function(configuration=config, **fidelity, **self.benchmark_settings)
+        result_dict = self.benchmark.objective_function(configuration=config,
+                                                        **fidelity,
+                                                        **self.benchmark_settings_for_sending)
         return {'loss': result_dict['function_value'],
-                # TODO: add result dict in a generic fashion with also "non-pickable" return types.
-                'info': {k: v for k, v in result_dict.items()}
-                }
+                'info': result_dict}

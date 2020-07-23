@@ -39,11 +39,11 @@ class ResultReader:
         return trajectory
 
     def get_trajectory_as_dataframe(self, meaningful_budget: bool = True, suffix: Optional[str] = '') -> pd.DataFrame:
-        return self._get_trajectory_as_dataframe(meaningful_budget, suffix, validated=True)
+        return self._get_trajectory_as_dataframe(meaningful_budget, suffix, validated=False)
 
     def get_validated_trajectory_as_dataframe(self, meaningful_budget: bool = True, suffix: Optional[str] = '') \
             -> pd.DataFrame:
-        return self._get_trajectory_as_dataframe(meaningful_budget, suffix, validated=False)
+        return self._get_trajectory_as_dataframe(meaningful_budget, suffix, validated=True)
 
     def _get_trajectory_as_dataframe(self, meaningful_budget: bool = True, suffix: Optional[str] = '',
                                      validated: bool = False) -> pd.DataFrame:

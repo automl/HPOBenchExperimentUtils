@@ -19,6 +19,7 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
                   benchmark: str,
                   output_dir: Union[Path, str],
                   rng: int,
+                  use_local: Union[bool, None] = False,
                   **benchmark_params: Dict):
 
     logger.info(f'Start running benchmark.')
@@ -34,11 +35,15 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
     logger.debug(f'Settings loaded')
     
     # Load benchmark
-    module = import_module(f'hpolib.benchmarks.{benchmark_settings["import_from"]}')
+    import_str = f'hpolib.{"container." if not use_local else ""}benchmarks.{benchmark_settings["import_from"]}'
+    logger.debug(f'Try to execute command: from {import_str} import {benchmark_settings["import_benchmark"]}')
+    module = import_module(import_str)
     benchmark_obj = getattr(module, benchmark_settings['import_benchmark'])
     logger.debug(f'Benchmark {benchmark_settings["import_benchmark"]} successfully loaded')
 
-    benchmark = benchmark_obj(**benchmark_params)
+    benchmark = benchmark_obj(container_source='library://phmueller/automl',
+                              **benchmark_params)
+
     logger.debug(f'Benchmark initialized. Additional benchmark parameters {benchmark_params}')
 
     # Setup optimizer (either smac or bohb)

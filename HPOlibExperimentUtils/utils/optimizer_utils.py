@@ -1,5 +1,6 @@
+import json
 import logging
-from typing import Union, Optional
+from typing import Union, Optional, Any
 
 import numpy as np
 
@@ -40,3 +41,35 @@ def get_number_ta_runs(iterations: int, min_budget: Union[int, float], max_budge
         hb_min = eta ** -s * max_budget
         ta_runs += get_sh_ta_runs(hb_min, max_budget, eta, n0)
     return int(ta_runs)
+
+
+def is_jsonable(value: Any):
+    """ Helperfunction to check if a value is json serializable."""
+    try:
+        json.dumps(value)
+        return True
+    except (TypeError, OverflowError):
+        return False
+
+
+def prepare_dict_for_sending(benchmark_settings: Dict):
+    """
+    Removes all non json-serializable parameter from a dictionary. A warning will be shown if a parameter is removed.
+    Parameters
+    ----------
+    benchmark_settings : Dict
+        Dict container parameters for running a benchmark. E.g. The seed and the output directory.
+        However it may include things in a non-serializable data type.
+    Returns
+    -------
+    Dict
+    """
+    benchmark_dict_for_sending = {}
+    for key, value in benchmark_settings.items():
+        if not is_jsonable(value):
+            if key == 'output_dir':
+                continue
+            logger.warning(f'Value of {key} is not json-serializable. Type was: {type(value)}')
+        else:
+            benchmark_dict_for_sending[key] = value
+    return benchmark_dict_for_sending
