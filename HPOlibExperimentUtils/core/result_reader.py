@@ -57,13 +57,13 @@ class ResultReader:
         trajectory = trajectory.add_suffix(suffix)
         return trajectory
 
-    def export_trajectory(self, output_path):
+    def export_trajectory(self, output_path: Path):
         self._export_trajectory(output_path, validated=False)
 
-    def export_validated_trajectory(self, output_path):
+    def export_validated_trajectory(self, output_path: Path):
         self._export_trajectory(output_path, validated=True)
 
-    def _export_trajectory(self, output_path, validated: bool = False):
+    def _export_trajectory(self, output_path: Path, validated: Union[bool, None] = False):
         trajectory = self.trajectory if not validated else self.validated_trajectory
 
         assert len(trajectory) != 0, "No trajectory available. Please read-in trajectory before."
@@ -86,11 +86,11 @@ class ResultReader:
         with output_path.open('w', encoding='utf-8') as fh:
             fh.writelines(lines)
 
-    def get_configuration_ids_trajectory(self):
+    def get_configuration_ids_trajectory(self) -> List:
         assert len(self.trajectory) != 0, 'Trajectory is still empty! Read Trajectory before calling this function'
         return [entry.config_id for _, entry in self.trajectory]
 
-    def get_configurations_trajectory(self):
+    def get_configurations_trajectory(self) -> List:
         assert len(self.trajectory) != 0, 'Trajectory is still empty! Read Trajectory before calling this function'
         return [self.config_ids_to_configs[config_id] for config_id in self.get_configuration_ids_trajectory()]
 
@@ -101,7 +101,7 @@ class ResultReader:
                 continue
             entry.loss = validated_values[entry.config_id]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'Reader: {len(self.results)} results from {len(self.config_ids_to_configs)}\n' \
                f'Trajectory: {self.trajectory}]'
 
@@ -113,8 +113,11 @@ class SMACReader(ResultReader):
     def read(self, file_path: Union[str, Path]):
         """
         Reads in the trajecotry file in SMACs Trajectory format and stores the trajectory in the SMACReader Object.
+        This function does not automatically extract also the trajectory. A separate call is necessary.
 
         Example for SMAC trajectory file format  in examples / examples_data/cartpole_smac_hb/run_1608637542/traj.json
+
+        TODO: Write a read method for the validated trajectory.
 
         Parameters
         ----------
@@ -126,10 +129,6 @@ class SMACReader(ResultReader):
             Or:
             a path to the specific trajectory file, e.g. /paht/to/own_trajectory_file.json. The file has also to be in
             SMAC trajectory file format.
-
-        Returns
-        -------
-
         """
         file_path = Path(file_path)
 
@@ -183,12 +182,46 @@ class SMACReader(ResultReader):
         self.config_ids_to_configs = config_ids_to_configs
         self.results = results
 
-    def get_trajectory_as_dataframe(self, meaningful_budget: bool = False, suffix: Optional[str] = '_smac') \
-            -> pd.DataFrame:
+    def get_trajectory_as_dataframe(self, meaningful_budget: Union[bool, None] = False,
+                                    suffix: Union[str, None] = '_smac') -> pd.DataFrame:
+        """
+        Returns the trajectory as Dataframe. It is important to call reader.read() before!
+
+        Parameters
+        ----------
+        meaningful_budget : Union[bool, None]
+            This parameter specifies if the budget is an acutal value or not. In SMAC's trajectory no budget is
+            available. In this case, we fill the budget with the position of the id in ascending order.
+
+             However, the budget in BOHB is the actual budget from the optimization task.
+        suffix : Union[str, None]
+            The suffix which is appended to each column name in the resulting data frame.
+
+        Returns
+        -------
+        pd.DataFrame
+        """
         return super(SMACReader, self).get_trajectory_as_dataframe(meaningful_budget=meaningful_budget, suffix=suffix)
 
-    def get_validated_trajectory_as_dataframe(self, meaningful_budget: bool = False,
-                                              suffix: Optional[str] = '_smac_valid') -> pd.DataFrame:
+    def get_validated_trajectory_as_dataframe(self, meaningful_budget: Union[bool, None] = False,
+                                              suffix: Union[str, None] = '_smac_valid') -> pd.DataFrame:
+        """
+        Returns the validated trajectory as Dataframe. It is important to call reader.read() before!
+
+        Parameters
+        ----------
+        meaningful_budget : Union[bool, None]
+            This parameter specifies if the budget is an acutal value or not. In SMAC's trajectory no budget is
+            available. In this case, we fill the budget with the position of the id in ascending order.
+
+             However, the budget in BOHB is the actual budget from the optimization task.
+        suffix : Union[str, None]
+            The suffix which is appended to each column name in the resulting data frame.
+
+        Returns
+        -------
+        pd.DataFrame
+        """
         return super(SMACReader, self).get_validated_trajectory_as_dataframe(meaningful_budget=meaningful_budget,
                                                                              suffix=suffix)
 
@@ -198,21 +231,60 @@ class BOHBReader(ResultReader):
         super(BOHBReader, self).__init__()
 
     def read(self, file_path: Union[str, Path]):
+        """
+        Reads in the  BOHB trajecotry file and parses it to SMAC's Trajectory format. The trajectory
+        will be stored in the Reader Object.
+        This function does not automatically extract also the trajectory. A separate call is necessary.
+
+        Parameters
+        ----------
+        file_path : Path
+            Path to the directory in which the Bohb run results are stored (configs.json, results. json).
+        """
         file_path = Path(file_path)
         self.config_ids_to_configs = self._read_bohb_confs(file_path)
         self.results = self._read_bohb_res(file_path)
 
-    def get_trajectory_as_dataframe(self, meaningful_budget: bool = True, suffix: Optional[str] = '_bohb') \
-            -> pd.DataFrame:
+    def get_trajectory_as_dataframe(self, meaningful_budget: Union[bool, None] = True,
+                                    suffix: Optional[str] = '_bohb') -> pd.DataFrame:
+        """
+        Returns the trajectory as Dataframe. It is important to call reader.read() before!
+
+        Parameters
+        ----------
+        meaningful_budget : Union[bool, None]
+            Since the budgets in BOHBS result are meaningful. This option should be always true!
+        suffix : Union[str, None]
+            The suffix which is appended to each column name in the resulting data frame.
+
+        Returns
+        -------
+        pd.DataFrame
+        """
         return super(BOHBReader, self).get_trajectory_as_dataframe(meaningful_budget=meaningful_budget, suffix=suffix)
 
-    def get_validated_trajectory_as_dataframe(self, meaningful_budget: bool = True,
+    def get_validated_trajectory_as_dataframe(self, meaningful_budget: Union[bool, None] = True,
                                               suffix: Optional[str] = '_bohb_valid') -> pd.DataFrame:
+        """
+        Returns the validated trajectory as Dataframe.
+        It is important to call reader.read() before on the validated trajectory.
 
+        Parameters
+        ----------
+        meaningful_budget : Union[bool, None]
+            Since the budgets in BOHBS result are meaningful. This option should be always true!
+        suffix : Union[str, None]
+            The suffix which is appended to each column name in the resulting data frame.
+
+        Returns
+        -------
+        pd.DataFrame
+        """
         return super(BOHBReader, self).get_validated_trajectory_as_dataframe(meaningful_budget=meaningful_budget,
                                                                              suffix=suffix)
 
     def _read_bohb_confs(self, file_path: Path) -> Dict:
+        """ Helper function to read in the bohb configurations from the configs.json file """
         config_ids_to_configs = {}
         with (file_path / 'configs.json').open('r') as fh:
             for i, line in enumerate(fh.readlines()):
@@ -230,6 +302,8 @@ class BOHBReader(ResultReader):
         return config_ids_to_configs
 
     def _read_bohb_res(self, file_path: Path) -> List:
+        """ Helper function to read in the bohb results from the results.json file """
+
         results = []
         start_time = 0
         with (file_path / 'results.json').open('r') as fh:

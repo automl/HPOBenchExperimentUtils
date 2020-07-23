@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Union, Optional, Any
+from typing import Union, Optional, Any, Dict
 
 import numpy as np
 
@@ -8,6 +8,18 @@ logger = logging.getLogger('Optimizer Utils')
 
 
 def parse_fidelity_type(fidelity_type: str):
+    """
+    Helperfunction to cast the fidelity into its correct type. This step is necessary since we can only store the
+    fidelity type in the experiment_settings.json as string.
+
+    Parameters
+    ----------
+    fidelity_type : str
+        The name of the type of the fidelity
+    Returns
+    -------
+        the python object representing this type.
+    """
     if fidelity_type.lower() == 'str':
         return str
     elif fidelity_type.lower() == 'int':
@@ -20,7 +32,7 @@ def parse_fidelity_type(fidelity_type: str):
 
 def get_sh_ta_runs(min_budget: Union[int, float], max_budget: Union[int, float], eta: int, n0: Optional[int] = None) \
         -> int:
-    """ returns total no. of configurations for a given SH configuration """
+    """ Returns total number of configurations for a given SH configuration """
     sh_iters = int(np.round((np.log(max_budget) - np.log(min_budget)) / np.log(eta), 8))
     if not n0:
         n0 = int(eta ** sh_iters)
@@ -29,7 +41,7 @@ def get_sh_ta_runs(min_budget: Union[int, float], max_budget: Union[int, float],
 
 
 def get_number_ta_runs(iterations: int, min_budget: Union[int, float], max_budget: Union[int, float], eta: int) -> int:
-    """ returns total no. of configurations (ta runs) for a given HB configuration """
+    """ Returns the total number of configurations (ta runs) for a given HB configuration """
     s_max = int(np.floor(np.log(max_budget / min_budget) / np.log(eta)))
 
     all_s = list(range(s_max+1))[::-1]
@@ -43,7 +55,7 @@ def get_number_ta_runs(iterations: int, min_budget: Union[int, float], max_budge
     return int(ta_runs)
 
 
-def is_jsonable(value: Any):
+def is_jsonable(value: Any) -> bool:
     """ Helperfunction to check if a value is json serializable."""
     try:
         json.dumps(value)

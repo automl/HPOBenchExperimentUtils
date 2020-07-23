@@ -1,7 +1,9 @@
-from typing import List, Union, Dict, Any
+from typing import List, Dict, Any, Union
 
 
 class Run(object):
+    """ Object to store all necessary information of each run of the optimizer. """
+
     def __init__(self):
         self.config_id = None
         self.relative_finish_time = 0
@@ -9,7 +11,7 @@ class Run(object):
         self.budget = 0
         self.info = {}
 
-    def get_relative_finish_time(self):
+    def get_relative_finish_time(self) -> Union[int, float]:
         return self.relative_finish_time
 
     def set_values_bohb(self, config_id: List, budget: Union[float, int], time_stamps: Dict, result: Dict,
@@ -29,6 +31,6 @@ class Run(object):
         self.loss = cost
         self.info = info
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'Run(ID: {self.config_id}, Budget: {self.budget}, Loss: {self.loss}, ' \
                f'Wall-clock time {self.relative_finish_time}, Info: {self.info}'

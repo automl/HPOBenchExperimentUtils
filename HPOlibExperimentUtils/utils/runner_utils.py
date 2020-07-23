@@ -1,8 +1,9 @@
 import json
 import logging
 from enum import Enum
+from importlib import import_module
 from pathlib import Path
-from typing import List, Union, Dict, Tuple
+from typing import List, Union, Dict, Tuple, Any
 
 logger = logging.getLogger('Runner Utils')
 
@@ -79,6 +80,21 @@ def transform_unknown_params_to_dict(unknown_args: List) -> Dict:
     return benchmark_params
 
 
+def load_experiment_settings() -> Dict:
+    """ Load the experiment settings from file """
+    experiment_settings_path = Path(__file__).absolute().parent.parent / 'experiment_settings.json'
+
+    with experiment_settings_path.open('r') as fh:
+        experiment_settings = json.load(fh)
+    return experiment_settings
+
+
+def get_benchmark_names():
+    """ Get the names for the supported benchmarks. """
+    experiment_settings = load_experiment_settings()
+    return experiment_settings.keys()
+
+
 def get_setting_per_benchmark(benchmark: str, rng: int, output_dir: Path) -> Tuple[Dict, Dict]:
     """
     Get a dictionary for each benchmark containing the experiment parameters.
@@ -95,10 +111,7 @@ def get_setting_per_benchmark(benchmark: str, rng: int, output_dir: Path) -> Tup
     -------
         Tuple[Dict, Dict] - optimizer settings, benchmark settings
     """
-    experiment_settings_path = Path(__file__).absolute().parent.parent / 'experiment_settings.json'
-
-    with experiment_settings_path.open('r') as fh:
-        experiment_settings = json.load(fh)
+    experiment_settings = load_experiment_settings()
 
     assert benchmark.lower() in experiment_settings.keys(),\
         f"benchmark name {benchmark.lower()} not found. Should be one of {', '.join(experiment_settings.keys())}"
@@ -113,3 +126,32 @@ def get_setting_per_benchmark(benchmark: str, rng: int, output_dir: Path) -> Tup
     benchmark_settings.update({'rng': rng, 'output_dir': output_dir})
 
     return optimizer_settings, benchmark_settings
+
+
+def load_benchmark(benchmark_settings: Dict, use_local: bool) -> Any:
+    """
+    Load the benchmark object.
+    If not `use_local`:  Then load a container from a given source, defined in the Hpolib.
+
+    Parameters
+    ----------
+    benchmark_settings : Dict
+        Dictionary containing alll necessary information for the benchmark, such as the name or where to load it from.
+    use_local : bool
+        By default this value is set to false.
+        In this case, a container will be downloaded. This container includes all necessary files for the experiment.
+        You don't have to install something.
+
+        If true, use the experiment locally. Therefore the experiment has to be installed.
+        See the experiment description in the HPOlib3.
+
+    Returns
+    -------
+    Benchmark
+    """
+    import_str = f'hpolib.{"container." if not use_local else ""}benchmarks.{benchmark_settings["import_from"]}'
+    logger.debug(f'Try to execute command: from {import_str} import {benchmark_settings["import_benchmark"]}')
+    module = import_module(import_str)
+    benchmark_obj = getattr(module, benchmark_settings['import_benchmark'])
+    logger.debug(f'Benchmark {benchmark_settings["import_benchmark"]} successfully loaded')
+    return benchmark_obj

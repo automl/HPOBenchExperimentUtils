@@ -1,22 +1,31 @@
 import logging
 from copy import deepcopy
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Union
 
 from hpbandster.core import result as hpres, nameserver as hpns
 from hpbandster.core.worker import Worker
 from hpbandster.optimizers import BOHB
 from hpolib.abstract_benchmark import AbstractBenchmark
+from hpolib.container.client_abstract_benchmark import AbstractBenchmarkClient
 
 from HPOlibExperimentUtils.optimizer.base_optimizer import Optimizer
 from HPOlibExperimentUtils.utils.optimizer_utils import parse_fidelity_type
+from HPOlibExperimentUtils.utils.runner_utils import OptimizerEnum
 from HPOlibExperimentUtils.utils.utils import TimeoutException, time_limit
 
 logger = logging.getLogger('Optimizer')
 
 
 class BOHBOptimizer(Optimizer):
-    def __init__(self, benchmark, optimizer_settings, benchmark_settings, intensifier, rng=0):
+    """
+    This class offers an interface to the BOHB Optimizer. It runs on a given benchmark.
+    All benchmark and optimizer specific information are stored in the dictionaries benchmark_settings and
+    optimizer_settings.
+    """
+    def __init__(self, benchmark: Union[AbstractBenchmark, AbstractBenchmarkClient],
+                 optimizer_settings: Dict, benchmark_settings: Dict,
+                 intensifier: OptimizerEnum, rng: Union[int, None] = 0):
         super().__init__(benchmark, optimizer_settings, benchmark_settings, intensifier, rng)
         self.run_id = f'BOHB_optimization_seed_{self.rng}'
 
@@ -24,6 +33,7 @@ class BOHBOptimizer(Optimizer):
         pass
 
     def run(self) -> Path:
+        """ Execute the optimization run. Return the path where the results are stored. """
         result_logger = hpres.json_result_logger(directory=str(self.optimizer_settings['output_dir']), overwrite=True)
 
         ns = hpns.NameServer(run_id=self.run_id,
@@ -73,12 +83,13 @@ class BOHBOptimizer(Optimizer):
 
             logger.info(f'Inc Config:\n{inc_cfg}\n with Performance: {inc_value:.2f}')
 
+        # Since BOHB and SMAC write the output to different directories, return it here.
         return self.optimizer_settings['output_dir']
 
 
 class CustomWorker(Worker):
     """ A generic worker for optimizing with BOHB. """
-    def __init__(self, benchmark : AbstractBenchmark,
+    def __init__(self, benchmark: AbstractBenchmark,
                  benchmark_settings: Dict,
                  benchmark_settings_for_sending: Dict, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -87,6 +98,7 @@ class CustomWorker(Worker):
         self.benchmark_settings_for_sending = benchmark_settings_for_sending
 
     def compute(self, config: Dict, budget: Any, **kwargs) -> Dict:
+        """Here happens the work in the optimization step. """
 
         fidelity_type = parse_fidelity_type(self.benchmark_settings['fidelity_type'])
         fidelity = {self.benchmark_settings['fidelity_name']: fidelity_type(budget)}

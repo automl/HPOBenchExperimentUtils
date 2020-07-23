@@ -1,8 +1,11 @@
 import logging
 from pathlib import Path
 from time import time
+from typing import Union, Dict
 
 import numpy as np
+from hpolib.abstract_benchmark import AbstractBenchmark
+from hpolib.container.client_abstract_benchmark import AbstractBenchmarkClient
 from smac.facade.smac_hpo_facade import SMAC4HPO
 from smac.intensification.hyperband import Hyperband
 from smac.intensification.successive_halving import SuccessiveHalving
@@ -16,7 +19,15 @@ logger = logging.getLogger('Optimizer')
 
 
 class SMACOptimizer(Optimizer):
-    def __init__(self, benchmark, optimizer_settings, benchmark_settings, intensifier, rng=0):
+    """
+    This class offers an interface to the SMAC Optimizer. It runs on a given benchmark.
+    All benchmark and optimizer specific information are stored in the dictionaries benchmark_settings and
+    optimizer_settings.
+    The intensifier specifies which SMAC-Intensifier (HB or SH) is used.
+    """
+    def __init__(self, benchmark: Union[AbstractBenchmark, AbstractBenchmarkClient],
+                 optimizer_settings: Dict, benchmark_settings: Dict,
+                 intensifier: OptimizerEnum, rng: Union[int, None] = 0):
         super().__init__(benchmark, optimizer_settings, benchmark_settings, intensifier, rng)
 
         if intensifier is OptimizerEnum.HYPERBAND:
@@ -30,6 +41,7 @@ class SMACOptimizer(Optimizer):
         pass
 
     def run(self) -> Path:
+        """ Start the optimization run with SMAC (HB or SH). """
         number_ta_runs = get_number_ta_runs(iterations=self.optimizer_settings['num_iterations'],
                                             min_budget=self.optimizer_settings['min_budget'],
                                             max_budget=self.optimizer_settings['max_budget'],
@@ -75,4 +87,5 @@ class SMACOptimizer(Optimizer):
         end_time = time()
         logger.info(f'Finished Optimization after {int(end_time - start_time):d}s. Incumbent is {incumbent}')
 
+        # Since BOHB and SMAC write the output to different directories, return it here.
         return Path(smac.output_dir)

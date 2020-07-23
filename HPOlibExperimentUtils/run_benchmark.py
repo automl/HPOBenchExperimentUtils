@@ -1,5 +1,4 @@
 import logging
-from importlib import import_module
 from pathlib import Path
 from typing import Union, Dict
 
@@ -7,7 +6,7 @@ from hpolib.util.example_utils import set_env_variables_to_use_only_one_core
 
 from HPOlibExperimentUtils import BOHBReader, SMACReader
 from HPOlibExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_setting_per_benchmark, \
-    OptimizerEnum, optimizer_str_to_enum
+    OptimizerEnum, optimizer_str_to_enum, load_benchmark, get_benchmark_names
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('BenchmarkRunner')
@@ -21,6 +20,44 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
                   rng: int,
                   use_local: Union[bool, None] = False,
                   **benchmark_params: Dict):
+    """
+    Run a HPOlib3 benchmark on a given Optimizer. Currently only SMAC, BOHB and Dragonfly are available as Optimizer.
+    The benchmarks are by default stored in singularity container which are downloaded at the first run.
+
+    Parameters
+    ----------
+    optimizer : str, OptimizerEnum
+        Either the OptimizerEnum object specifying the optimizer to take or a string representation of it.
+        Allowed choices are:
+        'BOHB',
+        'HYPERBAND', or  'HB',
+        'SUCCESSIVE_HALVING', or 'SH',
+        'DRAGONFLY' or 'DF'
+    benchmark : str
+        This benchmark is selected from the HPOlib3 and executed. with the optimizer from above.
+        Please have a look at the experiment_settings.json file to see what benchmarks are available.
+        Incomplete list of supported benchmarks:
+        'cartpolereduced', 'cartpolefull',
+        'xgboost',
+        'learna', 'metalearna',
+        'NASCifar10ABenchmark', 'NASCifar10BBenchmark', 'NASCifar10CBenchmark',
+        'SliceLocalizationBenchmark', 'ProteinStructureBenchmark',
+            'NavalPropulsionBenchmark', 'ParkinsonsTelemonitoringBenchmark'
+    output_dir : str, Path
+        Directory where the optimizer stores its results. In this directory a result directory will be created
+        with the format <optimizer_name>_run_<rng>.
+    rng : int, None
+        Random seed for the experiment. Also changes the output directory. By default 0.
+    use_local : bool, None
+        If you want to use the HPOlib3 benchamrks in a non-containerizd version (installed locally inside the
+        current python environment), you can set this parameter to True. This is not recommend.
+    benchmark_params : Dict
+        Some benchmarks take special parameters for the initialization. For example, The XGBOostBenchmark takes as
+        input a task_id. This task_id specifies the OpenML dataset to use.
+
+        Please take a look into the HPOlib3 Benchamarks to find out if the benchmark needs further parameter.
+        Note: Most of them dont need further parameter.
+    """
 
     logger.info(f'Start running benchmark.')
 
@@ -33,14 +70,9 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
 
     optimizer_settings, benchmark_settings = get_setting_per_benchmark(benchmark, rng=rng, output_dir=output_dir)
     logger.debug(f'Settings loaded')
-    
-    # Load benchmark
-    import_str = f'hpolib.{"container." if not use_local else ""}benchmarks.{benchmark_settings["import_from"]}'
-    logger.debug(f'Try to execute command: from {import_str} import {benchmark_settings["import_benchmark"]}')
-    module = import_module(import_str)
-    benchmark_obj = getattr(module, benchmark_settings['import_benchmark'])
-    logger.debug(f'Benchmark {benchmark_settings["import_benchmark"]} successfully loaded')
 
+    # Load and instantiate the benchmark
+    benchmark_obj = load_benchmark(benchmark_settings, use_local)
     benchmark = benchmark_obj(container_source='library://phmueller/automl',
                               **benchmark_params)
 
@@ -91,7 +123,7 @@ if __name__ == "__main__":
     parser.add_argument('--optimizer', choices=['BOHB', 'HYPERBAND', 'HB', 'SUCCESSIVE_HALVING', 'SH',
                                                 'DRAGONFLY', 'DF'],
                         required=True, type=str)
-    parser.add_argument('--benchmark', required=True, type=str)
+    parser.add_argument('--benchmark', choices=get_benchmark_names(), required=True, type=str)
     parser.add_argument('--rng', required=False, default=0, type=int)
 
     args, unknown = parser.parse_known_args()
