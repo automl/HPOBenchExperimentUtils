@@ -92,7 +92,7 @@ def load_experiment_settings() -> Dict:
 def get_benchmark_names():
     """ Get the names for the supported benchmarks. """
     experiment_settings = load_experiment_settings()
-    return experiment_settings.keys()
+    return [str(key) for key in experiment_settings.keys()]
 
 
 def get_setting_per_benchmark(benchmark: str, rng: int, output_dir: Path) -> Tuple[Dict, Dict]:
@@ -112,15 +112,16 @@ def get_setting_per_benchmark(benchmark: str, rng: int, output_dir: Path) -> Tup
         Tuple[Dict, Dict] - optimizer settings, benchmark settings
     """
     experiment_settings = load_experiment_settings()
+    benchmark_names = get_benchmark_names()
 
-    assert benchmark.lower() in experiment_settings.keys(),\
-        f"benchmark name {benchmark.lower()} not found. Should be one of {', '.join(experiment_settings.keys())}"
+    assert benchmark in benchmark_names,\
+        f"benchmark name {benchmark} not found. Should be one of {', '.join(benchmark_names)}"
 
     # TODO: DRAGONFLY - The experiment_settings.json contain also settings for the optimizer to make them comparable,
     #       s.a. min or maximum budget and available runtime. It would be good to map the Dragonfly parameters to the
     #       same parameters, such that the optimizers still comparable.
-    optimizer_settings = experiment_settings[benchmark.lower()]['optimizer_settings']
-    benchmark_settings = experiment_settings[benchmark.lower()]['benchmark_settings']
+    optimizer_settings = experiment_settings[benchmark]['optimizer_settings']
+    benchmark_settings = experiment_settings[benchmark]['benchmark_settings']
 
     optimizer_settings.update({'rng': rng, 'output_dir': output_dir})
     benchmark_settings.update({'rng': rng, 'output_dir': output_dir})
