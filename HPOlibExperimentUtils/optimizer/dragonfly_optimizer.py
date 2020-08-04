@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+import os, uuid
 
 from HPOlibExperimentUtils.optimizer.base_optimizer import Optimizer
 from HPOlibExperimentUtils.utils.dragonfly_utils import \
@@ -67,6 +68,25 @@ class DragonflyOptimizer(Optimizer):
         def objective(x):
             return self.benchmark.objective_function(parse_domain(x))['function_value']
 
+        # Change the current working directory to a unique temporary location in order to avoid any
+        # huge messes due to dragonfly's multi-process communication system
+
+        old_cwd = Path().cwd()
+        def change_cwd(tries=5):
+            if tries <= 0:
+                raise RuntimeError("Could not create random temporary dragonfly directory due to timeout.")
+
+            try:
+                tmp_dir = Path("/tmp") / "dragonfly" / str(uuid.uuid4())
+                tmp_dir.mkdir(parents=True, exist_ok=False)
+            except FileExistsError:
+                change_cwd(tries=tries - 1)
+            else:
+                os.chdir(tmp_dir)
+            return
+
+        change_cwd()
+
         if is_mf:
             def parse_fidelities(z):
                 ret = {parser[0]: parser[1](val) for parser, val in zip(fidelity_parsers, z)}
@@ -101,14 +121,11 @@ class DragonflyOptimizer(Optimizer):
                 capital_type=options.capital_type, opt_method=options.opt_method,
                 config=config, options=options, reporter=options.report_progress)
 
+        # Go back to the original working directory we started from
+        os.chdir(old_cwd)
+
         generate_trajectory(history, save_file=self.optimizer_settings["output_dir"] / Constants.smac_traj_filename,
                             is_cp=True if isinstance(history.query_qinfos[0].point, list) else False,
                             history_file=self.optimizer_settings["output_dir"] / "saved_history.json")
-
-        # Ok following
-        # https://stackoverflow.com/questions/2837214/python-popen-command-wait-until-the-command-is-finished
-        # call is the command to use.
-        # import subprocess
-        # subprocess.call(['ls -l', '>', 'text.txt'])
 
         return self.optimizer_settings['output_dir']
