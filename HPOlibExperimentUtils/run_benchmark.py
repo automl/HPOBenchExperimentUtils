@@ -37,7 +37,7 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
     optimizer_enum = optimizer_str_to_enum(optimizer)
     logger.debug(f'Optimizer: {optimizer_enum}')
 
-    output_dir = Path(output_dir) / f'{str(optimizer_enum)}-run-{rng}'
+    output_dir = Path(output_dir).expanduser().resolve() / f'{str(optimizer_enum)}-run-{rng}'
     output_dir.mkdir(exist_ok=True, parents=True)
     logger.debug(f'Output dir: {output_dir}')
 

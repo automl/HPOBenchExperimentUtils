@@ -173,6 +173,8 @@ def generate_trajectory(history: Namespace, save_file: Path, is_cp=False, histor
     """
     if history_file is not None:
         history_file = Path(history_file)
+        if not history_file.is_absolute():
+            history_file.expanduser().resolve()
         recorded_history = []
         save_history = True
     else:
