@@ -16,7 +16,7 @@ from HPOlibExperimentUtils import BOHBReader, SMACReader
 from HPOlibExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_setting_per_benchmark, \
     OptimizerEnum, optimizer_str_to_enum
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('BenchmarkRunner')
 
 set_env_variables_to_use_only_one_core()
@@ -26,9 +26,13 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
                   benchmark: str,
                   output_dir: Union[Path, str],
                   rng: int,
+                  debug: bool,
                   **benchmark_params: Dict):
 
     logger.info(f'Start running benchmark.')
+
+    if debug:
+        logging.basicConfig(level=logging.DEBUG)
 
     optimizer_enum = optimizer_str_to_enum(optimizer)
     logger.debug(f'Optimizer: {optimizer_enum}')
@@ -39,7 +43,7 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
 
     optimizer_settings, benchmark_settings = get_setting_per_benchmark(benchmark, rng=rng, output_dir=output_dir)
     logger.debug(f'Settings loaded')
-    
+
     # Load benchmark
     module = import_module(f'hpolib.benchmarks.{benchmark_settings["import_from"]}')
     benchmark_obj = getattr(module, benchmark_settings['import_benchmark'])
@@ -95,6 +99,7 @@ if __name__ == "__main__":
                         required=True, type=str)
     parser.add_argument('--benchmark', required=True, type=str)
     parser.add_argument('--rng', required=False, default=0, type=int)
+    parser.add_argument('--debug', action='store_true', default=False, help="When given, enables debug mode logging.")
 
     args, unknown = parser.parse_known_args()
     benchmark_params = transform_unknown_params_to_dict(unknown)
