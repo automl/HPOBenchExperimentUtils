@@ -16,8 +16,8 @@ from HPOlibExperimentUtils import BOHBReader, SMACReader
 from HPOlibExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_setting_per_benchmark, \
     OptimizerEnum, optimizer_str_to_enum
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('BenchmarkRunner')
+logger = logging.getLogger(__name__)
+logger.setLevel(level=logging.INFO)
 
 set_env_variables_to_use_only_one_core()
 
@@ -32,7 +32,7 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
     logger.info(f'Start running benchmark.')
 
     if debug:
-        logging.basicConfig(level=logging.DEBUG)
+        logger.setLevel(level=logging.DEBUG)
 
     optimizer_enum = optimizer_str_to_enum(optimizer)
     logger.debug(f'Optimizer: {optimizer_enum}')

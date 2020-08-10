@@ -12,7 +12,7 @@ from dragonfly import minimise_function, \
 
 from ConfigSpace import Configuration
 
-logger = logging.getLogger('Optimizer')
+logger = logging.getLogger(__name__)
 
 
 class DragonflyOptimizer(Optimizer):
