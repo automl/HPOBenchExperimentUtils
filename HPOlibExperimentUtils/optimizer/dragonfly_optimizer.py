@@ -26,18 +26,7 @@ class DragonflyOptimizer(Optimizer):
     def run(self) -> Path:
 
         # TODO: Update to include constraints
-        # TODO: Update to use ConfigurationSpace objects for fidelities
         # TODO: Include usage of RNG for consistency
-        # known_fidelities = ['n_estimators', 'subsample']
-        # fidelities = {key: value for key, value in self.benchmark_settings.items()
-        #               if key not in Constants.fixed_benchmark_settings}
-        # fidelities = {key: value for key, value in self.benchmark_settings.items()
-        #               if key in known_fidelities}
-        # logger.debug(f"Using fidelities: %s" % fidelities)
-        # config, domain_parsers, fidelity_parsers = configspace_to_dragonfly(domain_cs=self.cs, fidely_cs=fidelities)
-        # fidelity_parsers = [(tup[0], tup[1]) for tup in fidelity_parsers]
-        # fidelity_costs = [tup[2] for tup in fidelity_parsers]  # Separate the costs
-
         fidel_space = self.benchmark.get_fidelity_space()
         config, domain_parsers, fidelity_parsers, fidelity_costs = \
             configspace_to_dragonfly(domain_cs=self.cs, fidely_cs=fidel_space)

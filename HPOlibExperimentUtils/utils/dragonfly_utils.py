@@ -203,48 +203,6 @@ def _configspace_to_dragonfly(params: List[Hyperparameter]) -> Tuple[Dict, List,
     return dragonfly_dict, parser, costs
 
 
-# TODO: Switch to ConfigurationSpace objects
-def _generate_xgboost_fidelity_space(fidel_dict: Dict) -> Tuple[Dict, List]:
-    """
-    Given a dict of fidelities read from experiment_settings.json for the xgboost benchmark, returns an appropriate
-    ConfigurationSpace object. Temporary hack until a more stable solution is found.
-    """
-    fspace = {}
-    parsers = []
-
-    key = 'subsample'
-    if key in fidel_dict:
-        fidel = {
-            'name': key,
-            'type': 'float',
-            'min': 0.1,
-            'max': 1.0
-        }
-        parser = lambda x: x
-        cost = lambda x: 2
-        fspace[key] = fidel
-        parsers.append((key, parser, cost))
-
-    key = 'n_estimators'
-    if key in fidel_dict:
-        log = False if fidel_dict[key].lower() == 'linear' else True
-        fidel = {
-            'name': key,
-            'type': 'int',
-            'min': int(log2(1)) if log else 1,
-            'max': int(log2(128)) if log else 128
-        }
-        parser = (lambda x: 2 ** x) if log else (lambda x: x)
-        cost = lambda x: ((x - fidel['min']) / (fidel['max'] - fidel['min']))
-        fspace[key] = fidel
-        parsers.append((key, parser, cost))
-
-    return fspace, parsers
-
-
-# TODO: Switch fidelities to ConfigurationSpace objects
-# def configspace_to_dragonfly(domain_cs: ConfigurationSpace, name="hpolib_benchmark",
-#                              fidely_cs: Dict = None) -> Tuple[Dict, List, Union[List, None]]:
 def configspace_to_dragonfly(domain_cs: ConfigurationSpace, name="hpolib_benchmark",
                              fidely_cs: ConfigurationSpace = None) -> Tuple[Dict, List, Union[List, None], Union[List, None]]:
 
