@@ -24,14 +24,6 @@ class DragonflyOptimizer(Optimizer):
         pass
 
     def run(self) -> Path:
-        """
-
-        Returns
-        -------
-        Path-object. Please return the path to directory where your trajectory lies. This path is then used to read in
-        the trajecotory and transform it to a uniform format. (If you have such a trajectory example for me,
-        i can do the further steps then.)
-        """
 
         # TODO: Update to include constraints
         # TODO: Update to use ConfigurationSpace objects for fidelities
@@ -50,8 +42,17 @@ class DragonflyOptimizer(Optimizer):
         config, domain_parsers, fidelity_parsers, fidelity_costs = \
             configspace_to_dragonfly(domain_cs=self.cs, fidely_cs=fidel_space)
 
-        self.optimizer_settings["max_or_min"] = "min"
-        options, config = load_dragonfly_options(options=self.optimizer_settings, config=config)
+        try:
+            budget = self.optimizer_settings.get("time_limit_in_s")
+        except KeyError as e:
+            raise RuntimeError("Could not read a time limit for the optimizer.") from e
+
+        dragonfly_options = {
+            "capital_type": "realtime",
+            "max_capital": budget,
+            "max_or_min": "min"
+        }
+        options, config = load_dragonfly_options(options=dragonfly_options, config=config)
 
         if options.max_capital < 0:
             raise ValueError('max_capital (time or number of evaluations) must be positive.')
@@ -82,6 +83,7 @@ class DragonflyOptimizer(Optimizer):
                 change_cwd(tries=tries - 1)
             else:
                 os.chdir(tmp_dir)
+                logger.debug("Switched to temporary directory %s" % str(tmp_dir))
             return
 
         change_cwd()
@@ -96,7 +98,7 @@ class DragonflyOptimizer(Optimizer):
                 fidels = parse_fidelities(z)
                 logger.debug("Calling multi-fidelity objective with configuration %s at fidelity %s" % (
                     conf.get_dictionary(), fidels))
-                ret = self.benchmark.objective_function(conf, **fidels)
+                ret = self.benchmark.objective_function(conf, fidelity=fidels)
                 logger.debug("multi-fidelity objective returned %s" % ret)
                 return ret['function_value']
 

@@ -18,35 +18,7 @@
         "optimizer_settings":
             {"min_budget": 0.1, "max_budget": 1, "num_iterations": 10, "eta": 3, "time_limit_in_s": 4000, "cutoff_in_s": 1800, "mem_limit_in_mb": 4000},
         "benchmark_settings":
-            {"fidelity_name": "subsample", "fidelity_type": "float", "n_estimators": 128, "import_from": "ml.xgboost_benchmark", "import_benchmark": "XGBoostBenchmark"}
-    },
-    "xgboost_dragonfly":
-    {
-        "optimizer_settings":
-            {"max_capital":  100, "capital_type":  "realtime"},
-        "benchmark_settings":
-            {"import_from": "ml.xgboost_benchmark", "import_benchmark": "XGBoostBenchmark", "subsample":  "linear"}
-    },
-    "xgboost_dragonfly_subsample":
-    {
-        "optimizer_settings":
-            {"max_capital":  7200, "capital_type":  "realtime"},
-        "benchmark_settings":
-            {"import_from": "ml.xgboost_benchmark", "import_benchmark": "XGBoostBenchmark", "subsample":  "linear"}
-    },
-    "xgboost_dragonfly_nestimators_linear":
-    {
-        "optimizer_settings":
-            {"max_capital":  7200, "capital_type":  "realtime"},
-        "benchmark_settings":
-            {"import_from": "ml.xgboost_benchmark", "import_benchmark": "XGBoostBenchmark", "n_estimators":  "linear"}
-    },
-    "xgboost_dragonfly_nestimators_log":
-    {
-        "optimizer_settings":
-            {"max_capital":  7200, "capital_type":  "realtime"},
-        "benchmark_settings":
-            {"import_from": "ml.xgboost_benchmark", "import_benchmark": "XGBoostBenchmark", "n_estimators":  "log"}
+            {"import_from": "ml.xgboost_benchmark", "import_benchmark": "XGBoostBenchmark"}
     },
     "learna":
     {
