@@ -3,6 +3,7 @@ from typing import List, Dict, Tuple, Union, Optional
 from pathlib import Path
 from argparse import Namespace
 import logging
+import os, uuid
 
 logger = logging.getLogger('Dragonfly Utils')
 
@@ -289,3 +290,18 @@ def generate_trajectory(history: Namespace, save_file: Path, is_cp=False, histor
             json.dump(recorded_history, fp, indent=4)
 
     print("Finished writing trajectories file.")
+
+
+def change_cwd(tries=5):
+    if tries <= 0:
+        raise RuntimeError("Could not create random temporary dragonfly directory due to timeout.")
+
+    try:
+        tmp_dir = Path("/tmp") / "dragonfly" / str(uuid.uuid4())
+        tmp_dir.mkdir(parents=True, exist_ok=False)
+    except FileExistsError:
+        change_cwd(tries=tries - 1)
+    else:
+        os.chdir(tmp_dir)
+        logger.debug("Switched to temporary directory %s" % str(tmp_dir))
+    return

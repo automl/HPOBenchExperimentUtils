@@ -1,10 +1,10 @@
 import logging
 from pathlib import Path
-import os, uuid
+import os
 
 from HPOlibExperimentUtils.optimizer.base_optimizer import Optimizer
 from HPOlibExperimentUtils.utils.dragonfly_utils import \
-    configspace_to_dragonfly, load_dragonfly_options, generate_trajectory
+    configspace_to_dragonfly, load_dragonfly_options, generate_trajectory, change_cwd
 from HPOlibExperimentUtils.utils import Constants
 from hpolib.abstract_benchmark import AbstractBenchmark
 from dragonfly import minimise_function, \
@@ -61,20 +61,6 @@ class DragonflyOptimizer(Optimizer):
         # huge messes due to dragonfly's multi-process communication system
 
         old_cwd = Path().cwd()
-        def change_cwd(tries=5):
-            if tries <= 0:
-                raise RuntimeError("Could not create random temporary dragonfly directory due to timeout.")
-
-            try:
-                tmp_dir = Path("/tmp") / "dragonfly" / str(uuid.uuid4())
-                tmp_dir.mkdir(parents=True, exist_ok=False)
-            except FileExistsError:
-                change_cwd(tries=tries - 1)
-            else:
-                os.chdir(tmp_dir)
-                logger.debug("Switched to temporary directory %s" % str(tmp_dir))
-            return
-
         change_cwd()
 
         if is_mf:
