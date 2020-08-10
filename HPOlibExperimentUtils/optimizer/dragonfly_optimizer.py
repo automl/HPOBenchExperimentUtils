@@ -6,7 +6,7 @@ from HPOlibExperimentUtils.optimizer.base_optimizer import Optimizer
 from HPOlibExperimentUtils.utils.dragonfly_utils import \
     configspace_to_dragonfly, load_dragonfly_options, generate_trajectory
 from HPOlibExperimentUtils.utils import Constants
-
+from hpolib.abstract_benchmark import AbstractBenchmark
 from dragonfly import minimise_function, \
     minimise_multifidelity_function
 
@@ -17,7 +17,7 @@ logger = logging.getLogger('Optimizer')
 
 class DragonflyOptimizer(Optimizer):
 
-    def __init__(self, benchmark, optimizer_settings, benchmark_settings, intensifier, rng=0):
+    def __init__(self, benchmark: AbstractBenchmark, optimizer_settings, benchmark_settings, intensifier, rng=0):
         super().__init__(benchmark, optimizer_settings, benchmark_settings, intensifier, rng)
 
     def setup(self):
@@ -36,15 +36,19 @@ class DragonflyOptimizer(Optimizer):
         # TODO: Update to include constraints
         # TODO: Update to use ConfigurationSpace objects for fidelities
         # TODO: Include usage of RNG for consistency
-        known_fidelities = ['n_estimators', 'subsample']
+        # known_fidelities = ['n_estimators', 'subsample']
         # fidelities = {key: value for key, value in self.benchmark_settings.items()
         #               if key not in Constants.fixed_benchmark_settings}
-        fidelities = {key: value for key, value in self.benchmark_settings.items()
-                      if key in known_fidelities}
-        logger.debug(f"Using fidelities: %s" % fidelities)
-        config, domain_parsers, fidelity_parsers = configspace_to_dragonfly(domain_cs=self.cs, fidely_cs=fidelities)
-        fidelity_costs = [tup[2] for tup in fidelity_parsers]  # Separate the costs
-        fidelity_parsers = [(tup[0], tup[1]) for tup in fidelity_parsers]
+        # fidelities = {key: value for key, value in self.benchmark_settings.items()
+        #               if key in known_fidelities}
+        # logger.debug(f"Using fidelities: %s" % fidelities)
+        # config, domain_parsers, fidelity_parsers = configspace_to_dragonfly(domain_cs=self.cs, fidely_cs=fidelities)
+        # fidelity_parsers = [(tup[0], tup[1]) for tup in fidelity_parsers]
+        # fidelity_costs = [tup[2] for tup in fidelity_parsers]  # Separate the costs
+
+        fidel_space = self.benchmark.get_fidelity_space()
+        config, domain_parsers, fidelity_parsers, fidelity_costs = \
+            configspace_to_dragonfly(domain_cs=self.cs, fidely_cs=fidel_space)
 
         self.optimizer_settings["max_or_min"] = "min"
         options, config = load_dragonfly_options(options=self.optimizer_settings, config=config)
@@ -52,12 +56,7 @@ class DragonflyOptimizer(Optimizer):
         if options.max_capital < 0:
             raise ValueError('max_capital (time or number of evaluations) must be positive.')
 
-        if hasattr(config, 'fidel_space'):
-            logger.debug("Using multi-fidelity optimization.")
-            is_mf = True
-        else:
-            logger.debug("Using single-fidelity optimization.")
-            is_mf = False
+        is_mf = fidelity_parsers is not None
 
         def parse_domain(x):
             return Configuration(

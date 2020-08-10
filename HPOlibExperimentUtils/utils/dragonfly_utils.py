@@ -1,4 +1,4 @@
-from math import log10, log2
+from math import exp, log, log10, log2, floor, ceil
 from typing import List, Dict, Tuple, Union, Optional
 from pathlib import Path
 from argparse import Namespace
@@ -9,7 +9,8 @@ logger = logging.getLogger('Dragonfly Utils')
 # -------------------------------Begin code adapted directly from the dragonfly repo------------------------------------
 
 from ConfigSpace.configuration_space import ConfigurationSpace
-from ConfigSpace.hyperparameters import Hyperparameter, UniformFloatHyperparameter
+from ConfigSpace.hyperparameters import Hyperparameter, UniformFloatHyperparameter, UniformIntegerHyperparameter, \
+    CategoricalHyperparameter, OrdinalHyperparameter, Constant
 
 from dragonfly.exd.exd_utils import get_unique_list_of_option_args
 from dragonfly.utils.option_handler import get_option_specs
@@ -82,31 +83,124 @@ def _handler_unknown(hyp):
 
 
 def _handle_uniform_float(hyper: UniformFloatHyperparameter):
+    """
+    Handles the mapping of ConfigSpace.UniformFloatHyperparameter objects to dragonfly's 'float' parameters.
+    Caveats:
+        - Dragonfly does not support sampling on a log scale, therefore this mapping will instead ask dragonfly to
+          uniformly sample integers in the range [log(lower), log(upper)], and then forward the exponentiated sampled
+          values to the objective function.
+        - It is assumed that the costs are a directly proportional to the sampled value, such that the minimum value
+          corresponds to a cost of 0 and the maximum value corresponds to a cost of 1.
+    """
     domain = {
         'name': hyper.name,
         'type': 'float',
-        'min': log10(hyper.lower) if hyper.log else hyper.lower,
-        'max': log10(hyper.upper) if hyper.log else hyper.upper
+        'min': log(hyper.lower) if hyper.log else hyper.lower,
+        'max': log(hyper.upper) if hyper.log else hyper.upper
     }
 
-    parser = (lambda x: 10 ** x) if hyper.log else (lambda x: x)
-    return domain, parser
+    parser = (lambda x: exp(x)) if hyper.log else (lambda x: x)
+    cost = lambda x: (x - hyper.lower) / (hyper.upper - hyper.lower)
+    return domain, parser, cost
+
+
+def _handle_uniform_int(hyper: UniformFloatHyperparameter):
+    """
+    Handles the mapping of ConfigSpace.UniformFloatHyperparameter objects to dragonfly's 'int' parameters.
+    Caveats:
+        - Dragonfly does not support sampling on a log scale, therefore this mapping will instead ask dragonfly to
+          uniformly sample integers in the range [floor(log(lower)), floor(log(upper))], and then forward the
+          exponentiated sampled values to the objective function.
+        - It is assumed that the costs are a directly proportional to the sampled value, such that the minimum value
+          corresponds to a cost of 0 and the maximum value corresponds to a cost of 1.
+    """
+    domain = {
+        'name': hyper.name,
+        'type': 'int',
+        'min': floor(log(hyper.lower)) if hyper.log else hyper.lower,
+        'max': floor(log(hyper.upper)) if hyper.log else hyper.upper
+    }
+
+    parser = (lambda x: exp(x)) if hyper.log else (lambda x: x)
+    cost = lambda x: (x - hyper.lower) / (hyper.upper - hyper.lower)
+    return domain, parser, cost
+
+
+def _handle_categorical(hyper: CategoricalHyperparameter):
+    """
+    Handles the mapping of ConfigSpace.CategoricalHyperparameter objects to dragonfly's 'discrete' parameters.
+    Caveats:
+        - Dragonfly cannot handle non-uniform item weights.
+        - Dragonfly internally stores and samples all items as strings. An attempt will be made to automatically handle
+          the type conversion by inferring and storing the data type using a call to type(), hence it is expected that
+          the data types of the items support direct conversion to and from strings.
+        - It is assumed that each individual choice incurs exactly the same cost, 1/N, where N is the number of choices.
+    """
+
+    # TODO: Handle item weights
+    if not isinstance(hyper.choices, (list, tuple)):
+        raise TypeError("Expected choices to be either list or tuple, received %s" % str(type(hyper.choices)))
+
+    element_type = type(hyper.choices[0])
+    n = len(hyper.choices)
+    domain = {
+        'name': hyper.name,
+        'type': 'discrete',
+        'items': hyper.choices
+    }
+
+    parser = lambda x: element_type(x)
+    cost = lambda x: 1. / float(n)
+    return domain, parser, cost
+
+
+def _handle_ordinal(hyper: OrdinalHyperparameter):
+    """
+    Handles the mapping of ConfigSpace.OrdinalHyperparameter objects to dragonfly's 'discrete_numeric' parameters.
+    Caveats:
+        - The only difference between an Ordinal and a Categorical is the meta-information of item ordering, which is
+          not useful for dragonfly in any case, therefore dragonfly is only provided indices to an internally stored
+          ordered sequence.
+        - It is assumed that the costs are a directly proportional to the index location of the sampled value, such
+          that the item with index 0 or the first item in the sequence incurs a cost of 0 and the last item incurs a
+          cost of 1.
+    """
+
+    sequence = hyper.sequence
+    if not isinstance(sequence, (list, tuple)):
+        raise TypeError("Expected sequence to be either list or tuple, received %s" % str(type(sequence)))
+
+    n = len(sequence) - 1
+    domain = {
+        'name': hyper.name,
+        'type': 'discrete',
+        'items': list(range(0, len(sequence)))
+    }
+
+    parser = lambda x: sequence[x]
+    cost = lambda x: x / n
+    return domain, parser, cost
 
 
 _handlers = {
-    UniformFloatHyperparameter: _handle_uniform_float
+    UniformFloatHyperparameter: _handle_uniform_float,
+    UniformIntegerHyperparameter: _handle_uniform_int,
+    CategoricalHyperparameter: _handle_categorical,
+    OrdinalHyperparameter: _handle_ordinal
 }
 
 
-def _configspace_to_dragonfly_domain(hypers: List[Hyperparameter]) -> Tuple[Dict, List]:
-    domain = {}
+def _configspace_to_dragonfly(params: List[Hyperparameter]) -> Tuple[Dict, List, List]:
+    dragonfly_dict = {}
     parser = []
-    for hyp in hypers:
-        d, p = _handlers.get(type(hyp), _handler_unknown)(hyp)
-        domain[hyp.name] = d
-        parser.append((hyp.name, p))
+    costs = []
+    for param in params:
+        d, p, c = _handlers.get(type(param), _handler_unknown)(param)
+        dragonfly_dict[param.name] = d
+        parser.append((param.name, p))
+        costs.append(c)
 
-    return domain, parser
+    return dragonfly_dict, parser, costs
 
 
 # TODO: Switch to ConfigurationSpace objects
@@ -149,18 +243,23 @@ def _generate_xgboost_fidelity_space(fidel_dict: Dict) -> Tuple[Dict, List]:
 
 
 # TODO: Switch fidelities to ConfigurationSpace objects
+# def configspace_to_dragonfly(domain_cs: ConfigurationSpace, name="hpolib_benchmark",
+#                              fidely_cs: Dict = None) -> Tuple[Dict, List, Union[List, None]]:
 def configspace_to_dragonfly(domain_cs: ConfigurationSpace, name="hpolib_benchmark",
-                             fidely_cs: Dict = None) -> Tuple[Dict, List, Union[List, None]]:
-    domain, domain_parsers = _configspace_to_dragonfly_domain(domain_cs.get_hyperparameters())
+                             fidely_cs: ConfigurationSpace = None) -> Tuple[Dict, List, Union[List, None], Union[List, None]]:
+
+    domain, domain_parsers, _ = _configspace_to_dragonfly(domain_cs.get_hyperparameters())
     out = {'name': name, 'domain': domain}
     if fidely_cs:
-        fidelity_space, fidelity_parsers = _generate_xgboost_fidelity_space(fidely_cs)
+        # fidelity_space, fidelity_parsers = _generate_xgboost_fidelity_space(fidely_cs)
+        fidelity_space, fidelity_parsers, fidelity_costs = _configspace_to_dragonfly(fidely_cs.get_hyperparameters())
         out['fidel_space'] = fidelity_space
-        out['fidel_to_opt'] = [fidel['max'] for _, fidel in fidelity_space.items()]
+        # out['fidel_to_opt'] = [fidel['max'] for _, fidel in fidelity_space.items()]
+        out['fidel_to_opt'] = [param.default_value for param in fidely_cs.get_hyperparameters()]
         logger.debug("Generated fidelity space %s\nfidelity optimization taret: %s" % (fidelity_space, out['fidel_to_opt']))
-        return out, domain_parsers, fidelity_parsers
+        return out, domain_parsers, fidelity_parsers, fidelity_costs
     else:
-        return out, domain_parsers, None
+        return out, domain_parsers, None, None
     # TODO: Add support for converting constraints
 
 
