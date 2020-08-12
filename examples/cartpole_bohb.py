@@ -14,8 +14,8 @@ from pathlib import Path
 
 from HPOlibExperimentUtils import OptimizerEnum, run_benchmark, validate_benchmark
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('BOHB on cartpole')
+logger.setLevel(level=logging.DEBUG)
 root_logger = logging.getLogger()
 
 root_logger.setLevel(logging.DEBUG)
