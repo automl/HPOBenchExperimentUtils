@@ -95,7 +95,7 @@ def get_benchmark_names():
     return [str(key) for key in experiment_settings.keys()]
 
 
-def get_setting_per_benchmark(benchmark: str, rng: int, output_dir: Path) -> Tuple[Dict, Dict]:
+def get_setting_per_benchmark(benchmark: str) -> Tuple[Dict, Dict]:
     """
     Get a dictionary for each benchmark containing the experiment parameters.
 
@@ -117,27 +117,20 @@ def get_setting_per_benchmark(benchmark: str, rng: int, output_dir: Path) -> Tup
     assert benchmark in benchmark_names,\
         f"benchmark name {benchmark} not found. Should be one of {', '.join(benchmark_names)}"
 
-    # TODO: DRAGONFLY - The experiment_settings.json contain also settings for the optimizer to make them comparable,
-    #       s.a. min or maximum budget and available runtime. It would be good to map the Dragonfly parameters to the
-    #       same parameters, such that the optimizers still comparable.
-    optimizer_settings = experiment_settings[benchmark]['optimizer_settings']
-    benchmark_settings = experiment_settings[benchmark]['benchmark_settings']
-
-    optimizer_settings.update({'rng': rng, 'output_dir': output_dir})
-    benchmark_settings.update({'rng': rng, 'output_dir': output_dir})
-
-    return optimizer_settings, benchmark_settings
+    return experiment_settings[benchmark]
 
 
-def load_benchmark(benchmark_settings: Dict, use_local: bool) -> Any:
+def load_benchmark(benchmark_name, import_from, use_local: bool) -> Any:
     """
     Load the benchmark object.
     If not `use_local`:  Then load a container from a given source, defined in the Hpolib.
 
+    Import via command from hpolib.[container.]benchmarks.<import_from> import <benchmark_name>
+
     Parameters
     ----------
-    benchmark_settings : Dict
-        Dictionary containing alll necessary information for the benchmark, such as the name or where to load it from.
+    benchmark_name : str
+    import_from : str
     use_local : bool
         By default this value is set to false.
         In this case, a container will be downloaded. This container includes all necessary files for the experiment.
@@ -150,9 +143,11 @@ def load_benchmark(benchmark_settings: Dict, use_local: bool) -> Any:
     -------
     Benchmark
     """
-    import_str = f'hpolib.{"container." if not use_local else ""}benchmarks.{benchmark_settings["import_from"]}'
-    logger.debug(f'Try to execute command: from {import_str} import {benchmark_settings["import_benchmark"]}')
+    import_str = 'hpolib.' + ('container.' if not use_local else '') + 'benchmarks.' + import_from
+    logger.debug(f'Try to execute command: from {import_str} import {benchmark_name}')
+
     module = import_module(import_str)
-    benchmark_obj = getattr(module, benchmark_settings['import_benchmark'])
-    logger.debug(f'Benchmark {benchmark_settings["import_benchmark"]} successfully loaded')
+    benchmark_obj = getattr(module, benchmark_name)
+    logger.debug(f'Benchmark {benchmark_name} successfully loaded')
+
     return benchmark_obj

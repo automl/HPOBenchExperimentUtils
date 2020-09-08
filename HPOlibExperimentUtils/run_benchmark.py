@@ -2,6 +2,10 @@ import logging
 from pathlib import Path
 from typing import Union, Dict
 
+logging.basicConfig(level=logging.DEBUG)
+root_logger = logging.getLogger()
+root_logger.setLevel(logging.DEBUG)
+
 from hpolib.util.example_utils import set_env_variables_to_use_only_one_core
 
 from HPOlibExperimentUtils import BOHBReader, SMACReader
@@ -68,13 +72,24 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
     output_dir.mkdir(exist_ok=True, parents=True)
     logger.debug(f'Output dir: {output_dir}')
 
-    optimizer_settings, benchmark_settings = get_setting_per_benchmark(benchmark, rng=rng, output_dir=output_dir)
+    # TODO: get settings of fidelities
+    settings = get_setting_per_benchmark(benchmark)
     logger.debug(f'Settings loaded')
 
+    # TODO: REMOVE This
+    use_local = True
+
     # Load and instantiate the benchmark
-    benchmark_obj = load_benchmark(benchmark_settings, use_local)
-    benchmark = benchmark_obj(container_source='library://phmueller/automl',
-                              **benchmark_params)
+    benchmark_obj = load_benchmark(benchmark_name=settings['import_benchmark'],
+                                   import_from=settings['import_from'],
+                                   use_local=use_local)
+
+    if use_local:
+        benchmark = benchmark_obj(rng=rng, **benchmark_params)
+    else:
+        from hpolib import config_file
+        container_source = config_file.container_source
+        benchmark = benchmark_obj(rng=rng, container_source=container_source, **benchmark_params)
 
     logger.debug(f'Benchmark initialized. Additional benchmark parameters {benchmark_params}')
 
@@ -91,9 +106,8 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
     else:
         raise ValueError(f'Unknown optimizer: {optimizer_enum}')
 
-    optimizer = optimizer(benchmark=benchmark, optimizer_settings=optimizer_settings,
-                          benchmark_settings=benchmark_settings, intensifier=optimizer_enum,
-                          rng=rng)
+    optimizer = optimizer(benchmark=benchmark, settings=settings, intensifier=optimizer_enum,
+                          output_dir=output_dir, rng=rng)
     logger.debug(f'Optimizer initialized')
 
     # optimizer.setup()

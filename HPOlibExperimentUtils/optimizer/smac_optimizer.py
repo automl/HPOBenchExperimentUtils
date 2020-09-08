@@ -14,6 +14,7 @@ from smac.scenario.scenario import Scenario
 from HPOlibExperimentUtils.optimizer.base_optimizer import Optimizer
 from HPOlibExperimentUtils.utils.optimizer_utils import get_number_ta_runs, parse_fidelity_type
 from HPOlibExperimentUtils.utils.runner_utils import OptimizerEnum
+from HPOlibExperimentUtils.utils.utils import time_limit, TimeoutException
 
 logger = logging.getLogger('Optimizer')
 
@@ -62,12 +63,31 @@ class SMACOptimizer(Optimizer):
 
         def optimization_function_wrapper(cfg, seed, instance, budget):
             """ Helper-function: simple wrapper to use the benchmark with smac"""
-            fidelity_type = parse_fidelity_type(self.benchmark_settings['fidelity_type'])
-            fidelity = {self.benchmark_settings['fidelity_name']: fidelity_type(budget)}
+            fidelity_space = self.benchmark.get_fidelity_space()
+            fidelity = fidelity_space.get_default_configuration().get_dictionary()
 
-            result_dict = self.benchmark.objective_function(configuration=cfg,
-                                                            **fidelity,
-                                                            **self.benchmark_settings_for_sending)
+            fidelity_type = parse_fidelity_type(self.benchmark_settings['fidelity_type'])
+
+            fidelity[self.benchmark_settings['fidelity_name']] = fidelity_type(budget)
+
+            # fidelity_type = parse_fidelity_type(self.benchmark_settings['fidelity_type'])
+            # fidelity = {self.benchmark_settings['fidelity_name']: fidelity_type(budget)}
+
+            benchmark_settings_for_sending = self.benchmark_settings_for_sending.copy()
+            for key in fidelity:
+                if key in self.benchmark_settings_for_sending:
+                    del benchmark_settings_for_sending[key]
+
+            try:
+                with time_limit(1):
+                    result_dict = self.benchmark.objective_function(configuration=cfg,
+                                                                    fidelity=fidelity,
+                                                                    **benchmark_settings_for_sending)
+
+            except TimeoutException:
+                print('TIMEOUT')
+                return 10**5
+
             return result_dict['function_value']
 
         smac = SMAC4HPO(scenario=scenario,
