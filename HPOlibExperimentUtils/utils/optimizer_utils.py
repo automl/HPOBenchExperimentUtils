@@ -4,6 +4,8 @@ from typing import Union, Optional, Any, Dict
 
 import numpy as np
 
+from HPOlibExperimentUtils import OptimizerEnum
+
 logger = logging.getLogger('Optimizer Utils')
 
 
@@ -85,3 +87,18 @@ def prepare_dict_for_sending(benchmark_settings: Dict):
         else:
             benchmark_dict_for_sending[key] = value
     return benchmark_dict_for_sending
+
+
+def get_optimizer(optimizer_enum):
+    if optimizer_enum is OptimizerEnum.BOHB:
+        from HPOlibExperimentUtils.optimizer.bohb_optimizer import BOHBOptimizer
+        optimizer = BOHBOptimizer
+    elif optimizer_enum is OptimizerEnum.DRAGONFLY:
+        from HPOlibExperimentUtils.optimizer.dragonfly_optimizer import DragonflyOptimizer
+        optimizer = DragonflyOptimizer
+    elif optimizer_enum is OptimizerEnum.HYPERBAND or optimizer_enum is OptimizerEnum.SUCCESSIVE_HALVING:
+        from HPOlibExperimentUtils.optimizer.smac_optimizer import SMACOptimizer
+        optimizer = SMACOptimizer
+    else:
+        raise ValueError(f'Unknown optimizer: {optimizer_enum}')
+    return optimizer

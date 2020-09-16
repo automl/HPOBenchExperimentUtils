@@ -1,26 +1,27 @@
 import logging
+from abc import ABC
 from pathlib import Path
 from typing import Union, Dict
 
 from hpolib.abstract_benchmark import AbstractBenchmark
 from hpolib.container.client_abstract_benchmark import AbstractBenchmarkClient
 
+from HPOlibExperimentUtils.core.bookkeeper import Bookkeeper
 from HPOlibExperimentUtils.utils.optimizer_utils import prepare_dict_for_sending
-from HPOlibExperimentUtils.utils.runner_utils import OptimizerEnum
+from HPOlibExperimentUtils.utils.utils import get_main_fidelity
 
 logger = logging.getLogger('Optimizer')
 
 
-class Optimizer:
+class Optimizer(ABC):
     """ Base class for the Optimizer classes for SMACOptimizer, BOHBOptimizer and DragonflyOptimizer """
-    def __init__(self, benchmark: Union[AbstractBenchmark, AbstractBenchmarkClient],
-                 settings: Dict, intensifier: OptimizerEnum, output_dir: Path, rng: Union[int, None] = 0):
+    def __init__(self, benchmark: Union[Bookkeeper, AbstractBenchmark, AbstractBenchmarkClient],
+                 settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
         self.benchmark = benchmark
         self.cs = benchmark.get_configuration_space()
         self.rng = rng
         self.output_dir = output_dir
         self.settings = settings
-        self.intensifier = intensifier
 
         # Since we use containerized benchmarks. Information are sent via json format to the container. Therefore each
         # entry in the benchmark settings dict must be json serializable.
@@ -32,5 +33,19 @@ class Optimizer:
     def setup(self):
         raise NotImplementedError()
 
-    def run(self) -> Path:
+    def run(self):
         raise NotImplementedError()
+
+
+class SingleFidelityOptimizer(Optimizer, ABC):
+
+    def __init__(self, benchmark: Union[AbstractBenchmark, AbstractBenchmarkClient],
+                 settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
+
+        # determine min and max budget from the fidelity space
+        fidelity_space = benchmark.get_fidelity_space()
+        self.main_fidelity = get_main_fidelity(fidelity_space, settings)
+        self.min_budget = self.main_fidelity.lower
+        self.max_budget = self.main_fidelity.upper
+
+        super(SingleFidelityOptimizer, self).__init__(benchmark, settings, output_dir, rng)

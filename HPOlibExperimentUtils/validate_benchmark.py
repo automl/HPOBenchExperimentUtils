@@ -8,7 +8,7 @@ from hpolib.util.example_utils import set_env_variables_to_use_only_one_core
 
 from HPOlibExperimentUtils import BOHBReader, SMACReader
 from HPOlibExperimentUtils.utils.optimizer_utils import parse_fidelity_type, prepare_dict_for_sending
-from HPOlibExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_setting_per_benchmark, \
+from HPOlibExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_benchmark_settings, \
     load_benchmark, get_benchmark_names
 
 logging.basicConfig(level=logging.DEBUG)
@@ -69,7 +69,7 @@ def validate_benchmark(benchmark: str,
     output_dir = Path(output_dir)
 
     assert output_dir.is_dir(), f'Result folder doesn\"t exist: {output_dir}'
-    optimizer_settings, benchmark_settings = get_setting_per_benchmark(benchmark, rng=rng, output_dir=output_dir)
+    optimizer_settings, benchmark_settings = get_benchmark_settings(benchmark, rng=rng, output_dir=output_dir)
     benchmark_settings_for_sending = prepare_dict_for_sending(benchmark_settings)
 
     # First, try to load already extracted trajectory file

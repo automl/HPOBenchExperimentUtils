@@ -1,21 +1,24 @@
 import logging
+from multiprocessing import Process, Manager
 from pathlib import Path
+from time import time, sleep
 from typing import Union, Dict
 
-logging.basicConfig(level=logging.DEBUG)
-root_logger = logging.getLogger()
-root_logger.setLevel(logging.DEBUG)
-
+from hpolib.util.container_utils import enable_container_debug
 from hpolib.util.example_utils import set_env_variables_to_use_only_one_core
 
-from HPOlibExperimentUtils import BOHBReader, SMACReader
-from HPOlibExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_setting_per_benchmark, \
-    OptimizerEnum, optimizer_str_to_enum, load_benchmark, get_benchmark_names
+from HPOlibExperimentUtils import PING_OPTIMIZER_IN_S
+from HPOlibExperimentUtils.core.bookkeeper import Bookkeeper
+from HPOlibExperimentUtils.utils.optimizer_utils import get_optimizer
+from HPOlibExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_benchmark_settings, \
+    OptimizerEnum, optimizer_str_to_enum, load_benchmark, get_benchmark_names, get_optimizer_settings_names, \
+    get_optimizer_setting
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('BenchmarkRunner')
 
 set_env_variables_to_use_only_one_core()
+enable_container_debug()
 
 
 def run_benchmark(optimizer: Union[OptimizerEnum, str],
@@ -65,6 +68,10 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
 
     logger.info(f'Start running benchmark.')
 
+    optimizer_settings = get_optimizer_setting(optimizer)
+    benchmark_settings = get_benchmark_settings(benchmark)
+    logger.debug(f'Settings loaded')
+
     optimizer_enum = optimizer_str_to_enum(optimizer)
     logger.debug(f'Optimizer: {optimizer_enum}')
 
@@ -72,16 +79,9 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
     output_dir.mkdir(exist_ok=True, parents=True)
     logger.debug(f'Output dir: {output_dir}')
 
-    # TODO: get settings of fidelities
-    settings = get_setting_per_benchmark(benchmark)
-    logger.debug(f'Settings loaded')
-
-    # TODO: REMOVE This
-    use_local = True
-
     # Load and instantiate the benchmark
-    benchmark_obj = load_benchmark(benchmark_name=settings['import_benchmark'],
-                                   import_from=settings['import_from'],
+    benchmark_obj = load_benchmark(benchmark_name=benchmark_settings['import_benchmark'],
+                                   import_from=benchmark_settings['import_from'],
                                    use_local=use_local)
 
     if use_local:
@@ -91,39 +91,40 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
         container_source = config_file.container_source
         benchmark = benchmark_obj(rng=rng, container_source=container_source, **benchmark_params)
 
+    # Create a Process Manager to get access to the variable "total_time_proxy" of the bookkeeper
+    # This variable represents how much time the optimizer has used
+    manager = Manager()
+    total_time_proxy = manager.Value('f', 0)
+
+    benchmark = Bookkeeper(benchmark,
+                           output_dir,
+                           total_time_proxy,
+                           wall_clock_limit_in_s=benchmark_settings['time_limit_in_s'],
+                           cutoff_limit_in_s=benchmark_settings['cutoff_in_s'],
+                           is_surrogate=benchmark_settings['is_surrogate'])
+
     logger.debug(f'Benchmark initialized. Additional benchmark parameters {benchmark_params}')
 
-    # Setup optimizer (either smac or bohb)
-    if optimizer_enum is OptimizerEnum.BOHB:
-        from HPOlibExperimentUtils.optimizer.bohb_optimizer import BOHBOptimizer
-        optimizer = BOHBOptimizer
-    elif optimizer_enum is OptimizerEnum.DRAGONFLY:
-        from HPOlibExperimentUtils.optimizer.dragonfly_optimizer import DragonflyOptimizer
-        optimizer = DragonflyOptimizer
-    elif optimizer_enum is OptimizerEnum.HYPERBAND or optimizer_enum is OptimizerEnum.SUCCESSIVE_HALVING:
-        from HPOlibExperimentUtils.optimizer.smac_optimizer import SMACOptimizer
-        optimizer = SMACOptimizer
-    else:
-        raise ValueError(f'Unknown optimizer: {optimizer_enum}')
-
-    optimizer = optimizer(benchmark=benchmark, settings=settings, intensifier=optimizer_enum,
+    optimizer = get_optimizer(optimizer_enum)
+    optimizer = optimizer(benchmark=benchmark,
+                          settings=benchmark_settings,
                           output_dir=output_dir, rng=rng)
     logger.debug(f'Optimizer initialized')
 
-    # optimizer.setup()
-    run_dir = optimizer.run()
+    start_time = time()
+    process = Process(target=optimizer.run, args=(), kwargs=dict())
+    process.start()
+
+    # Wait for the optimizer to finish. But in case the optimizer crashes somehow, also test for the real time here.
+    while benchmark_settings['time_limit_in_s'] >= benchmark.get_total_time_used() \
+            and benchmark_settings['time_limit_in_s'] >= (time() - start_time) \
+            and process.is_alive():
+        sleep(PING_OPTIMIZER_IN_S)
+    else:
+        process.terminate()
+        print(f'finished after {time() - start_time}')
+
     logger.info(f'Optimizer finished')
-
-    # Export the trajectory
-    traj_path = output_dir / f'traj_hpolib.json'
-
-    # TODO: DRAGONFLY - Support Reader for Dragonfly. If output of Dragonfly is equal to SMAC trajectory format,
-    #  we can use the SMAC-Reader.
-    reader = BOHBReader() if optimizer_enum is OptimizerEnum.BOHB else SMACReader()
-    reader.read(file_path=run_dir)
-    reader.get_trajectory()
-    reader.export_trajectory(traj_path)
-    logger.info(f'Trajectory successfully exported to {traj_path}')
 
 
 if __name__ == "__main__":
@@ -134,9 +135,7 @@ if __name__ == "__main__":
                                                  'unified interface')
 
     parser.add_argument('--output_dir', required=True, type=str)
-    parser.add_argument('--optimizer', choices=['BOHB', 'HYPERBAND', 'HB', 'SUCCESSIVE_HALVING', 'SH',
-                                                'DRAGONFLY', 'DF'],
-                        required=True, type=str)
+    parser.add_argument('--optimizer', choices=get_optimizer_settings_names(),  required=True, type=str)
     parser.add_argument('--benchmark', choices=get_benchmark_names(), required=True, type=str)
     parser.add_argument('--rng', required=False, default=0, type=int)
 

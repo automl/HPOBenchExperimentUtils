@@ -1,25 +1,23 @@
 import logging
 import pickle
-from multiprocessing import Process
 from pathlib import Path
-from time import time, sleep
 from typing import Dict, Any, Union
 
+import ConfigSpace as CS
 from hpbandster.core import result as hpres, nameserver as hpns
 from hpbandster.core.worker import Worker
 from hpbandster.optimizers import BOHB
 from hpolib.abstract_benchmark import AbstractBenchmark
 from hpolib.container.client_abstract_benchmark import AbstractBenchmarkClient
-from pebble import concurrent
 
-from HPOlibExperimentUtils.optimizer.base_optimizer import Optimizer
+from HPOlibExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
 from HPOlibExperimentUtils.utils.runner_utils import OptimizerEnum
 from HPOlibExperimentUtils.utils.utils import get_main_fidelity
 
 logger = logging.getLogger('Optimizer')
 
 
-class BOHBOptimizer(Optimizer):
+class BOHBOptimizer(SingleFidelityOptimizer):
     """
     This class offers an interface to the BOHB Optimizer. It runs on a given benchmark.
     All benchmark and optimizer specific information are stored in the dictionaries benchmark_settings and
@@ -30,18 +28,10 @@ class BOHBOptimizer(Optimizer):
         super().__init__(benchmark, settings, intensifier, output_dir, rng)
         self.run_id = f'BOHB_optimization_seed_{self.rng}'
 
-        # determine min and max budget from the fidelity space
-        fidelity_space = benchmark.get_fidelity_space()
-
-        fidelity = get_main_fidelity(fidelity_space, settings)
-
-        self.min_budget = fidelity.lower
-        self.max_budget = fidelity.upper
-
     def setup(self):
         pass
 
-    def run(self) -> Path:
+    def run(self):
         """ Execute the optimization run. Return the path where the results are stored. """
         result_logger = hpres.json_result_logger(directory=str(self.output_dir), overwrite=True)
 
@@ -51,6 +41,7 @@ class BOHBOptimizer(Optimizer):
         ns_host, ns_port = ns.start()
 
         worker = CustomWorker(benchmark=self.benchmark,
+                              main_fidelity=self.main_fidelity,
                               settings=self.settings,
                               settings_for_sending=self.settings_for_sending,
                               nameserver=ns_host,
@@ -69,23 +60,34 @@ class BOHBOptimizer(Optimizer):
                       max_budget=self.max_budget,
                       result_logger=result_logger)
 
-        def run_bohb(output_dir):
-            result = master.run(n_iterations=self.settings['num_iterations'])
-            with open(output_dir / 'results.pkl', 'wb') as fh:
-                pickle.dump(result, fh)
+        result = master.run(n_iterations=self.settings['num_iterations'])
+        with open(self.output_dir / 'results.pkl', 'wb') as fh:
+            pickle.dump(result, fh)
 
-        start_time = time()
-        process = Process(target=run_bohb(output_dir=self.output_dir), args=(), kwargs=dict())
-        process.start()
-
-        # Check if global time limit is reached or process is not alive anymore
-        while time() - start_time < self.settings['time_limit_in_s'] and process.is_alive():
-            sleep(0.25)
-        else:
-            print(f'finished after {time() - start_time}')
-
+        # def run_bohb(output_dir):
+        #     result = master.run(n_iterations=self.settings['num_iterations'])
+        #     with open(output_dir / 'results.pkl', 'wb') as fh:
+        #         pickle.dump(result, fh)
+        #
+        # start_time = time()
+        # process = Process(target=run_bohb(output_dir=self.output_dir), args=(), kwargs=dict())
+        # process.start()
+        #
+        # # Check if global time limit is reached or process is not alive anymore
+        # while time() - start_time < self.settings['time_limit_in_s'] and process.is_alive():
+        #     sleep(0.25)
+        # else:
+        #     print(f'finished after {time() - start_time}')
         master.shutdown(shutdown_workers=True)
         ns.shutdown()
+
+        # Todo: We can recover the results from the master object.
+        # result = master.run(n_iterations=self.settings['num_iterations'])
+        # for iteration in master.warmstart_iteration:
+        #     iteration.fix_timestamps(master.time_ref)
+        # ws_data = [iteration.data for iteration in master.warmstart_iteration]
+        # result = hpres.Result([deepcopy(iteration.data) for iteration in master.iterations] + ws_data,
+        #                       master.config)
 
         # if result is not None:
         #     id2config = result.get_id2config_mapping()
@@ -95,16 +97,18 @@ class BOHBOptimizer(Optimizer):
         # logger.info(f'Inc Config:\n{inc_cfg}\n with Performance: {inc_value:.2f}')
 
         # Since BOHB and SMAC write the output to different directories, return it here.
-        return self.output_dir
+        # return self.output_dir
 
 
 class CustomWorker(Worker):
     """ A generic worker for optimizing with BOHB. """
     def __init__(self, benchmark: AbstractBenchmark,
+                 main_fidelity: CS.Configuration,
                  settings: Dict,
                  settings_for_sending: Dict, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.benchmark = benchmark
+        self.main_fidelity = main_fidelity
         self.settings = settings
         self.settings_for_sending = settings_for_sending
 
@@ -113,20 +117,8 @@ class CustomWorker(Worker):
 
     def compute(self, config: Dict, budget: Any, **kwargs) -> Dict:
         """Here happens the work in the optimization step. """
-
         fidelity = {self.main_fidelity.name: budget}
 
-        @concurrent.process(timeout=self.settings['cutoff_in_s'])
-        def objective_function(configuration, fidelity, **benchmark_settings_for_sending):
-            result_dict = self.benchmark.objective_function(configuration=configuration,
-                                                            fidelity=fidelity,
-                                                            **benchmark_settings_for_sending)
-            return result_dict
-
-        result_dict = objective_function(configuration=config, fidelity=fidelity, **self.settings_for_sending)
-
-        # Throws an time out error if a time out occurs
-        result_dict = result_dict.result()
-
+        result_dict = self.benchmark.objective_function(configuration=config, fidelity=fidelity, **self.settings_for_sending)
         return {'loss': result_dict['function_value'],
                 'info': result_dict}

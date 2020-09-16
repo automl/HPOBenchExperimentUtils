@@ -1,9 +1,10 @@
-import json
 import logging
 from enum import Enum
 from importlib import import_module
 from pathlib import Path
-from typing import List, Union, Dict, Tuple, Any
+from typing import List, Union, Dict, Any
+
+import yaml
 
 logger = logging.getLogger('Runner Utils')
 
@@ -80,22 +81,45 @@ def transform_unknown_params_to_dict(unknown_args: List) -> Dict:
     return benchmark_params
 
 
+def load_optimizer_settings() -> Dict:
+    """ Load the experiment settings from file """
+    optimizer_settings_path = Path(__file__).absolute().parent.parent / 'optimizer_settings.yaml'
+    with optimizer_settings_path.open('r') as fh:
+        optimizer_settings = yaml.load(fh, yaml.FullLoader)
+    return optimizer_settings
+
+
+def get_optimizer_settings_names():
+    settings = load_optimizer_settings()
+    return list(settings.keys())
+
+
+def get_optimizer_setting(optimizer_setting_str: str) -> Dict:
+    optimizer_settings = load_optimizer_settings()
+    settings_names = get_optimizer_settings_names()
+
+    assert optimizer_setting_str in settings_names,\
+        f"Optimizer setting {optimizer_setting_str} not found. Should be one of {', '.join(settings_names)}"
+
+    return optimizer_settings[optimizer_setting_str]
+
+
 def load_experiment_settings() -> Dict:
     """ Load the experiment settings from file """
     experiment_settings_path = Path(__file__).absolute().parent.parent / 'experiment_settings.json'
 
     with experiment_settings_path.open('r') as fh:
-        experiment_settings = json.load(fh)
+        experiment_settings = yaml.load(fh, yaml.FullLoader)
     return experiment_settings
 
 
 def get_benchmark_names():
     """ Get the names for the supported benchmarks. """
     experiment_settings = load_experiment_settings()
-    return [str(key) for key in experiment_settings.keys()]
+    return list(experiment_settings.keys())
 
 
-def get_setting_per_benchmark(benchmark: str) -> Tuple[Dict, Dict]:
+def get_benchmark_settings(benchmark: str) -> Dict:
     """
     Get a dictionary for each benchmark containing the experiment parameters.
 
@@ -116,6 +140,9 @@ def get_setting_per_benchmark(benchmark: str) -> Tuple[Dict, Dict]:
 
     assert benchmark in benchmark_names,\
         f"benchmark name {benchmark} not found. Should be one of {', '.join(benchmark_names)}"
+
+    settings = experiment_settings[benchmark]
+    settings['is_surrogate'] = settings.get('is_surrogate', False)
 
     return experiment_settings[benchmark]
 
