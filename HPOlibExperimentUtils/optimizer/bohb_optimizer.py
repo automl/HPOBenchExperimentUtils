@@ -11,7 +11,6 @@ from hpolib.abstract_benchmark import AbstractBenchmark
 from hpolib.container.client_abstract_benchmark import AbstractBenchmarkClient
 
 from HPOlibExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
-from HPOlibExperimentUtils.utils.runner_utils import OptimizerEnum
 from HPOlibExperimentUtils.utils.utils import get_main_fidelity
 
 logger = logging.getLogger('Optimizer')
@@ -24,8 +23,8 @@ class BOHBOptimizer(SingleFidelityOptimizer):
     optimizer_settings.
     """
     def __init__(self, benchmark: Union[AbstractBenchmark, AbstractBenchmarkClient],
-                 settings: Dict, intensifier: OptimizerEnum, output_dir: Path, rng: Union[int, None] = 0):
-        super().__init__(benchmark, settings, intensifier, output_dir, rng)
+                 settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
+        super().__init__(benchmark, settings, output_dir, rng)
         self.run_id = f'BOHB_optimization_seed_{self.rng}'
 
     def setup(self):

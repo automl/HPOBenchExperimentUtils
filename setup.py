@@ -30,7 +30,7 @@ setuptools.setup(
     version=read_file('HPOlibExperimentUtils/__version__.py').split()[-1].strip('\''),
     packages=setuptools.find_packages(exclude=['*.tests', '*.tests.*',
                                                'tests.*', 'tests'],),
-    package_data={'HPOlibExperimentUtils': ['experiment_settings.json']},
+    package_data={'HPOlibExperimentUtils': ['benchmark_settings.yaml', 'optimizer_settings.yaml']},
     include_package_data=True,
     python_requires='>=3.6, <3.8',
     install_requires=read_file('./requirements.txt').split('\n'),

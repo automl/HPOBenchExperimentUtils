@@ -13,7 +13,7 @@ from hpolib.abstract_benchmark import AbstractBenchmark
 from hpolib.container.client_abstract_benchmark import AbstractBenchmarkClient
 from pebble import concurrent
 
-from HPOlibExperimentUtils import MAXINT
+from HPOlibExperimentUtils.utils import MAXINT
 
 
 def _safe_cast_config(configuration):

@@ -7,8 +7,8 @@ from typing import Union, Dict
 from hpolib.util.container_utils import enable_container_debug
 from hpolib.util.example_utils import set_env_variables_to_use_only_one_core
 
-from HPOlibExperimentUtils import PING_OPTIMIZER_IN_S
 from HPOlibExperimentUtils.core.bookkeeper import Bookkeeper
+from HPOlibExperimentUtils.utils import PING_OPTIMIZER_IN_S
 from HPOlibExperimentUtils.utils.optimizer_utils import get_optimizer
 from HPOlibExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_benchmark_settings, \
     OptimizerEnum, optimizer_str_to_enum, load_benchmark, get_benchmark_names, get_optimizer_settings_names, \
@@ -70,6 +70,7 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
 
     optimizer_settings = get_optimizer_setting(optimizer)
     benchmark_settings = get_benchmark_settings(benchmark)
+    settings = dict(benchmark_settings, **optimizer_settings)
     logger.debug(f'Settings loaded')
 
     optimizer_enum = optimizer_str_to_enum(optimizer)
@@ -80,8 +81,8 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
     logger.debug(f'Output dir: {output_dir}')
 
     # Load and instantiate the benchmark
-    benchmark_obj = load_benchmark(benchmark_name=benchmark_settings['import_benchmark'],
-                                   import_from=benchmark_settings['import_from'],
+    benchmark_obj = load_benchmark(benchmark_name=settings['import_benchmark'],
+                                   import_from=settings['import_from'],
                                    use_local=use_local)
 
     if use_local:
@@ -99,15 +100,15 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
     benchmark = Bookkeeper(benchmark,
                            output_dir,
                            total_time_proxy,
-                           wall_clock_limit_in_s=benchmark_settings['time_limit_in_s'],
-                           cutoff_limit_in_s=benchmark_settings['cutoff_in_s'],
-                           is_surrogate=benchmark_settings['is_surrogate'])
+                           wall_clock_limit_in_s=settings['time_limit_in_s'],
+                           cutoff_limit_in_s=settings['cutoff_in_s'],
+                           is_surrogate=settings['is_surrogate'])
 
     logger.debug(f'Benchmark initialized. Additional benchmark parameters {benchmark_params}')
 
     optimizer = get_optimizer(optimizer_enum)
     optimizer = optimizer(benchmark=benchmark,
-                          settings=benchmark_settings,
+                          settings=settings,
                           output_dir=output_dir, rng=rng)
     logger.debug(f'Optimizer initialized')
 
@@ -116,8 +117,8 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
     process.start()
 
     # Wait for the optimizer to finish. But in case the optimizer crashes somehow, also test for the real time here.
-    while benchmark_settings['time_limit_in_s'] >= benchmark.get_total_time_used() \
-            and benchmark_settings['time_limit_in_s'] >= (time() - start_time) \
+    while settings['time_limit_in_s'] >= benchmark.get_total_time_used() \
+            and settings['time_limit_in_s'] >= (time() - start_time) \
             and process.is_alive():
         sleep(PING_OPTIMIZER_IN_S)
     else:
