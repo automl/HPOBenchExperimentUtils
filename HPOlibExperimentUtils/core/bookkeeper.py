@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 from concurrent.futures import TimeoutError
 from functools import wraps
@@ -15,6 +16,7 @@ from pebble import concurrent
 
 from HPOlibExperimentUtils.utils import MAXINT
 
+logger = logging.getLogger('Bookkeeper')
 
 def _safe_cast_config(configuration):
     if isinstance(configuration, CS.Configuration):
@@ -30,6 +32,8 @@ def keep_track(validate=False):
         def wrapped(self, configuration: Union[np.ndarray, List, CS.Configuration, Dict],
                     fidelity: Union[CS.Configuration, Dict, None] = None,
                     rng: Union[np.random.RandomState, int, None] = None, **kwargs):
+
+            self.function_calls += 1
             start_time = time()
             result_dict = function(self, configuration, fidelity, rng, **kwargs)
             finish_time = time()
@@ -50,6 +54,7 @@ def keep_track(validate=False):
             # In case of a surrogate benchmark also take the "surrogate" costs into account.
             total_time_used = time() - self.boot_time
             if self.is_surrogate:
+                total_time_used -= (finish_time - start_time)
                 total_time_used += self.total_objective_costs
 
             # Time used for this configuration. The benchamrk returns as cost the time of the function call +
@@ -61,7 +66,7 @@ def keep_track(validate=False):
             # Note: We update the proxy variable after checking the conditions here.
             #       This is because, we want to make sure, that this process is not be killed from outside
             #       before it was able to write the current result into the result file.
-            if total_time_used <= self.wall_clock_limit_in_s \
+            if (self.wall_clock_limit_in_s is None or total_time_used <= self.wall_clock_limit_in_s) \
                     and time_for_evaluation <= self.cutoff_limit_in_s:
                 configuration = _safe_cast_config(configuration)
                 fidelity = _safe_cast_config(fidelity)
@@ -72,12 +77,17 @@ def keep_track(validate=False):
                           'fidelity': fidelity,
                           'cost': result_dict['cost'],
                           'configuration': configuration,
-                          'info': result_dict['info']
+                          'info': result_dict['info'],
+                          'function_call': self.function_calls,
+                          'total_time_used': total_time_used,
+                          'total_objective_costs': self.total_objective_costs
                           }
 
                 log_file = self.log_file if not validate else self.validate_log_file
                 self.write_line_to_file(log_file, record)
-                self.calculate_incumbent(record)
+
+                if not validate:
+                    self.calculate_incumbent(record)
 
             self.set_total_time_used(total_time_used)
             return result_dict
@@ -90,7 +100,7 @@ class Bookkeeper:
     def __init__(self, benchmark: Union[AbstractBenchmark, AbstractBenchmarkClient],
                  output_dir: Path,
                  total_time_proxy: Any,
-                 wall_clock_limit_in_s: Union[int, float],
+                 wall_clock_limit_in_s: Union[int, float, None],
                  cutoff_limit_in_s: Union[int, float],
                  is_surrogate: bool,
                  validate: bool = False):
@@ -118,6 +128,10 @@ class Bookkeeper:
         if not validate:
             self.write_line_to_file(self.log_file, {'boot_time': self.boot_time}, mode='w')
             self.write_line_to_file(self.trajectory, {'boot_time': self.boot_time}, mode='w')
+        else:
+            if self.validate_log_file.exists():
+                logger.warning(f'The validation log file already exists. The results will be appended.')
+            self.write_line_to_file(self.validate_log_file, {'boot_time': self.boot_time}, mode='a+')
 
         self.function_calls = 0
 
@@ -128,10 +142,9 @@ class Bookkeeper:
 
         @concurrent.process(timeout=self.cutoff_limit_in_s)
         def __objective_function(configuration, fidelity, **benchmark_settings_for_sending):
-            result_dict = self.benchmark.objective_function(configuration=configuration,
-                                                            fidelity=fidelity,
-                                                            **benchmark_settings_for_sending)
-            return result_dict
+            return self.benchmark.objective_function(configuration=configuration,
+                                                     fidelity=fidelity,
+                                                     **benchmark_settings_for_sending)
 
         result_dict = __objective_function(configuration=configuration,
                                            fidelity=fidelity,
@@ -146,10 +159,9 @@ class Bookkeeper:
 
         @concurrent.process(timeout=self.cutoff_limit_in_s)
         def __objective_function_test(configuration, fidelity, **benchmark_settings_for_sending):
-            result_dict = self.benchmark.objective_function(configuration=configuration,
-                                                            fidelity=fidelity,
-                                                            **benchmark_settings_for_sending)
-            return result_dict
+            return self.benchmark.objective_function_test(configuration=configuration,
+                                                          fidelity=fidelity,
+                                                          **benchmark_settings_for_sending)
 
         result_dict = __objective_function_test(configuration=configuration,
                                                 fidelity=fidelity,
@@ -175,7 +187,7 @@ class Bookkeeper:
             return self.total_time_proxy.value
 
     @staticmethod
-    def write_line_to_file(file, dict_to_store, mode='a'):
+    def write_line_to_file(file, dict_to_store, mode='a+'):
         with file.open(mode) as fh:
             json.dump(dict_to_store, fh)
             fh.write(os.linesep)

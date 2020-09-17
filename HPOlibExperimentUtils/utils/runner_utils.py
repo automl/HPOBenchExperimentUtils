@@ -104,9 +104,9 @@ def get_optimizer_setting(optimizer_setting_str: str) -> Dict:
     return optimizer_settings[optimizer_setting_str]
 
 
-def load_experiment_settings() -> Dict:
+def load_benchmark_settings() -> Dict:
     """ Load the experiment settings from file """
-    experiment_settings_path = Path(__file__).absolute().parent.parent / 'experiment_settings.json'
+    experiment_settings_path = Path(__file__).absolute().parent.parent / 'benchmark_settings.yaml'
 
     with experiment_settings_path.open('r') as fh:
         experiment_settings = yaml.load(fh, yaml.FullLoader)
@@ -115,7 +115,7 @@ def load_experiment_settings() -> Dict:
 
 def get_benchmark_names():
     """ Get the names for the supported benchmarks. """
-    experiment_settings = load_experiment_settings()
+    experiment_settings = load_benchmark_settings()
     return list(experiment_settings.keys())
 
 
@@ -135,7 +135,7 @@ def get_benchmark_settings(benchmark: str) -> Dict:
     -------
         Tuple[Dict, Dict] - optimizer settings, benchmark settings
     """
-    experiment_settings = load_experiment_settings()
+    experiment_settings = load_benchmark_settings()
     benchmark_names = get_benchmark_names()
 
     assert benchmark in benchmark_names,\

@@ -1,12 +1,14 @@
 import argparse
+import json
 import logging
-from collections import OrderedDict
+from multiprocessing import Value
 from pathlib import Path
 from typing import Union, Dict
 
 from hpolib.util.example_utils import set_env_variables_to_use_only_one_core
 
-from HPOlibExperimentUtils.utils.optimizer_utils import parse_fidelity_type, prepare_dict_for_sending
+from HPOlibExperimentUtils.core.bookkeeper import Bookkeeper
+from HPOlibExperimentUtils.utils.optimizer_utils import prepare_dict_for_sending
 from HPOlibExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_benchmark_settings, \
     load_benchmark, get_benchmark_names
 
@@ -26,11 +28,11 @@ def validate_benchmark(benchmark: str,
     to validate (run on the highest budget) the configurations, which were incumbents for some time during the
     optimization process.
 
-    Similar to run_benchmark(), only SMAC, BOHB and Dragonfly are available as Optimizer.
     The benchmarks are by default stored in singularity container which are downloaded at the first run.
 
-    The validation script automatically detects the used optimizer and reads in the trajectory files in the output
-    directory.
+    The validation script reads in the trajectory files in the output directory. As a note, the validation script reads
+    in all the trajectory files found in the given output path.
+    Then all configurations are validated and written via the bookkeeper into a runhistory file.
 
     Note:
     -----
@@ -64,72 +66,89 @@ def validate_benchmark(benchmark: str,
         Please take a look into the HPOlib3 Benchamarks to find out if the benchmark needs further parameter.
         Note: Most of them dont need further parameter.
     """
+    logger.info('Start validating procedure')
 
     output_dir = Path(output_dir)
 
     assert output_dir.is_dir(), f'Result folder doesn\"t exist: {output_dir}'
-    optimizer_settings, benchmark_settings = get_benchmark_settings(benchmark, rng=rng, output_dir=output_dir)
+
+    benchmark_settings = get_benchmark_settings(benchmark)
     benchmark_settings_for_sending = prepare_dict_for_sending(benchmark_settings)
 
     # First, try to load already extracted trajectory file
-    unvalidated_trajectory = list(output_dir.rglob(f'traj_hpolib.json'))
-    if len(unvalidated_trajectory) == 0:
-        unvalidated_trajectory = output_dir
-        already_extracted = False
-    elif len(unvalidated_trajectory) == 1:
-        unvalidated_trajectory = unvalidated_trajectory[0]
-        already_extracted = True
-    else:
-        # TODO: Support selecting multiple trajecotry files.
-        logger.warning('Found mulitple trajectory files in the directory. We select the first.')
-        unvalidated_trajectory = unvalidated_trajectory[0]
-        already_extracted = True
+    unvalidated_trajectories = list(output_dir.rglob(f'hpolib_trajectory.txt'))
+    assert len(unvalidated_trajectories) >= 1
 
-    # Check if it was a BOHB run. In this case we find a results.json file in the output directory.
-    bohb_run = len(list(unvalidated_trajectory.parent.glob('**/results.json'))) != 0
+    if len(unvalidated_trajectories) > 1:
+        logger.warning('More than one trajectory file found. Start to combine all found configurations')
 
-    logger.debug(f'Unvalidated Trajectory: {unvalidated_trajectory}\n'
-                 f'Already extracted {already_extracted} - Bohb run: {bohb_run}')
+    found_results = []
+    for unvalidated_trajectory in unvalidated_trajectories:
+        # Read in trajectory:
+        with unvalidated_trajectory.open('r') as fh:
+            lines = fh.readlines()
 
-    # TODO: Adapt to Dragonfly usage
-    # Instantiate the reader. This reader can parse the trajectory file from the optimization run.
-    reader = SMACReader() if already_extracted or not bohb_run else BOHBReader()
-    reader.read(file_path=unvalidated_trajectory)
-    reader.get_trajectory()
-    logger.debug(reader)
+        trajectory = [json.loads(line) for line in lines]
+        boot_time = trajectory[0]
+        trajectory = trajectory[1:]
+        found_results += trajectory
 
-    # Read in the configurations which where found in the trajectory file.
-    # In a later step, we want to validate those configurations. This means to run them again on the highest budget.
-    trajectory_ids = reader.get_configuration_ids_trajectory()
-    configurations_to_validate = \
-        OrderedDict({traj_id: reader.config_ids_to_configs[traj_id] for traj_id in trajectory_ids})
+    configurations = [entry['configuration'] for entry in found_results]
+    # config_to_config_id = {}
+    # config_id_to_config = {}
+    # counter = 0
+    # for config in configurations:
+    #     if str(config) not in config_to_config_id:
+    #         config_to_config_id[str(config)] = counter
+    #         config_id_to_config[counter] = str(config)
+    #         counter += 1
 
-    validated_loss = OrderedDict({traj_id: -1234 for traj_id in trajectory_ids})
+    configurations_to_validate = {str(configuration): -1234 for configuration in configurations}
 
     # Load and instantiate the benchmark
-    benchmark_obj = load_benchmark(benchmark_settings, use_local)
-    benchmark = benchmark_obj(container_source='library://phmueller/automl',
-                              **benchmark_params)
+    benchmark_obj = load_benchmark(benchmark_name=benchmark_settings['import_benchmark'],
+                                   import_from=benchmark_settings['import_from'],
+                                   use_local=use_local)
 
-    # Now, we start the validation process for every configuration.
-    # Note: This process may take a lot of time.
-    for i, traj_id in enumerate(configurations_to_validate):
-        config = configurations_to_validate[traj_id]
-        max_budget = optimizer_settings['max_budget']
-        cast_to = parse_fidelity_type(benchmark_settings['fidelity_type'])
-        fidelity = {benchmark_settings['fidelity_name']: cast_to(max_budget)}
-        logger.debug(f'Validate configuration: {config}\n'
-                     f'Max Budget: {max_budget} on fidelity: {benchmark_settings["fidelity_name"]}')
+    if use_local:
+        benchmark = benchmark_obj(rng=rng, **benchmark_params)
+    else:
+        from hpolib import config_file
+        container_source = config_file.container_source
+        benchmark = benchmark_obj(rng=rng, container_source=container_source, **benchmark_params)
 
-        result_dict = benchmark.objective_function_test(config, **fidelity, **benchmark_settings_for_sending)
-        validated_loss[traj_id] = result_dict['function_value']
-        logger.debug(f'Validated config [{i+1:5d}|{len(configurations_to_validate)}]: {validated_loss[traj_id]}')
+    total_time_proxy = Value('f', 0)
 
-    # We add the validated trajectory to the reader. The reader then can export it in the SMAC-like trajectory format.
-    reader.add_validated_trajectory(validated_loss)
-    traj_path = optimizer_settings['output_dir'] / f'traj_validated_hpolib.json'
+    # There is no reason why we want to have a wallclock time limit here.
+    # Only a cutoff time limit seems to be useful.
+    benchmark = Bookkeeper(benchmark,
+                           output_dir,
+                           total_time_proxy,
+                           wall_clock_limit_in_s=None,
+                           cutoff_limit_in_s=benchmark_settings['cutoff_in_s'],
+                           is_surrogate=benchmark_settings['is_surrogate'],
+                           validate=True)
 
-    reader.export_validated_trajectory(traj_path)
+    logger.debug(f'Benchmark initialized. Additional benchmark parameters {benchmark_params}')
+
+    for configuration in configurations:
+        config_str = str(configuration)
+        if configurations_to_validate[config_str] != -1234:
+            continue
+
+        # The bookkeeper writes the trajectory automatically in to a file. But this file then contains only
+        # a single entry per configuration. And the configurations are also not in the same order as the "original"
+        # trajectory.
+        # benchmark.objective_function_test(configuration, rng=rng)
+        result_dict = benchmark.objective_function_test(configuration, rng=rng)
+        configurations_to_validate[config_str] = result_dict['function_value']
+
+    # TODO: do something with the trajectory
+    # validated_trajectory = output_dir / 'hpolib_runhistory_validation.txt'
+    # with validated_trajectory.open('r') as fh:
+    #     lines = fh.readlines()
+    #     validated_results = [json.loads(line) for line in lines]
+    #     validated_results = [result for result in validated_results if 'boot_time' not in result]
 
 
 if __name__ == "__main__":

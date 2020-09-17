@@ -33,13 +33,8 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
 
     Parameters
     ----------
-    optimizer : str, OptimizerEnum
-        Either the OptimizerEnum object specifying the optimizer to take or a string representation of it.
-        Allowed choices are:
-        'BOHB',
-        'HYPERBAND', or  'HB',
-        'SUCCESSIVE_HALVING', or 'SH',
-        'DRAGONFLY' or 'DF'
+    optimizer : str
+        A string describing an optimizer with an setting. Those are defined in the optimizer_settings.yaml file
     benchmark : str
         This benchmark is selected from the HPOlib3 and executed. with the optimizer from above.
         Please have a look at the experiment_settings.json file to see what benchmarks are available.
@@ -118,7 +113,7 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
 
     # Wait for the optimizer to finish. But in case the optimizer crashes somehow, also test for the real time here.
     while settings['time_limit_in_s'] >= benchmark.get_total_time_used() \
-            and settings['time_limit_in_s'] >= (time() - start_time) \
+            and settings['time_limit_in_s'] >= (time() - start_time - 60) \
             and process.is_alive():
         sleep(PING_OPTIMIZER_IN_S)
     else:

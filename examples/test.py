@@ -6,13 +6,13 @@ from hpolib.benchmarks.ml.xgboost_benchmark import XGBoostBenchmark
 from hpolib.util.openml_data_manager import get_openmlcc18_taskids
 
 from HPOlibExperimentUtils.optimizer.bohb_optimizer import BOHBOptimizer
-from HPOlibExperimentUtils.utils.runner_utils import get_setting_per_benchmark, OptimizerEnum
+from HPOlibExperimentUtils.utils.runner_utils import get_benchmark_settings, OptimizerEnum
 
 task_id = get_openmlcc18_taskids()[0]
 output_path = Path('./test')
 
 benchmark = XGBoostBenchmark(task_id=task_id)
-optimizer_settings, benchmark_settings = get_setting_per_benchmark(benchmark='xgboost', rng=0, output_dir=output_path)
+optimizer_settings, benchmark_settings = get_benchmark_settings(benchmark='xgboost', rng=0, output_dir=output_path)
 
 optimizer = BOHBOptimizer(benchmark=benchmark,
                           optimizer_settings=optimizer_settings,

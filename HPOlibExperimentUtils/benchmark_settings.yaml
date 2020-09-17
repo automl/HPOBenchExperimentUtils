@@ -1,4 +1,5 @@
 ---
+
 cartpolereduced:
   time_limit_in_s: 4000
   cutoff_in_s: 1800
@@ -12,7 +13,7 @@ cartpolefull:
   mem_limit_in_mb: 8000
   import_from: rl.cartpole
   import_benchmark: CartpoleFull
-  
+
 xgboost:
   time_limit_in_s: 4000
   cutoff_in_s: 1800
@@ -21,7 +22,7 @@ xgboost:
   import_benchmark: XGBoostBenchmark
   main_fidelity: subsample
   is_surrogate: true
-  
+
 learna:
   time_limit_in_s: 172800
   cutoff_in_s: 40000
@@ -42,7 +43,7 @@ NASCifar10ABenchmark:
   mem_limit_in_mb: 16000
   import_from: nas.nasbench_101
   import_benchmark: NASCifar10ABenchmark
-  is_surrogate:  true
+  is_surrogate: true
 
 NASCifar10BBenchmark:
   time_limit_in_s: 4000
@@ -50,46 +51,46 @@ NASCifar10BBenchmark:
   mem_limit_in_mb: 16000
   import_from: nas.nasbench_101
   import_benchmark: NASCifar10BBenchmark
-  is_surrogate:  true
+  is_surrogate: true
 
 NASCifar10CBenchmark:
   time_limit_in_s: 4000
   cutoff_in_s: 1800
-  mem_limit_in_mb: 16000,
+  mem_limit_in_mb: 16000
   import_from: nas.nasbench_101
   import_benchmark: NASCifar10CBenchmark
-  is_surrogate:  true},
+  is_surrogate: true
 
 SliceLocalizationBenchmark:
   time_limit_in_s: 4000
   cutoff_in_s: 1800
-  mem_limit_in_mb: 16000,
+  mem_limit_in_mb: 16000
   import_from: nas.tabular_benchmarks
   import_benchmark: SliceLocalizationBenchmark
-  is_surrogate:  true
+  is_surrogate: true
 
 ProteinStructureBenchmark:
   time_limit_in_s: 4000
   cutoff_in_s: 1800
-  mem_limit_in_mb: 16000,
-   import_from: nas.tabular_benchmarks
+  mem_limit_in_mb: 16000
+  import_from: nas.tabular_benchmarks
   import_benchmark: ProteinStructureBenchmark
-  is_surrogate:  true
+  is_surrogate: true
 
 NavalPropulsionBenchmark:
   time_limit_in_s: 4000
   cutoff_in_s: 1800
-  mem_limit_in_mb: 16000,
+  mem_limit_in_mb: 16000
   import_from: nas.tabular_benchmarks
   import_benchmark: NavalPropulsionBenchmark
-  is_surrogate:  true
+  is_surrogate: true
 
 ParkinsonsTelemonitoringBenchmark:
   time_limit_in_s: 4000
   cutoff_in_s: 1800
-  mem_limit_in_mb: 16000,
-   import_from: nas.tabular_benchmarks
+  mem_limit_in_mb: 16000
+  import_from: nas.tabular_benchmarks
   import_benchmark: ParkinsonsTelemonitoringBenchmark
-  is_surrogate:  true
+  is_surrogate: true
 
 ...

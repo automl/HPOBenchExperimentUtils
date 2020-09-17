@@ -1,78 +1,73 @@
 ---
 # SMAC SUCCESSIVE HALVING ############################################################################################ #
-smac_hb_eta_1_num_it_10:
+smac_hb_eta_1:
   optimizer: hb
   eta: 1
-  num_iterations: 10
+  num_iterations: 1000
 
 # learna | metalearna
-smac_hb_eta_2_num_it_3:
+smac_hb_eta_2_learna:
   optimizer: hb
   eta: 2
   num_iterations: 3
 
-smac_hb_eta_2_num_it_10:
+smac_hb_eta_2:
   optimizer: hb
   eta: 2
-  num_iterations: 10
+  num_iterations: 1000
 
 # xgboost | cartpolereduced| cartpolefull | NASCifar10ABenchmark | NASCifar10BBenchmark | NASCifar10CBenchmark
 # SliceLocalizationBenchmark | ProteinStructureBenchmark | NavalPropulsionBenchmark | ParkinsonsTelemonitoringBenchmark
-smac_hb_eta_3_num_it_10:
+smac_hb_eta_3:
   optimizer: hb
   eta: 3
-  num_iterations: 10
+  num_iterations: 1000
 
 # SMAC HYPERBAND ##################################################################################################### #
-smac_sh_eta_1_num_it_10:
+smac_sh_eta_1:
   optimizer: hb
   eta: 1
-  num_iterations: 10
+  num_iterations: 1000
 
 # learna | metalearna
-smac_sh_eta_2_num_it_3:
+smac_sh_eta_2_learna:
   optimizer: sh
   eta: 2
   num_iterations: 3
 
-smac_sh_eta_2_num_it_10:
+smac_sh_eta_2:
   optimizer: sh
   eta: 2
-  num_iterations: 10
+  num_iterations: 1000
 
 # xgboost | cartpolereduced| cartpolefull | NASCifar10ABenchmark | NASCifar10BBenchmark | NASCifar10CBenchmark
 # SliceLocalizationBenchmark | ProteinStructureBenchmark | NavalPropulsionBenchmark | ParkinsonsTelemonitoringBenchmark
-smac_sh_eta_3_num_it_10:
+smac_sh_eta_3:
   optimizer: hb
   eta: 3
-  num_iterations: 10
+  num_iterations: 1000
 
 # BOHB ############################################################################################################### #
-bohb_eta_1_num_it_10:
-  optimizer: bohb
-  eta: 1
-  num_iterations: 10
-
 # learna | metalearna
-bohb_eta_2_num_it_3:
+bohb_eta_2_learna:
   optimizer: bohb
   eta: 2
   num_iterations: 3
 
-bohb_eta_2_num_it_10:
+bohb_eta_2:
   optimizer: bohb
   eta: 2
-  num_iterations: 10
+  num_iterations: 1000
 
-bohb_eta_3_num_it_1:
+bohb_eta_3_test:
   optimizer: bohb
   eta: 3
   num_iterations: 1
 
 # xgboost | cartpolereduced| cartpolefull | NASCifar10ABenchmark | NASCifar10BBenchmark | NASCifar10CBenchmark
 # SliceLocalizationBenchmark | ProteinStructureBenchmark | NavalPropulsionBenchmark | ParkinsonsTelemonitoringBenchmark
-bohb_eta_3_num_it_10:
+bohb_eta_3:
   optimizer: bohb
   eta: 3
-  num_iterations: 10
+  num_iterations: 1000
 ...
