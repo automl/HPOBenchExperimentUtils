@@ -3,7 +3,7 @@
 smac_hb_eta_1:
   optimizer: hb
   eta: 1
-  num_iterations: 1000
+  num_iterations: 100000
 
 # learna | metalearna
 smac_hb_eta_2_learna:
@@ -14,20 +14,20 @@ smac_hb_eta_2_learna:
 smac_hb_eta_2:
   optimizer: hb
   eta: 2
-  num_iterations: 1000
+  num_iterations: 100000
 
 # xgboost | cartpolereduced| cartpolefull | NASCifar10ABenchmark | NASCifar10BBenchmark | NASCifar10CBenchmark
 # SliceLocalizationBenchmark | ProteinStructureBenchmark | NavalPropulsionBenchmark | ParkinsonsTelemonitoringBenchmark
 smac_hb_eta_3:
   optimizer: hb
   eta: 3
-  num_iterations: 1000
+  num_iterations: 100000
 
 # SMAC HYPERBAND ##################################################################################################### #
 smac_sh_eta_1:
   optimizer: hb
   eta: 1
-  num_iterations: 1000
+  num_iterations: 100000
 
 # learna | metalearna
 smac_sh_eta_2_learna:
@@ -38,14 +38,14 @@ smac_sh_eta_2_learna:
 smac_sh_eta_2:
   optimizer: sh
   eta: 2
-  num_iterations: 1000
+  num_iterations: 100000
 
 # xgboost | cartpolereduced| cartpolefull | NASCifar10ABenchmark | NASCifar10BBenchmark | NASCifar10CBenchmark
 # SliceLocalizationBenchmark | ProteinStructureBenchmark | NavalPropulsionBenchmark | ParkinsonsTelemonitoringBenchmark
 smac_sh_eta_3:
   optimizer: hb
   eta: 3
-  num_iterations: 1000
+  num_iterations: 100000
 
 # BOHB ############################################################################################################### #
 # learna | metalearna
@@ -57,7 +57,7 @@ bohb_eta_2_learna:
 bohb_eta_2:
   optimizer: bohb
   eta: 2
-  num_iterations: 1000
+  num_iterations: 100000
 
 bohb_eta_3_test:
   optimizer: bohb
@@ -69,5 +69,5 @@ bohb_eta_3_test:
 bohb_eta_3:
   optimizer: bohb
   eta: 3
-  num_iterations: 1000
+  num_iterations: 100000
 ...

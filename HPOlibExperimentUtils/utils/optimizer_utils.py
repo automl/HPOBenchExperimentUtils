@@ -4,7 +4,7 @@ from typing import Union, Optional, Any, Dict
 
 import numpy as np
 
-from HPOlibExperimentUtils import OptimizerEnum
+from HPOlibExperimentUtils.utils.runner_utils import OptimizerEnum
 
 logger = logging.getLogger('Optimizer Utils')
 

@@ -14,11 +14,11 @@ from HPOlibExperimentUtils.utils.runner_utils import transform_unknown_params_to
     OptimizerEnum, optimizer_str_to_enum, load_benchmark, get_benchmark_names, get_optimizer_settings_names, \
     get_optimizer_setting
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('BenchmarkRunner')
 
 set_env_variables_to_use_only_one_core()
-enable_container_debug()
+# enable_container_debug()
 
 
 def run_benchmark(optimizer: Union[OptimizerEnum, str],
@@ -71,7 +71,7 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
     optimizer_enum = optimizer_str_to_enum(optimizer)
     logger.debug(f'Optimizer: {optimizer_enum}')
 
-    output_dir = Path(output_dir) / f'{str(optimizer_enum)}-run-{rng}'
+    output_dir = Path(output_dir) / f'{optimizer}-run-{rng}'
     output_dir.mkdir(exist_ok=True, parents=True)
     logger.debug(f'Output dir: {output_dir}')
 

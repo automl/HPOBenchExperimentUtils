@@ -16,9 +16,9 @@ from HPOlibExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimiz
 from HPOlibExperimentUtils.utils.optimizer_utils import get_number_ta_runs
 
 logger = logging.getLogger('Optimizer')
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 root_logger = logging.getLogger()
-root_logger.setLevel(logging.DEBUG)
+# root_logger.setLevel(logging.DEBUG)
 
 
 class SMACOptimizer(SingleFidelityOptimizer):
