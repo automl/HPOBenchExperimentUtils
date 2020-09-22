@@ -1,12 +1,12 @@
 import logging
 import pickle
 from pathlib import Path
-from typing import Dict, Any, Union
+from typing import Dict, Any, Union, Type
 
 import ConfigSpace as CS
 from hpbandster.core import result as hpres, nameserver as hpns
 from hpbandster.core.worker import Worker
-from hpbandster.optimizers import BOHB
+from hpbandster.optimizers import BOHB, HyperBand, RandomSearch, H2BO
 from hpolib.abstract_benchmark import AbstractBenchmark
 from hpolib.container.client_abstract_benchmark import AbstractBenchmarkClient
 
@@ -16,16 +16,18 @@ from HPOlibExperimentUtils.utils.utils import get_main_fidelity
 logger = logging.getLogger('Optimizer')
 
 
-class BOHBOptimizer(SingleFidelityOptimizer):
+class HpBandSterBaseOptimizer(SingleFidelityOptimizer):
     """
     This class offers an interface to the BOHB Optimizer. It runs on a given benchmark.
     All benchmark and optimizer specific information are stored in the dictionaries benchmark_settings and
     optimizer_settings.
     """
     def __init__(self, benchmark: Union[AbstractBenchmark, AbstractBenchmarkClient],
+                 intensifier: Union[Type[BOHB], Type[HyperBand], Type[H2BO], Type[RandomSearch]],
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
         super().__init__(benchmark, settings, output_dir, rng)
         self.run_id = f'BOHB_optimization_seed_{self.rng}'
+        self.intensifier = intensifier
 
     def setup(self):
         pass
@@ -49,34 +51,20 @@ class BOHBOptimizer(SingleFidelityOptimizer):
 
         worker.run(background=True)
 
-        master = BOHB(configspace=self.cs,
-                      run_id=self.run_id,
-                      host=ns_host,
-                      nameserver=ns_host,
-                      nameserver_port=ns_port,
-                      eta=self.settings['eta'],
-                      min_budget=self.min_budget,
-                      max_budget=self.max_budget,
-                      result_logger=result_logger)
+        master = self.intensifier(configspace=self.cs,
+                                  run_id=self.run_id,
+                                  host=ns_host,
+                                  nameserver=ns_host,
+                                  nameserver_port=ns_port,
+                                  eta=self.settings['eta'],
+                                  min_budget=self.min_budget,
+                                  max_budget=self.max_budget,
+                                  result_logger=result_logger)
 
         result = master.run(n_iterations=self.settings['num_iterations'])
         with open(self.output_dir / 'results.pkl', 'wb') as fh:
             pickle.dump(result, fh)
 
-        # def run_bohb(output_dir):
-        #     result = master.run(n_iterations=self.settings['num_iterations'])
-        #     with open(output_dir / 'results.pkl', 'wb') as fh:
-        #         pickle.dump(result, fh)
-        #
-        # start_time = time()
-        # process = Process(target=run_bohb(output_dir=self.output_dir), args=(), kwargs=dict())
-        # process.start()
-        #
-        # # Check if global time limit is reached or process is not alive anymore
-        # while time() - start_time < self.settings['time_limit_in_s'] and process.is_alive():
-        #     sleep(0.25)
-        # else:
-        #     print(f'finished after {time() - start_time}')
         master.shutdown(shutdown_workers=True)
         ns.shutdown()
 
@@ -95,8 +83,34 @@ class BOHBOptimizer(SingleFidelityOptimizer):
         #     inc_cfg = id2config[incumbent]['config']
         # logger.info(f'Inc Config:\n{inc_cfg}\n with Performance: {inc_value:.2f}')
 
-        # Since BOHB and SMAC write the output to different directories, return it here.
-        # return self.output_dir
+
+class HpBandSterBOHBOptimizer(HpBandSterBaseOptimizer):
+    def __init__(self, benchmark: Union[AbstractBenchmark, AbstractBenchmarkClient],
+                 settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
+        super(HpBandSterBOHBOptimizer, self).__init__(benchmark=benchmark, intensifier=BOHB, settings=settings,
+
+                                                      output_dir=output_dir, rng=rng)
+
+
+class HpBandSterRandomSearchOptimizer(HpBandSterBaseOptimizer):
+    def __init__(self, benchmark: Union[AbstractBenchmark, AbstractBenchmarkClient],
+                 settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
+        super(HpBandSterRandomSearchOptimizer, self).__init__(benchmark=benchmark, intensifier=RandomSearch,
+                                                              settings=settings, output_dir=output_dir, rng=rng)
+
+
+class HpBandSterHyperBandOptimizer(HpBandSterBaseOptimizer):
+    def __init__(self, benchmark: Union[AbstractBenchmark, AbstractBenchmarkClient],
+                 settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
+        super(HpBandSterHyperBandOptimizer, self).__init__(benchmark=benchmark, intensifier=HyperBand,
+                                                           settings=settings, output_dir=output_dir, rng=rng)
+
+
+class HpBandSterH2BOOptimizer(HpBandSterBaseOptimizer):
+    def __init__(self, benchmark: Union[AbstractBenchmark, AbstractBenchmarkClient],
+                 settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
+        super(HpBandSterH2BOOptimizer, self).__init__(benchmark=benchmark, intensifier=H2BO,
+                                                      settings=settings, output_dir=output_dir, rng=rng)
 
 
 class CustomWorker(Worker):

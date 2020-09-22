@@ -203,3 +203,6 @@ class Bookkeeper:
             self.inc_budget = fidelity
 
             self.write_line_to_file(self.trajectory, record, mode='a')
+
+    def __del__(self):
+        self.benchmark.__del__()

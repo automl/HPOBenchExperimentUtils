@@ -1,56 +1,11 @@
 import logging
-from enum import Enum
 from importlib import import_module
 from pathlib import Path
-from typing import List, Union, Dict, Any
+from typing import List, Dict, Any
 
 import yaml
 
 logger = logging.getLogger('Runner Utils')
-
-
-class OptimizerEnum(Enum):
-    """ Enumeration type for the supported optimizers """
-    def __str__(self):
-        return str(self.value)
-
-    BOHB = 'bohb'
-    HYPERBAND = 'hyperband'
-    SUCCESSIVE_HALVING = 'successive_halving'
-    DRAGONFLY = 'dragonfly'
-
-
-def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]) -> OptimizerEnum:
-    """
-    Maps a name as string or enumeration typ of an optimizer to the enumeration object.
-
-    Parameters
-    ----------
-    optimizer : Union[OptimizerEnum, str]
-        If the type is 'str': return the optimizer-enumeration object.
-        But if it is already the optimizer enumeration, just return the type again.
-
-    Returns
-    -------
-        OptimizerEnum
-    """
-    if isinstance(optimizer, OptimizerEnum):
-        return optimizer
-
-    if isinstance(optimizer, str):
-        if 'bohb' in optimizer:
-            return OptimizerEnum.BOHB
-        elif 'hyperband' in optimizer or 'hb' in optimizer:
-            return OptimizerEnum.HYPERBAND
-        elif 'successive_halving' in optimizer or 'sh' in optimizer:
-            return OptimizerEnum.SUCCESSIVE_HALVING
-        elif 'dragonfly' in optimizer or 'df' == optimizer:
-            return OptimizerEnum.DRAGONFLY
-        else:
-            raise ValueError(f'Unknown optimizer str. Must be one of {get_optimizer_settings_names()},'
-                             f' but was {optimizer}')
-    else:
-        raise TypeError(f'Unknown optimizer type. Must be one of str|OptimizerEnum, but was {type(optimizer)}')
 
 
 def transform_unknown_params_to_dict(unknown_args: List) -> Dict:

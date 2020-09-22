@@ -94,6 +94,9 @@ def validate_benchmark(benchmark: str,
         found_results += trajectory
 
     configurations = [entry['configuration'] for entry in found_results]
+
+    # TODO: This mapping is not needed atm. But maybe if we want to create a trajectory according to the unvalidated
+    #  configurations, a mapping from config to config id (position in the trajectory) might be useful.
     # config_to_config_id = {}
     # config_id_to_config = {}
     # counter = 0
@@ -131,7 +134,9 @@ def validate_benchmark(benchmark: str,
 
     logger.debug(f'Benchmark initialized. Additional benchmark parameters {benchmark_params}')
 
-    for configuration in configurations:
+    logger.info(f'Going to validate {len(configurations)} configuration')
+    for i_config, configuration in enumerate(configurations):
+        logger.debug(f'[{i_config + 1:4d}|{len(configurations):4d}] Evaluate configuration')
         config_str = str(configuration)
         if configurations_to_validate[config_str] != -1234:
             continue
@@ -149,6 +154,8 @@ def validate_benchmark(benchmark: str,
     #     lines = fh.readlines()
     #     validated_results = [json.loads(line) for line in lines]
     #     validated_results = [result for result in validated_results if 'boot_time' not in result]
+    benchmark.__del__()
+    return 1
 
 
 if __name__ == "__main__":

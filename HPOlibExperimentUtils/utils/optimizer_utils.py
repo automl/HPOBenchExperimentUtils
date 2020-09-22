@@ -1,10 +1,11 @@
 import json
 import logging
+from enum import Enum
 from typing import Union, Optional, Any, Dict
 
 import numpy as np
 
-from HPOlibExperimentUtils.utils.runner_utils import OptimizerEnum
+from HPOlibExperimentUtils.utils.runner_utils import get_optimizer_settings_names
 
 logger = logging.getLogger('Optimizer Utils')
 
@@ -89,20 +90,99 @@ def prepare_dict_for_sending(benchmark_settings: Dict):
     return benchmark_dict_for_sending
 
 
+class OptimizerEnum(Enum):
+    """ Enumeration type for the supported optimizers """
+    def __str__(self):
+        return str(self.value)
+
+    HPBANDSTER_HB = 'hpbandster_hyperband'
+    HPBANDSTER_H2BO = 'hpbandster_h2bo'
+    HPBANDSTER_RS = 'hpbandster_randomsearch'
+    HPBANDSTER_BOHB = 'hpbandster_bohb'
+    SMAC_HYPERBAND = 'smac_hyperband'
+    SMAC_SUCCESSIVE_HALVING = 'smac_successive_halving'
+    DRAGONFLY = 'dragonfly'
+
+
+def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]) -> OptimizerEnum:
+    """
+    Maps a name as string or enumeration typ of an optimizer to the enumeration object.
+
+    Parameters
+    ----------
+    optimizer : Union[OptimizerEnum, str]
+        If the type is 'str': return the optimizer-enumeration object.
+        But if it is already the optimizer enumeration, just return the type again.
+
+    Returns
+    -------
+        OptimizerEnum
+    """
+    if isinstance(optimizer, OptimizerEnum):
+        return optimizer
+
+    fail = False
+    if isinstance(optimizer, str):
+        if 'hpbandster' in optimizer:
+            if 'bohb' in optimizer:
+                return OptimizerEnum.HPBANDSTER_BOHB
+            elif 'hyperband' in optimizer or 'hb' in optimizer:
+                return OptimizerEnum.HPBANDSTER_HB
+            elif 'randomsearch' in optimizer or 'rs' in optimizer:
+                return OptimizerEnum.HPBANDSTER_RS
+            elif 'h2bo' in optimizer:
+                return OptimizerEnum.HPBANDSTER_H2BO
+            else:
+                fail = True
+
+        elif 'smac' in optimizer:
+            if 'hyperband' in optimizer or 'hb' in optimizer:
+                return OptimizerEnum.HYPERBAND
+            elif 'successive_halving' in optimizer or 'sh' in optimizer:
+                return OptimizerEnum.SUCCESSIVE_HALVING
+            else:
+                fail = True
+
+        elif 'dragonfly' in optimizer or 'df' == optimizer:
+            return OptimizerEnum.DRAGONFLY
+
+        else:
+            fail = True
+    else:
+        raise TypeError(f'Unknown optimizer type. Must be one of str|OptimizerEnum, but was {type(optimizer)}')
+
+    if fail:
+        raise ValueError(f'Unknown optimizer str. Must be one of {get_optimizer_settings_names()},'
+                         f' but was {optimizer}')
+
+
+
 def get_optimizer(optimizer_enum):
 
-    if optimizer_enum is OptimizerEnum.BOHB:
-        from HPOlibExperimentUtils.optimizer.bohb_optimizer import BOHBOptimizer
-        optimizer = BOHBOptimizer
+    if optimizer_enum is OptimizerEnum.HPBANDSTER_BOHB:
+        from HPOlibExperimentUtils.optimizer.bohb_optimizer import HpBandSterBOHBOptimizer
+        optimizer = HpBandSterBOHBOptimizer
+    elif optimizer_enum is OptimizerEnum.HPBANDSTER_RS:
+        from HPOlibExperimentUtils.optimizer.bohb_optimizer import HpBandSterRandomSearchOptimizer
+        optimizer = HpBandSterRandomSearchOptimizer
+    elif optimizer_enum is OptimizerEnum.HPBANDSTER_HB:
+        from HPOlibExperimentUtils.optimizer.bohb_optimizer import HpBandSterHyperBandOptimizer
+        optimizer = HpBandSterHyperBandOptimizer
+    elif optimizer_enum is OptimizerEnum.HPBANDSTER_H2BO:
+        from HPOlibExperimentUtils.optimizer.bohb_optimizer import HpBandSterH2BOOptimizer
+        optimizer = HpBandSterH2BOOptimizer
+
     elif optimizer_enum is OptimizerEnum.DRAGONFLY:
         from HPOlibExperimentUtils.optimizer.dragonfly_optimizer import DragonflyOptimizer
         optimizer = DragonflyOptimizer
-    elif optimizer_enum is OptimizerEnum.HYPERBAND:
+
+    elif optimizer_enum is OptimizerEnum.SMAC_HYPERBAND:
         from HPOlibExperimentUtils.optimizer.smac_optimizer import SMACOptimizerHyperband
         optimizer = SMACOptimizerHyperband
-    elif optimizer_enum is OptimizerEnum.SUCCESSIVE_HALVING:
+    elif optimizer_enum is OptimizerEnum.SMAC_SUCCESSIVE_HALVING:
         from HPOlibExperimentUtils.optimizer.smac_optimizer import SMACOptimizerSuccessiveHalving
         optimizer = SMACOptimizerSuccessiveHalving
+
     else:
         raise ValueError(f'Unknown optimizer: {optimizer_enum}')
     return optimizer
