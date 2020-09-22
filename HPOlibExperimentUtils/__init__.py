@@ -1,3 +1,2 @@
 from HPOlibExperimentUtils.run_benchmark import run_benchmark
-from HPOlibExperimentUtils.utils.optimizer_utils import OptimizerEnum
 from HPOlibExperimentUtils.validate_benchmark import validate_benchmark
