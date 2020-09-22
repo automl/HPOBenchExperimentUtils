@@ -137,9 +137,9 @@ def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]) -> OptimizerEnum
 
         elif 'smac' in optimizer:
             if 'hyperband' in optimizer or 'hb' in optimizer:
-                return OptimizerEnum.HYPERBAND
+                return OptimizerEnum.SMAC_HYPERBAND
             elif 'successive_halving' in optimizer or 'sh' in optimizer:
-                return OptimizerEnum.SUCCESSIVE_HALVING
+                return OptimizerEnum.SMAC_SUCCESSIVE_HALVING
             else:
                 fail = True
 
