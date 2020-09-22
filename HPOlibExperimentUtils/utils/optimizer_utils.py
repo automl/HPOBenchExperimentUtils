@@ -90,15 +90,19 @@ def prepare_dict_for_sending(benchmark_settings: Dict):
 
 
 def get_optimizer(optimizer_enum):
+
     if optimizer_enum is OptimizerEnum.BOHB:
         from HPOlibExperimentUtils.optimizer.bohb_optimizer import BOHBOptimizer
         optimizer = BOHBOptimizer
     elif optimizer_enum is OptimizerEnum.DRAGONFLY:
         from HPOlibExperimentUtils.optimizer.dragonfly_optimizer import DragonflyOptimizer
         optimizer = DragonflyOptimizer
-    elif optimizer_enum is OptimizerEnum.HYPERBAND or optimizer_enum is OptimizerEnum.SUCCESSIVE_HALVING:
-        from HPOlibExperimentUtils.optimizer.smac_optimizer import SMACOptimizer
-        optimizer = SMACOptimizer
+    elif optimizer_enum is OptimizerEnum.HYPERBAND:
+        from HPOlibExperimentUtils.optimizer.smac_optimizer import SMACOptimizerHyperband
+        optimizer = SMACOptimizerHyperband
+    elif optimizer_enum is OptimizerEnum.SUCCESSIVE_HALVING:
+        from HPOlibExperimentUtils.optimizer.smac_optimizer import SMACOptimizerSuccessiveHalving
+        optimizer = SMACOptimizerSuccessiveHalving
     else:
         raise ValueError(f'Unknown optimizer: {optimizer_enum}')
     return optimizer

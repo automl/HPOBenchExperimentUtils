@@ -40,8 +40,8 @@ class SMACOptimizer(SingleFidelityOptimizer):
     def run(self):
         """ Start the optimization run with SMAC (HB or SH). """
         number_ta_runs = get_number_ta_runs(iterations=self.settings['num_iterations'],
-                                            min_budget=self.settings['min_budget'],
-                                            max_budget=self.settings['max_budget'],
+                                            min_budget=self.min_budget,
+                                            max_budget=self.max_budget,
                                             eta=self.settings['eta'])
 
         scenario_dict = {"run_obj": "quality",

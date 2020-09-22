@@ -36,17 +36,19 @@ def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]) -> OptimizerEnum
     """
     if isinstance(optimizer, OptimizerEnum):
         return optimizer
+
     if isinstance(optimizer, str):
-        if 'BOHB' in optimizer.upper():
+        if 'bohb' in optimizer:
             return OptimizerEnum.BOHB
-        elif 'HYPERBAND' in optimizer.upper() or 'HB' == optimizer.upper():
+        elif 'hyperband' in optimizer or 'hb' in optimizer:
             return OptimizerEnum.HYPERBAND
-        elif 'SUCCESSIVE_HALVING' in optimizer.upper() or 'SH' == optimizer.upper():
+        elif 'successive_halving' in optimizer or 'sh' in optimizer:
             return OptimizerEnum.SUCCESSIVE_HALVING
-        elif 'DRAGONFLY' in optimizer.upper() or 'DF' == optimizer.upper():
+        elif 'dragonfly' in optimizer or 'df' == optimizer:
             return OptimizerEnum.DRAGONFLY
         else:
-            raise ValueError(f'Unknown optimizer str. Must be one of BOHB|SMAC|DRAGONFLY, but was {optimizer}')
+            raise ValueError(f'Unknown optimizer str. Must be one of {get_optimizer_settings_names()},'
+                             f' but was {optimizer}')
     else:
         raise TypeError(f'Unknown optimizer type. Must be one of str|OptimizerEnum, but was {type(optimizer)}')
 
