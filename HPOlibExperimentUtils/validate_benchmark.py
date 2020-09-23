@@ -8,7 +8,6 @@ from typing import Union, Dict
 from hpolib.util.example_utils import set_env_variables_to_use_only_one_core
 
 from HPOlibExperimentUtils.core.bookkeeper import Bookkeeper
-from HPOlibExperimentUtils.utils.optimizer_utils import prepare_dict_for_sending
 from HPOlibExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_benchmark_settings, \
     load_benchmark, get_benchmark_names
 
@@ -66,14 +65,14 @@ def validate_benchmark(benchmark: str,
         Please take a look into the HPOlib3 Benchamarks to find out if the benchmark needs further parameter.
         Note: Most of them dont need further parameter.
     """
-    logger.info('Start validating procedure')
+    logger.info(f'Start validating procedure on benchmark {benchmark}')
 
     output_dir = Path(output_dir)
 
     assert output_dir.is_dir(), f'Result folder doesn\"t exist: {output_dir}'
 
     benchmark_settings = get_benchmark_settings(benchmark)
-    benchmark_settings_for_sending = prepare_dict_for_sending(benchmark_settings)
+    # benchmark_settings_for_sending = prepare_dict_for_sending(benchmark_settings)
 
     # First, try to load already extracted trajectory file
     unvalidated_trajectories = list(output_dir.rglob(f'hpolib_trajectory.txt'))

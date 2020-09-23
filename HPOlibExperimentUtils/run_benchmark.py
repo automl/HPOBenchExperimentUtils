@@ -60,12 +60,12 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
         Note: Most of them dont need further parameter.
     """
 
-    logger.info(f'Start running benchmark.')
+    logger.info(f'Start running benchmark {benchmark} with optimizer setting {optimizer}.')
 
     optimizer_settings = get_optimizer_setting(optimizer)
     benchmark_settings = get_benchmark_settings(benchmark)
     settings = dict(benchmark_settings, **optimizer_settings)
-    logger.debug(f'Settings loaded')
+    logger.debug(f'Settings loaded: {settings}')
 
     optimizer_enum = optimizer_str_to_enum(optimizer_settings['optimizer'])
     logger.debug(f'Optimizer: {optimizer_enum}')
@@ -85,6 +85,7 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
         from hpolib import config_file
         container_source = config_file.container_source
         benchmark = benchmark_obj(rng=rng, container_source=container_source, **benchmark_params)
+    logger.info(f'Benchmark successfully initialized.')
 
     # Create a Process Manager to get access to the variable "total_time_proxy" of the bookkeeper
     # This variable represents how much time the optimizer has used
@@ -98,13 +99,13 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
                            cutoff_limit_in_s=settings['cutoff_in_s'],
                            is_surrogate=settings['is_surrogate'])
 
-    logger.debug(f'Benchmark initialized. Additional benchmark parameters {benchmark_params}')
+    logger.info(f'BookKeeper initialized. Additional benchmark parameters {benchmark_params}')
 
     optimizer = get_optimizer(optimizer_enum)
     optimizer = optimizer(benchmark=benchmark,
                           settings=settings,
                           output_dir=output_dir, rng=rng)
-    logger.debug(f'Optimizer initialized')
+    logger.info(f'Optimizer initialized. Start optimization process.')
 
     start_time = time()
     process = Process(target=optimizer.run, args=(), kwargs=dict())
@@ -117,9 +118,9 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
         sleep(PING_OPTIMIZER_IN_S)
     else:
         process.terminate()
-        print(f'finished after {time() - start_time}')
+        logger.info(f'Terminate Process after {time() - start_time}')
 
-    logger.info(f'Optimizer finished')
+    logger.info(f'Run Benchmark - Finished.')
 
 
 if __name__ == "__main__":
