@@ -11,7 +11,7 @@ from hpolib.abstract_benchmark import AbstractBenchmark
 from hpolib.container.client_abstract_benchmark import AbstractBenchmarkClient
 
 from HPOlibExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
-from HPOlibExperimentUtils.utils.utils import get_main_fidelity
+from HPOlibExperimentUtils.utils.optimizer_utils import get_main_fidelity
 
 logger = logging.getLogger('Optimizer')
 

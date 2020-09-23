@@ -1,7 +1,0 @@
-"CPU Time Used","Estimated Training Performance","Wallclock Time","Incumbent ID","Automatic Configurator (CPU) Time","Configuration..."
-0.000000, 2147483648.000000, 0.042555, 1, 0.042555, batch_size='44', discount='0.5', entropy_regularization='0.5', learning_rate='9.999999999999991e-05', likelihood_ratio_clipping='0.5', n_units_1='31', n_units_2='31'
-65.331527, 3000.000000, 65.504138, 1, 0.172611, batch_size='44', discount='0.5', entropy_regularization='0.5', learning_rate='9.999999999999991e-05', likelihood_ratio_clipping='0.5', n_units_1='31', n_units_2='31'
-216.945252, 986.000000, 217.197384, 2, 0.252132, batch_size='18', discount='0.75', entropy_regularization='0.25', learning_rate='0.003162277660168382', likelihood_ratio_clipping='0.25', n_units_1='63', n_units_2='15'
-11000.082436, 551.400000, 11002.649651, 3, 2.567215, batch_size='11', discount='0.703125', entropy_regularization='0.171875', learning_rate='0.003924189758484535', likelihood_ratio_clipping='0.515625', n_units_1='55', n_units_2='13'
-15191.910316, 490.600000, 15195.350964, 4, 3.440648, batch_size='8', discount='0.796875', entropy_regularization='0.953125', learning_rate='0.0010746078283213173', likelihood_ratio_clipping='0.796875', n_units_1='103', n_units_2='60'
-16672.609782, 378.600000, 16682.495447, 5, 9.885665, batch_size='8', discount='0.7295181076000933', entropy_regularization='0.9728271104769496', learning_rate='0.0040227706034454535', likelihood_ratio_clipping='0.10221243505514721', n_units_1='123', n_units_2='14'

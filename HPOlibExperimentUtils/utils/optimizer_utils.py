@@ -10,29 +10,6 @@ from HPOlibExperimentUtils.utils.runner_utils import get_optimizer_settings_name
 logger = logging.getLogger('Optimizer Utils')
 
 
-def parse_fidelity_type(fidelity_type: str):
-    """
-    Helperfunction to cast the fidelity into its correct type. This step is necessary since we can only store the
-    fidelity type in the experiment_settings.json as string.
-
-    Parameters
-    ----------
-    fidelity_type : str
-        The name of the type of the fidelity
-    Returns
-    -------
-        the python object representing this type.
-    """
-    if fidelity_type.lower() == 'str':
-        return str
-    elif fidelity_type.lower() == 'int':
-        return int
-    elif fidelity_type.lower() == 'float':
-        return float
-    else:
-        raise ValueError(f'Unknown fidelity type: {fidelity_type}. Must be one of [str, int, float].')
-
-
 def get_sh_ta_runs(min_budget: Union[int, float], max_budget: Union[int, float], eta: int, n0: Optional[int] = None) \
         -> int:
     """ Returns total number of configurations for a given SH configuration """
@@ -156,7 +133,6 @@ def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]) -> OptimizerEnum
                          f' but was {optimizer}')
 
 
-
 def get_optimizer(optimizer_enum):
 
     if optimizer_enum is OptimizerEnum.HPBANDSTER_BOHB:
@@ -186,3 +162,16 @@ def get_optimizer(optimizer_enum):
     else:
         raise ValueError(f'Unknown optimizer: {optimizer_enum}')
     return optimizer
+
+
+def get_main_fidelity(fidelity_space, settings):
+    """Helper function to get the main fidelity from a fidelity space. """
+    if len(fidelity_space.get_hyperparameters()) > 1 and 'main_fidelity' not in settings:
+        raise ValueError('Ok something went wrong. Please specify a main fidelity in the benchmark settings')
+
+    if 'main_fidelity' in settings:
+        main_fidelity = settings['main_fidelity']
+        fidelity = fidelity_space.get_hyperparameter(main_fidelity)
+    else:
+        fidelity = fidelity_space.get_hyperparameters()[0]
+    return fidelity
