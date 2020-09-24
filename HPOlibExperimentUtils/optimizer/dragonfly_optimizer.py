@@ -1,34 +1,29 @@
 import logging
 from pathlib import Path
+from typing import Union, Dict
 
-from HPOlibExperimentUtils.optimizer.base_optimizer import Optimizer
+from hpolib.abstract_benchmark import AbstractBenchmark
+from hpolib.container.client_abstract_benchmark import AbstractBenchmarkClient
+
+from HPOlibExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
 
 logger = logging.getLogger('Optimizer')
 
 
-class DragonflyOptimizer(Optimizer):
-    def __init__(self, benchmark, optimizer_settings, benchmark_settings, intensifier, rng=0):
-        super().__init__(benchmark, optimizer_settings, benchmark_settings, intensifier, rng)
+class DragonflyOptimizer(SingleFidelityOptimizer):
+    def __init__(self, benchmark: Union[AbstractBenchmark, AbstractBenchmarkClient],
+                 settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
+        super().__init__(benchmark, settings, output_dir, rng)
 
     def setup(self):
         pass
 
-    def run(self) -> Path:
+    def run(self) -> None:
         """
         TODO: DRAGONFLY - This is the skeleton for the dragonfly optimizer.
 
         Returns
         -------
-        Path-object. Please return the path to directory where your trajectory lies. This path is then used to read in
-        the trajecotory and transform it to a uniform format. (If you have such a trajectory example for me,
-        i can do the further steps then.)
+        None
         """
-
-        # Ok following
-        # https://stackoverflow.com/questions/2837214/python-popen-command-wait-until-the-command-is-finished
-        # call is the command to use.
-        import subprocess
-        subprocess.call(['ls -l', '>', 'text.txt'])
-
-        # or it is in the output folder then simply self.optimizer_settings['output_dir']
-        return Path('The Folder where your trajectory is')
+        pass

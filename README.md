@@ -140,7 +140,6 @@ hpbandster_hb_eta_3_test:
   # Optimizer dependent options:
   # ############################
   eta: 3
-  num_iterations: 1
 ```
 
 #### Available Optimizers:

@@ -29,6 +29,7 @@ learna:
   mem_limit_in_mb: 4000
   import_from: rl.learna_benchmark
   import_benchmark: Learna
+  num_iterations: 3
 
 metalearna:
   time_limit_in_s: 345600
@@ -36,6 +37,7 @@ metalearna:
   mem_limit_in_mb: 4000
   import_from: rl.learna_benchmark
   import_benchmark: MetaLearna
+  num_iterations: 3
 
 NASCifar10ABenchmark:
   time_limit_in_s: 4000

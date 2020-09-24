@@ -64,13 +64,13 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
 
     optimizer_settings = get_optimizer_setting(optimizer)
     benchmark_settings = get_benchmark_settings(benchmark)
-    settings = dict(benchmark_settings, **optimizer_settings)
+    settings = dict(optimizer_settings, **benchmark_settings)
     logger.debug(f'Settings loaded: {settings}')
 
     optimizer_enum = optimizer_str_to_enum(optimizer_settings['optimizer'])
     logger.debug(f'Optimizer: {optimizer_enum}')
 
-    output_dir = Path(output_dir) / f'{optimizer}-run-{rng}'
+    output_dir = Path(output_dir) / f'{optimizer}' / f'run-{rng}'
     output_dir.mkdir(exist_ok=True, parents=True)
     logger.debug(f'Output dir: {output_dir}')
 
@@ -104,10 +104,15 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
     optimizer = get_optimizer(optimizer_enum)
     optimizer = optimizer(benchmark=benchmark,
                           settings=settings,
-                          output_dir=output_dir, rng=rng)
+                          output_dir=output_dir,
+                          rng=rng)
     logger.info(f'Optimizer initialized. Start optimization process.')
 
     start_time = time()
+    # Currently no optimizer uses the setup function, but we still call it to enable future optimizer implementations to
+    # have a setup function.
+    optimizer.setup()
+
     process = Process(target=optimizer.run, args=(), kwargs=dict())
     process.start()
 

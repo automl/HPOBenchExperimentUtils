@@ -43,6 +43,17 @@ def load_optimizer_settings() -> Dict:
     optimizer_settings_path = Path(__file__).absolute().parent.parent / 'optimizer_settings.yaml'
     with optimizer_settings_path.open('r') as fh:
         optimizer_settings = yaml.load(fh, yaml.FullLoader)
+
+    # Check that all mandatory fields are in the settings given:
+    mandatory = ['time_limit_in_s', 'cutoff_in_s', 'mem_limit_in_mb', 'import_from', 'import_benchmark']
+    assert all([option in optimizer_settings for option in mandatory])
+
+    # fill missing parameter with default ones:
+    default_params = dict(num_iterations=10000000,
+                          is_surrogate=False)
+
+    # Update the optimizer settings (this command is comparable to default_params.update(optimizer_settings)
+    optimizer_settings = dict(default_params, **optimizer_settings)
     return optimizer_settings
 
 
