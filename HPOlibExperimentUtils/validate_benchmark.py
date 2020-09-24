@@ -1,9 +1,13 @@
 import argparse
-import json
 import logging
 from multiprocessing import Value
 from pathlib import Path
 from typing import Union, Dict
+
+from HPOlibExperimentUtils.utils.validation_utils import write_validated_trajectory, get_unvalidated_configurations, \
+    load_trajectories, load_validated_configurations
+
+logging.basicConfig(level=logging.DEBUG)
 
 from hpolib.util.example_utils import set_env_variables_to_use_only_one_core
 
@@ -11,7 +15,6 @@ from HPOlibExperimentUtils.core.bookkeeper import Bookkeeper
 from HPOlibExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_benchmark_settings, \
     load_benchmark, get_benchmark_names
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('BenchmarkValidation')
 
 set_env_variables_to_use_only_one_core()
@@ -20,6 +23,7 @@ set_env_variables_to_use_only_one_core()
 def validate_benchmark(benchmark: str,
                        output_dir: Union[Path, str],
                        rng: int,
+                       recompute_all: bool = False,
                        use_local: Union[bool, None] = False,
                        **benchmark_params: Dict):
     """
@@ -29,9 +33,12 @@ def validate_benchmark(benchmark: str,
 
     The benchmarks are by default stored in singularity container which are downloaded at the first run.
 
-    The validation script reads in the trajectory files in the output directory. As a note, the validation script reads
+    The validation script reads in the trajectory files in the output directory. Note that the validation script reads
     in all the trajectory files found in the given output path.
     Then all configurations are validated and written via the bookkeeper into a runhistory file.
+
+    To speed up the procedure, we do not clear the validation runhistory, but keep it to check for a later validation
+    run if we have already validated a specific configuration.
 
     Note:
     -----
@@ -55,6 +62,8 @@ def validate_benchmark(benchmark: str,
         which was generated in the previous step.
     rng : int, None
         Random seed for the experiment. Also changes the output directory. By default 0.
+    recompute_all : bool, None
+        If you want to recompute all validation results regardless of whether already precomputed results exist or not.
     use_local : bool, None
         If you want to use the HPOlib3 benchamrks in a non-containerizd version (installed locally inside the
         current python environment), you can set this parameter to True. This is not recommend.
@@ -71,58 +80,34 @@ def validate_benchmark(benchmark: str,
 
     assert output_dir.is_dir(), f'Result folder doesn\"t exist: {output_dir}'
 
-    benchmark_settings = get_benchmark_settings(benchmark)
-    # benchmark_settings_for_sending = prepare_dict_for_sending(benchmark_settings)
+    unvalidated_trajectories_paths = list(output_dir.rglob(f'hpolib_trajectory.txt'))
+    unvalidated_trajectories = load_trajectories(unvalidated_trajectories_paths)
+    unvalidated_configurations = get_unvalidated_configurations(unvalidated_trajectories)
+    validation_results = {str(configuration): -1234 for configuration in unvalidated_configurations}
 
-    # First, try to load already extracted trajectory file
-    unvalidated_trajectories = list(output_dir.rglob(f'hpolib_trajectory.txt'))
-    assert len(unvalidated_trajectories) >= 1
+    already_evaluated_configs = load_validated_configurations(output_dir)
+    logger.info(f'Found {len(unvalidated_trajectories_paths)} trajectories with a total of '
+                f'{len(unvalidated_configurations)} configurations (Unique: {len(validation_results)}) to validate.\n'
+                f'Also, we found {len(already_evaluated_configs)} already validated configurations.')
 
-    if len(unvalidated_trajectories) > 1:
-        logger.warning('More than one trajectory file found. Start to combine all found configurations')
-
-    found_results = []
-    for unvalidated_trajectory in unvalidated_trajectories:
-        # Read in trajectory:
-        with unvalidated_trajectory.open('r') as fh:
-            lines = fh.readlines()
-
-        trajectory = [json.loads(line) for line in lines]
-        boot_time = trajectory[0]
-        trajectory = trajectory[1:]
-        found_results += trajectory
-
-    configurations = [entry['configuration'] for entry in found_results]
-
-    # TODO: This mapping is not needed atm. But maybe if we want to create a trajectory according to the unvalidated
-    #  configurations, a mapping from config to config id (position in the trajectory) might be useful.
-    # config_to_config_id = {}
-    # config_id_to_config = {}
-    # counter = 0
-    # for config in configurations:
-    #     if str(config) not in config_to_config_id:
-    #         config_to_config_id[str(config)] = counter
-    #         config_id_to_config[counter] = str(config)
-    #         counter += 1
-
-    configurations_to_validate = {str(configuration): -1234 for configuration in configurations}
+    if not recompute_all:
+        validation_results.update(already_evaluated_configs)
+    logger.info('Finished loading unvalidated and already validated configurations')
 
     # Load and instantiate the benchmark
+    benchmark_settings = get_benchmark_settings(benchmark)
     benchmark_obj = load_benchmark(benchmark_name=benchmark_settings['import_benchmark'],
                                    import_from=benchmark_settings['import_from'],
                                    use_local=use_local)
 
-    if use_local:
-        benchmark = benchmark_obj(rng=rng, **benchmark_params)
-    else:
+    if not use_local:
         from hpolib import config_file
-        container_source = config_file.container_source
-        benchmark = benchmark_obj(rng=rng, container_source=container_source, **benchmark_params)
-
-    total_time_proxy = Value('f', 0)
+        benchmark_params['container_source'] = config_file.container_source
+    benchmark = benchmark_obj(rng=rng, **benchmark_params)
 
     # There is no reason why we want to have a wallclock time limit here.
     # Only a cutoff time limit seems to be useful.
+    total_time_proxy = Value('f', 0)
     benchmark = Bookkeeper(benchmark,
                            output_dir,
                            total_time_proxy,
@@ -133,27 +118,27 @@ def validate_benchmark(benchmark: str,
 
     logger.debug(f'Benchmark initialized. Additional benchmark parameters {benchmark_params}')
 
-    logger.info(f'Going to validate {len(configurations)} configuration')
-    for i_config, configuration in enumerate(configurations):
-        logger.debug(f'[{i_config + 1:4d}|{len(configurations):4d}] Evaluate configuration')
+    logger.info(f'Going to validate {len(unvalidated_configurations)} configuration')
+    for i_config, configuration in enumerate(unvalidated_configurations):
+        logger.info(f'[{i_config + 1:4d}|{len(unvalidated_configurations):4d}] Evaluate configuration')
         config_str = str(configuration)
-        if configurations_to_validate[config_str] != -1234:
+
+        # Configuration was already validated
+        if validation_results[config_str] != -1234:
             continue
 
         # The bookkeeper writes the trajectory automatically in to a file. But this file then contains only
         # a single entry per configuration. And the configurations are also not in the same order as the "original"
         # trajectory.
-        # benchmark.objective_function_test(configuration, rng=rng)
         result_dict = benchmark.objective_function_test(configuration, rng=rng)
-        configurations_to_validate[config_str] = result_dict['function_value']
+        validation_results[config_str] = result_dict['function_value']
 
-    # TODO: do something with the trajectory
-    # validated_trajectory = output_dir / 'hpolib_runhistory_validation.txt'
-    # with validated_trajectory.open('r') as fh:
-    #     lines = fh.readlines()
-    #     validated_results = [json.loads(line) for line in lines]
-    #     validated_results = [result for result in validated_results if 'boot_time' not in result]
     benchmark.__del__()
+
+    for unvalidated_traj, unvalidated_traj_path in zip(unvalidated_trajectories, unvalidated_trajectories_paths):
+        write_validated_trajectory(unvalidated_traj, validation_results, unvalidated_traj_path, unvalidated_traj,
+                                   unvalidated_traj_path)
+
     return 1
 
 
@@ -166,6 +151,7 @@ if __name__ == "__main__":
     parser.add_argument('--output_dir', required=True, type=str)
     parser.add_argument('--benchmark', choices=get_benchmark_names(), required=True, type=str)
     parser.add_argument('--rng', required=False, default=0, type=int)
+    parser.add_argument('--recompute_all', action='store_true', default=False)
 
     args, unknown = parser.parse_known_args()
     benchmark_params = transform_unknown_params_to_dict(unknown)
