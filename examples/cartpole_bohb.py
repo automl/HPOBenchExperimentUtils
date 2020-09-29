@@ -10,8 +10,8 @@ and the HPOlib3 ``pip install <dir of hpolib>``
 """
 
 import logging
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('BOHB on cartpole')
+logger.setLevel(level=logging.DEBUG)
 
 from pathlib import Path
 from HPOlibExperimentUtils import validate_benchmark, run_benchmark

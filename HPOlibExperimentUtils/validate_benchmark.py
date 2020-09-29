@@ -7,8 +7,6 @@ from typing import Union, Dict
 from HPOlibExperimentUtils.utils.validation_utils import write_validated_trajectory, get_unvalidated_configurations, \
     load_trajectories, load_validated_configurations
 
-logging.basicConfig(level=logging.DEBUG)
-
 from hpolib.util.example_utils import set_env_variables_to_use_only_one_core
 
 from HPOlibExperimentUtils.core.bookkeeper import Bookkeeper
@@ -16,6 +14,7 @@ from HPOlibExperimentUtils.utils.runner_utils import transform_unknown_params_to
     load_benchmark, get_benchmark_names
 
 logger = logging.getLogger('BenchmarkValidation')
+logger.setLevel(level=logging.DEBUG)
 
 set_env_variables_to_use_only_one_core()
 

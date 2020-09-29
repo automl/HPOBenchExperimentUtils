@@ -4,6 +4,13 @@ from pathlib import Path
 from time import time, sleep
 from typing import Union, Dict
 
+try:
+    from HPOlibExperimentUtils.utils import Constants
+except:
+    import sys, os.path
+    sys.path.append(os.path.expandvars('$HPOEXPUTIL_PATH'))
+    from HPOlibExperimentUtils.utils import Constants
+
 from hpolib.util.example_utils import set_env_variables_to_use_only_one_core
 
 from HPOlibExperimentUtils.core.bookkeeper import Bookkeeper
@@ -25,6 +32,7 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
                   output_dir: Union[Path, str],
                   rng: int,
                   use_local: Union[bool, None] = False,
+                  debug: bool = False,
                   **benchmark_params: Dict):
     """
     Run a HPOlib3 benchmark on a given Optimizer. Currently only SMAC, BOHB and Dragonfly are available as Optimizer.
@@ -61,6 +69,9 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
     """
 
     logger.info(f'Start running benchmark {benchmark} with optimizer setting {optimizer}.')
+
+    if debug:
+        logger.setLevel(level=logging.DEBUG)
 
     optimizer_settings = get_optimizer_setting(optimizer)
     benchmark_settings = get_benchmark_settings(benchmark)
@@ -140,6 +151,7 @@ if __name__ == "__main__":
     parser.add_argument('--benchmark', choices=get_benchmark_names(), required=True, type=str)
     parser.add_argument('--rng', required=False, default=0, type=int)
     parser.add_argument('--use_local', action='store_true', default=False)
+    parser.add_argument('--debug', action='store_true', default=False, help="When given, enables debug mode logging.")
     args, unknown = parser.parse_known_args()
     benchmark_params = transform_unknown_params_to_dict(unknown)
 
