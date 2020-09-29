@@ -31,6 +31,7 @@ class DragonflyOptimizer(Optimizer):
         # TODO: Update to include constraints
         # TODO: Include usage of RNG for consistency
         # TODO: Check for benchmarks that don't have a fidelity space
+        # TODO: Read dragonfly optimizer settings
         fidel_space = self.benchmark.get_fidelity_space()
         config, domain_parsers, fidelity_parsers, fidelity_costs = \
             configspace_to_dragonfly(domain_cs=self.cs, fidely_cs=fidel_space)

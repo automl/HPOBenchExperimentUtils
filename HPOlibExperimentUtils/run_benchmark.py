@@ -4,16 +4,15 @@ from pathlib import Path
 from time import time, sleep
 from typing import Union, Dict
 
+from hpolib.util.example_utils import set_env_variables_to_use_only_one_core
+
 try:
-    from HPOlibExperimentUtils.utils import Constants
+    from HPOlibExperimentUtils.core.bookkeeper import Bookkeeper
 except:
     import sys, os.path
     sys.path.append(os.path.expandvars('$HPOEXPUTIL_PATH'))
-    from HPOlibExperimentUtils.utils import Constants
+    from HPOlibExperimentUtils.core.bookkeeper import Bookkeeper
 
-from hpolib.util.example_utils import set_env_variables_to_use_only_one_core
-
-from HPOlibExperimentUtils.core.bookkeeper import Bookkeeper
 from HPOlibExperimentUtils.utils import PING_OPTIMIZER_IN_S
 from HPOlibExperimentUtils.utils.optimizer_utils import get_optimizer, optimizer_str_to_enum, OptimizerEnum
 from HPOlibExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_benchmark_settings, \
