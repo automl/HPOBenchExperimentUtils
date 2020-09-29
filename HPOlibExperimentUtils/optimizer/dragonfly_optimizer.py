@@ -6,11 +6,10 @@ import os
 from HPOlibExperimentUtils.optimizer.base_optimizer import Optimizer
 from HPOlibExperimentUtils.utils.dragonfly_utils import \
     configspace_to_dragonfly, load_dragonfly_options, generate_trajectory, change_cwd
-from HPOlibExperimentUtils.utils import Constants
-from hpolib.abstract_benchmark import AbstractBenchmark
 from dragonfly import minimise_function, \
     minimise_multifidelity_function
 
+from HPOlibExperimentUtils.core.bookkeeper import Bookkeeper
 from hpolib.abstract_benchmark import AbstractBenchmark
 from hpolib.container.client_abstract_benchmark import AbstractBenchmarkClient
 
@@ -20,7 +19,7 @@ logger = logging.getLogger('Optimizer')
 
 
 class DragonflyOptimizer(Optimizer):
-    def __init__(self, benchmark: Union[AbstractBenchmark, AbstractBenchmarkClient],
+    def __init__(self, benchmark: Union[Bookkeeper, AbstractBenchmark, AbstractBenchmarkClient],
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
         super().__init__(benchmark, settings, output_dir, rng)
 
@@ -31,12 +30,13 @@ class DragonflyOptimizer(Optimizer):
 
         # TODO: Update to include constraints
         # TODO: Include usage of RNG for consistency
+        # TODO: Check for benchmarks that don't have a fidelity space
         fidel_space = self.benchmark.get_fidelity_space()
         config, domain_parsers, fidelity_parsers, fidelity_costs = \
             configspace_to_dragonfly(domain_cs=self.cs, fidely_cs=fidel_space)
 
         try:
-            budget = self.optimizer_settings.get("time_limit_in_s")
+            budget = self.settings.get("time_limit_in_s")
         except KeyError as e:
             raise RuntimeError("Could not read a time limit for the optimizer.") from e
 
@@ -104,8 +104,8 @@ class DragonflyOptimizer(Optimizer):
         # Go back to the original working directory we started from
         os.chdir(old_cwd)
 
-        generate_trajectory(history, save_file=self.optimizer_settings["output_dir"] / Constants.smac_traj_filename,
+        generate_trajectory(history, save_file=self.output_dir / f"dragonfly_traj.json",
                             is_cp=True if isinstance(history.query_qinfos[0].point, list) else False,
-                            history_file=self.optimizer_settings["output_dir"] / "saved_history.json")
+                            history_file=self.output_dir / "dragonfly_history.json")
 
-        return self.optimizer_settings['output_dir']
+        # return self.optimizer_settings['output_dir']
