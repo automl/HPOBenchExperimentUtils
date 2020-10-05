@@ -38,13 +38,17 @@ class DragonflyOptimizer(Optimizer):
 
         try:
             budget = self.settings.get("time_limit_in_s")
+            init_frac = self.settings.get("init_capital_frac")
         except KeyError as e:
             raise RuntimeError("Could not read a time limit for the optimizer.") from e
 
+        # TODO: Check if infinite budget and initial budget implementation as here work
         dragonfly_options = {
             "capital_type": "realtime",
-            "max_capital": budget,
-            "max_or_min": "min"
+            # "max_capital": budget,
+            "max_capital": float("inf"),
+            "max_or_min": "min",
+            "init_capital": budget * init_frac
         }
         options, config = load_dragonfly_options(options=dragonfly_options, config=config)
 
