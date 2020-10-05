@@ -15,18 +15,13 @@ from hpolib.container.client_abstract_benchmark import AbstractBenchmarkClient
 
 from ConfigSpace import Configuration
 
-logger = logging.getLogger('Optimizer')
-
+logger = logging.getLogger('DragonflyOptimizer')
+# logger.setLevel(logging.DEBUG)
 
 class DragonflyOptimizer(Optimizer):
     def __init__(self, benchmark: Union[Bookkeeper, AbstractBenchmark, AbstractBenchmarkClient],
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
         super().__init__(benchmark, settings, output_dir, rng)
-
-    def setup(self):
-        pass
-
-    def run(self) -> Path:
 
         # TODO: Update to include constraints
         # TODO: Include usage of RNG for consistency
@@ -50,12 +45,12 @@ class DragonflyOptimizer(Optimizer):
             "max_or_min": "min",
             "init_capital": budget * init_frac
         }
-        options, config = load_dragonfly_options(options=dragonfly_options, config=config)
+        self.options, self.config = load_dragonfly_options(options=dragonfly_options, config=config)
 
-        if options.max_capital < 0:
+        if self.options.max_capital < 0:
             raise ValueError('max_capital (time or number of evaluations) must be positive.')
 
-        is_mf = fidelity_parsers is not None
+        self.is_mf = fidelity_parsers is not None
 
         def parse_domain(x):
             return Configuration(
@@ -66,13 +61,10 @@ class DragonflyOptimizer(Optimizer):
         def objective(x):
             return self.benchmark.objective_function(parse_domain(x))['function_value']
 
-        # Change the current working directory to a unique temporary location in order to avoid any
-        # huge messes due to dragonfly's multi-process communication system
+        self.parse_domain = parse_domain
+        self.objective = objective
 
-        old_cwd = Path().cwd()
-        change_cwd()
-
-        if is_mf:
+        if self.is_mf:
             def parse_fidelities(z):
                 ret = {parser[0]: parser[1](val) for parser, val in zip(fidelity_parsers, z)}
                 return ret
@@ -83,28 +75,44 @@ class DragonflyOptimizer(Optimizer):
                 logger.debug("Calling multi-fidelity objective with configuration %s at fidelity %s" % (
                     conf.get_dictionary(), fidels))
                 ret = self.benchmark.objective_function(conf, fidelity=fidels)
-                logger.debug("multi-fidelity objective returned %s" % ret)
+                logger.debug("multi-fidelity objective returned %s" % (str(ret)))
                 return ret['function_value']
 
             def cost(z):
                 ret = sum([c(v) for c, v in zip(fidelity_costs, z)]) / float(len(fidelity_costs)) + 1e-6
                 return ret
 
+            self.parse_fidelities = parse_fidelities
+            self.objective_mf = objective_mf
+            self.cost = cost
+
+    def setup(self):
+        pass
+
+    def run(self) -> Path:
+
+        # Change the current working directory to a unique temporary location in order to avoid any
+        # huge messes due to dragonfly's multi-process communication system
+
+        old_cwd = Path().cwd()
+        change_cwd()
+
+        if self.is_mf:
             logger.info('Minimising multi-fidelity function on\n Fidelity-Space: %s.\n Domain: %s.' % (
-                config.fidel_space, config.domain))
+                self.config.fidel_space, self.config.domain))
             opt_val, opt_pt, history = minimise_multifidelity_function(
-                objective_mf, fidel_space=None, domain=None,
-                fidel_to_opt=config.fidel_to_opt, fidel_cost_func=cost,
-                max_capital=options.max_capital, capital_type=options.capital_type,
-                opt_method=options.opt_method, config=config, options=options,
-                reporter=options.report_progress)
+                self.objective_mf, fidel_space=None, domain=None,
+                fidel_to_opt=self.config.fidel_to_opt, fidel_cost_func=self.cost,
+                max_capital=self.options.max_capital, capital_type=self.options.capital_type,
+                opt_method=self.options.opt_method, config=self.config, options=self.options,
+                reporter=self.options.report_progress)
         else:
             # test_obj = objective(test_point)
-            logger.info('Minimising function on Domain: %s.' % config.domain)
+            logger.info('Minimising function on Domain: %s.' % self.config.domain)
             opt_val, opt_pt, history = minimise_function(
-                objective, domain=None, max_capital=options.max_capital,
-                capital_type=options.capital_type, opt_method=options.opt_method,
-                config=config, options=options, reporter=options.report_progress)
+                self.objective, domain=None, max_capital=self.options.max_capital,
+                capital_type=self.options.capital_type, opt_method=self.options.opt_method,
+                config=self.config, options=self.options, reporter=self.options.report_progress)
 
         # Go back to the original working directory we started from
         os.chdir(old_cwd)
