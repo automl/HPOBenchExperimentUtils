@@ -45,8 +45,8 @@ def load_optimizer_settings() -> Dict:
         optimizer_settings = yaml.load(fh, yaml.FullLoader)
 
     # Check that all mandatory fields are in the settings given:
-    mandatory = ['time_limit_in_s', 'cutoff_in_s', 'mem_limit_in_mb', 'import_from', 'import_benchmark']
-    assert all([option in optimizer_settings for option in mandatory])
+    # mandatory = ['time_limit_in_s', 'cutoff_in_s', 'mem_limit_in_mb', 'import_from', 'import_benchmark']
+    # assert all([option in optimizer_settings for option in mandatory])
 
     # fill missing parameter with default ones:
     default_params = dict(num_iterations=10000000,
@@ -78,6 +78,13 @@ def load_benchmark_settings() -> Dict:
 
     with experiment_settings_path.open('r') as fh:
         experiment_settings = yaml.load(fh, yaml.FullLoader)
+
+    # Check that all mandatory fields are in the settings given:
+    mandatory = ['time_limit_in_s', 'cutoff_in_s', 'mem_limit_in_mb', 'import_from', 'import_benchmark']
+    for benchmark, settings in experiment_settings.items():
+        found = [option in settings for option in mandatory]
+        assert all(found), "Missing mandatory option(s) %s in benchmark settings %s" % \
+                           (str([o for b, o in zip(found, mandatory) if not b]), str(settings))
     return experiment_settings
 
 
