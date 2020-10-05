@@ -18,6 +18,11 @@ from HPOlibExperimentUtils.utils import MAXINT
 
 logger = logging.getLogger('Bookkeeper')
 
+def _get_dict_types(d):
+    assert isinstance(d, Dict), "Expected to display items types for a dictionary, but received object of type %s" % \
+                                type(d)
+    return {k: type(v) if not isinstance(v, Dict) else _get_dict_types(v) for k, v in d.items()}
+
 def _safe_cast_config(configuration):
     if isinstance(configuration, CS.Configuration):
         configuration = configuration.get_dictionary()
@@ -84,7 +89,12 @@ def keep_track(validate=False):
                           }
 
                 log_file = self.log_file if not validate else self.validate_log_file
-                self.write_line_to_file(log_file, record)
+                try:
+                    self.write_line_to_file(log_file, record)
+                except TypeError as e:
+                    logger.error("Failed to serialize records dictionary to JSON. Received the following types as "
+                                 "input:\n%s" % (_get_dict_types(record)))
+                    raise e
 
                 if not validate:
                     self.calculate_incumbent(record)
