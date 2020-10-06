@@ -1,4 +1,4 @@
-import json
+import json_tricks
 import logging
 import os
 from concurrent.futures import TimeoutError
@@ -89,12 +89,7 @@ def keep_track(validate=False):
                           }
 
                 log_file = self.log_file if not validate else self.validate_log_file
-                try:
-                    self.write_line_to_file(log_file, record)
-                except TypeError as e:
-                    logger.error("Failed to serialize records dictionary to JSON. Received the following types as "
-                                 "input:\n%s" % (_get_dict_types(record)))
-                    raise e
+                self.write_line_to_file(log_file, record)
 
                 if not validate:
                     self.calculate_incumbent(record)
@@ -199,7 +194,12 @@ class Bookkeeper:
     @staticmethod
     def write_line_to_file(file, dict_to_store, mode='a+'):
         with file.open(mode) as fh:
-            json.dump(dict_to_store, fh)
+            try:
+                json_tricks.dump(dict_to_store, fh)
+            except TypeError as e:
+                logger.error("Failed to serialize dictionary to JSON. Received the following types as "
+                             "input:\n%s" % (_get_dict_types(dict_to_store)))
+                raise e
             fh.write(os.linesep)
 
     def calculate_incumbent(self, record: Dict):

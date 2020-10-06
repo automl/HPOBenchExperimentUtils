@@ -151,6 +151,7 @@ if __name__ == "__main__":
     parser.add_argument('--benchmark', choices=get_benchmark_names(), required=True, type=str)
     parser.add_argument('--rng', required=False, default=0, type=int)
     parser.add_argument('--recompute_all', action='store_true', default=False)
+    parser.add_argument('--use_local', action='store_true', default=False)
 
     args, unknown = parser.parse_known_args()
     benchmark_params = transform_unknown_params_to_dict(unknown)
