@@ -80,7 +80,7 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
     optimizer_enum = optimizer_str_to_enum(optimizer_settings['optimizer'])
     logger.debug(f'Optimizer: {optimizer_enum}')
 
-    output_dir = Path(output_dir) / f'{optimizer}' / f'run-{rng}'
+    output_dir = Path(output_dir) / benchmark / optimizer / f'run-{rng}'
     output_dir.mkdir(exist_ok=True, parents=True)
     logger.debug(f'Output dir: {output_dir}')
 
@@ -101,6 +101,7 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
     # This variable represents how much time the optimizer has used
     manager = Manager()
     total_time_proxy = manager.Value('f', 0)
+    # total_time_proxy = Value('f', 0)
 
     benchmark = Bookkeeper(benchmark,
                            output_dir,
