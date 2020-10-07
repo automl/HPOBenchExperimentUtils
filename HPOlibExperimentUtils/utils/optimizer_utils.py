@@ -79,6 +79,7 @@ class OptimizerEnum(Enum):
     SMAC_HYPERBAND = 'smac_hyperband'
     SMAC_SUCCESSIVE_HALVING = 'smac_successive_halving'
     DRAGONFLY = 'dragonfly'
+    PURE_RANDOMSEARCH = 'randomsearch'
 
 
 def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]) -> OptimizerEnum:
@@ -123,6 +124,9 @@ def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]) -> OptimizerEnum
         elif 'dragonfly' in optimizer or 'df' == optimizer:
             return OptimizerEnum.DRAGONFLY
 
+        elif optimizer == 'randomsearch':
+            return OptimizerEnum.PURE_RANDOMSEARCH
+
         else:
             fail = True
     else:
@@ -159,6 +163,10 @@ def get_optimizer(optimizer_enum):
         from HPOlibExperimentUtils.optimizer.smac_optimizer import SMACOptimizerSuccessiveHalving
         optimizer = SMACOptimizerSuccessiveHalving
 
+    elif optimizer_enum is OptimizerEnum.PURE_RANDOMSEARCH:
+        from HPOlibExperimentUtils.optimizer.randomsearch_optimizer import RandomSearchOptimizer
+        optimizer = RandomSearchOptimizer
+
     else:
         raise ValueError(f'Unknown optimizer: {optimizer_enum}')
     return optimizer
@@ -167,7 +175,7 @@ def get_optimizer(optimizer_enum):
 def get_main_fidelity(fidelity_space, settings):
     """Helper function to get the main fidelity from a fidelity space. """
     if len(fidelity_space.get_hyperparameters()) > 1 and 'main_fidelity' not in settings:
-        raise ValueError('Ok something went wrong. Please specify a main fidelity in the benchmark settings')
+        raise ValueError('Something went wrong. Please specify a main fidelity in the benchmark settings')
 
     if 'main_fidelity' in settings:
         main_fidelity = settings['main_fidelity']

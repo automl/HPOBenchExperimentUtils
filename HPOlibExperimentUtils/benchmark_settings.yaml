@@ -95,4 +95,36 @@ ParkinsonsTelemonitoringBenchmark:
   import_benchmark: ParkinsonsTelemonitoringBenchmark
   is_surrogate: true
 
+Cifar10NasBench201Benchmark:
+  time_limit_in_s: 4000
+  cutoff_in_s: 1800
+  mem_limit_in_mb: 16000
+  import_from: nas.nasbench_201
+  import_benchmark: Cifar10NasBench201Benchmark
+  is_surrogate: true
+
+Cifar10ValidNasBench201Benchmark:
+  time_limit_in_s: 4000
+  cutoff_in_s: 1800
+  mem_limit_in_mb: 16000
+  import_from: nas.nasbench_201
+  import_benchmark: Cifar10ValidNasBench201Benchmark
+  is_surrogate: true
+
+Cifar100NasBench201Benchmark:
+  time_limit_in_s: 4000
+  cutoff_in_s: 1800
+  mem_limit_in_mb: 16000
+  import_from: nas.nasbench_201
+  import_benchmark: Cifar100NasBench201Benchmark
+  is_surrogate: true
+
+ImageNetNasBench201Benchmark:
+  time_limit_in_s: 4000
+  cutoff_in_s: 1800
+  mem_limit_in_mb: 16000
+  import_from: nas.nasbench_201
+  import_benchmark: ImageNetNasBench201Benchmark
+  is_surrogate: true
+
 ...

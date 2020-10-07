@@ -39,9 +39,9 @@ def get_unvalidated_configurations(trajectories: List) -> List:
     return configurations
 
 
-def load_trajectories(unvalidated_trajectories_paths: List) -> List:
+def load_trajectories(trajectory_paths: List) -> List:
     """
-    Collect the unvalidated trajectories which are in the output directory
+    Collect the trajectories which are in the output directory
 
     Parameters
     ----------
@@ -53,15 +53,15 @@ def load_trajectories(unvalidated_trajectories_paths: List) -> List:
     -------
 
     """
-    assert len(unvalidated_trajectories_paths) >= 1
-    if len(unvalidated_trajectories_paths) > 1:
+    assert len(trajectory_paths) >= 1
+    if len(trajectory_paths) > 1:
         logger.warning('More than one trajectory file found. Start to combine all found configurations')
 
     # Load all trajectories
     found_trajectories = []
-    for unvalidated_trajectory_path in unvalidated_trajectories_paths:
+    for trajectory_path in trajectory_paths:
         # Read in trajectory:
-        lines = read_lines(unvalidated_trajectory_path)
+        lines = read_lines(trajectory_path)
 
         trajectory = [json.loads(line) for line in lines]
         found_trajectories.append(trajectory)
