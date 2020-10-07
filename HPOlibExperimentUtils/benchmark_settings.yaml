@@ -21,7 +21,7 @@ xgboost:
   import_from: ml.xgboost_benchmark
   import_benchmark: XGBoostBenchmark
   main_fidelity: subsample
-  is_surrogate: true
+  is_surrogate: false
 
 learna:
   time_limit_in_s: 172800

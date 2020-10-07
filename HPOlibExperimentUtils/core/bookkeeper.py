@@ -1,4 +1,3 @@
-import json_tricks
 import logging
 import os
 from concurrent.futures import TimeoutError
@@ -9,6 +8,7 @@ from time import time
 from typing import Union, List, Dict, Any
 
 import ConfigSpace as CS
+import json_tricks
 import numpy as np
 from hpolib.abstract_benchmark import AbstractBenchmark
 from hpolib.container.client_abstract_benchmark import AbstractBenchmarkClient
@@ -18,10 +18,12 @@ from HPOlibExperimentUtils.utils import MAXINT
 
 logger = logging.getLogger('Bookkeeper')
 
+
 def _get_dict_types(d):
     assert isinstance(d, Dict), "Expected to display items types for a dictionary, but received object of type %s" % \
                                 type(d)
     return {k: type(v) if not isinstance(v, Dict) else _get_dict_types(v) for k, v in d.items()}
+
 
 def _safe_cast_config(configuration):
     if isinstance(configuration, CS.Configuration):
@@ -51,7 +53,7 @@ def keep_track(validate=False):
                 self.set_total_time_used(self.cutoff_limit_in_s)
                 return {'function_value': MAXINT,
                         'cost': self.cutoff_limit_in_s,
-                        'info': {'fidelity': fidelity}}
+                        'info': {'fidelity': fidelity or -1234}}
 
             self.total_objective_costs += result_dict['cost']
 
@@ -74,7 +76,8 @@ def keep_track(validate=False):
             if (self.wall_clock_limit_in_s is None or total_time_used <= self.wall_clock_limit_in_s) \
                     and time_for_evaluation <= self.cutoff_limit_in_s:
                 configuration = _safe_cast_config(configuration)
-                fidelity = _safe_cast_config(fidelity)
+                # if the fidelity is none: load it from the result dictionary.
+                fidelity = _safe_cast_config(fidelity or result_dict['info']['fidelity'])
 
                 record = {'start_time': start_time,
                           'finish_time': finish_time,
@@ -91,8 +94,7 @@ def keep_track(validate=False):
                 log_file = self.log_file if not validate else self.validate_log_file
                 self.write_line_to_file(log_file, record)
 
-                if not validate:
-                    self.calculate_incumbent(record)
+                self.calculate_incumbent(record, validate=validate)
 
             self.set_total_time_used(total_time_used)
             return result_dict
@@ -114,12 +116,18 @@ class Bookkeeper:
         self.log_file = output_dir / 'hpolib_runhistory.txt'
         self.trajectory = output_dir / 'hpolib_trajectory.txt'
         self.validate_log_file = output_dir / 'hpolib_runhistory_validation.txt'
+        self.validate_trajectory = output_dir / 'hpolib_trajectory_validation.txt'
 
         self.boot_time = time()
-        self.total_objective_costs = 0  # TODO: Create proxy for tae count
+        self.total_objective_costs = 0
+        # TODO: Create proxy for tae count
+        self.function_calls = 0
 
         self.inc_budget = None
         self.inc_value = None
+
+        self.inc_budget_validated = None
+        self.inc_value_validated = None
 
         # This variable is a share variable. A proxy to check from outside. It represents the time already used for this
         # benchmark. It also takes into account if the benchmark is a surrogate.
@@ -137,8 +145,6 @@ class Bookkeeper:
             if self.validate_log_file.exists():
                 logger.warning(f'The validation log file already exists. The results will be appended.')
             self.write_line_to_file(self.validate_log_file, {'boot_time': self.boot_time}, mode='a+')
-
-        self.function_calls = 0
 
     @keep_track(validate=False)
     def objective_function(self, configuration: Union[np.ndarray, List, CS.Configuration, Dict],
@@ -202,17 +208,26 @@ class Bookkeeper:
                 raise e
             fh.write(os.linesep)
 
-    def calculate_incumbent(self, record: Dict):
+    def calculate_incumbent(self, record: Dict, validate: bool):
         # If any progress has made, Bigger is better, etc.
         fidelity = list(record['fidelity'].values())[0]
 
-        if self.inc_value is None \
-                or (abs(fidelity - self.inc_budget) <= 1e-8 and ((self.inc_value - record['function_value']) > 1e-8))\
-                or (fidelity - self.inc_budget) > 1e-8:
-            self.inc_value = record['function_value']
-            self.inc_budget = fidelity
+        inc_value = self.inc_value if not validate else self.inc_value_validated
+        inc_budget = self.inc_budget if not validate else self.inc_budget_validated
 
-            self.write_line_to_file(self.trajectory, record, mode='a')
+        if inc_value is None \
+            or (abs(fidelity - inc_budget) <= 1e-8 and ((inc_value - record['function_value']) > 1e-8))\
+            or (fidelity - inc_budget) > 1e-8:
+
+            if not validate:
+                self.inc_value = record['function_value']
+                self.inc_budget = fidelity
+                self.write_line_to_file(self.trajectory, record, mode='a')
+
+            else:
+                self.inc_value_validated = record['function_value']
+                self.inc_budget_validated = fidelity
+                self.write_line_to_file(self.validate_trajectory, record, mode='a')
 
     def __del__(self):
         self.benchmark.__del__()

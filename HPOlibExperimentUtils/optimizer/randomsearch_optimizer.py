@@ -1,4 +1,5 @@
 import logging
+import pickle
 from pathlib import Path
 from typing import Dict, Union
 
@@ -31,11 +32,21 @@ class RandomSearchOptimizer(Optimizer):
 
         results = []
         num_configs = 1
+        num_iterations = self.settings['num_iterations']
 
-        while True:
-            logger.debug("Start sampling configurations")
+        for iteration in range(num_iterations):
+            logger.debug(f"Iteration: [{iteration + 1}|{num_iterations}] Start sampling configurations")
             configuration = cs.sample_configuration()
-            result = self.benchmark.objective_function(configuration, rng=self.rng)
+            result = self.benchmark.objective_function(configuration, rng=self.rng, **self.settings_for_sending)
             results.append((configuration, result))
-            logger.info(f'Config [{num_configs}:6d] - Result: {result["function_value"]}.')
+            logger.info(f'Config [{num_configs:6d}] - Result: {result["function_value"]}.')
             num_configs += 1
+
+            if (num_configs % 100) == 0:
+                self.__save_results(results)
+
+        self.__save_results(results)
+
+    def __save_results(self, results):
+        with (self.output_dir / 'runhistory.pkl').open('wb') as fh:
+            pickle.dump(results, fh)

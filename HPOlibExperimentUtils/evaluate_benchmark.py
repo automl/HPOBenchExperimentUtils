@@ -19,8 +19,8 @@ logger = logging.getLogger('Evaluation')
 set_env_variables_to_use_only_one_core()
 
 
-def eval_trajectories(benchmark: str, output_dir: Union[Path, str], rng: int,
-                    criterion: str = 'mean', unvalidated: bool = True):
+def save_table(benchmark: str, output_dir: Union[Path, str], rng: int,
+               unvalidated: bool = True, **kwargs):
     logger.info(f'Start plotting trajectories of benchmark {benchmark}')
     output_dir = Path(output_dir)
     assert output_dir.is_dir(), f'Result folder doesn\"t exist: {output_dir}'
@@ -79,7 +79,6 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], rng: int,
     f, ax = plt.subplots(1, 1)
 
     for key, df in zip(keys, statistics_df):
-
         df[criterion].plot.line(drawstyle='steps-post', linewidth=2, ax=ax, label=key)
         if criterion == 'mean':
             ax.fill_between(df.index, df['mean'] - df['std'], df['mean'] + df['std'], alpha=0.3)
@@ -89,7 +88,7 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], rng: int,
     ax.set_ylabel('Mean Loss')
     ax.set_xscale('log')
     ax.set_yscale('log')
-    ax.set_title(f'{benchmark} {val_str}')
+    ax.set_title(f'{benchmark} {val_str} {criterion}')
     ax.legend()
     plt.show()
     print(statistics_df)
@@ -104,9 +103,9 @@ if __name__ == "__main__":
     parser.add_argument('--output_dir', required=True, type=str)
     parser.add_argument('--benchmark', choices=get_benchmark_names(), required=True, type=str)
     parser.add_argument('--rng', required=False, default=0, type=int)
-    parser.add_argument('--criterion', choices=['mean', 'median'])
+    parser.add_argument('--criterion', choices=['mean', 'median'], required=True)
     parser.add_argument('--unvalidated', action='store_false', default=True)
 
     args, unknown = parser.parse_known_args()
-    eval_trajectories(**vars(args))
+    # save_table(**vars(args))
     plot_trajectory(**vars(args))

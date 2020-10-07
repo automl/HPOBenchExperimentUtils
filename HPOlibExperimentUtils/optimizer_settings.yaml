@@ -1,6 +1,6 @@
 ---
 # PURE RANDOMSEARCH################################################################################################### #
-rs_default:
+randomsearch:
   optimizer: randomsearch
 
 
@@ -132,7 +132,5 @@ hpbandster_h2bo_eta_3_test:
 hpbandster_h2bo_eta_3:
   optimizer: hpbandster_h2bo
   eta: 3
-
-
 
 ...

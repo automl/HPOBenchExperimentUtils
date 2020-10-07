@@ -43,17 +43,6 @@ def load_optimizer_settings() -> Dict:
     optimizer_settings_path = Path(__file__).absolute().parent.parent / 'optimizer_settings.yaml'
     with optimizer_settings_path.open('r') as fh:
         optimizer_settings = yaml.load(fh, yaml.FullLoader)
-
-    # Check that all mandatory fields are in the settings given:
-    # mandatory = ['time_limit_in_s', 'cutoff_in_s', 'mem_limit_in_mb', 'import_from', 'import_benchmark']
-    # assert all([option in optimizer_settings for option in mandatory])
-
-    # fill missing parameter with default ones:
-    default_params = dict(num_iterations=10000000,
-                          is_surrogate=False)
-
-    # Update the optimizer settings (this command is comparable to default_params.update(optimizer_settings)
-    optimizer_settings = dict(default_params, **optimizer_settings)
     return optimizer_settings
 
 
@@ -79,12 +68,6 @@ def load_benchmark_settings() -> Dict:
     with experiment_settings_path.open('r') as fh:
         experiment_settings = yaml.load(fh, yaml.FullLoader)
 
-    # Check that all mandatory fields are in the settings given:
-    mandatory = ['time_limit_in_s', 'cutoff_in_s', 'mem_limit_in_mb', 'import_from', 'import_benchmark']
-    for benchmark, settings in experiment_settings.items():
-        found = [option in settings for option in mandatory]
-        assert all(found), "Missing mandatory option(s) %s in benchmark settings %s" % \
-                           (str([o for b, o in zip(found, mandatory) if not b]), str(settings))
     return experiment_settings
 
 
@@ -116,10 +99,21 @@ def get_benchmark_settings(benchmark: str) -> Dict:
     assert benchmark in benchmark_names,\
         f"benchmark name {benchmark} not found. Should be one of {', '.join(benchmark_names)}"
 
-    settings = experiment_settings[benchmark]
-    settings['is_surrogate'] = settings.get('is_surrogate', False)
+    experiment_settings = experiment_settings[benchmark]
 
-    return experiment_settings[benchmark]
+
+    # Check that all mandatory fields are in the settings given:
+    mandatory = ['time_limit_in_s', 'cutoff_in_s', 'mem_limit_in_mb', 'import_from', 'import_benchmark']
+    found = [option in experiment_settings for option in mandatory]
+    assert all(found), "Missing mandatory option(s) %s in benchmark settings %s" % \
+                       (str([o for b, o in zip(found, mandatory) if not b]), str(experiment_settings))
+
+    # fill missing parameter with default ones:
+    default_params = dict(num_iterations=10000000,
+                          is_surrogate=False)
+    experiment_settings = dict(default_params, **experiment_settings)
+
+    return experiment_settings
 
 
 def load_benchmark(benchmark_name, import_from, use_local: bool) -> Any:
