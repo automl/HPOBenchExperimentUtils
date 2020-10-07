@@ -39,7 +39,8 @@ class RandomSearchOptimizer(Optimizer):
             configuration = cs.sample_configuration()
             result = self.benchmark.objective_function(configuration, rng=self.rng, **self.settings_for_sending)
             results.append((configuration, result))
-            logger.info(f'Config [{num_configs:6d}] - Result: {result["function_value"]}.')
+            logger.info(f'Config [{num_configs:6d}] - Result: {result["function_value"]:.4f} - '
+                        f'Time Used: {result["cost"]}')
             num_configs += 1
 
             if (num_configs % 100) == 0:

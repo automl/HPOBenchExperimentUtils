@@ -134,6 +134,7 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
         sleep(PING_OPTIMIZER_IN_S)
     else:
         process.terminate()
+        logger.info(f'Timelimit: {settings["time_limit_in_s"]} and is now: {benchmark.get_total_time_used()}')
         logger.info(f'Terminate Process after {time() - start_time}')
 
     logger.info(f'Run Benchmark - Finished.')
