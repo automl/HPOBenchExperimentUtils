@@ -3,6 +3,7 @@ from abc import ABC
 from pathlib import Path
 from typing import Union, Dict
 
+from ConfigSpace.hyperparameters import OrdinalHyperparameter
 from hpolib.abstract_benchmark import AbstractBenchmark
 from hpolib.container.client_abstract_benchmark import AbstractBenchmarkClient
 
@@ -44,7 +45,16 @@ class SingleFidelityOptimizer(Optimizer, ABC):
         # determine min and max budget from the fidelity space
         fidelity_space = benchmark.get_fidelity_space()
         self.main_fidelity = get_main_fidelity(fidelity_space, settings)
-        self.min_budget = self.main_fidelity.lower
-        self.max_budget = self.main_fidelity.upper
+
+        if isinstance(self.main_fidelity, OrdinalHyperparameter):
+            order = self.main_fidelity.get_seq_order()
+            self.min_budget = self.main_fidelity.get_value(order.min())
+            self.max_budget = self.main_fidelity.get_value(order.max())
+        else:
+            self.min_budget = self.main_fidelity.lower
+            self.max_budget = self.main_fidelity.upper
+
+        self.min_budget = max(self.min_budget, 0.01)
+        self.max_budget = max(self.min_budget, 0.01)
 
         super(SingleFidelityOptimizer, self).__init__(benchmark, settings, output_dir, rng)

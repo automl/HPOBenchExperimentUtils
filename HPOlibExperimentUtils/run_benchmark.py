@@ -1,5 +1,5 @@
 import logging
-from multiprocessing import Process, Manager
+from multiprocessing import Process, Manager, Value
 from pathlib import Path
 from time import time, sleep
 from typing import Union, Dict
