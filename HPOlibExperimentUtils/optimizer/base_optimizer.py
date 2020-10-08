@@ -55,6 +55,6 @@ class SingleFidelityOptimizer(Optimizer, ABC):
             self.max_budget = self.main_fidelity.upper
 
         self.min_budget = max(self.min_budget, 0.01)
-        self.max_budget = max(self.min_budget, 0.01)
+        self.max_budget = max(self.max_budget, 0.01)
 
         super(SingleFidelityOptimizer, self).__init__(benchmark, settings, output_dir, rng)

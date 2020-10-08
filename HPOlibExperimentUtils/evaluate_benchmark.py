@@ -54,7 +54,8 @@ def save_table(benchmark: str, output_dir: Union[Path, str], rng: int,
 
     result_df.columns = ["_".join(x) for x in result_df.columns.ravel()]
 
-    with open(output_dir / f'{benchmark}_result_table.tex', 'w') as fh:
+    val_str = 'unvalidated' if unvalidated else 'validated'
+    with open(output_dir / f'{benchmark}_{val_str}_result_table.tex', 'w') as fh:
         fh.write(result_df.to_latex())
 
 
@@ -88,9 +89,10 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], rng: int,
     ax.set_ylabel('Mean Loss')
     ax.set_xscale('log')
     ax.set_yscale('log')
-    ax.set_title(f'{benchmark} {val_str} {criterion}')
+    ax.set_title(f'{benchmark} {val_str} {criterion} Seed {rng}')
     ax.legend()
-    plt.show()
+    val_str = 'unvalidated' if unvalidated else 'validated'
+    plt.savefig(output_dir / f'{benchmark}_{val_str}_{criterion}_trajectory.png')
     print(statistics_df)
 
     return 1
@@ -103,9 +105,9 @@ if __name__ == "__main__":
     parser.add_argument('--output_dir', required=True, type=str)
     parser.add_argument('--benchmark', choices=get_benchmark_names(), required=True, type=str)
     parser.add_argument('--rng', required=False, default=0, type=int)
-    parser.add_argument('--criterion', choices=['mean', 'median'], required=True)
     parser.add_argument('--unvalidated', action='store_false', default=True)
 
     args, unknown = parser.parse_known_args()
-    # save_table(**vars(args))
-    plot_trajectory(**vars(args))
+    save_table(**vars(args))
+    plot_trajectory(criterion='mean', **vars(args))
+    plot_trajectory(criterion='median', **vars(args))
