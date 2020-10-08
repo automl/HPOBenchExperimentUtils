@@ -26,6 +26,26 @@ class HpBandSterBaseOptimizer(SingleFidelityOptimizer):
                  intensifier: Union[Type[BOHB], Type[HyperBand], Type[H2BO], Type[RandomSearch]],
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
         super().__init__(benchmark, settings, output_dir, rng)
+
+        # Hpbandster does not handle ordinal hyperparameter.
+        # cast them to categorical.
+        hps = self.cs.get_hyperparameters()
+
+        ordinal_hp = any([isinstance(hp, CS.OrdinalHyperparameter) for hp in hps])
+
+        if ordinal_hp:
+            new_cs = CS.ConfigurationSpace()
+            new_cs.seed(self.rng)
+            for hp in hps:
+                if isinstance(hp, CS.OrdinalHyperparameter):
+                    values = [hp.get_value(index) for index in hp.get_seq_order()]
+                    cat_hp = CS.CategoricalHyperparameter(hp.name, choices=values, default_value=hp.default_value)
+                    new_cs.add_hyperparameter(cat_hp)
+                    logger.info(f'Convert Ordinal Hyperparameter: {hp.name} to categorical.')
+                else:
+                    new_cs.add_hyperparameter(hp)
+            self.cs = new_cs
+
         self.run_id = f'BOHB_optimization_seed_{self.rng}'
         self.intensifier = intensifier
 
@@ -130,8 +150,16 @@ class CustomWorker(Worker):
 
     def compute(self, config: Dict, budget: Any, **kwargs) -> Dict:
         """Here happens the work in the optimization step. """
+
+        if isinstance(self.main_fidelity, CS.hyperparameters.UniformIntegerHyperparameter) \
+                or isinstance(self.main_fidelity, CS.hyperparameters.NormalIntegerHyperparameter) \
+                or isinstance(self.main_fidelity.default_value, int):
+            budget = int(budget)
+
         fidelity = {self.main_fidelity.name: budget}
 
-        result_dict = self.benchmark.objective_function(configuration=config, fidelity=fidelity, **self.settings_for_sending)
+        result_dict = self.benchmark.objective_function(configuration=config,
+                                                        fidelity=fidelity,
+                                                        **self.settings_for_sending)
         return {'loss': result_dict['function_value'],
                 'info': result_dict}
