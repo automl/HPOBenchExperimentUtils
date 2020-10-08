@@ -3,6 +3,7 @@ from pathlib import Path
 from time import time
 from typing import Union, Dict, Type
 
+import ConfigSpace as CS
 import numpy as np
 from hpolib.abstract_benchmark import AbstractBenchmark
 from hpolib.container.client_abstract_benchmark import AbstractBenchmarkClient
@@ -39,10 +40,10 @@ class SMACOptimizer(SingleFidelityOptimizer):
 
     def run(self):
         """ Start the optimization run with SMAC (HB or SH). """
-        number_ta_runs = get_number_ta_runs(iterations=self.settings['num_iterations'],
-                                            min_budget=self.min_budget,
-                                            max_budget=self.max_budget,
-                                            eta=self.settings['eta'])
+        # number_ta_runs = get_number_ta_runs(iterations=self.settings['num_iterations'],
+        #                                     min_budget=self.min_budget,
+        #                                     max_budget=self.max_budget,
+        #                                     eta=self.settings['eta'])
 
         scenario_dict = {"run_obj": "quality",
                          "cs": self.cs,
@@ -54,6 +55,11 @@ class SMACOptimizer(SingleFidelityOptimizer):
 
         def optimization_function_wrapper(cfg, seed, instance, budget):
             """ Helper-function: simple wrapper to use the benchmark with smac"""
+
+            if isinstance(self.main_fidelity, CS.hyperparameters.UniformIntegerHyperparameter) \
+                    or isinstance(self.main_fidelity, CS.hyperparameters.NormalIntegerHyperparameter) \
+                    or isinstance(self.main_fidelity.default_value, int):
+                budget = int(budget)
 
             fidelity = {self.main_fidelity.name: budget}
             result_dict = self.benchmark.objective_function(configuration=cfg,

@@ -99,9 +99,9 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
 
     # Create a Process Manager to get access to the variable "total_time_proxy" of the bookkeeper
     # This variable represents how much time the optimizer has used
-    manager = Manager()
-    total_time_proxy = manager.Value('f', 0)
-    # total_time_proxy = Value('f', 0)
+    # manager = Manager()
+    # total_time_proxy = manager.Value('f', 0)
+    total_time_proxy = Value('f', 0)
 
     benchmark = Bookkeeper(benchmark,
                            output_dir,
