@@ -1,5 +1,5 @@
-from math import exp, log, log10, log2, floor, ceil
-from typing import List, Dict, Tuple, Union, Optional
+from math import exp, log, floor
+from typing import List, Dict, Tuple, Union, Callable
 from pathlib import Path
 from argparse import Namespace
 import logging
@@ -29,7 +29,6 @@ from dragonfly.opt.random_multiobjective_optimiser import \
     euclidean_random_multiobjective_optimiser_args, \
     cp_random_multiobjective_optimiser_args
 from dragonfly.utils.option_handler import load_options
-
 
 
 _dragonfly_args = [
@@ -83,14 +82,14 @@ def _handler_unknown(hyp):
     raise RuntimeError("No valid handler available for hyperparameter of type %s" % type(hyp))
 
 
-def _handle_uniform_float(hyper: UniformFloatHyperparameter):
+def _handle_uniform_float(hyper: UniformFloatHyperparameter) -> Tuple[Dict, Callable, Callable]:
     """
     Handles the mapping of ConfigSpace.UniformFloatHyperparameter objects to dragonfly's 'float' parameters.
     Caveats:
         - Dragonfly does not support sampling on a log scale, therefore this mapping will instead ask dragonfly to
-          uniformly sample integers in the range [log(lower), log(upper)], and then forward the exponentiated sampled
+          uniformly sample values in the range [log(lower), log(upper)], and then forward the exponentiated sampled
           values to the objective function.
-        - It is assumed that the costs are a directly proportional to the sampled value, such that the minimum value
+        - It is assumed that the costs are directly proportional to the sampled value, such that the minimum value
           corresponds to a cost of 0 and the maximum value corresponds to a cost of 1.
     """
     domain = {
@@ -105,7 +104,7 @@ def _handle_uniform_float(hyper: UniformFloatHyperparameter):
     return domain, parser, cost
 
 
-def _handle_uniform_int(hyper: UniformFloatHyperparameter):
+def _handle_uniform_int(hyper: UniformFloatHyperparameter) -> Tuple[Dict, Callable, Callable]:
     """
     Handles the mapping of ConfigSpace.UniformFloatHyperparameter objects to dragonfly's 'int' parameters.
     Caveats:
@@ -127,7 +126,7 @@ def _handle_uniform_int(hyper: UniformFloatHyperparameter):
     return domain, parser, cost
 
 
-def _handle_categorical(hyper: CategoricalHyperparameter):
+def _handle_categorical(hyper: CategoricalHyperparameter) -> Tuple[Dict, Callable, Callable]:
     """
     Handles the mapping of ConfigSpace.CategoricalHyperparameter objects to dragonfly's 'discrete' parameters.
     Caveats:
@@ -155,7 +154,7 @@ def _handle_categorical(hyper: CategoricalHyperparameter):
     return domain, parser, cost
 
 
-def _handle_ordinal(hyper: OrdinalHyperparameter):
+def _handle_ordinal(hyper: OrdinalHyperparameter) -> Tuple[Dict, Callable, Callable]:
     """
     Handles the mapping of ConfigSpace.OrdinalHyperparameter objects to dragonfly's 'discrete_numeric' parameters.
     Caveats:
@@ -193,19 +192,20 @@ _handlers = {
 
 def _configspace_to_dragonfly(params: List[Hyperparameter]) -> Tuple[Dict, List, List]:
     dragonfly_dict = {}
-    parser = []
+    parsers = []
     costs = []
     for param in params:
         d, p, c = _handlers.get(type(param), _handler_unknown)(param)
         dragonfly_dict[param.name] = d
-        parser.append((param.name, p))
+        parsers.append((param.name, p))
         costs.append(c)
 
-    return dragonfly_dict, parser, costs
+    return dragonfly_dict, parsers, costs
 
 
 def configspace_to_dragonfly(domain_cs: ConfigurationSpace, name="hpolib_benchmark",
-                             fidely_cs: ConfigurationSpace = None) -> Tuple[Dict, List, Union[List, None], Union[List, None]]:
+                             fidely_cs: ConfigurationSpace = None) -> \
+        Tuple[Dict, List, Union[List, None], Union[List, None]]:
 
     domain, domain_parsers, _ = _configspace_to_dragonfly(domain_cs.get_hyperparameters())
     out = {'name': name, 'domain': domain}
@@ -215,7 +215,8 @@ def configspace_to_dragonfly(domain_cs: ConfigurationSpace, name="hpolib_benchma
         out['fidel_space'] = fidelity_space
         # out['fidel_to_opt'] = [fidel['max'] for _, fidel in fidelity_space.items()]
         out['fidel_to_opt'] = [param.default_value for param in fidely_cs.get_hyperparameters()]
-        logger.debug("Generated fidelity space %s\nfidelity optimization taret: %s" % (fidelity_space, out['fidel_to_opt']))
+        logger.debug("Generated fidelity space %s\nfidelity optimization taret: %s" %
+                     (fidelity_space, out['fidel_to_opt']))
         return out, domain_parsers, fidelity_parsers, fidelity_costs
     else:
         return out, domain_parsers, None, None
@@ -282,7 +283,7 @@ def generate_trajectory(history: Namespace, save_file: Path, is_cp=False, histor
             })
     import json
     with open(save_file, "w") as f:
-        f.write("\n".join([json.dumps(t) for t in trajectories]))
+        f.write("\n".join([json.dumps(t, indent=4) for t in trajectories]))
         # json.dump(trajectories, f, indent=4)
 
     if save_history:
