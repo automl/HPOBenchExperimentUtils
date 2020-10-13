@@ -100,7 +100,8 @@ def _handle_uniform_float(hyper: UniformFloatHyperparameter) -> Tuple[Dict, Call
     }
 
     parser = (lambda x: exp(x)) if hyper.log else (lambda x: x)
-    cost = lambda x: (x - hyper.lower) / (hyper.upper - hyper.lower)
+    # Here, x is in the mapped space!
+    cost = lambda x: (x - domain['min']) / (domain['max'] - domain['min'])
     return domain, parser, cost
 
 
@@ -122,7 +123,8 @@ def _handle_uniform_int(hyper: UniformFloatHyperparameter) -> Tuple[Dict, Callab
     }
 
     parser = (lambda x: exp(x)) if hyper.log else (lambda x: x)
-    cost = lambda x: (x - hyper.lower) / (hyper.upper - hyper.lower)
+    # Here, x is in the mapped space!
+    cost = lambda x: (x - domain['min']) / (domain['max'] - domain['min'])
     return domain, parser, cost
 
 
