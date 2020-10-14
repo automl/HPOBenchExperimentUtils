@@ -148,7 +148,7 @@ def _handle_categorical(hyper: CategoricalHyperparameter) -> Tuple[Dict, Callabl
     domain = {
         'name': hyper.name,
         'type': 'discrete',
-        'items': hyper.choices
+        'items': list(str(ch) for ch in hyper.choices)
     }
 
     parser = lambda x: element_type(x)
@@ -163,8 +163,8 @@ def _handle_ordinal(hyper: OrdinalHyperparameter) -> Tuple[Dict, Callable, Calla
         - The only difference between an Ordinal and a Categorical is the meta-information of item ordering, which is
           not useful for dragonfly in any case, therefore dragonfly is only provided indices to an internally stored
           ordered sequence.
-        - It is assumed that the costs are a directly proportional to the index location of the sampled value, such
-          that the item with index 0 or the first item in the sequence incurs a cost of 0 and the last item incurs a
+        - It is assumed that the costs are directly proportional to the index location of the sampled value, such that
+          the item with index 0 or the first item in the sequence incurs a cost of 0 and the last item incurs a
           cost of 1.
     """
 
@@ -175,8 +175,8 @@ def _handle_ordinal(hyper: OrdinalHyperparameter) -> Tuple[Dict, Callable, Calla
     n = len(sequence) - 1
     domain = {
         'name': hyper.name,
-        'type': 'discrete',
-        'items': list(range(0, len(sequence)))
+        'type': 'discrete_numeric',
+        'items': '%d:1:%d' % (0, n+1)
     }
 
     parser = lambda x: sequence[x]

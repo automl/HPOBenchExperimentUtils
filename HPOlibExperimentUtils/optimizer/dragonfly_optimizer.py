@@ -31,6 +31,8 @@ class DragonflyOptimizer(Optimizer):
         config, domain_parsers, fidelity_parsers, fidelity_costs = \
             configspace_to_dragonfly(domain_cs=self.cs, fidely_cs=fidel_space)
 
+        logger.debug("Read config:\n%s" % str(config))
+
         try:
             budget = self.settings.get("time_limit_in_s")
             init_frac = self.settings.get("init_capital_frac")
@@ -46,7 +48,7 @@ class DragonflyOptimizer(Optimizer):
             "init_capital": budget * init_frac
         }
         self.options, self.config = load_dragonfly_options(options=dragonfly_options, config=config)
-
+        breakpoint()
         if self.options.max_capital < 0:
             raise ValueError('max_capital (time or number of evaluations) must be positive.')
 
