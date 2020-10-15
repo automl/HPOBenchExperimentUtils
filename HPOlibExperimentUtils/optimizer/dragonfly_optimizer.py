@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 from typing import Union, Dict
 import os
+import numpy as np
 
 from HPOlibExperimentUtils.optimizer.base_optimizer import Optimizer
 from HPOlibExperimentUtils.utils.dragonfly_utils import \
@@ -60,6 +61,7 @@ class DragonflyOptimizer(Optimizer):
             )
 
         def objective(x):
+            _log.debug("Calling no-fidelity objective with configuration %s." % str(conf.get_dictionary()))
             return self.benchmark.objective_function(parse_domain(x))['function_value']
 
         self.parse_domain = parse_domain

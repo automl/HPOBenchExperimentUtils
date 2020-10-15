@@ -100,7 +100,7 @@ def _handle_uniform_float(hyper: UniformFloatHyperparameter) -> Tuple[Dict, Call
         'max': log(hyper.upper) if hyper.log else hyper.upper
     }
 
-    parser = (lambda x: exp(x)) if hyper.log else (lambda x: x)
+    parser = (lambda x: float(exp(x))) if hyper.log else (lambda x: float(x))
     # Here, x is in the mapped space!
     cost = lambda x: (x - domain['min']) / (domain['max'] - domain['min'])
     return domain, parser, cost
@@ -123,7 +123,7 @@ def _handle_uniform_int(hyper: UniformFloatHyperparameter) -> Tuple[Dict, Callab
         'max': floor(log(hyper.upper)) if hyper.log else hyper.upper
     }
 
-    parser = (lambda x: exp(x)) if hyper.log else (lambda x: x)
+    parser = (lambda x: int(exp(x))) if hyper.log else (lambda x: int(x))
     # Here, x is in the mapped space!
     cost = lambda x: (x - domain['min']) / (domain['max'] - domain['min'])
     return domain, parser, cost
@@ -148,13 +148,14 @@ def _handle_categorical(hyper: CategoricalHyperparameter) -> Tuple[Dict, Callabl
     probs = hyper.probabilities
     _log.debug("Given CategoricalHyperparameter has probabilities %s" % str(probs))
     if probs is None:
-        cumprobs = np.repeat(1. / n, n)
-    else:
-        cumprobs = np.cumsum(probs)
-        assert cumprobs.shape[0] == n, "The number of cumulative probability values should match the number of " \
+        probs = np.repeat(1. / n, n)
+    
+    cumprobs = np.cumsum(probs)
+    assert cumprobs.shape[0] == n, "The number of cumulative probability values should match the number of " \
                                        "choices, given cumulative probabilities %s and %d choices." % (str(cumprobs), n)
-        assert cumprobs[-1] == 1., "The given probability values have not been normalized. Cumulative probabilities " \
+    assert cumprobs[-1] == 1., "The given probability values have not been normalized. Cumulative probabilities " \
                                    "are %s" % str(cumprobs)
+    _log.debug("Generated cumulative probabilities: %s" % str(cumprobs))
 
     def _choose(pval: float):
         return np.asarray(pval <= cumprobs).nonzero()[0][0]
@@ -213,7 +214,7 @@ def _configspace_to_dragonfly(params: List[Hyperparameter]) -> Tuple[Dict, List,
     costs = []
     for param in params:
         d, p, c = _handlers.get(type(param), _handler_unknown)(param)
-        _log.debug("Mapped ConfigSpace Hyperparameter %s to dragonfly domain %s" % (str(param, str(d))))
+        _log.debug("Mapped ConfigSpace Hyperparameter %s to dragonfly domain %s" % (str(param), str(d)))
         dragonfly_dict[param.name] = d
         parsers.append((param.name, p))
         costs.append(c)
