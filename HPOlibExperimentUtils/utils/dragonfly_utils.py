@@ -6,7 +6,7 @@ import logging
 import os, uuid
 import numpy as np
 
-logger = logging.getLogger('Dragonfly Utils')
+_log = logging.getLogger(__name__)
 
 # -------------------------------Begin code adapted directly from the dragonfly repo------------------------------------
 
@@ -146,12 +146,15 @@ def _handle_categorical(hyper: CategoricalHyperparameter) -> Tuple[Dict, Callabl
     n = len(hyper.choices)
     choices = tuple(hyper.choices)
     probs = hyper.probabilities
+    _log.debug("Given CategoricalHyperparameter has probabilities %s" % str(probs))
     if probs is None:
         cumprobs = np.repeat(1. / n, n)
     else:
         cumprobs = np.cumsum(probs)
-        assert cumprobs.shape[0] == n, "The number of cumulative probability values should match the number of choices."
-        assert cumprobs[-1] == 1., "The given probability values have not been normalized."
+        assert cumprobs.shape[0] == n, "The number of cumulative probability values should match the number of " \
+                                       "choices, given cumulative probabilities %s and %d choices." % (str(cumprobs), n)
+        assert cumprobs[-1] == 1., "The given probability values have not been normalized. Cumulative probabilities " \
+                                   "are %s" % str(cumprobs)
 
     def _choose(pval: float):
         return np.asarray(pval <= cumprobs).nonzero()[0][0]
@@ -210,6 +213,7 @@ def _configspace_to_dragonfly(params: List[Hyperparameter]) -> Tuple[Dict, List,
     costs = []
     for param in params:
         d, p, c = _handlers.get(type(param), _handler_unknown)(param)
+        _log.debug("Mapped ConfigSpace Hyperparameter %s to dragonfly domain %s" % (str(param, str(d))))
         dragonfly_dict[param.name] = d
         parsers.append((param.name, p))
         costs.append(c)
@@ -229,8 +233,8 @@ def configspace_to_dragonfly(domain_cs: ConfigurationSpace, name="hpolib_benchma
         out['fidel_space'] = fidelity_space
         # out['fidel_to_opt'] = [fidel['max'] for _, fidel in fidelity_space.items()]
         out['fidel_to_opt'] = [param.default_value for param in fidely_cs.get_hyperparameters()]
-        logger.debug("Generated fidelity space %s\nfidelity optimization taret: %s" %
-                     (fidelity_space, out['fidel_to_opt']))
+        _log.debug("Generated fidelity space %s\nfidelity optimization taret: %s" %
+                   (fidelity_space, out['fidel_to_opt']))
         return out, domain_parsers, fidelity_parsers, fidelity_costs
     else:
         return out, domain_parsers, None, None
@@ -318,5 +322,5 @@ def change_cwd(tries=5):
         change_cwd(tries=tries - 1)
     else:
         os.chdir(tmp_dir)
-        logger.debug("Switched to temporary directory %s" % str(tmp_dir))
+        _log.debug("Switched to temporary directory %s" % str(tmp_dir))
     return

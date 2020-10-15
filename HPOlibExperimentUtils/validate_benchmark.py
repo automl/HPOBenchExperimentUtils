@@ -13,8 +13,11 @@ from HPOlibExperimentUtils.core.bookkeeper import Bookkeeper
 from HPOlibExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_benchmark_settings, \
     load_benchmark, get_benchmark_names
 
-logger = logging.getLogger('BenchmarkValidation')
-logger.setLevel(level=logging.DEBUG)
+from HPOlibExperimentUtils import _log as _main_log, _default_log_format
+
+_main_log.setLevel(level=logging.DEBUG)
+_log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format=_default_log_format)
 
 set_env_variables_to_use_only_one_core()
 
@@ -73,7 +76,7 @@ def validate_benchmark(benchmark: str,
         Please take a look into the HPOlib3 Benchamarks to find out if the benchmark needs further parameter.
         Note: Most of them dont need further parameter.
     """
-    logger.info(f'Start validating procedure on benchmark {benchmark}')
+    _log.info(f'Start validating procedure on benchmark {benchmark}')
 
     output_dir = Path(output_dir)
 
@@ -85,13 +88,13 @@ def validate_benchmark(benchmark: str,
     validation_results = {str(configuration): -1234 for configuration in unvalidated_configurations}
 
     already_evaluated_configs = load_validated_configurations(output_dir)
-    logger.info(f'Found {len(unvalidated_trajectories_paths)} trajectories with a total of '
+    _log.info(f'Found {len(unvalidated_trajectories_paths)} trajectories with a total of '
                 f'{len(unvalidated_configurations)} configurations (Unique: {len(validation_results)}) to validate.\n'
                 f'Also, we found {len(already_evaluated_configs)} already validated configurations.')
 
     if not recompute_all:
         validation_results.update(already_evaluated_configs)
-    logger.info('Finished loading unvalidated and already validated configurations')
+    _log.info('Finished loading unvalidated and already validated configurations')
 
     # Load and instantiate the benchmark
     benchmark_settings = get_benchmark_settings(benchmark)
@@ -115,11 +118,11 @@ def validate_benchmark(benchmark: str,
                            is_surrogate=benchmark_settings['is_surrogate'],
                            validate=True)
 
-    logger.debug(f'Benchmark initialized. Additional benchmark parameters {benchmark_params}')
+    _log.debug(f'Benchmark initialized. Additional benchmark parameters {benchmark_params}')
 
-    logger.info(f'Going to validate {len(unvalidated_configurations)} configuration')
+    _log.info(f'Going to validate {len(unvalidated_configurations)} configuration')
     for i_config, configuration in enumerate(unvalidated_configurations):
-        logger.info(f'[{i_config + 1:4d}|{len(unvalidated_configurations):4d}] Evaluate configuration')
+        _log.info(f'[{i_config + 1:4d}|{len(unvalidated_configurations):4d}] Evaluate configuration')
         config_str = str(configuration)
 
         # Configuration was already validated

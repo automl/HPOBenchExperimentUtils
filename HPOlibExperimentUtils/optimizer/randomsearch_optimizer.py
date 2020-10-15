@@ -8,7 +8,7 @@ from hpolib.container.client_abstract_benchmark import AbstractBenchmarkClient
 
 from HPOlibExperimentUtils.optimizer.base_optimizer import Optimizer
 
-logger = logging.getLogger('RandomSearchOptimizer')
+_log = logging.getLogger(__name__)
 
 
 class RandomSearchOptimizer(Optimizer):
@@ -20,7 +20,7 @@ class RandomSearchOptimizer(Optimizer):
     def __init__(self, benchmark: Union[AbstractBenchmark, AbstractBenchmarkClient],
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
         super().__init__(benchmark, settings, output_dir, rng)
-        logger.info('Successfully initialized')
+        _log.info('Successfully initialized')
 
     def setup(self):
         pass
@@ -35,11 +35,11 @@ class RandomSearchOptimizer(Optimizer):
         num_iterations = self.settings['num_iterations']
 
         for iteration in range(num_iterations):
-            logger.debug(f"Iteration: [{iteration + 1}|{num_iterations}] Start sampling configurations")
+            _log.debug(f"Iteration: [{iteration + 1}|{num_iterations}] Start sampling configurations")
             configuration = cs.sample_configuration()
             result = self.benchmark.objective_function(configuration, rng=self.rng, **self.settings_for_sending)
             results.append((configuration, result))
-            logger.info(f'Config [{num_configs:6d}] - Result: {result["function_value"]:.4f} - '
+            _log.info(f'Config [{num_configs:6d}] - Result: {result["function_value"]:.4f} - '
                         f'Time Used: {result["cost"]}')
             num_configs += 1
 

@@ -15,8 +15,7 @@ from hpolib.container.client_abstract_benchmark import AbstractBenchmarkClient
 
 from ConfigSpace import Configuration
 
-logger = logging.getLogger('DragonflyOptimizer')
-# logger.setLevel(logging.DEBUG)
+_log = logging.getLogger(__name__)
 
 class DragonflyOptimizer(Optimizer):
     def __init__(self, benchmark: Union[Bookkeeper, AbstractBenchmark, AbstractBenchmarkClient],
@@ -31,7 +30,7 @@ class DragonflyOptimizer(Optimizer):
         config, domain_parsers, fidelity_parsers, fidelity_costs = \
             configspace_to_dragonfly(domain_cs=self.cs, fidely_cs=fidel_space)
 
-        logger.debug("Read config:\n%s" % str(config))
+        _log.debug("Read config:\n%s" % str(config))
 
         try:
             budget = self.settings.get("time_limit_in_s")
@@ -74,10 +73,10 @@ class DragonflyOptimizer(Optimizer):
             def objective_mf(z, x):
                 conf = parse_domain(x)
                 fidels = parse_fidelities(z)
-                logger.debug("Calling multi-fidelity objective with configuration %s at fidelity %s" % (
+                _log.debug("Calling multi-fidelity objective with configuration %s at fidelity %s" % (
                     conf.get_dictionary(), fidels))
                 ret = self.benchmark.objective_function(conf, fidelity=fidels)
-                logger.debug("multi-fidelity objective returned %s" % (str(ret)))
+                _log.debug("multi-fidelity objective returned %s" % (str(ret)))
                 return ret['function_value']
 
             def cost(z):
@@ -100,7 +99,7 @@ class DragonflyOptimizer(Optimizer):
         change_cwd()
 
         if self.is_mf:
-            logger.info('Minimising multi-fidelity function on\n Fidelity-Space: %s.\n Domain: %s.' % (
+            _log.info('Minimising multi-fidelity function on\n Fidelity-Space: %s.\n Domain: %s.' % (
                 self.config.fidel_space, self.config.domain))
             opt_val, opt_pt, history = minimise_multifidelity_function(
                 self.objective_mf, fidel_space=None, domain=None,
@@ -110,7 +109,7 @@ class DragonflyOptimizer(Optimizer):
                 reporter=self.options.report_progress)
         else:
             # test_obj = objective(test_point)
-            logger.info('Minimising function on Domain: %s.' % self.config.domain)
+            _log.info('Minimising function on Domain: %s.' % self.config.domain)
             opt_val, opt_pt, history = minimise_function(
                 self.objective, domain=None, max_capital=self.options.max_capital,
                 capital_type=self.options.capital_type, opt_method=self.options.opt_method,

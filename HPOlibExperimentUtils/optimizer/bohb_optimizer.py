@@ -13,7 +13,7 @@ from hpolib.container.client_abstract_benchmark import AbstractBenchmarkClient
 from HPOlibExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
 from HPOlibExperimentUtils.utils.optimizer_utils import get_main_fidelity
 
-logger = logging.getLogger('Optimizer')
+_log = logging.getLogger(__name__)
 
 
 class HpBandSterBaseOptimizer(SingleFidelityOptimizer):
@@ -41,7 +41,7 @@ class HpBandSterBaseOptimizer(SingleFidelityOptimizer):
                     values = [hp.get_value(index) for index in hp.get_seq_order()]
                     cat_hp = CS.CategoricalHyperparameter(hp.name, choices=values, default_value=hp.default_value)
                     new_cs.add_hyperparameter(cat_hp)
-                    logger.info(f'Convert Ordinal Hyperparameter: {hp.name} to categorical.')
+                    _log.info(f'Convert Ordinal Hyperparameter: {hp.name} to categorical.')
                 else:
                     new_cs.add_hyperparameter(hp)
             self.cs = new_cs
@@ -101,7 +101,7 @@ class HpBandSterBaseOptimizer(SingleFidelityOptimizer):
         #     incumbent = result.get_incumbent_id()
         #     inc_value = result.get_runs_by_id(incumbent)[-1]['loss']
         #     inc_cfg = id2config[incumbent]['config']
-        # logger.info(f'Inc Config:\n{inc_cfg}\n with Performance: {inc_value:.2f}')
+        # _log.info(f'Inc Config:\n{inc_cfg}\n with Performance: {inc_value:.2f}')
 
 
 class HpBandSterBOHBOptimizer(HpBandSterBaseOptimizer):

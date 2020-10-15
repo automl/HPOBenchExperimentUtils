@@ -5,7 +5,7 @@ from typing import List, Dict, Any
 
 import yaml
 
-logger = logging.getLogger('Runner Utils')
+_log = logging.getLogger(__name__)
 
 
 def transform_unknown_params_to_dict(unknown_args: List) -> Dict:
@@ -140,10 +140,10 @@ def load_benchmark(benchmark_name, import_from, use_local: bool) -> Any:
     Benchmark
     """
     import_str = 'hpolib.' + ('container.' if not use_local else '') + 'benchmarks.' + import_from
-    logger.debug(f'Try to execute command: from {import_str} import {benchmark_name}')
+    _log.debug(f'Try to execute command: from {import_str} import {benchmark_name}')
 
     module = import_module(import_str)
     benchmark_obj = getattr(module, benchmark_name)
-    logger.debug(f'Benchmark {benchmark_name} successfully loaded')
+    _log.debug(f'Benchmark {benchmark_name} successfully loaded')
 
     return benchmark_obj

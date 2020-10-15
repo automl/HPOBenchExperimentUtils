@@ -2,7 +2,7 @@ import logging
 import signal
 from contextlib import contextmanager
 
-logger = logging.getLogger('Utils')
+_log = logging.getLogger(__name__)
 
 
 class TimeoutException(Exception):

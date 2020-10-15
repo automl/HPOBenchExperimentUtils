@@ -8,7 +8,7 @@ from typing import Dict, List
 import numpy as np
 import pandas as pd
 
-logger = logging.getLogger('ValidationUtils')
+_log = logging.getLogger(__name__)
 
 
 def write_validated_trajectory(unvalidated_traj, validation_results, unvalidated_traj_path,
@@ -55,7 +55,7 @@ def load_trajectories(trajectory_paths: List) -> List:
     """
     assert len(trajectory_paths) >= 1
     if len(trajectory_paths) > 1:
-        logger.warning('More than one trajectory file found. Start to combine all found configurations')
+        _log.warning('More than one trajectory file found. Start to combine all found configurations')
 
     # Load all trajectories
     found_trajectories = []
