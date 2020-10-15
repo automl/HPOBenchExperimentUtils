@@ -48,7 +48,7 @@ class DragonflyOptimizer(Optimizer):
             "init_capital": budget * init_frac
         }
         self.options, self.config = load_dragonfly_options(options=dragonfly_options, config=config)
-        breakpoint()
+
         if self.options.max_capital < 0:
             raise ValueError('max_capital (time or number of evaluations) must be positive.')
 

@@ -179,7 +179,7 @@ def _handle_ordinal(hyper: OrdinalHyperparameter) -> Tuple[Dict, Callable, Calla
         'items': '%d:1:%d' % (0, n+1)
     }
 
-    parser = lambda x: sequence[x]
+    parser = lambda x: sequence[int(x)]
     cost = lambda x: x / n
     return domain, parser, cost
 
