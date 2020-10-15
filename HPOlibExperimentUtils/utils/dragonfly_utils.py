@@ -4,6 +4,7 @@ from pathlib import Path
 from argparse import Namespace
 import logging
 import os, uuid
+import numpy as np
 
 logger = logging.getLogger('Dragonfly Utils')
 
@@ -139,20 +140,31 @@ def _handle_categorical(hyper: CategoricalHyperparameter) -> Tuple[Dict, Callabl
         - It is assumed that each individual choice incurs exactly the same cost, 1/N, where N is the number of choices.
     """
 
-    # TODO: Handle item weights
     if not isinstance(hyper.choices, (list, tuple)):
         raise TypeError("Expected choices to be either list or tuple, received %s" % str(type(hyper.choices)))
 
-    element_type = type(hyper.choices[0])
     n = len(hyper.choices)
+    choices = tuple(hyper.choices)
+    probs = hyper.probabilities
+    if probs is None:
+        cumprobs = np.repeat(1. / n, n)
+    else:
+        cumprobs = np.cumsum(probs)
+        assert cumprobs.shape[0] == n, "The number of cumulative probability values should match the number of choices."
+        assert cumprobs[-1] == 1., "The given probability values have not been normalized."
+
+    def _choose(pval: float):
+        return np.asarray(pval <= cumprobs).nonzero()[0][0]
+
     domain = {
         'name': hyper.name,
-        'type': 'discrete',
-        'items': list(str(ch) for ch in hyper.choices)
+        'type': 'float',
+        'min': 0.0,
+        'max': 1.0,
     }
 
-    parser = lambda x: element_type(x)
-    cost = lambda x: 1. / float(n)
+    parser = lambda x: choices[_choose(x)]
+    cost = lambda x: probs[_choose(x)]
     return domain, parser, cost
 
 
@@ -175,8 +187,8 @@ def _handle_ordinal(hyper: OrdinalHyperparameter) -> Tuple[Dict, Callable, Calla
     n = len(sequence) - 1
     domain = {
         'name': hyper.name,
-        'type': 'discrete_numeric',
-        'items': '%d:1:%d' % (0, n+1)
+        'type': 'discrete',
+        'items': "-".join([str(i) for i in range(n+1)])
     }
 
     parser = lambda x: sequence[int(x)]
