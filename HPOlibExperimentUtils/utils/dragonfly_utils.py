@@ -129,46 +129,75 @@ def _handle_uniform_int(hyper: UniformFloatHyperparameter) -> Tuple[Dict, Callab
     return domain, parser, cost
 
 
+# def _handle_categorical(hyper: CategoricalHyperparameter) -> Tuple[Dict, Callable, Callable]:
+#     """
+#     Handles the mapping of ConfigSpace.CategoricalHyperparameter objects to dragonfly's 'discrete' parameters.
+#     Caveats:
+#       - In order to handle weighted probabilities, the actual hyperparameter choices will be stored as an internal
+#       sequence whereas the parameter itself will be converted into a uniform float in the range [0.0, 1.0),
+#       representing a die that determines which item is chosen based on the marginal probabilities of the items.
+#     """
+#
+#     if not isinstance(hyper.choices, (list, tuple)):
+#         raise TypeError("Expected choices to be either list or tuple, received %s" % str(type(hyper.choices)))
+#
+#     n = len(hyper.choices)
+#     choices = tuple(hyper.choices)
+#     probs = hyper.probabilities
+#     _log.debug("Given CategoricalHyperparameter has probabilities %s" % str(probs))
+#     if probs is None:
+#         probs = np.repeat(1. / n, n)
+#
+#     cumprobs = np.cumsum(probs)
+#     assert cumprobs.shape[0] == n, "The number of cumulative probability values should match the number of " \
+#                                        "choices, given cumulative probabilities %s and %d choices." % (str(cumprobs), n)
+#     assert cumprobs[-1] == 1., "The given probability values have not been normalized. Cumulative probabilities " \
+#                                    "are %s" % str(cumprobs)
+#     _log.debug("Generated cumulative probabilities: %s" % str(cumprobs))
+#
+#     def _choose(pval: float):
+#         return np.asarray(pval <= cumprobs).nonzero()[0][0]
+#
+#     domain = {
+#         'name': hyper.name,
+#         'type': 'float',
+#         'min': 0.0,
+#         'max': 1.0,
+#     }
+#
+#     parser = lambda x: choices[_choose(x)]
+#     cost = lambda x: probs[_choose(x)]
+#     return domain, parser, cost
+#
+#
 def _handle_categorical(hyper: CategoricalHyperparameter) -> Tuple[Dict, Callable, Callable]:
     """
     Handles the mapping of ConfigSpace.CategoricalHyperparameter objects to dragonfly's 'discrete' parameters.
     Caveats:
         - Dragonfly cannot handle non-uniform item weights.
-        - Dragonfly internally stores and samples all items as strings. An attempt will be made to automatically handle
-          the type conversion by inferring and storing the data type using a call to type(), hence it is expected that
-          the data types of the items support direct conversion to and from strings.
+        - The items will be internally stored as a list and dragonfly will only be provided the indices of the items
+          as a categorical parameter to choose from.
         - It is assumed that each individual choice incurs exactly the same cost, 1/N, where N is the number of choices.
     """
 
     if not isinstance(hyper.choices, (list, tuple)):
         raise TypeError("Expected choices to be either list or tuple, received %s" % str(type(hyper.choices)))
 
+    if hyper.probabilities is not None:
+        if not hyper.probabilities[:-1] == hyper.probabilities[1:]:
+            raise ValueError("Dragonfly does not support categorical parameters with non-uniform weights.")
+
     n = len(hyper.choices)
     choices = tuple(hyper.choices)
-    probs = hyper.probabilities
-    _log.debug("Given CategoricalHyperparameter has probabilities %s" % str(probs))
-    if probs is None:
-        probs = np.repeat(1. / n, n)
-    
-    cumprobs = np.cumsum(probs)
-    assert cumprobs.shape[0] == n, "The number of cumulative probability values should match the number of " \
-                                       "choices, given cumulative probabilities %s and %d choices." % (str(cumprobs), n)
-    assert cumprobs[-1] == 1., "The given probability values have not been normalized. Cumulative probabilities " \
-                                   "are %s" % str(cumprobs)
-    _log.debug("Generated cumulative probabilities: %s" % str(cumprobs))
-
-    def _choose(pval: float):
-        return np.asarray(pval <= cumprobs).nonzero()[0][0]
 
     domain = {
         'name': hyper.name,
-        'type': 'float',
-        'min': 0.0,
-        'max': 1.0,
+        'type': 'discrete',
+        'items': '-'.join([str(i) for i in range(n)])
     }
 
-    parser = lambda x: choices[_choose(x)]
-    cost = lambda x: probs[_choose(x)]
+    parser = lambda x: choices[int(x)]
+    cost = lambda x: 1. / n
     return domain, parser, cost
 
 
@@ -191,11 +220,12 @@ def _handle_ordinal(hyper: OrdinalHyperparameter) -> Tuple[Dict, Callable, Calla
     n = len(sequence) - 1
     domain = {
         'name': hyper.name,
-        'type': 'discrete',
-        'items': "-".join([str(i) for i in range(n+1)])
+        'type': 'int',
+        'min': 0,
+        'max': n    # Dragonfly uses the closed interval [min, max]
     }
 
-    parser = lambda x: sequence[int(x)]
+    parser = lambda x: sequence[x]
     cost = lambda x: x / n
     return domain, parser, cost
 
