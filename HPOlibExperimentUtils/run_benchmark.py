@@ -86,6 +86,10 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
     _log.debug(f'Optimizer: {optimizer_enum}')
 
     output_dir = Path(output_dir) / benchmark / optimizer / f'run-{rng}'
+    output_dir = output_dir.absolute()
+    if output_dir.is_dir():
+        raise ValueError("Outputdir %s already exists, pass" % output_dir)
+
     output_dir.mkdir(exist_ok=True, parents=True)
     _log.debug(f'Output dir: {output_dir}')
 

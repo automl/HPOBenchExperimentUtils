@@ -150,7 +150,6 @@ class Bookkeeper:
     def objective_function(self, configuration: Union[np.ndarray, List, CS.Configuration, Dict],
                            fidelity: Union[CS.Configuration, Dict, None] = None,
                            rng: Union[np.random.RandomState, int, None] = None, **kwargs) -> Dict:
-
         @concurrent.process(timeout=self.cutoff_limit_in_s)
         def __objective_function(configuration, fidelity, **benchmark_settings_for_sending):
             return self.benchmark.objective_function(configuration=configuration,

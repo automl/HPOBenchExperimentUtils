@@ -21,12 +21,19 @@ logging.basicConfig(level=logging.INFO, format=_default_log_format)
 set_env_variables_to_use_only_one_core()
 
 
-def save_table(benchmark: str, output_dir: Union[Path, str], rng: int,
+def save_table(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str], rng: int,
                unvalidated: bool = True, **kwargs):
+<<<<<<< Updated upstream
     _log.info(f'Start plotting trajectories of benchmark {benchmark}')
     output_dir = Path(output_dir)
     assert output_dir.is_dir(), f'Result folder doesn\"t exist: {output_dir}'
     unique_optimizer, val_str = load_trajectories_as_df(output_dir, unvalidated)
+=======
+    logger.info(f'Start plotting trajectories of benchmark {benchmark}')
+    input_dir = Path(input_dir) / benchmark
+    assert input_dir.is_dir(), f'Result folder doesn\"t exist: {output_dir}'
+    unique_optimizer, val_str = load_trajectories_as_df(input_dir, unvalidated)
+>>>>>>> Stashed changes
     keys = list(unique_optimizer.keys())
 
     result_df = pd.DataFrame()
@@ -57,21 +64,26 @@ def save_table(benchmark: str, output_dir: Union[Path, str], rng: int,
     result_df.columns = ["_".join(x) for x in result_df.columns.ravel()]
 
     val_str = 'unvalidated' if unvalidated else 'validated'
-    with open(output_dir / f'{benchmark}_{val_str}_result_table.tex', 'w') as fh:
+    with open(Path(output_dir) / f'{benchmark}_{val_str}_result_table.tex', 'w') as fh:
         fh.write(result_df.to_latex())
 
 
-def plot_trajectory(benchmark: str, output_dir: Union[Path, str], rng: int,
+def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str], rng: int,
                     criterion: str = 'mean', unvalidated: bool = True):
 
+<<<<<<< Updated upstream
     _log.info(f'Start plotting trajectories of benchmark {benchmark}')
     output_dir = Path(output_dir)
     assert output_dir.is_dir(), f'Result folder doesn\"t exist: {output_dir}'
+=======
+    logger.info(f'Start plotting trajectories of benchmark {benchmark}')
+    input_dir = Path(input_dir) / benchmark
+    assert input_dir.is_dir(), f'Result folder doesn\"t exist: {output_dir}'
+>>>>>>> Stashed changes
 
-    unique_optimizer, val_str = load_trajectories_as_df(output_dir, unvalidated)
+    unique_optimizer, val_str = load_trajectories_as_df(input_dir, unvalidated)
 
     keys = list(unique_optimizer.keys())
-    # key = keys[0]
     statistics_df = []
     for key in keys:
         trajectories = load_trajectories(unique_optimizer[key])
@@ -82,20 +94,21 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], rng: int,
     f, ax = plt.subplots(1, 1)
 
     for key, df in zip(keys, statistics_df):
+
         df[criterion].plot.line(drawstyle='steps-post', linewidth=2, ax=ax, label=key)
         if criterion == 'mean':
             ax.fill_between(df.index, df['mean'] - df['std'], df['mean'] + df['std'], alpha=0.3)
         else:
             ax.fill_between(df.index, df['q25'], df['q75'], alpha=0.3)
 
-    ax.set_ylabel('Mean Loss')
+    ax.set_ylabel('%s Loss' % criterion)
     ax.set_xscale('log')
     ax.set_yscale('log')
     ax.set_title(f'{benchmark} {val_str} {criterion} Seed {rng}')
     ax.legend()
     val_str = 'unvalidated' if unvalidated else 'validated'
-    plt.savefig(output_dir / f'{benchmark}_{val_str}_{criterion}_trajectory.png')
-    print(statistics_df)
+    plt.savefig(Path(output_dir) / f'{benchmark}_{val_str}_{criterion}_trajectory.png')
+    #print(statistics_df)
 
     return 1
 
@@ -105,9 +118,10 @@ if __name__ == "__main__":
                                      description='Plot the trajectories')
 
     parser.add_argument('--output_dir', required=True, type=str)
+    parser.add_argument('--input_dir', required=True, type=str)
     parser.add_argument('--benchmark', choices=get_benchmark_names(), required=True, type=str)
     parser.add_argument('--rng', required=False, default=0, type=int)
-    parser.add_argument('--unvalidated', action='store_false', default=True)
+    parser.add_argument('--unvalidated', action='store_true', default=False)
 
     args, unknown = parser.parse_known_args()
     save_table(**vars(args))

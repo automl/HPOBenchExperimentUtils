@@ -7,7 +7,7 @@ import ConfigSpace as CS
 import numpy as np
 from hpolib.abstract_benchmark import AbstractBenchmark
 from hpolib.container.client_abstract_benchmark import AbstractBenchmarkClient
-from smac.facade.smac_hpo_facade import SMAC4HPO
+from smac.facade.smac_bohb_facade import BOHB4HPO
 from smac.intensification.hyperband import Hyperband
 from smac.intensification.successive_halving import SuccessiveHalving
 from smac.scenario.scenario import Scenario
@@ -19,7 +19,7 @@ from HPOlibExperimentUtils.utils.optimizer_utils import get_number_ta_runs
 _log = logging.getLogger('Optimizer')
 # logging.basicConfig(level=logging.DEBUG)
 root_logger = logging.getLogger()
-# root_logger.setLevel(logging.DEBUG)
+#root_logger.setLevel(logging.DEBUG)
 
 
 class SMACOptimizer(SingleFidelityOptimizer):
@@ -55,27 +55,25 @@ class SMACOptimizer(SingleFidelityOptimizer):
 
         def optimization_function_wrapper(cfg, seed, instance, budget):
             """ Helper-function: simple wrapper to use the benchmark with smac"""
-
             if isinstance(self.main_fidelity, CS.hyperparameters.UniformIntegerHyperparameter) \
                     or isinstance(self.main_fidelity, CS.hyperparameters.NormalIntegerHyperparameter) \
                     or isinstance(self.main_fidelity.default_value, int):
                 budget = int(budget)
-
             fidelity = {self.main_fidelity.name: budget}
             result_dict = self.benchmark.objective_function(configuration=cfg,
                                                             fidelity=fidelity,
                                                             **self.settings_for_sending,
                                                             rng=seed)
-
             return result_dict['function_value']
 
-        smac = SMAC4HPO(scenario=scenario,
+        smac = BOHB4HPO(scenario=scenario,
                         rng=np.random.RandomState(self.rng),
                         tae_runner=optimization_function_wrapper,
                         intensifier=self.intensifier,  # you can also change the intensifier to use like this!
                         intensifier_kwargs={'initial_budget': self.min_budget,
                                             'max_budget': self.max_budget,
-                                            'eta': self.settings['eta']}
+                                            'eta': self.settings['eta'], 
+                                            }
                         )
 
         start_time = time()

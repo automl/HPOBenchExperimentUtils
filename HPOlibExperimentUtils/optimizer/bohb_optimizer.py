@@ -155,7 +155,6 @@ class CustomWorker(Worker):
                 or isinstance(self.main_fidelity, CS.hyperparameters.NormalIntegerHyperparameter) \
                 or isinstance(self.main_fidelity.default_value, int):
             budget = int(budget)
-
         fidelity = {self.main_fidelity.name: budget}
 
         result_dict = self.benchmark.objective_function(configuration=config,

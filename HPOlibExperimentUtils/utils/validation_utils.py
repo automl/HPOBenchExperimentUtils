@@ -113,7 +113,9 @@ def get_statistics_df(optimizer_df):
     select_cols = ['mean', 'std', 'median', 'q25', 'q75', 'mean_inf', 'up', 'lo']
     # Dataframe for the learning curves per optimizer
     piv = optimizer_df.pivot(index='total_objective_costs', columns='id', values='function_values')
+
     piv = piv.fillna(method='ffill')
+    piv = piv.fillna(method='bfill')
 
     piv['mean'] = piv.mean(axis=1)
     piv['std'] = piv.std(axis=1)

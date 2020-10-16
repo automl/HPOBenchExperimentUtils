@@ -3,7 +3,7 @@ from abc import ABC
 from pathlib import Path
 from typing import Union, Dict
 
-from ConfigSpace.hyperparameters import OrdinalHyperparameter
+from ConfigSpace.hyperparameters import OrdinalHyperparameter, UniformIntegerHyperparameter
 from hpolib.abstract_benchmark import AbstractBenchmark
 from hpolib.container.client_abstract_benchmark import AbstractBenchmarkClient
 
@@ -54,7 +54,12 @@ class SingleFidelityOptimizer(Optimizer, ABC):
             self.min_budget = self.main_fidelity.lower
             self.max_budget = self.main_fidelity.upper
 
-        self.min_budget = max(self.min_budget, 0.01)
-        self.max_budget = max(self.max_budget, 0.01)
+        if isinstance(self.main_fidelity, UniformIntegerHyperparameter):
+            # TODO: We need to fix this through never setting an int budget to 0
+            self.min_budget = max(self.min_budget, 1)
+            self.max_budget = max(self.max_budget, 1)
+        else:
+            self.min_budget = max(self.min_budget, 0.01)
+            self.max_budget = max(self.max_budget, 0.01)
 
         super(SingleFidelityOptimizer, self).__init__(benchmark, settings, output_dir, rng)
