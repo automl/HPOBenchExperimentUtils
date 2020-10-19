@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Union, Dict
 import os
 import numpy as np
+import json
 
 from HPOlibExperimentUtils.optimizer.base_optimizer import Optimizer
 from HPOlibExperimentUtils.utils.dragonfly_utils import \
@@ -31,7 +32,7 @@ class DragonflyOptimizer(Optimizer):
         config, domain_parsers, fidelity_parsers, fidelity_costs = \
             configspace_to_dragonfly(domain_cs=self.cs, fidely_cs=fidel_space)
 
-        _log.debug("Read config:\n%s" % str(config))
+        _log.debug("Based on the HPOlib Benchmark, generated the config:\n%s" % str(config))
 
         try:
             budget = self.settings.get("time_limit_in_s")
@@ -48,6 +49,9 @@ class DragonflyOptimizer(Optimizer):
             "init_capital": budget * init_frac
         }
         self.options, self.config = load_dragonfly_options(options=dragonfly_options, config=config)
+
+        _log.debug("Dragonfly optimizer options are:\n%s" % json.dumps(self.options.__dict__, indent=4))
+        _log.debug("Dragonfly optimizer config is:\n%s" % str(self.config.__dict__))
 
         if self.options.max_capital < 0:
             raise ValueError('max_capital (time or number of evaluations) must be positive.')
