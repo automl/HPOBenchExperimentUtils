@@ -71,6 +71,13 @@ class HpBandSterBaseOptimizer(SingleFidelityOptimizer):
 
         worker.run(background=True)
 
+        # Allow at most max_stages stages
+        tmp = self.max_budget
+        for i in range(self.settings.get('max_stages', 10)):
+            tmp /= self.settings['eta']
+        if tmp > self.min_budget:
+            self.min_budget = tmp
+        
         master = self.intensifier(configspace=self.cs,
                                   run_id=self.run_id,
                                   host=ns_host,
@@ -155,7 +162,6 @@ class CustomWorker(Worker):
                 or isinstance(self.main_fidelity, CS.hyperparameters.NormalIntegerHyperparameter) \
                 or isinstance(self.main_fidelity.default_value, int):
             budget = int(budget)
-
         fidelity = {self.main_fidelity.name: budget}
 
         result_dict = self.benchmark.objective_function(configuration=config,
