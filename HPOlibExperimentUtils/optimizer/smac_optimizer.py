@@ -66,6 +66,13 @@ class SMACOptimizer(SingleFidelityOptimizer):
                                                             rng=seed)
             return result_dict['function_value']
 
+        # Allow at most max_stages stages
+        tmp = self.max_budget
+        for i in range(self.settings.get('max_stages', 10)):
+            tmp /= self.settings['eta']
+        if tmp > self.min_budget:
+            self.min_budget = tmp
+
         smac = BOHB4HPO(scenario=scenario,
                         rng=np.random.RandomState(self.rng),
                         tae_runner=optimization_function_wrapper,

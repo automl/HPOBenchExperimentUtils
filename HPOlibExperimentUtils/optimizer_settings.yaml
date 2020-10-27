@@ -28,6 +28,7 @@ smac_hb_eta_2:
 smac_hb_eta_3:
   optimizer: smac_hb
   eta: 3
+  max_stages: 4
 
 # SMAC SUCCESSIVE HALVING ############################################################################################ #
 smac_sh_eta_1:
@@ -69,6 +70,7 @@ hpbandster_bohb_eta_3_test:
 hpbandster_bohb_eta_3:
   optimizer: hpbandster_bohb
   eta: 3
+  max_stages: 4
 
 # HPBANDSTER RANDOMSEARCH ############################################################################################ #
 # learna | metalearna
