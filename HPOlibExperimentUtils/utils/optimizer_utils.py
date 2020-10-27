@@ -79,6 +79,7 @@ class OptimizerEnum(Enum):
     SMAC_HYPERBAND = 'smac_hyperband'
     SMAC_SUCCESSIVE_HALVING = 'smac_successive_halving'
     DRAGONFLY = 'dragonfly'
+    FABOLAS = 'fabolas'
     PURE_RANDOMSEARCH = 'randomsearch'
 
 
@@ -155,6 +156,9 @@ def get_optimizer(optimizer_enum):
     elif optimizer_enum is OptimizerEnum.DRAGONFLY:
         from HPOlibExperimentUtils.optimizer.dragonfly_optimizer import DragonflyOptimizer
         optimizer = DragonflyOptimizer
+    elif optimizer_enum is OptimizerEnum.FABOLAS:
+        from HPOlibExperimentUtils.optimizer.fabolas_optimizer import FabolasOptimizer
+        optimizer = FabolasOptimizer
 
     elif optimizer_enum is OptimizerEnum.SMAC_HYPERBAND:
         from HPOlibExperimentUtils.optimizer.smac_optimizer import SMACOptimizerHyperband

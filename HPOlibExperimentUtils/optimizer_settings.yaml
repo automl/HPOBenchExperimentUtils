@@ -14,6 +14,12 @@ dragonfly_realtime:
   optimizer: dragonfly
   init_capital_frac: 0.1
 
+# FABOLAS ############################################################################################################ #
+fabolas:
+  optimizer: fabolas
+  num_init_evals: 10
+  marginalize_hypers: false
+
 # SMAC HYPERBAND ##################################################################################################### #
 smac_hb_eta_1:
   optimizer: smac_hb
