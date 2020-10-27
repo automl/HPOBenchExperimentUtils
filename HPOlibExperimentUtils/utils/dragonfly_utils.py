@@ -71,8 +71,61 @@ from dragonfly.parse.config_parser import load_parameters
 from dragonfly.exd.cp_domain_utils import load_config
 
 
-def load_dragonfly_options(options: Dict, config: Dict) -> Tuple[Namespace, Dict]:
-    options = load_options(_get_command_line_args(), partial_options=options, cmd_line=False)
+def load_dragonfly_options(hpoexp_settings: Dict, config: Dict) -> Tuple[Namespace, Dict]:
+    """ Interpret the options provided by HPOlibExperimentUtils to those compatible with dragonfly. """
+
+    def construct_default_options():
+        budget = hpoexp_settings.get("time_limit_in_s")
+        try:
+            init_frac = hpoexp_settings.get("init_capital_frac")
+        except KeyError as e:
+            raise RuntimeError("Could not read an initial capital fraction for the optimizer.") from e
+
+        dragonfly_options = {
+            "capital_type": "realtime",
+            "max_capital": float("inf"),
+            "init_capital": budget * init_frac
+        }
+        return dragonfly_options
+
+    def construct_tabular_options():
+        try:
+            init_eval = hpoexp_settings.get("num_init_eval")
+        except KeyError as e:
+            raise RuntimeError("Could not read the number of initial evaluations for the optimizer.") from e
+
+        dragonfly_options = {
+            "capital_type": "num_evals",
+            "max_capital": int("inf"),
+            # Dragonfly prioritises init_capital > init_capital_frac > num_init_evals
+            "init_capital": None,
+            "init_capital_frac": None,
+            "num_init_evals": init_eval
+        }
+
+        return dragonfly_options
+
+    known_types = {
+        "default": construct_default_options,
+        "tabular": construct_tabular_options
+    }
+
+    try:
+        type = hpoexp_settings.get("type")
+    except KeyError as e:
+        raise KeyError(
+            "The key 'type' must be specified for the dragonfly optimizer settings. Accepted values are: "
+            "%s" % str(known_types.keys())) from e
+
+    if type not in known_types:
+        raise ValueError(
+            "Unrecognized value '%s' for key 'type' in dragonfly optimizer settings. Accepted values are: "
+            "%s" % (str(type), str(known_types.keys())))
+
+    partial_options = known_types[type]()
+    partial_options["max_or_min"] = "min"
+
+    options = load_options(_get_command_line_args(), partial_options=partial_options, cmd_line=False)
     config = load_config(load_parameters(config))
     return options, config
 

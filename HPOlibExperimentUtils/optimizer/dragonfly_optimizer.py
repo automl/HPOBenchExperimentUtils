@@ -34,21 +34,7 @@ class DragonflyOptimizer(Optimizer):
 
         _log.debug("Based on the HPOlib Benchmark, generated the config:\n%s" % str(config))
 
-        try:
-            budget = self.settings.get("time_limit_in_s")
-            init_frac = self.settings.get("init_capital_frac")
-        except KeyError as e:
-            raise RuntimeError("Could not read a time limit for the optimizer.") from e
-
-        # TODO: Check if infinite budget and initial budget implementation as here work
-        dragonfly_options = {
-            "capital_type": "realtime",
-            # "max_capital": budget,
-            "max_capital": float("inf"),
-            "max_or_min": "min",
-            "init_capital": budget * init_frac
-        }
-        self.options, self.config = load_dragonfly_options(options=dragonfly_options, config=config)
+        self.options, self.config = load_dragonfly_options(hpoexp_settings=self.settings, config=config)
 
         _log.debug("Dragonfly optimizer options are:\n%s" % json.dumps(self.options.__dict__, indent=4))
         _log.debug("Dragonfly optimizer config is:\n%s" % str(self.config.__dict__))
@@ -65,8 +51,9 @@ class DragonflyOptimizer(Optimizer):
             )
 
         def objective(x):
+            conf = parse_domain(x)
             _log.debug("Calling no-fidelity objective with configuration %s." % str(conf.get_dictionary()))
-            return self.benchmark.objective_function(parse_domain(x))['function_value']
+            return self.benchmark.objective_function(conf)['function_value']
 
         self.parse_domain = parse_domain
         self.objective = objective
@@ -112,14 +99,15 @@ class DragonflyOptimizer(Optimizer):
                 fidel_to_opt=self.config.fidel_to_opt, fidel_cost_func=self.cost,
                 max_capital=self.options.max_capital, capital_type=self.options.capital_type,
                 opt_method=self.options.opt_method, config=self.config, options=self.options,
-                reporter=self.options.report_progress)
+                reporter=self.options.report_progress, worker_manager="synthetic")
         else:
             # test_obj = objective(test_point)
             _log.info('Minimising function on Domain: %s.' % self.config.domain)
             opt_val, opt_pt, history = minimise_function(
                 self.objective, domain=None, max_capital=self.options.max_capital,
                 capital_type=self.options.capital_type, opt_method=self.options.opt_method,
-                config=self.config, options=self.options, reporter=self.options.report_progress)
+                config=self.config, options=self.options, reporter=self.options.report_progress,
+                worker_manager="synthetic")
 
         # Go back to the original working directory we started from
         os.chdir(old_cwd)

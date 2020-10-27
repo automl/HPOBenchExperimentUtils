@@ -3,11 +3,17 @@
 randomsearch:
   optimizer: randomsearch
 
-
 # DRAGONFLY DEFAULT ################################################################################################## #
 dragonfly_default:
   optimizer: dragonfly
-  init_capital_frac: 0.1
+  type: default
+  init_capital_frac: 0.1 # Fraction of total budget
+
+# DRAGONFLY FOR TABULAR BENCHMARKS ################################################################################### #
+dragonfly_tabular:
+  optimizer: dragonfly
+  type: tabular
+  num_init_eval: 10 # Number of iterations
 
 # SMAC HYPERBAND ##################################################################################################### #
 smac_hb_eta_1:
