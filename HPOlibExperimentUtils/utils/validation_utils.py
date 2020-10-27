@@ -8,11 +8,10 @@ from typing import Dict, List
 import numpy as np
 import pandas as pd
 
-logger = logging.getLogger('ValidationUtils')
+_log = logging.getLogger(__name__)
 
 
-def write_validated_trajectory(unvalidated_traj, validation_results, unvalidated_traj_path,
-                               unvalidated_trajectory: Dict, unvalidated_trajectory_path: Path):
+def write_validated_trajectory(unvalidated_traj: List, validation_results: Dict, unvalidated_traj_path: Path):
     """ update the function value in the unvalidated trajectory with the validated function value.
         Then write the validated trajectory in a file, which is in the same folder as the unvalidated trajectory
         file """
@@ -20,9 +19,18 @@ def write_validated_trajectory(unvalidated_traj, validation_results, unvalidated
     # Update the function values
     validated_trajectory = []
     for i_entry, entry in enumerate(unvalidated_traj):
+        # Skip the first entry. That's the boot time entry.
         if i_entry != 0:
             config = str(entry['configuration'])
-            entry['function_value'] = validation_results[config]
+
+            result_dict = validation_results[config]
+
+            entry['function_value'] = result_dict['function_value']
+
+            # TODO: PM: Discuss which fields need to be overwritten.
+            # entry['info']['fidelity'] = result_dict['info']['fidelity']
+            # entry['fidelity'] = result_dict['fidelity']
+
         validated_trajectory.append(entry)
 
     # Write back the validated trajectory
@@ -51,11 +59,11 @@ def load_trajectories(trajectory_paths: List) -> List:
 
     Returns
     -------
-
+    List
     """
     assert len(trajectory_paths) >= 1
     if len(trajectory_paths) > 1:
-        logger.warning('More than one trajectory file found. Start to combine all found configurations')
+        _log.warning('More than one trajectory file found. Start to combine all found configurations')
 
     # Load all trajectories
     found_trajectories = []

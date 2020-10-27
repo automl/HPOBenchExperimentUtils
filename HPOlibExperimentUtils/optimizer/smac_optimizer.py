@@ -16,7 +16,7 @@ from HPOlibExperimentUtils.core.bookkeeper import Bookkeeper
 from HPOlibExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
 from HPOlibExperimentUtils.utils.optimizer_utils import get_number_ta_runs
 
-logger = logging.getLogger('Optimizer')
+_log = logging.getLogger('Optimizer')
 # logging.basicConfig(level=logging.DEBUG)
 root_logger = logging.getLogger()
 # root_logger.setLevel(logging.DEBUG)
@@ -84,7 +84,7 @@ class SMACOptimizer(SingleFidelityOptimizer):
         finally:
             incumbent = smac.solver.incumbent
         end_time = time()
-        logger.info(f'Finished Optimization after {int(end_time - start_time):d}s. Incumbent is {incumbent}')
+        _log.info(f'Finished Optimization after {int(end_time - start_time):d}s. Incumbent is {incumbent}')
 
 
 class SMACOptimizerHyperband(SMACOptimizer):

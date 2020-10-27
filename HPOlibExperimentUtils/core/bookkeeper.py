@@ -94,7 +94,8 @@ def keep_track(validate=False):
                 log_file = self.log_file if not validate else self.validate_log_file
                 self.write_line_to_file(log_file, record)
 
-                self.calculate_incumbent(record, validate=validate)
+                if not validate:
+                    self.calculate_incumbent(record)
 
             self.set_total_time_used(total_time_used)
             return result_dict
@@ -116,7 +117,8 @@ class Bookkeeper:
         self.log_file = output_dir / 'hpolib_runhistory.txt'
         self.trajectory = output_dir / 'hpolib_trajectory.txt'
         self.validate_log_file = output_dir / 'hpolib_runhistory_validation.txt'
-        self.validate_trajectory = output_dir / 'hpolib_trajectory_validation.txt'
+        # self.validate_trajectory = output_dir / 'hpolib_trajectory_validation.txt'
+        # self.validate_log_db = output_dir / 'hpolib_runhistory_validation.db'
 
         self.boot_time = time()
         self.total_objective_costs = 0
@@ -126,8 +128,8 @@ class Bookkeeper:
         self.inc_budget = None
         self.inc_value = None
 
-        self.inc_budget_validated = None
-        self.inc_value_validated = None
+        # self.inc_budget_validated = None
+        # self.inc_value_validated = None
 
         # This variable is a share variable. A proxy to check from outside. It represents the time already used for this
         # benchmark. It also takes into account if the benchmark is a surrogate.
@@ -203,31 +205,22 @@ class Bookkeeper:
             try:
                 json_tricks.dump(dict_to_store, fh)
             except TypeError as e:
-                logger.error("Failed to serialize dictionary to JSON. Received the following types as "
-                             "input:\n%s" % (_get_dict_types(dict_to_store)))
+                logger.error(f"Failed to serialize dictionary to JSON. Received the following types as "
+                             f"input:\n{_get_dict_types(dict_to_store)}")
                 raise e
             fh.write(os.linesep)
 
-    def calculate_incumbent(self, record: Dict, validate: bool):
+    def calculate_incumbent(self, record: Dict):
         # If any progress has made, Bigger is better, etc.
         fidelity = list(record['fidelity'].values())[0]
 
-        inc_value = self.inc_value if not validate else self.inc_value_validated
-        inc_budget = self.inc_budget if not validate else self.inc_budget_validated
+        if self.inc_value is None \
+            or (abs(fidelity - self.inc_budget) <= 1e-8 and ((self.inc_value - record['function_value']) > 1e-8)) \
+            or (fidelity - self.inc_budget) > 1e-8:
 
-        if inc_value is None \
-            or (abs(fidelity - inc_budget) <= 1e-8 and ((inc_value - record['function_value']) > 1e-8))\
-            or (fidelity - inc_budget) > 1e-8:
-
-            if not validate:
-                self.inc_value = record['function_value']
-                self.inc_budget = fidelity
-                self.write_line_to_file(self.trajectory, record, mode='a')
-
-            else:
-                self.inc_value_validated = record['function_value']
-                self.inc_budget_validated = fidelity
-                self.write_line_to_file(self.validate_trajectory, record, mode='a')
+            self.inc_value = record['function_value']
+            self.inc_budget = fidelity
+            self.write_line_to_file(self.trajectory, record, mode='a')
 
     def __del__(self):
         self.benchmark.__del__()

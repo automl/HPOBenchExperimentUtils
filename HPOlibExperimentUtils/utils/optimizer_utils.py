@@ -7,7 +7,7 @@ import numpy as np
 
 from HPOlibExperimentUtils.utils.runner_utils import get_optimizer_settings_names
 
-logger = logging.getLogger('Optimizer Utils')
+_log = logging.getLogger(__name__)
 
 
 def get_sh_ta_runs(min_budget: Union[int, float], max_budget: Union[int, float], eta: int, n0: Optional[int] = None) \
@@ -61,7 +61,7 @@ def prepare_dict_for_sending(benchmark_settings: Dict):
         if not is_jsonable(value):
             if key == 'output_dir':
                 continue
-            logger.warning(f'Value of {key} is not json-serializable. Type was: {type(value)}')
+            _log.warning(f'Value of {key} is not json-serializable. Type was: {type(value)}')
         else:
             benchmark_dict_for_sending[key] = value
     return benchmark_dict_for_sending

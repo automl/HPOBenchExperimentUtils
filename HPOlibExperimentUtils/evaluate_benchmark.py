@@ -12,16 +12,18 @@ from HPOlibExperimentUtils.utils.runner_utils import get_benchmark_names
 from HPOlibExperimentUtils.utils.validation_utils import load_trajectories, load_trajectories_as_df, get_statistics_df, \
     df_per_optimizer
 
-logging.basicConfig(level=logging.DEBUG)
+from HPOlibExperimentUtils import _default_log_format, _log as _main_log
 
-logger = logging.getLogger('Evaluation')
+_main_log.setLevel(logging.DEBUG)
+_log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format=_default_log_format)
 
 set_env_variables_to_use_only_one_core()
 
 
 def save_table(benchmark: str, output_dir: Union[Path, str], rng: int,
                unvalidated: bool = True, **kwargs):
-    logger.info(f'Start plotting trajectories of benchmark {benchmark}')
+    _log.info(f'Start plotting trajectories of benchmark {benchmark}')
     output_dir = Path(output_dir)
     assert output_dir.is_dir(), f'Result folder doesn\"t exist: {output_dir}'
     unique_optimizer, val_str = load_trajectories_as_df(output_dir, unvalidated)
@@ -62,7 +64,7 @@ def save_table(benchmark: str, output_dir: Union[Path, str], rng: int,
 def plot_trajectory(benchmark: str, output_dir: Union[Path, str], rng: int,
                     criterion: str = 'mean', unvalidated: bool = True):
 
-    logger.info(f'Start plotting trajectories of benchmark {benchmark}')
+    _log.info(f'Start plotting trajectories of benchmark {benchmark}')
     output_dir = Path(output_dir)
     assert output_dir.is_dir(), f'Result folder doesn\"t exist: {output_dir}'
 

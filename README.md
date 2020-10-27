@@ -22,7 +22,7 @@ or by using the commandline:
 python run_benchmark.py --output_dir path/to/output \
                         --optimizer smac_hb_eta_2 \
                         --benchmark xgboost \
-                        --task_id 167149
+                        --task_id 167083
                         --rng 1
 ```
 
@@ -57,7 +57,7 @@ validate_benchmark(benchmark='cartpolereduced',
 ```bash 
 python validate_benchmark.py --output_dir path/to/output \
                              --benchmark xgboost \
-                             --task_id 167149
+                             --task_id 167083
                              --rng 1
 ```
 The validated trajectory is automatically saved in human readable form to the output directory. 

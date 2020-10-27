@@ -10,7 +10,7 @@ from hpolib.container.client_abstract_benchmark import AbstractBenchmarkClient
 from HPOlibExperimentUtils.core.bookkeeper import Bookkeeper
 from HPOlibExperimentUtils.utils.optimizer_utils import prepare_dict_for_sending, get_main_fidelity
 
-logger = logging.getLogger('Optimizer')
+_log = logging.getLogger(__name__)
 
 
 class Optimizer(ABC):

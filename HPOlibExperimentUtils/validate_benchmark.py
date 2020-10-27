@@ -13,8 +13,11 @@ from HPOlibExperimentUtils.core.bookkeeper import Bookkeeper
 from HPOlibExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_benchmark_settings, \
     load_benchmark, get_benchmark_names
 
-logger = logging.getLogger('BenchmarkValidation')
-logger.setLevel(level=logging.DEBUG)
+from HPOlibExperimentUtils import _log as _main_log, _default_log_format
+
+_main_log.setLevel(level=logging.INFO)
+_log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format=_default_log_format)
 
 set_env_variables_to_use_only_one_core()
 
@@ -24,6 +27,7 @@ def validate_benchmark(benchmark: str,
                        rng: int,
                        recompute_all: bool = False,
                        use_local: Union[bool, None] = False,
+                       debug: Union[bool, None] = False,
                        **benchmark_params: Dict):
     """
     After running a optimization run, often we want to validate the found configurations. To be more precisely, we want
@@ -73,7 +77,12 @@ def validate_benchmark(benchmark: str,
         Please take a look into the HPOlib3 Benchamarks to find out if the benchmark needs further parameter.
         Note: Most of them dont need further parameter.
     """
-    logger.info(f'Start validating procedure on benchmark {benchmark}')
+    _log.info(f'Start validating procedure on benchmark {benchmark}')
+
+    if debug:
+        _main_log.setLevel(level=logging.DEBUG)
+        from hpolib.util.container_utils import enable_container_debug
+        enable_container_debug()
 
     output_dir = Path(output_dir)
 
@@ -82,16 +91,16 @@ def validate_benchmark(benchmark: str,
     unvalidated_trajectories_paths = list(output_dir.rglob(f'hpolib_trajectory.txt'))
     unvalidated_trajectories = load_trajectories(unvalidated_trajectories_paths)
     unvalidated_configurations = get_unvalidated_configurations(unvalidated_trajectories)
-    validation_results = {str(configuration): -1234 for configuration in unvalidated_configurations}
+    validation_results = {str(configuration): None for configuration in unvalidated_configurations}
 
     already_evaluated_configs = load_validated_configurations(output_dir)
-    logger.info(f'Found {len(unvalidated_trajectories_paths)} trajectories with a total of '
-                f'{len(unvalidated_configurations)} configurations (Unique: {len(validation_results)}) to validate.\n'
-                f'Also, we found {len(already_evaluated_configs)} already validated configurations.')
+    _log.info(f'Found {len(unvalidated_trajectories_paths)} trajectories with a total of '
+              f'{len(unvalidated_configurations)} configurations (Unique: {len(validation_results)}) to validate.\n'
+              f'Also, we found {len(already_evaluated_configs)} already validated configurations.')
 
     if not recompute_all:
         validation_results.update(already_evaluated_configs)
-    logger.info('Finished loading unvalidated and already validated configurations')
+    _log.info('Finished loading unvalidated and already validated configurations')
 
     # Load and instantiate the benchmark
     benchmark_settings = get_benchmark_settings(benchmark)
@@ -115,28 +124,33 @@ def validate_benchmark(benchmark: str,
                            is_surrogate=benchmark_settings['is_surrogate'],
                            validate=True)
 
-    logger.debug(f'Benchmark initialized. Additional benchmark parameters {benchmark_params}')
+    _log.debug(f'Benchmark initialized. Additional benchmark parameters {benchmark_params}')
 
-    logger.info(f'Going to validate {len(unvalidated_configurations)} configuration')
+    _log.info(f'Going to validate {len(unvalidated_configurations)} configuration')
+
+    # The default fidelity should be the highest budget.
+    default_fidelity = benchmark.get_fidelity_space().get_default_configuration()
+
     for i_config, configuration in enumerate(unvalidated_configurations):
-        logger.info(f'[{i_config + 1:4d}|{len(unvalidated_configurations):4d}] Evaluate configuration')
+        _log.info(f'[{i_config + 1:4d}|{len(unvalidated_configurations):4d}] Evaluate configuration')
         config_str = str(configuration)
 
         # Configuration was already validated
-        if validation_results[config_str] != -1234:
+        if validation_results[config_str] is not None:
+            _log.debug('Skip already validated configuration')
             continue
 
         # The bookkeeper writes the trajectory automatically in to a file. But this file then contains only
         # a single entry per configuration. And the configurations are also not in the same order as the "original"
         # trajectory.
-        result_dict = benchmark.objective_function_test(configuration, rng=rng)
-        validation_results[config_str] = result_dict['function_value']
+        validation_results[config_str] = benchmark.objective_function_test(configuration=configuration,
+                                                                           fidelity=default_fidelity,
+                                                                           rng=rng)
 
     benchmark.__del__()
 
     for unvalidated_traj, unvalidated_traj_path in zip(unvalidated_trajectories, unvalidated_trajectories_paths):
-        write_validated_trajectory(unvalidated_traj, validation_results, unvalidated_traj_path, unvalidated_traj,
-                                   unvalidated_traj_path)
+        write_validated_trajectory(unvalidated_traj, validation_results, unvalidated_traj_path)
 
     return 1
 
@@ -152,6 +166,7 @@ if __name__ == "__main__":
     parser.add_argument('--rng', required=False, default=0, type=int)
     parser.add_argument('--recompute_all', action='store_true', default=False)
     parser.add_argument('--use_local', action='store_true', default=False)
+    parser.add_argument('--debug', action='store_true', default=False, help="When given, enables debug mode logging.")
 
     args, unknown = parser.parse_known_args()
     benchmark_params = transform_unknown_params_to_dict(unknown)

@@ -19,8 +19,13 @@ from HPOlibExperimentUtils.utils.runner_utils import transform_unknown_params_to
     load_benchmark, get_benchmark_names, get_optimizer_settings_names, \
     get_optimizer_setting
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('BenchmarkRunner')
+from HPOlibExperimentUtils import _log as _main_log, _default_log_format
+_main_log.setLevel(logging.INFO)
+# from HPOlibExperimentUtils.utils import _log as _utils_log
+# _utils_log.setLevel(logging.DEBUG)
+
+_log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format=_default_log_format)
 
 set_env_variables_to_use_only_one_core()
 # enable_container_debug()
@@ -67,22 +72,22 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
         Note: Most of them dont need further parameter.
     """
 
-    logger.info(f'Start running benchmark {benchmark} with optimizer setting {optimizer}.')
+    _log.info(f'Start running benchmark {benchmark} with optimizer setting {optimizer}.')
 
     if debug:
-        logger.setLevel(level=logging.DEBUG)
+        _main_log.setLevel(level=logging.DEBUG)
 
     optimizer_settings = get_optimizer_setting(optimizer)
     benchmark_settings = get_benchmark_settings(benchmark)
     settings = dict(optimizer_settings, **benchmark_settings)
-    logger.debug(f'Settings loaded: {settings}')
+    _log.debug(f'Settings loaded: {settings}')
 
     optimizer_enum = optimizer_str_to_enum(optimizer_settings['optimizer'])
-    logger.debug(f'Optimizer: {optimizer_enum}')
+    _log.debug(f'Optimizer: {optimizer_enum}')
 
     output_dir = Path(output_dir) / benchmark / optimizer / f'run-{rng}'
     output_dir.mkdir(exist_ok=True, parents=True)
-    logger.debug(f'Output dir: {output_dir}')
+    _log.debug(f'Output dir: {output_dir}')
 
     # Load and instantiate the benchmark
     benchmark_obj = load_benchmark(benchmark_name=settings['import_benchmark'],
@@ -95,7 +100,7 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
         from hpolib import config_file
         container_source = config_file.container_source
         benchmark = benchmark_obj(rng=rng, container_source=container_source, **benchmark_params)
-    logger.info(f'Benchmark successfully initialized.')
+    _log.info(f'Benchmark successfully initialized.')
 
     # Create a Process Manager to get access to the variable "total_time_proxy" of the bookkeeper
     # This variable represents how much time the optimizer has used
@@ -110,14 +115,14 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
                            cutoff_limit_in_s=settings['cutoff_in_s'],
                            is_surrogate=settings['is_surrogate'])
 
-    logger.info(f'BookKeeper initialized. Additional benchmark parameters {benchmark_params}')
+    _log.info(f'BookKeeper initialized. Additional benchmark parameters {benchmark_params}')
 
     optimizer = get_optimizer(optimizer_enum)
     optimizer = optimizer(benchmark=benchmark,
                           settings=settings,
                           output_dir=output_dir,
                           rng=rng)
-    logger.info(f'Optimizer initialized. Start optimization process.')
+    _log.info(f'Optimizer initialized. Start optimization process.')
 
     start_time = time()
     # Currently no optimizer uses the setup function, but we still call it to enable future optimizer implementations to
@@ -134,10 +139,10 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
         sleep(PING_OPTIMIZER_IN_S)
     else:
         process.terminate()
-        logger.info(f'Timelimit: {settings["time_limit_in_s"]} and is now: {benchmark.get_total_time_used()}')
-        logger.info(f'Terminate Process after {time() - start_time}')
+        _log.info(f'Timelimit: {settings["time_limit_in_s"]} and is now: {benchmark.get_total_time_used()}')
+        _log.info(f'Terminate Process after {time() - start_time}')
 
-    logger.info(f'Run Benchmark - Finished.')
+    _log.info(f'Run Benchmark - Finished.')
 
 
 if __name__ == "__main__":
