@@ -21,14 +21,10 @@ from HPOlibExperimentUtils.utils.runner_utils import transform_unknown_params_to
 
 from HPOlibExperimentUtils import _log as _main_log, _default_log_format
 _main_log.setLevel(logging.INFO)
-# from HPOlibExperimentUtils.utils import _log as _utils_log
-# _utils_log.setLevel(logging.DEBUG)
-
 _log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format=_default_log_format)
 
 set_env_variables_to_use_only_one_core()
-# enable_container_debug()
 
 
 def run_benchmark(optimizer: Union[OptimizerEnum, str],
@@ -76,6 +72,8 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
 
     if debug:
         _main_log.setLevel(level=logging.DEBUG)
+        from hpolib.util.container_utils import enable_container_debug
+        enable_container_debug()
 
     optimizer_settings = get_optimizer_setting(optimizer)
     benchmark_settings = get_benchmark_settings(benchmark)
