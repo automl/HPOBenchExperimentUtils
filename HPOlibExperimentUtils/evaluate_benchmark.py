@@ -23,19 +23,12 @@ set_env_variables_to_use_only_one_core()
 
 def save_table(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str], rng: int,
                unvalidated: bool = True, **kwargs):
-<<<<<<< Updated upstream
-    _log.info(f'Start plotting trajectories of benchmark {benchmark}')
-    output_dir = Path(output_dir)
-    assert output_dir.is_dir(), f'Result folder doesn\"t exist: {output_dir}'
-    unique_optimizer, val_str = load_trajectories_as_df(output_dir, unvalidated)
-=======
-    logger.info(f'Start plotting trajectories of benchmark {benchmark}')
+    _log.info(f'Start creating table of benchmark {benchmark}')
     input_dir = Path(input_dir) / benchmark
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {output_dir}'
     unique_optimizer, val_str = load_trajectories_as_df(input_dir, unvalidated)
->>>>>>> Stashed changes
-    keys = list(unique_optimizer.keys())
 
+    keys = list(unique_optimizer.keys())
     result_df = pd.DataFrame()
     for key in keys:
         trajectories = load_trajectories(unique_optimizer[key])
@@ -71,15 +64,9 @@ def save_table(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pa
 def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str], rng: int,
                     criterion: str = 'mean', unvalidated: bool = True):
 
-<<<<<<< Updated upstream
     _log.info(f'Start plotting trajectories of benchmark {benchmark}')
-    output_dir = Path(output_dir)
-    assert output_dir.is_dir(), f'Result folder doesn\"t exist: {output_dir}'
-=======
-    logger.info(f'Start plotting trajectories of benchmark {benchmark}')
     input_dir = Path(input_dir) / benchmark
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {output_dir}'
->>>>>>> Stashed changes
 
     unique_optimizer, val_str = load_trajectories_as_df(input_dir, unvalidated)
 
@@ -102,6 +89,8 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
             ax.fill_between(df.index, df['q25'], df['q75'], alpha=0.3)
 
     ax.set_ylabel('%s Loss' % criterion)
+    xl = ax.get_xlim()
+    ax.set_xlim([1, xl[1]])
     ax.set_xscale('log')
     ax.set_yscale('log')
     ax.set_title(f'{benchmark} {val_str} {criterion} Seed {rng}')
@@ -125,5 +114,5 @@ if __name__ == "__main__":
 
     args, unknown = parser.parse_known_args()
     save_table(**vars(args))
-    plot_trajectory(criterion='mean', **vars(args))
+    #plot_trajectory(criterion='mean', **vars(args))
     plot_trajectory(criterion='median', **vars(args))

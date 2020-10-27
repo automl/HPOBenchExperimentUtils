@@ -1,14 +1,14 @@
 ---
 
 cartpolereduced:
-  time_limit_in_s: 4000
+  time_limit_in_s: 86400
   cutoff_in_s: 1800
   mem_limit_in_mb: 8000
   import_from: rl.cartpole
   import_benchmark: CartpoleReduced
 
 cartpolefull:
-  time_limit_in_s: 4000
+  time_limit_in_s: 86400
   cutoff_in_s: 1800
   mem_limit_in_mb: 8000
   import_from: rl.cartpole
