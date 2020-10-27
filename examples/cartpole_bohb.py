@@ -10,26 +10,21 @@ and the HPOlib3 ``pip install <dir of hpolib>``
 """
 
 import logging
-from pathlib import Path
-
-from HPOlibExperimentUtils.core.optimizer import OptimizerEnum
-from HPOlibExperimentUtils.run_benchmark import run_benchmark
-from HPOlibExperimentUtils.validate_benchmark import validate_benchmark
-
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('BOHB on cartpole')
-root_logger = logging.getLogger()
+logger.setLevel(level=logging.DEBUG)
 
-root_logger.setLevel(logging.DEBUG)
+from pathlib import Path
+from HPOlibExperimentUtils import validate_benchmark, run_benchmark
 
 benchmark = 'cartpolereduced'
-output_dir = Path('../example_dir/cartpole_bohb2')
+output_dir = Path('../example_dir/cartpole')
 rng = 1
 
-run_benchmark(optimizer=OptimizerEnum.BOHB,
+run_benchmark(optimizer='hpbandster_rs_eta_3_test',
               benchmark=benchmark,
               output_dir=output_dir,
-              rng=rng)
+              rng=rng,
+              use_local=False)
 
 validate_benchmark(benchmark=benchmark,
                    output_dir=output_dir,

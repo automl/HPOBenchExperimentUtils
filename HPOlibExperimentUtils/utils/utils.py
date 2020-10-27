@@ -2,7 +2,7 @@ import logging
 import signal
 from contextlib import contextmanager
 
-logger = logging.getLogger('Utils')
+_log = logging.getLogger(__name__)
 
 
 class TimeoutException(Exception):
@@ -11,6 +11,7 @@ class TimeoutException(Exception):
 
 @contextmanager
 def time_limit(seconds):
+    """ Simple time limit enforcer script. We use it to make sure that each configuration only runs a given time. """
     def signal_handler(signum, frame):
         raise TimeoutException("Timed out!")
 

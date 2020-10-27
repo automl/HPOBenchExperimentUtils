@@ -2,5 +2,6 @@ json_tricks>=3
 pandas>=0.25
 numpy>=1.15
 matplotlib>=3.0.0
-smac
-hpbandster
+setuptools>=49.6.0
+configspace>=0.4.15
+pebble>=4.5.3

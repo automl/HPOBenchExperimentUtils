@@ -129,3 +129,6 @@ dmypy.json
 .pyre/
 /.idea/
 /experiments/
+
+# Local scripts directory
+local_scripts
