@@ -43,7 +43,7 @@ def main(args):
 
             cmd = "%s/validate_benchmark.py --output_dir %s/%s/%s --benchmark %s --rng %d" % (base, args.out_run, benchmark, optimizer, benchmark, 1)
             val_cmd.append(cmd)
-        cmd = "%s/evaluate_benchmark.py --output_dir %s/ --input_dir %s/ --benchmark %s --rng %d" % (base, args.out_eval, args.out_run, benchmark, 1)
+        cmd = "%s/evaluate_benchmark.py --output_dir %s/ --input_dir %s/ --benchmark %s --agg median --what all" % (base, args.out_eval, args.out_run, benchmark)
         eval_cmd.append(cmd)
         cmd += " --unvalidated"
         evalu_cmd.append(cmd)
