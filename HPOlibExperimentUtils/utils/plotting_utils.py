@@ -21,7 +21,7 @@ plot_dc = {
     "xscale": "log",
     "yscale": "linear",
     },
-    "cartpolereduces": {
+    "cartpolereduced": {
     "xlim_lo": 10**1,
     "ylim_lo": 10**2,
     "ylim_up": 10**4,
