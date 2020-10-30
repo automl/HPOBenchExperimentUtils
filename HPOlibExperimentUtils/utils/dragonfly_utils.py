@@ -170,18 +170,36 @@ def _handle_uniform_int(hyper: UniformFloatHyperparameter) -> Tuple[Dict, Callab
         - It is assumed that the costs are a directly proportional to the sampled value, such that the minimum value
           corresponds to a cost of 0 and the maximum value corresponds to a cost of 1.
     """
-    domain = {
-        'name': hyper.name,
-        'type': 'int',
-        'min': floor(log(hyper.lower)) if hyper.log else hyper.lower,
-        'max': floor(log(hyper.upper)) if hyper.log else hyper.upper
-    }
+    if hyper.log:
+        lower = log(hyper.lower)
+        upper = log(hyper.upper)
+        width = upper - lower
 
-    parser = (lambda x: int(exp(x))) if hyper.log else (lambda x: int(x))
-    # Here, x is in the mapped space!
-    cost = lambda x: (x - domain['min']) / (domain['max'] - domain['min'])
-    default = floor(log(hyper.default_value)) if hyper.log else hyper.default_value
-    return domain, parser, cost, default
+        domain = {
+            'name': hyper.name,
+            'type': 'float',
+            'min': 0.0,
+            'max': 1.0
+        }
+
+        # Here, x is in the dragonfly space!
+        parser = lambda x: round(exp(x * width + lower))
+        cost = lambda x: x
+        default = (log(hyper.default_value) - lower) / (upper - lower)
+        return domain, parser, cost, default
+    else:
+        domain = {
+            'name': hyper.name,
+            'type': 'int',
+            'min': hyper.lower,
+            'max': hyper.upper
+        }
+
+        # Here, x is in the dragonfly space!
+        parser = lambda x: int(x)
+        cost = lambda x: (x - hyper.lower + 1) / (hyper.upper - hyper.lower + 1)
+        default = hyper.default_value
+        return domain, parser, cost, default
 
 
 # def _handle_categorical(hyper: CategoricalHyperparameter) -> Tuple[Dict, Callable, Callable]:
