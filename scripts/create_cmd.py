@@ -5,6 +5,7 @@ expset_dc = {
     "NAS201": ["Cifar10NasBench201Benchmark", "Cifar10ValidNasBench201Benchmark", "Cifar100NasBench201Benchmark", "ImageNetNasBench201Benchmark"],
     "NAS101": ["NASCifar10ABenchmark", "NASCifar10BBenchmark", "NASCifar10CBenchmark"],
     "NASTAB": ["SliceLocalizationBenchmark", "ProteinStructureBenchmark", "NavalPropulsionBenchmark", "ParkinsonsTelemonitoringBenchmark"],
+    "pybnn": ["BNNOnBostonHousing", "BNNOnProteinStructure", "BNNOnYearPrediction"],
     "rl": ["cartpolereduced"],
     "learna": ["metalearna", "learna"],
 }
