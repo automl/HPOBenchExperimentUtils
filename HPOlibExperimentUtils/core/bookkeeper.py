@@ -55,6 +55,9 @@ def keep_track(validate=False):
                         'cost': self.cutoff_limit_in_s,
                         'info': {'fidelity': fidelity or -1234}}
 
+            if not np.isfinite(result_dict["function_value"]):
+                result_dict["function_value"] = MAXINT
+
             self.total_objective_costs += result_dict['cost']
 
             # Measure the total time since the start up. This is the budget which is used by the optimization procedure.
@@ -64,7 +67,7 @@ def keep_track(validate=False):
                 total_time_used -= (finish_time - start_time)
                 total_time_used += self.total_objective_costs
 
-            # Time used for this configuration. The benchamrk returns as cost the time of the function call +
+            # Time used for this configuration. The benchmark returns as cost the time of the function call +
             # the cost of the configuration. If the benchmark is a surrogate, the cost field includes the costs for the
             # function call, as well as surrogate costs. Thus, it is sufficient to use the costs returned by the
             # benchmark.
