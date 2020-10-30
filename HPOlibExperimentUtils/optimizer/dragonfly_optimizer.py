@@ -32,7 +32,7 @@ class DragonflyOptimizer(Optimizer):
         config, domain_parsers, fidelity_parsers, fidelity_costs = \
             configspace_to_dragonfly(domain_cs=self.cs, fidelity_cs=fidel_space)
 
-        _log.debug("Based on the HPOlib Benchmark, generated the config:\n%s" % str(config))
+        _log.debug("Based on the HPOlib Benchmark, generated the config:\n%s" % json.dumps(config, indent=4))
 
         self.options, self.config = load_dragonfly_options(hpoexp_settings=self.settings, config=config)
 

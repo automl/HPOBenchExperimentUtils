@@ -3,13 +3,16 @@
 randomsearch:
   optimizer: randomsearch
 
-# DRAGONFLY ########################################################################################################## #
-dragonfly:
+# DRAGONFLY DEFAULT ################################################################################################## #
+dragonfly_default:
   optimizer: dragonfly
-  type: default
   init_iter_per_dim: 10
+  init_capital_frac: 0.1 # Ignored since 'init_iter_per_dim' is present
+
+# DRAGONFLY REALTIME ################################################################################################# #
+dragonfly_realtime:
+  optimizer: dragonfly
   init_capital_frac: 0.1
-  # Priorities: num_iter_per_dim > init_capital_frac
 
 # SMAC HYPERBAND ##################################################################################################### #
 smac_hb_eta_1:

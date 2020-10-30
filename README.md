@@ -78,6 +78,7 @@ timelimits and cutoff times are defined in the
 | HpBandSter - Random Search 	| hpbandster_rs_eta_2_learna, hpbandster_rs_eta_2, hpbandster_rs_eta_3       	|
 | HpBandSter - Hyperband     	| hpbandster_hb_eta_2_learna, hpbandster_hb_eta_2, hpbandster_hb_eta_3       	|
 | HpBandSter - H2BO          	| hpbandster_h2bo_eta_2_learna, hpbandster_h2bo_eta_2, hpbandster_h2bo_eta_3 	|
+| Dragonfly                   	| dragonfly_default, dragonfly_realtime                                         |
 
 ### Available Benchmarks:
 | Benchmarks                                    	| benchmark token                   	| HPOlib2 Link                                                                                      	|
@@ -157,3 +158,9 @@ hpbandster_hb_eta_3_test:
 - Implement the run method. 
 - Add a optimizer setting to the optimizer_settings.yaml as described above. 
 It's as simple as that :wink:
+
+### Some optimizer-specific settings:
+| Optimizer                 | setting name          | Description                                                   |
+|---------------------------|-----------------------|---------------------------------------------------------------|
+| Dragonfly                 | init_iter_per_dim     | An integer N such that, given that the benchmark's configuration space has D dimensions, NxD iterations will be used to randomly sample configurations to warm-start the optimizer with. Makes dragonfly use an internal budget type of 'num_evals'. |
+| Dragonfly                 | init_capital_frac     | A value f in the closed interval [0, 1] such that, given that a benchmark specifies a time limit of T seconds, f * t seconds will be used for initialization. Only comes into effect when 'init_iter_per_dim' is not given. Also switches dragonfly's internal budget type to 'realtime'. |
