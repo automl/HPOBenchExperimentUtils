@@ -3,7 +3,7 @@ from typing import List, Dict, Tuple, Union, Callable
 from pathlib import Path
 from argparse import Namespace
 import logging
-import os, uuid
+import os, uuid, sys
 import numpy as np
 
 _log = logging.getLogger(__name__)
@@ -96,7 +96,7 @@ def load_dragonfly_options(hpoexp_settings: Dict, config: Dict) -> Tuple[Namespa
 
         dragonfly_options = {
             "capital_type": "num_evals",
-            "max_capital": int("inf"),
+            "max_capital": sys.maxsize,
             # Dragonfly prioritises init_capital > init_capital_frac > num_init_evals
             "init_capital": None,
             "init_capital_frac": None,
@@ -406,10 +406,14 @@ def change_cwd(tries=5):
     if tries <= 0:
         raise RuntimeError("Could not create random temporary dragonfly directory due to timeout.")
 
+    tmp_dir = Path(os.getenv('TMPDIR', "/tmp")) / "dragonfly" / str(uuid.uuid4())
+
     try:
-        tmp_dir = Path("/tmp") / "dragonfly" / str(uuid.uuid4())
         tmp_dir.mkdir(parents=True, exist_ok=False)
     except FileExistsError:
+        change_cwd(tries=tries - 1)
+    except PermissionError as e:
+        _log.debug("Encountered PermissionError: %s" % e.strerror)
         change_cwd(tries=tries - 1)
     else:
         os.chdir(tmp_dir)
