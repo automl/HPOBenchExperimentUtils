@@ -138,11 +138,10 @@ def _handle_uniform_float(hyper: UniformFloatHyperparameter) -> Tuple[Dict, Call
     parser = (lambda x: float(exp(x))) if hyper.log else (lambda x: float(x))
     # Here, x is in the mapped space!
     cost = lambda x: (x - domain['min']) / (domain['max'] - domain['min'])
-    default = log(hyper.default_value) if hyper.log else hyper.default_value
-    return domain, parser, cost, default
+    return domain, parser, cost, domain['max']
 
 
-def _handle_uniform_int(hyper: UniformFloatHyperparameter) -> Tuple[Dict, Callable, Callable, int]:
+def _handle_uniform_int(hyper: UniformFloatHyperparameter) -> Tuple[Dict, Callable, Callable, Union[int, float]]:
     """
     Handles the mapping of ConfigSpace.UniformFloatHyperparameter objects to dragonfly's 'int' parameters.
     Caveats:
@@ -167,8 +166,7 @@ def _handle_uniform_int(hyper: UniformFloatHyperparameter) -> Tuple[Dict, Callab
         # Here, x is in the dragonfly space!
         parser = lambda x: round(exp(x * width + lower))
         cost = lambda x: x
-        default = (log(hyper.default_value) - lower) / (upper - lower)
-        return domain, parser, cost, default
+        return domain, parser, cost, domain['max']
     else:
         domain = {
             'name': hyper.name,
@@ -180,11 +178,10 @@ def _handle_uniform_int(hyper: UniformFloatHyperparameter) -> Tuple[Dict, Callab
         # Here, x is in the dragonfly space!
         parser = lambda x: int(x)
         cost = lambda x: (x - hyper.lower + 1) / (hyper.upper - hyper.lower + 1)
-        default = hyper.default_value
-        return domain, parser, cost, default
+        return domain, parser, cost, domain['max']
 
 
-def _handle_categorical(hyper: CategoricalHyperparameter) -> Tuple[Dict, Callable, Callable, int]:
+def _handle_categorical(hyper: CategoricalHyperparameter) -> Tuple[Dict, Callable, Callable, str]:
     """
     Handles the mapping of ConfigSpace.CategoricalHyperparameter objects to dragonfly's 'discrete' parameters.
     Caveats:
@@ -192,6 +189,7 @@ def _handle_categorical(hyper: CategoricalHyperparameter) -> Tuple[Dict, Callabl
         - The items will be internally stored as a list and dragonfly will only be provided the indices of the items
           as a categorical parameter to choose from.
         - It is assumed that each individual choice incurs exactly the same cost, 1/N, where N is the number of choices.
+        - Dragonfly will read the indices as strings.
     """
 
     if not isinstance(hyper.choices, (list, tuple)):
@@ -212,8 +210,7 @@ def _handle_categorical(hyper: CategoricalHyperparameter) -> Tuple[Dict, Callabl
 
     parser = lambda x: choices[int(x)]
     cost = lambda x: 1. / n
-    default = str(choices.index(hyper.default_value))
-    return domain, parser, cost, default
+    return domain, parser, cost, str(n - 1)
 
 
 def _handle_ordinal(hyper: OrdinalHyperparameter) -> Tuple[Dict, Callable, Callable, int]:
@@ -242,8 +239,7 @@ def _handle_ordinal(hyper: OrdinalHyperparameter) -> Tuple[Dict, Callable, Calla
 
     parser = lambda x: sequence[x]
     cost = lambda x: x / n
-    default = sequence.index(hyper.default_value)
-    return domain, parser, cost, default
+    return domain, parser, cost, domain['max']
 
 
 _handlers = {
@@ -258,16 +254,16 @@ def _configspace_to_dragonfly(params: List[Hyperparameter]) -> Tuple[Dict, List,
     dragonfly_dict = {}
     parsers = []
     costs = []
-    defaults = []
+    maxima = []
     for param in params:
-        d, p, c, default = _handlers.get(type(param), _handler_unknown)(param)
+        d, p, c, m = _handlers.get(type(param), _handler_unknown)(param)
         _log.debug("Mapped ConfigSpace Hyperparameter %s to dragonfly domain %s" % (str(param), str(d)))
         dragonfly_dict[param.name] = d
         parsers.append((param.name, p))
         costs.append(c)
-        defaults.append(default)
+        maxima.append(m)
 
-    return dragonfly_dict, parsers, costs, defaults
+    return dragonfly_dict, parsers, costs, maxima
 
 
 def configspace_to_dragonfly(domain_cs: ConfigurationSpace, name="hpolib_benchmark",
@@ -278,13 +274,12 @@ def configspace_to_dragonfly(domain_cs: ConfigurationSpace, name="hpolib_benchma
     out = {'name': name, 'domain': domain}
     if fidelity_cs:
         # fidelity_space, fidelity_parsers = _generate_xgboost_fidelity_space(fidelity_cs)
-        fidelity_space, fidelity_parsers, fidelity_costs, default_values = \
+        fidelity_space, fidelity_parsers, fidelity_costs, fidelity_maxima = \
             _configspace_to_dragonfly(fidelity_cs.get_hyperparameters())
         out['fidel_space'] = fidelity_space
-        # out['fidel_to_opt'] = [fidel['max'] for _, fidel in fidelity_space.items()]
-        out['fidel_to_opt'] = default_values
-        _log.debug("Generated fidelity space %s\nfidelity optimization taret: %s" %
-                   (fidelity_space, out['fidel_to_opt']))
+        out['fidel_to_opt'] = fidelity_maxima
+        _log.debug("Generated fidelity space %s\nFidelity optimization target: %s" %
+                   (out['fidel_space'], out['fidel_to_opt']))
         return out, domain_parsers, fidelity_parsers, fidelity_costs
     else:
         return out, domain_parsers, None, None
