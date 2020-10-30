@@ -10,6 +10,7 @@ _main_log.setLevel(logging.DEBUG)
 _log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format=_default_log_format)
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog='HPOlib3 Wrapper - Plotting tool',
                                      description='Plot the trajectories')

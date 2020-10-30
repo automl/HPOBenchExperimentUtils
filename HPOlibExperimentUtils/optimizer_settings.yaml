@@ -76,4 +76,5 @@ hpbandster_sh_eta_2:
   eta: 2
   max_stages: 5
   display_name: "SH (eta2)"
+
 ...
