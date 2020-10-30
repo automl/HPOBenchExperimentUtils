@@ -6,7 +6,7 @@ from HPOlibExperimentUtils.utils.plotting_utils import plot_dc
 from HPOlibExperimentUtils import _default_log_format, _log as _main_log
 from HPOlibExperimentUtils.utils.validation_utils import load_trajectories, load_trajectories_as_df,\
     get_statistics_df, df_per_optimizer
-from HPOlibExperimentUtils.utils.runner_utils import get_benchmark_settings, get_optimizer_setting
+from HPOlibExperimentUtils.utils.runner_utils import get_optimizer_setting
 
 import matplotlib.pyplot as plt
 
@@ -19,7 +19,8 @@ def read_trajectories(benchmark: str, input_dir: Path, train: bool=True):
     input_dir = Path(input_dir) / benchmark
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
 
-    unique_optimizer, val_str = load_trajectories_as_df(input_dir, train)
+    unique_optimizer = load_trajectories_as_df(input_dir=input_dir,
+                                               which="train" if train else "test")
     optimizer_names = list(unique_optimizer.keys())
     statistics_df = []
     _log.critical("Found: " + ",".join(optimizer_names))
@@ -41,8 +42,6 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
                                                                      train=unvalidated,
                                                                      )
     # start plotting the trajectories:
-    benchmark_settings = get_benchmark_settings(benchmark)
-
     f, ax = plt.subplots(1, 1)
     min_ = 100000
     max_ = -1

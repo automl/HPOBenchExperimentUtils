@@ -20,7 +20,8 @@ def save_table(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pa
     _log.info(f'Start creating table of benchmark {benchmark}')
     input_dir = Path(input_dir) / benchmark
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
-    unique_optimizer, val_str = load_trajectories_as_df(input_dir, unvalidated)
+    unique_optimizer = load_trajectories_as_df(input_dir=input_dir,
+                                               which="train" if unvalidated else "test")
 
     keys = list(unique_optimizer.keys())
     result_df = pd.DataFrame()
