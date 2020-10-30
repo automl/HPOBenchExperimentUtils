@@ -164,6 +164,7 @@ def df_per_optimizer(key, unvalidated_trajectories):
         trajectory_df['total_time_used'] = total_time_used
         trajectory_df['total_objective_costs'] = total_obj_costs
         trajectory_df['function_values'] = function_values
+        trajectory_df['fidel_values'] = fidel_values
         trajectory_df['costs'] = costs
         trajectory_df['start_time'] = start
         trajectory_df['finish_time'] = finish

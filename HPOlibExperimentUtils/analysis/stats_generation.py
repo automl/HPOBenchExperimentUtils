@@ -8,7 +8,7 @@ import numpy as np
 from HPOlibExperimentUtils import _default_log_format, _log as _main_log
 from HPOlibExperimentUtils.utils.validation_utils import load_trajectories, \
     load_trajectories_as_df, df_per_optimizer
-from HPOlibExperimentUtils.utils.plotting_utils import color_per_opt
+from HPOlibExperimentUtils.utils.plotting_utils import color_per_opt, marker_per_opt
 from HPOlibExperimentUtils.utils.runner_utils import get_optimizer_setting
 
 _main_log.setLevel(logging.DEBUG)
@@ -30,21 +30,30 @@ def plot_fidels(benchmark: str, output_dir: Union[Path, str], input_dir: Union[P
         df = df_per_optimizer(opt, rhs)
         stat_dc[opt] = df
 
-    plt.figure(figsize=[10, 5])
-    a = plt.subplot(111)
-    for opt in stat_dc:
+    plt.figure(figsize=[5*len(stat_dc), 5])
+
+    ax_old = None
+    for i, opt in enumerate(stat_dc):
+        ax = plt.subplot(1, len(stat_dc), i+1, sharey=ax_old)
         # get queried fidels
         df = stat_dc[opt]
         nseeds = df['id'].unique()
+        avg = []
         for seed in nseeds:
-            fidels = df[df['id'] == seed]["fidelity_value"]
+            fidels = df[df['id'] == seed]["fidel_values"]
+            avg.append(len(fidels))
             steps = df[df['id'] == seed]["total_time_used"]
             label = get_optimizer_setting(opt).get("display_name", opt)
 
-            a.scatter(steps, fidels, edgecolor=color_per_opt.get(opt, "k"), facecolor="none",
-                      marker="o", label=label if seed == 0 else None)
-    a.legend()
-    a.set_xscale("log")
+            plt.scatter(steps, fidels, edgecolor=color_per_opt.get(opt, "k"), facecolor="none",
+                        marker=marker_per_opt[opt], alpha=0.5,
+                        label=label if seed == nseeds[-1] else None)
+        plt.xscale("log")
+        plt.xlabel("Runtime in seconds")
+        plt.legend(title="%g evals on avg" % np.mean(avg))
+        ax_old = ax
+
+    plt.ylabel("Fidelity")
     plt.tight_layout()
     plt.savefig(Path(output_dir) / f'{benchmark}_fidel.png')
 

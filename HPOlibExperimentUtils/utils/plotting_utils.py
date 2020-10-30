@@ -40,3 +40,12 @@ color_per_opt = {
     "randomsearch": list_of_colors[2],
     "dragonfly_default": list_of_colors[3]
 }
+
+marker_per_opt = {
+    "hpbandster_bohb_eta_3": "o",
+    "hpbandster_bohb_eta_2": "o",
+    "smac_hb_eta_3": "s",
+    "smac_hb_eta_2": "s",
+    "randomsearch": "v",
+    "dragonfly_default": "^",
+}
