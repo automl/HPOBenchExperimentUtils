@@ -38,7 +38,7 @@ def plot_fidels(benchmark: str, output_dir: Union[Path, str], input_dir: Union[P
         nseeds = df['id'].unique()
         for seed in nseeds:
             fidels = df[df['id'] == seed]["fidelity_value"]
-            steps = df[df['id'] == seed]["total_objective_costs"]
+            steps = df[df['id'] == seed]["total_time_used"]
             label = get_optimizer_setting(opt).get("display_name", opt)
 
             a.scatter(steps, fidels, edgecolor=color_per_opt.get(opt, "k"), facecolor="none",
@@ -70,7 +70,7 @@ def plot_overhead(benchmark: str, output_dir: Union[Path, str], input_dir: Union
         df = stat_dc[opt]
         nseeds = df['id'].unique()
         for seed in nseeds:
-            steps = df[df['id'] == seed]["total_objective_costs"]
+            steps = df[df['id'] == seed]["total_time_used"]
             overhead = df[df['id'] == seed]["start_time"] - df[df['id'] == seed]["finish_time"].shift(1)
 
             overhead = np.cumsum(overhead)
@@ -89,7 +89,7 @@ def plot_overhead(benchmark: str, output_dir: Union[Path, str], input_dir: Union
     a.set_xlabel("Runtime in seconds")
     a.set_ylabel("Cumulated overhead in seconds")
     a.set_xlim([1, a.set_xlim()[1]])
-    a.set_ylim([0, 1000])
+    a.set_ylim([0.1, 10000])
     plt.tight_layout()
     plt.savefig(Path(output_dir) / f'{benchmark}_overhead.png')
 
