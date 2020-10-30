@@ -43,8 +43,6 @@ def keep_track(validate=False):
             self.function_calls += 1
             start_time = time()
             result_dict = function(self, configuration, fidelity, rng, **kwargs)
-            finish_time = time()
-
             # Throw an time error if the function evaluation takes more time than the specified cutoff value.
             # Note: This check is intended to
             try:
@@ -54,6 +52,9 @@ def keep_track(validate=False):
                 return {'function_value': MAXINT,
                         'cost': self.cutoff_limit_in_s,
                         'info': {'fidelity': fidelity or -1234}}
+
+            # We can only compute the finish time after we obtain the result()
+            finish_time = time()
 
             if not np.isfinite(result_dict["function_value"]):
                 result_dict["function_value"] = MAXINT
