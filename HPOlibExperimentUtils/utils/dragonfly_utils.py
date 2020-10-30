@@ -4,7 +4,7 @@ from pathlib import Path
 from argparse import Namespace
 import logging
 import os, uuid, sys
-import numpy as np
+import json
 
 _log = logging.getLogger(__name__)
 
@@ -74,63 +74,45 @@ from dragonfly.exd.cp_domain_utils import load_config
 def load_dragonfly_options(hpoexp_settings: Dict, config: Dict) -> Tuple[Namespace, Dict]:
     """ Interpret the options provided by HPOlibExperimentUtils to those compatible with dragonfly. """
 
-    def construct_default_options():
-        budget = hpoexp_settings.get("time_limit_in_s")
-        try:
-            init_frac = hpoexp_settings.get("init_capital_frac")
-        except KeyError as e:
-            raise RuntimeError("Could not read an initial capital fraction for the optimizer.") from e
-
-        dragonfly_options = {
-            "capital_type": "realtime",
-            "max_capital": float("inf"),
-            "init_capital": budget * init_frac
-        }
-        return dragonfly_options
-
-    def construct_tabular_options():
-        try:
-            init_eval = hpoexp_settings.get("num_init_eval")
-        except KeyError as e:
-            raise RuntimeError("Could not read the number of initial evaluations for the optimizer.") from e
-
-        dragonfly_options = {
-            "capital_type": "num_evals",
-            "max_capital": sys.maxsize,
-            # Dragonfly prioritises init_capital > init_capital_frac > num_init_evals
-            "init_capital": None,
-            "init_capital_frac": None,
-            "num_init_evals": init_eval
-        }
-
-        return dragonfly_options
-
-    known_types = {
-        "default": construct_default_options,
-        "tabular": construct_tabular_options
+    partial_options = {
+        "max_or_min": "min",
+        "capital_type": "num_evals",
+        "max_capital": sys.maxsize,
+        # Dragonfly prioritises init_capital > init_capital_frac > num_init_evals
+        "init_capital": None,
+        "init_capital_frac": None,
     }
 
     try:
-        type = hpoexp_settings.get("type")
-    except KeyError as e:
-        raise KeyError(
-            "The key 'type' must be specified for the dragonfly optimizer settings. Accepted values are: "
-            "%s" % str(known_types.keys())) from e
+        init_eval = hpoexp_settings["init_iter_per_dim"]
+    except KeyError:
+        _log.debug("Could not read the number of initial evaluations for the optimizer, switching to a realtime "
+                   "budget.")
+        budget = hpoexp_settings["time_limit_in_s"]
 
-    if type not in known_types:
-        raise ValueError(
-            "Unrecognized value '%s' for key 'type' in dragonfly optimizer settings. Accepted values are: "
-            "%s" % (str(type), str(known_types.keys())))
+        try:
+            init_frac = hpoexp_settings.get("init_capital_frac")
+        except KeyError as e:
+            raise RuntimeError("Could not read an initial budget for the optimizer. Either 'init_iter_per_dim' or "
+                               "'init_capital_frac' must be specified in the optimizer settings of dragonfly.")
+        else:
+            _log.debug("Setting dragonfly to use a realtime budget and a fraction of the benchmark budget for "
+                       "initialization.")
+            partial_options.update({
+                "capital_type": "realtime",
+                "max_capital": float("inf"),
+                "init_capital": budget * init_frac
+            })
+    else:
+        _log.debug("Setting dragonfly to use a number of evaluations based budget and an initialization budget based "
+                   "on the size of the benchmark configuration space.")
+        partial_options["num_init_evals"] = init_eval * len(config["domain"])
 
-    partial_options = known_types[type]()
-    partial_options["max_or_min"] = "min"
-
+    _log.debug("Passing these settings to the dragonfly optimizer:\n%s" % json.dumps(partial_options, indent=4))
     options = load_options(_get_command_line_args(), partial_options=partial_options, cmd_line=False)
     config = load_config(load_parameters(config))
     return options, config
 
-
-# TODO: Add more hyperparameter types and type-specific handlers.
 
 def _handler_unknown(hyp):
     raise RuntimeError("No valid handler available for hyperparameter of type %s" % type(hyp))
@@ -202,47 +184,6 @@ def _handle_uniform_int(hyper: UniformFloatHyperparameter) -> Tuple[Dict, Callab
         return domain, parser, cost, default
 
 
-# def _handle_categorical(hyper: CategoricalHyperparameter) -> Tuple[Dict, Callable, Callable]:
-#     """
-#     Handles the mapping of ConfigSpace.CategoricalHyperparameter objects to dragonfly's 'discrete' parameters.
-#     Caveats:
-#       - In order to handle weighted probabilities, the actual hyperparameter choices will be stored as an internal
-#       sequence whereas the parameter itself will be converted into a uniform float in the range [0.0, 1.0),
-#       representing a die that determines which item is chosen based on the marginal probabilities of the items.
-#     """
-#
-#     if not isinstance(hyper.choices, (list, tuple)):
-#         raise TypeError("Expected choices to be either list or tuple, received %s" % str(type(hyper.choices)))
-#
-#     n = len(hyper.choices)
-#     choices = tuple(hyper.choices)
-#     probs = hyper.probabilities
-#     _log.debug("Given CategoricalHyperparameter has probabilities %s" % str(probs))
-#     if probs is None:
-#         probs = np.repeat(1. / n, n)
-#
-#     cumprobs = np.cumsum(probs)
-#     assert cumprobs.shape[0] == n, "The number of cumulative probability values should match the number of " \
-#                                        "choices, given cumulative probabilities %s and %d choices." % (str(cumprobs), n)
-#     assert cumprobs[-1] == 1., "The given probability values have not been normalized. Cumulative probabilities " \
-#                                    "are %s" % str(cumprobs)
-#     _log.debug("Generated cumulative probabilities: %s" % str(cumprobs))
-#
-#     def _choose(pval: float):
-#         return np.asarray(pval <= cumprobs).nonzero()[0][0]
-#
-#     domain = {
-#         'name': hyper.name,
-#         'type': 'float',
-#         'min': 0.0,
-#         'max': 1.0,
-#     }
-#
-#     parser = lambda x: choices[_choose(x)]
-#     cost = lambda x: probs[_choose(x)]
-#     return domain, parser, cost
-#
-#
 def _handle_categorical(hyper: CategoricalHyperparameter) -> Tuple[Dict, Callable, Callable, int]:
     """
     Handles the mapping of ConfigSpace.CategoricalHyperparameter objects to dragonfly's 'discrete' parameters.
@@ -271,7 +212,7 @@ def _handle_categorical(hyper: CategoricalHyperparameter) -> Tuple[Dict, Callabl
 
     parser = lambda x: choices[int(x)]
     cost = lambda x: 1. / n
-    default = choices.index(hyper.default_value)
+    default = str(choices.index(hyper.default_value))
     return domain, parser, cost, default
 
 
@@ -330,15 +271,15 @@ def _configspace_to_dragonfly(params: List[Hyperparameter]) -> Tuple[Dict, List,
 
 
 def configspace_to_dragonfly(domain_cs: ConfigurationSpace, name="hpolib_benchmark",
-                             fidely_cs: ConfigurationSpace = None) -> \
+                             fidelity_cs: ConfigurationSpace = None) -> \
         Tuple[Dict, List, Union[List, None], Union[List, None]]:
 
     domain, domain_parsers, _, _ = _configspace_to_dragonfly(domain_cs.get_hyperparameters())
     out = {'name': name, 'domain': domain}
-    if fidely_cs:
-        # fidelity_space, fidelity_parsers = _generate_xgboost_fidelity_space(fidely_cs)
+    if fidelity_cs:
+        # fidelity_space, fidelity_parsers = _generate_xgboost_fidelity_space(fidelity_cs)
         fidelity_space, fidelity_parsers, fidelity_costs, default_values = \
-            _configspace_to_dragonfly(fidely_cs.get_hyperparameters())
+            _configspace_to_dragonfly(fidelity_cs.get_hyperparameters())
         out['fidel_space'] = fidelity_space
         # out['fidel_to_opt'] = [fidel['max'] for _, fidel in fidelity_space.items()]
         out['fidel_to_opt'] = default_values
