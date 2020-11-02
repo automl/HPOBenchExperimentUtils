@@ -9,7 +9,7 @@ xgboostsub:
   main_fidelity: subsample
   is_surrogate: false
 
-xgboostsub:
+xgboostest:
   time_limit_in_s: 7200
   cutoff_in_s: 7200
   mem_limit_in_mb: 6000
@@ -19,6 +19,23 @@ xgboostsub:
   is_surrogate: false
 
 # Run for 1 d
+cartpolereduced:
+  time_limit_in_s: 86400
+  cutoff_in_s: 1800
+  mem_limit_in_mb: 6000
+  import_from: rl.cartpole
+  import_benchmark: CartpoleReduced
+  is_surrogate: false
+
+cartpolefull:
+  time_limit_in_s: 86400
+  cutoff_in_s: 1800
+  mem_limit_in_mb: 6000
+  import_from: rl.cartpole
+  import_benchmark: CartpoleFull
+  is_surrogate: false
+
+# Run for 1 d (potentially increase to 2d)
 BNNOnBostonHousing:
   time_limit_in_s: 86400
   cutoff_in_s: 86400
@@ -43,28 +60,14 @@ BNNOnYearPrediction:
   import_benchmark: BNNOnYearPrediction
   is_surrogate: false
 
-cartpolereduced:
-  time_limit_in_s: 86400
-  cutoff_in_s: 1800
-  mem_limit_in_mb: 6000
-  import_from: rl.cartpole
-  import_benchmark: CartpoleReduced
-
-cartpolefull:
-  time_limit_in_s: 86400
-  cutoff_in_s: 1800
-  mem_limit_in_mb: 6000
-  import_from: rl.cartpole
-  import_benchmark: CartpoleFull
-
-# run for 
+# run for 2d
 learna:
   time_limit_in_s: 172800
   cutoff_in_s: 40000
   mem_limit_in_mb: 6000
   import_from: rl.learna_benchmark
   import_benchmark: Learna
-  num_iterations: 3
+  is_surrogate: false
 
 metalearna:
   time_limit_in_s: 345600
@@ -72,8 +75,9 @@ metalearna:
   mem_limit_in_mb: 6000
   import_from: rl.learna_benchmark
   import_benchmark: MetaLearna
-  num_iterations: 3
+  is_surrogate: false
 
+# surrogate benchmarks
 NASCifar10ABenchmark:
   time_limit_in_s: 10000000
   cutoff_in_s: 10000000
