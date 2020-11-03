@@ -103,15 +103,15 @@ NASCifar10CBenchmark:
   is_surrogate: true
 
 SliceLocalizationBenchmark:
-  time_limit_in_s: 500000
-  cutoff_in_s: 500000
+  time_limit_in_s: 10000000
+  cutoff_in_s: 10000000
   mem_limit_in_mb: 6000
   import_from: nas.tabular_benchmarks
   import_benchmark: SliceLocalizationBenchmark
   is_surrogate: true
 
 ProteinStructureBenchmark:
-  time_limit_in_s: 500000
+  time_limit_in_s: 10000000
   cutoff_in_s: 500000
   mem_limit_in_mb: 6000
   import_from: nas.tabular_benchmarks
@@ -119,16 +119,16 @@ ProteinStructureBenchmark:
   is_surrogate: true
 
 NavalPropulsionBenchmark:
-  time_limit_in_s: 500000
-  cutoff_in_s: 500000
+  time_limit_in_s: 10000000
+  cutoff_in_s: 10000000
   mem_limit_in_mb: 6000
   import_from: nas.tabular_benchmarks
   import_benchmark: NavalPropulsionBenchmark
   is_surrogate: true
 
 ParkinsonsTelemonitoringBenchmark:
-  time_limit_in_s: 500000
-  cutoff_in_s: 500000
+  time_limit_in_s: 10000000
+  cutoff_in_s: 10000000
   mem_limit_in_mb: 6000
   import_from: nas.tabular_benchmarks
   import_benchmark: ParkinsonsTelemonitoringBenchmark
