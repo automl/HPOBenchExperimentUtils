@@ -143,13 +143,17 @@ def get_statistics_df(optimizer_df):
     return piv
 
 
-def df_per_optimizer(key, unvalidated_trajectories):
+def df_per_optimizer(key, unvalidated_trajectories, y_best: float=0):
     optimizer_df = pd.DataFrame()
+
+    if y_best != 0:
+        _log.info("Found y_best = %g; Going to compute regret" % y_best)
+
     for id, traj in enumerate(unvalidated_trajectories):
         trajectory_df = pd.DataFrame(columns=['optimizer', 'id',
                                               'function_values', 'fidelity_value',
                                               'total_time_used', 'total_objective_costs'])
-        function_values = [record['function_value'] for record in traj[1:]]
+        function_values = [record['function_value']-y_best for record in traj[1:]]
         total_time_used = [record['total_time_used'] for record in traj[1:]]
         total_obj_costs = [record['total_objective_costs'] for record in traj[1:]]
         costs = [record['cost'] for record in traj[1:]]

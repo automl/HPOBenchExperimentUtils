@@ -8,6 +8,7 @@ import pandas as pd
 from HPOlibExperimentUtils.utils.validation_utils import load_trajectories, \
     load_trajectories_as_df, df_per_optimizer
 from HPOlibExperimentUtils import _default_log_format, _log as _main_log
+from HPOlibExperimentUtils.utils.plotting_utils import plot_dc
 
 
 _main_log.setLevel(logging.DEBUG)
@@ -22,12 +23,19 @@ def save_table(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pa
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
     unique_optimizer = load_trajectories_as_df(input_dir=input_dir,
                                                which="train" if unvalidated else "test")
+    benchmark_spec = plot_dc.get(benchmark, {})
+    y_best_val = benchmark_spec.get("ystar_valid", 0)
+    y_best_test = benchmark_spec.get("ystar_test", 0)
 
     keys = list(unique_optimizer.keys())
     result_df = pd.DataFrame()
     for key in keys:
         trajectories = load_trajectories(unique_optimizer[key])
-        optimizer_df = df_per_optimizer(key, trajectories)
+        optimizer_df = df_per_optimizer(
+            key=key,
+            unvalidated_trajectories=trajectories,
+            y_best=y_best_val if unvalidated else y_best_test
+        )
 
         unique_ids = np.unique(optimizer_df['id'])
         for unique_id in unique_ids:

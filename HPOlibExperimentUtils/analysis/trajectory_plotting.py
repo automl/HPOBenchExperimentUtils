@@ -15,7 +15,7 @@ _log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format=_default_log_format)
 
 
-def read_trajectories(benchmark: str, input_dir: Path, train: bool=True):
+def read_trajectories(benchmark: str, input_dir: Path, train: bool=True, y_best: float=0.0):
     input_dir = Path(input_dir) / benchmark
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
 
@@ -28,7 +28,7 @@ def read_trajectories(benchmark: str, input_dir: Path, train: bool=True):
         raise ValueError("No files found")
     for key in optimizer_names:
         trajectories = load_trajectories(unique_optimizer[key])
-        optimizer_df = df_per_optimizer(key, trajectories)
+        optimizer_df = df_per_optimizer(key, trajectories, y_best=y_best)
         statistics_df.append(get_statistics_df(optimizer_df))
     return optimizer_names, trajectories, statistics_df
 
@@ -36,11 +36,16 @@ def read_trajectories(benchmark: str, input_dir: Path, train: bool=True):
 def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
                     criterion: str = 'mean', unvalidated: bool = True, **kwargs):
     _log.info(f'Start plotting trajectories of benchmark {benchmark}')
+    benchmark_spec = plot_dc.get(benchmark, {})
+    y_best = benchmark_spec.get("ystar_valid", 0) if unvalidated \
+        else benchmark_spec.get("ystar_test", 0)
 
-    optimizer_names, trajectories, statistics_df = read_trajectories(benchmark=benchmark,
-                                                                     input_dir=Path(input_dir),
-                                                                     train=unvalidated,
-                                                                     )
+    optimizer_names, trajectories, statistics_df = read_trajectories(
+        benchmark=benchmark,
+        input_dir=Path(input_dir),
+        train=unvalidated,
+        y_best=y_best,
+    )
     # start plotting the trajectories:
     f, ax = plt.subplots(1, 1)
     min_ = 100000
@@ -60,10 +65,12 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
             min_ = min(min_, df['q25'].min())
             max_ = max(max_, df[criterion].max())
 
-    ax.set_ylabel('%s Loss' % criterion)
+    if y_best != 0:
+        ax.set_ylabel('%s Regret' % criterion)
+    else:
+        ax.set_ylabel('%s Loss' % criterion)
     xl, xu = ax.get_xlim()
 
-    benchmark_spec = plot_dc.get(benchmark, {})
     xl = benchmark_spec.get("xlim_lo", 1)
     xu = benchmark_spec.get("xlim_up", xu)
     yl = benchmark_spec.get("ylim_lo", min_)

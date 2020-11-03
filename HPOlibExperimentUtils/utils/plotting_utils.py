@@ -6,6 +6,9 @@ plot_dc = {
     "ylim_up": 9,
     "xscale": "log",
     "yscale": "linear",
+    # None
+    "ystar_valid": 0,
+    "ystar_test": 0,
     },
     "BNNOnProteinStructure": {
     "xlim_lo": 10**3,
@@ -13,20 +16,86 @@ plot_dc = {
     "ylim_up": 10,
     "xscale": "log",
     "yscale": "linear",
+    # None
+    "ystar_valid": 0,
+    "ystar_test": 0,
     },
     "BNNOnYearPrediction": {
-    "xlim_lo": 10**3,
-    "ylim_lo": 10,
-    "ylim_up": 50,
-    "xscale": "log",
-    "yscale": "linear",
+        "xlim_lo": 10**3,
+        "ylim_lo": 10,
+        "ylim_up": 50,
+        "xscale": "log",
+        "yscale": "linear",
+        # None
+        "ystar_valid": 0,
+        "ystar_test": 0,
     },
     "cartpolereduced": {
-    "xlim_lo": 10**1,
-    "ylim_lo": 10**2,
-    "ylim_up": 10**4,
-    "xscale": "log",
-    "yscale": "log",
+        "xlim_lo": 10**1,
+        "ylim_lo": 10**2,
+        "ylim_up": 10**4,
+        "xscale": "log",
+        "yscale": "log",
+        # None
+        "ystar_valid": 0,
+        "ystar_test": 0,
+    },
+    "SliceLocalizationBenchmark": {
+        "xlim_lo": 10**1,
+        "ylim_lo": 10**-9,
+        "ylim_up": 10**-1,
+        "xscale": "log",
+        "yscale": "log",
+        #  bench = SliceLocalizationBenchmark(rng=1, data_path="<path>/fcnet_tabular_benchmarks/")
+        #  c, v, t = bench.benchmark.get_best_configuration()
+        #  print(c, v, t)
+        "ystar_valid": 0.00020406871,
+        "ystar_test": 0.00014428208,
+    },
+    "ProteinStructureBenchmark": {
+        "xlim_lo": 10**0,
+        "ylim_lo": 10**-7,
+        "ylim_up": 10**0,
+        "xscale": "log",
+        "yscale": "log",
+        # None
+        "ystar_valid": 0.22137885,
+        "ystar_test": 0.21536806,
+    },
+    "NavalPropulsionBenchmark": {
+        "xlim_lo": 10**0,
+        "ylim_lo": 10**-9,
+        "ylim_up": 10**-1,
+        "xscale": "log",
+        "yscale": "log",
+        # None
+        "ystar_valid": 3.1911346e-05,
+        "ystar_test": 2.9110292e-05,
+    },
+    "ParkinsonsTelemonitoringBenchmark": {
+        "xlim_lo": 10**0,
+        "ylim_lo": 10**-8,
+        "ylim_up": 10**-0,
+        "xscale": "log",
+        "yscale": "log",
+        # None
+        "ystar_valid": 0.007629349,
+        "ystar_test": 0.004239297,
+    },
+    "NASCifar10ABenchmark": {
+        # https://github.com/automl/nas_benchmarks/blob/master/tabular_benchmarks/nas_cifar10.py#L26
+        "ystar_valid": 0.04944576819737756,
+        "ystar_test": 0.056824247042338016,
+    },
+    "NASCifar10BBenchmark": {
+        # https://github.com/automl/nas_benchmarks/blob/master/tabular_benchmarks/nas_cifar10.py#L26
+        "ystar_valid": 0.04944576819737756,
+        "ystar_test": 0.056824247042338016,
+    },
+    "NASCifar10CBenchmark": {
+        # https://github.com/automl/nas_benchmarks/blob/master/tabular_benchmarks/nas_cifar10.py#L26
+        "ystar_valid": 0.04944576819737756,
+        "ystar_test": 0.056824247042338016,
     },
 }
 
