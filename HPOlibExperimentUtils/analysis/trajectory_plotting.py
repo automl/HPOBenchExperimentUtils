@@ -66,9 +66,9 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
             max_ = max(max_, df[criterion].max())
 
     if y_best != 0:
-        ax.set_ylabel('%s Regret' % criterion)
+        ylabel = "Regret"
     else:
-        ax.set_ylabel('%s Loss' % criterion)
+        ylabel = "Loss"
     xl, xu = ax.get_xlim()
 
     xl = benchmark_spec.get("xlim_lo", 1)
