@@ -80,25 +80,31 @@ def plot_overhead(benchmark: str, output_dir: Union[Path, str], input_dir: Union
         nseeds = df['id'].unique()
         for seed in nseeds:
             steps = df[df['id'] == seed]["total_time_used"]
-            overhead = df[df['id'] == seed]["start_time"] - df[df['id'] == seed]["finish_time"].shift(1)
-
-            overhead = np.cumsum(overhead)
             label = get_optimizer_setting(opt).get("display_name", opt)
-            plt.plot(steps, overhead, color=color_per_opt.get(opt, "k"), label=label if seed == 0 else None)
 
             benchmark_cost = df[df['id'] == seed]["finish_time"] - df[df['id'] == seed]["start_time"]
             benchmark_cost = np.cumsum(benchmark_cost)
-            plt.plot(steps, benchmark_cost, color='k', alpha=0.5, zorder=0,
+            plt.plot(steps, benchmark_cost, color='k', alpha=0.5, zorder=99,
                      label=benchmark if seed == 0 and opt == list(stat_dc.keys())[0] else None)
 
+            overhead = df[df['id'] == seed]["start_time"] - df[df['id'] == seed]["finish_time"].shift(1)
+            overhead = np.cumsum(overhead)
+            plt.plot(steps, overhead, color=color_per_opt.get(opt, "k"), linestyle=":", label=label if seed == 0 else None)
+
+            overall_cost = df[df['id'] == seed]["finish_time"] - df[df['id'] == seed]["start_time"].iloc[0]
+            benchmark_cost = np.cumsum(overall_cost)
+            plt.plot(steps, overall_cost, color=color_per_opt.get(opt, "k"), alpha=0.5, zorder=99,
+                     label="%s overall" % label if seed == 0 else None)
+
+
     a.legend()
-    a.grid()
+    a.grid(which="both", zorder=0)
     a.set_yscale("log")
     a.set_xscale("log")
     a.set_xlabel("Runtime in seconds")
     a.set_ylabel("Cumulated overhead in seconds")
     a.set_xlim([1, a.set_xlim()[1]])
-    a.set_ylim([0.1, 10000])
+    #a.set_ylim([0.1, 10000])
     plt.tight_layout()
     plt.savefig(Path(output_dir) / f'{benchmark}_overhead.png')
 
