@@ -24,12 +24,14 @@ def main(args):
         os.mkdir(args.out_cmd)
 
     val_fl = "%s/val_%s_%s_%d.cmd" % (args.out_cmd, exp, opt, nrep)
+    val_ind_fl = "%s/valind_%s_%s_%d.cmd" % (args.out_cmd, exp, opt, nrep)
     run_fl = "%s/run_%s_%s_%d.cmd" % (args.out_cmd, exp, opt, nrep)
     eval_fl = "%s/eval_%s_%s_%d.cmd" % (args.out_cmd, exp, opt, nrep)
     evalu_fl = "%s/evalunv_%s_%s_%d.cmd" % (args.out_cmd, exp, opt, nrep)
 
     run_cmd = []
     val_cmd = []
+    val_ind_cmd = []
     eval_cmd = []
     evalu_cmd = []
 
@@ -38,17 +40,23 @@ def main(args):
     for benchmark in expset_dc[exp]:
         for optimizer in opt_set[opt]:
             for seed in range(1, nrep+1):
-                cmd = "%s/run_benchmark.py --output_dir %s --optimizer %s --benchmark %s --rng %s" % (base, args.out_run, optimizer, benchmark, seed)
+                cmd = "%s/run_benchmark.py --output_dir %s --optimizer %s --benchmark %s --rng %s" \
+                      % (base, args.out_run, optimizer, benchmark, seed)
                 run_cmd.append(cmd)
-
-        cmd = "%s/validate_benchmark.py --output_dir %s/%s --benchmark %s --rng %d" % (base, args.out_run, benchmark, benchmark, 1)
+                cmd = "%s/validate_benchmark.py --output_dir %s/%s/%s/run-%d/ --benchmark %s " \
+                      "--rng %d" % (base, args.out_run, optimizer, seed, benchmark, benchmark, 1)
+                val_ind_cmd.append(cmd)
+        cmd = "%s/validate_benchmark.py --output_dir %s/%s --benchmark %s --rng %d" \
+              % (base, args.out_run, benchmark, benchmark, 1)
         val_cmd.append(cmd)
-        cmd = "%s/evaluate_benchmark.py --output_dir %s/ --input_dir %s/ --benchmark %s --agg median --what all" % (base, args.out_eval, args.out_run, benchmark)
+        cmd = "%s/evaluate_benchmark.py --output_dir %s/ --input_dir %s/ --benchmark %s " \
+              "--agg median --what all" % (base, args.out_eval, args.out_run, benchmark)
         eval_cmd.append(cmd)
         cmd += " --unvalidated"
         evalu_cmd.append(cmd)
 
-    for c, f in [[run_cmd, run_fl], [val_cmd, val_fl], [eval_cmd, eval_fl], [evalu_cmd, evalu_fl]]:
+    for c, f in [[run_cmd, run_fl], [val_cmd, val_fl], [eval_cmd, eval_fl],
+                 [evalu_cmd, evalu_fl], [val_ind_cmd, val_ind_fl]]:
         write_cmd(c, f)
 
 
