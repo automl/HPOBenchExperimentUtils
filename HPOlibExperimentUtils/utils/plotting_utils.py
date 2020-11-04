@@ -31,7 +31,7 @@ plot_dc = {
         "ystar_test": 0,
     },
     "cartpolereduced": {
-        "xlim_lo": 10**1,
+        "xlim_lo": 10**2,
         "ylim_lo": 10**2,
         "ylim_up": 10**4,
         "xscale": "log",
@@ -97,6 +97,34 @@ plot_dc = {
         "ystar_valid": 0.04944576819737756,
         "ystar_test": 0.056824247042338016,
     },
+   "Cifar100NasBench201Benchmark": {
+        "xlim_lo": 10**2,
+        "ylim_lo": 10,
+        "ylim_up": 30,
+        "xscale": "log",
+        "yscale": "log",
+   },
+   "Cifar10ValidNasBench201Benchmark": {
+        "xlim_lo": 10**2,
+        "ylim_lo": 10,
+        "ylim_up": 20,
+        "xscale": "log",
+        "yscale": "log",
+   },
+   "Cifar10NasBench201Benchmark":  {
+        "xlim_lo": 10**2,
+        "ylim_lo": 1,
+        "ylim_up": 20,
+        "xscale": "log",
+        "yscale": "log",
+   },
+   "ImageNetNasBench201Benchmark":   {
+        "xlim_lo": 10**2,
+        "ylim_lo": 40,
+        "ylim_up": 100,
+        "xscale": "log",
+        "yscale": "log",
+   },
 }
 
 list_of_colors = ['#1b9e77', '#d95f02', '#7570b3', '#e7298a', '#66a61e', '#e6ab02', '#a6761d']

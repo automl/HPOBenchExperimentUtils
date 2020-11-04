@@ -57,11 +57,11 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
         min_ = min(min_, df[criterion].min())
         max_ = max(max_, df['q25'].max())
         if criterion == 'mean':
-            ax.fill_between(df.index, df['mean'] - df['std'], df['mean'] + df['std'], alpha=0.3)
+            ax.fill_between(df.index, df['mean'] - df['std'], df['mean'] + df['std'], alpha=0.3, step="post")
             min_ = min(min_, df[criterion].min())
             max_ = max(max_, df[criterion].max())
         else:
-            ax.fill_between(df.index, df['q25'], df['q75'], alpha=0.3)
+            ax.fill_between(df.index, df['q25'], df['q75'], alpha=0.3, step="post")
             min_ = min(min_, df['q25'].min())
             max_ = max(max_, df[criterion].max())
 
@@ -92,5 +92,6 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
     ax.legend()
     val_str = '' if unvalidated else 'validated'
     ax.set_title(f'{benchmark}')
+    plt.grid(b=True, which="both", axis="both")
     plt.savefig(Path(output_dir) / f'{benchmark}_{val_str}_{criterion}_trajectory.png')
     return 1
