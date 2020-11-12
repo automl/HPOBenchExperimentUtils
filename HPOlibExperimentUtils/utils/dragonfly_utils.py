@@ -283,7 +283,6 @@ def configspace_to_dragonfly(domain_cs: ConfigurationSpace, name="hpolib_benchma
         return out, domain_parsers, fidelity_parsers, fidelity_costs
     else:
         return out, domain_parsers, None, None
-    # TODO: Add support for converting constraints
 
 
 def generate_trajectory(history: Namespace, save_file: Path, is_cp=False, history_file=None):
