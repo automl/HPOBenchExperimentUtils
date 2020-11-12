@@ -45,7 +45,7 @@ class DehbOptimizer(SingleFidelityOptimizer):
         # Initializing DEHB object
         self.dehb = DEHB(cs=cs, dimensions=dimensions, f=f, strategy=self.settings["strategy"],
                     mutation_factor=self.settings["mutation_factor"], crossover_prob=self.settings["crossover_prob"],
-                    eta=self.settings["eta"], min_budget=self.main_fidelity.lower, max_budget=self.main_fidelity.upper,
+                    eta=self.settings["eta"], min_budget=self.min_budget, max_budget=self.max_budget,
                     generations=self.settings["gens"], async_strategy=self.settings["async_strategy"])
 
     def setup(self):
