@@ -9,7 +9,7 @@ with open(experiment_settings_path, 'r') as fh:
     experiment_settings = yaml.load(fh, yaml.FullLoader)
 
 for key in experiment_settings:
-    import_str = 'hpolib.' + 'container.' + 'benchmarks.' + experiment_settings[key]["import_from"]
+    import_str = 'hpobench.' + 'container.' + 'benchmarks.' + experiment_settings[key]["import_from"]
     module = import_module(import_str)
     benchmark_obj = getattr(module, experiment_settings[key]["import_benchmark"])
     if key in ("xgboost", "svm"):

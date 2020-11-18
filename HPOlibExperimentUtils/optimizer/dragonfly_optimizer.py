@@ -12,8 +12,8 @@ from dragonfly import minimise_function, \
     minimise_multifidelity_function
 
 from HPOlibExperimentUtils.core.bookkeeper import Bookkeeper
-from hpolib.abstract_benchmark import AbstractBenchmark
-from hpolib.container.client_abstract_benchmark import AbstractBenchmarkClient
+from hpobench.abstract_benchmark import AbstractBenchmark
+from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 
 from ConfigSpace import Configuration
 
@@ -28,7 +28,7 @@ class DragonflyOptimizer(Optimizer):
         config, domain_parsers, fidelity_parsers, fidelity_costs = \
             configspace_to_dragonfly(domain_cs=self.cs, fidelity_cs=fidel_space)
 
-        _log.debug("Based on the HPOlib Benchmark, generated the config:\n%s" % json.dumps(config, indent=4))
+        _log.debug("Based on the HPOBench Benchmark, generated the config:\n%s" % json.dumps(config, indent=4))
 
         self.options, self.config = load_dragonfly_options(hpoexp_settings=self.settings, config=config)
 

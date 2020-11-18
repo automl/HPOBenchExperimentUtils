@@ -10,8 +10,8 @@ from typing import Union, List, Dict, Any
 import ConfigSpace as CS
 import json_tricks
 import numpy as np
-from hpolib.abstract_benchmark import AbstractBenchmark
-from hpolib.container.client_abstract_benchmark import AbstractBenchmarkClient
+from hpobench.abstract_benchmark import AbstractBenchmark
+from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 from pebble import concurrent
 
 from HPOlibExperimentUtils.utils import MAXINT

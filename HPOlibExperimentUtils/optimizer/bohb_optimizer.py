@@ -7,8 +7,8 @@ import ConfigSpace as CS
 from hpbandster.core import result as hpres, nameserver as hpns
 from hpbandster.core.worker import Worker
 from hpbandster.optimizers import BOHB, HyperBand, RandomSearch, H2BO
-from hpolib.abstract_benchmark import AbstractBenchmark
-from hpolib.container.client_abstract_benchmark import AbstractBenchmarkClient
+from hpobench.abstract_benchmark import AbstractBenchmark
+from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 
 from HPOlibExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
 from HPOlibExperimentUtils.utils.optimizer_utils import get_main_fidelity

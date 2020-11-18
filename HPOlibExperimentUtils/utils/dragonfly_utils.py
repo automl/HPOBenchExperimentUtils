@@ -266,7 +266,7 @@ def _configspace_to_dragonfly(params: List[Hyperparameter]) -> Tuple[Dict, List,
     return dragonfly_dict, parsers, costs, maxima
 
 
-def configspace_to_dragonfly(domain_cs: ConfigurationSpace, name="hpolib_benchmark",
+def configspace_to_dragonfly(domain_cs: ConfigurationSpace, name="hpobench_benchmark",
                              fidelity_cs: ConfigurationSpace = None) -> \
         Tuple[Dict, List, Union[List, None], Union[List, None]]:
 

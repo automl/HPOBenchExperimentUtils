@@ -5,8 +5,8 @@ from typing import Union, Dict, Type
 
 import ConfigSpace as CS
 import numpy as np
-from hpolib.abstract_benchmark import AbstractBenchmark
-from hpolib.container.client_abstract_benchmark import AbstractBenchmarkClient
+from hpobench.abstract_benchmark import AbstractBenchmark
+from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 from smac.facade.smac_bohb_facade import BOHB4HPO
 from smac.intensification.hyperband import Hyperband
 from smac.intensification.successive_halving import SuccessiveHalving

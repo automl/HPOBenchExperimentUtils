@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.INFO, format=_default_log_format)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(prog='HPOlib3 Wrapper - Plotting tool',
+    parser = argparse.ArgumentParser(prog='HPOBench Wrapper - Plotting tool',
                                      description='Plot the trajectories')
 
     parser.add_argument('--output_dir', required=True, type=str)

@@ -7,8 +7,8 @@ import json
 
 from HPOlibExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
 from HPOlibExperimentUtils.core.bookkeeper import Bookkeeper
-from hpolib.abstract_benchmark import AbstractBenchmark
-from hpolib.container.client_abstract_benchmark import AbstractBenchmarkClient
+from hpobench.abstract_benchmark import AbstractBenchmark
+from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 
 from dehb.optimizers import DE, DEHB
 from ConfigSpace import UniformFloatHyperparameter, Configuration

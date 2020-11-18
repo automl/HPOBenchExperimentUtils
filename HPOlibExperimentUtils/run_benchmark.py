@@ -4,7 +4,7 @@ from pathlib import Path
 from time import time, sleep
 from typing import Union, Dict
 
-from hpolib.util.example_utils import set_env_variables_to_use_only_one_core
+from hpobench.util.example_utils import set_env_variables_to_use_only_one_core
 
 try:
     from HPOlibExperimentUtils.core.bookkeeper import Bookkeeper
@@ -35,7 +35,7 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
                   debug: bool = False,
                   **benchmark_params: Dict):
     """
-    Run a HPOlib3 benchmark on a given Optimizer. Currently only SMAC, BOHB and Dragonfly are available as Optimizer.
+    Run a HPOBench benchmark on a given Optimizer. Currently only SMAC, BOHB and Dragonfly are available as Optimizer.
     The benchmarks are by default stored in singularity container which are downloaded at the first run.
 
     Parameters
@@ -43,7 +43,7 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
     optimizer : str
         A string describing an optimizer with an setting. Those are defined in the optimizer_settings.yaml file
     benchmark : str
-        This benchmark is selected from the HPOlib3 and executed. with the optimizer from above.
+        This benchmark is selected from the HPOBench and executed. with the optimizer from above.
         Please have a look at the experiment_settings.json file to see what benchmarks are available.
         Incomplete list of supported benchmarks:
         'cartpolereduced', 'cartpolefull',
@@ -58,13 +58,13 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
     rng : int, None
         Random seed for the experiment. Also changes the output directory. By default 0.
     use_local : bool, None
-        If you want to use the HPOlib3 benchamrks in a non-containerizd version (installed locally inside the
+        If you want to use the HPOBench benchamrks in a non-containerizd version (installed locally inside the
         current python environment), you can set this parameter to True. This is not recommend.
     benchmark_params : Dict
         Some benchmarks take special parameters for the initialization. For example, The XGBOostBenchmark takes as
         input a task_id. This task_id specifies the OpenML dataset to use.
 
-        Please take a look into the HPOlib3 Benchamarks to find out if the benchmark needs further parameter.
+        Please take a look into the HPOBench Benchamarks to find out if the benchmark needs further parameter.
         Note: Most of them dont need further parameter.
     """
 
@@ -72,7 +72,7 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
 
     if debug:
         _main_log.setLevel(level=logging.DEBUG)
-        from hpolib.util.container_utils import enable_container_debug
+        from hpobench.util.container_utils import enable_container_debug
         enable_container_debug()
 
     optimizer_settings = get_optimizer_setting(optimizer)
@@ -99,7 +99,7 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
     if use_local:
         benchmark = benchmark_obj(rng=rng, **benchmark_params)
     else:
-        from hpolib import config_file
+        from hpobench import config_file
         container_source = config_file.container_source
         benchmark = benchmark_obj(rng=rng, container_source=container_source, **benchmark_params)
     _log.info(f'Benchmark successfully initialized.')
@@ -150,8 +150,8 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
 if __name__ == "__main__":
 
     import argparse
-    parser = argparse.ArgumentParser(prog='HPOlib3 Wrapper',
-                                     description='HPOlib3 running different benchmarks on different optimizer with a '
+    parser = argparse.ArgumentParser(prog='HPOBench Wrapper',
+                                     description='HPOBench running different benchmarks on different optimizer with a '
                                                  'unified interface')
 
     parser.add_argument('--output_dir', required=True, type=str)

@@ -6,7 +6,7 @@ This example shows the usage of an Hyperparameter Tuner, such as BOHB on the car
 BOHB is a combination of Bayesian optimization and Hyperband.
 
 Please install the necessary dependencies via ``pip install .[cartpole_example]``
-and the HPOlib3 ``pip install <dir of hpolib>``
+and the HPOBench ``pip install <dir of hpobench>``
 """
 
 import logging

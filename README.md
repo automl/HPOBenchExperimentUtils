@@ -1,7 +1,7 @@
 HPOlibExperimentUtils
 ---------------------
 
-A small tool to easily run different optimizers on hpolib2-benchmarks with the same settings. 
+A small tool to easily run different optimizers on HPOBench-benchmarks with the same settings. 
 The HPOlibExpUtils extract for each run a runhistory as well as a trajectory. 
 
 
@@ -32,7 +32,7 @@ stores information about the evaluated configuration.
 
 **Note** that in both cases you can pass benchmark specific parameters to the call. Here, the xgboost benchmark takes an
 openml task id. Please take a look at the benchmarks in the 
-[HPOlib2](https://github.com/automl/HPOlib2/tree/master/hpolib/benchmarks).
+[HPOBench](https://github.com/automl/HPOBench/tree/master/hpobench/benchmarks).
 Also, by default the containerized version of the benchmark is used. This requires singularity 3.5. You can use the 
 local installed benchmarks by adding use_local=True to the function call. 
 
@@ -81,20 +81,20 @@ timelimits and cutoff times are defined in the
 | Dragonfly                   	| dragonfly_default, dragonfly_realtime                                         |
 
 ### Available Benchmarks:
-| Benchmarks                                    	| benchmark token                   	| HPOlib2 Link                                                                                      	|
+| Benchmarks                                    	| benchmark token                   	| HPOBench Link                                                                                      	|
 |-----------------------------------------------	|-----------------------------------	|---------------------------------------------------------------------------------------------------	|
 | Cartpole - Full search space                  	| cartpolefull                      	| Link                                                                                              	|
-| Cartpole - Reduced search space               	| cartpolereduced                   	| [link](https://github.com/automl/HPOlib2/blob/master/hpolib/benchmarks/rl/cartpole.py)            	|
-| Learna                                        	| learna                            	| [link](https://github.com/automl/HPOlib2/blob/master/hpolib/benchmarks/rl/learna_benchmark.py)    	|
-| MetaLearna                                    	| metalearna                        	| [link](https://github.com/automl/HPOlib2/blob/master/hpolib/benchmarks/rl/learna_benchmark.py)    	|
-| NasBench101 - Cifar10A                        	| NASCifar10ABenchmark              	| [link](https://github.com/automl/HPOlib2/blob/master/hpolib/benchmarks/nas/nasbench_101.py)       	|
-| NasBench101 - Cifar10B                        	| NASCifar10BBenchmark              	| [link](https://github.com/automl/HPOlib2/blob/master/hpolib/benchmarks/nas/nasbench_101.py)       	|
-| NasBench101 - Cifar10C                        	| NASCifar10CBenchmark              	| [link](https://github.com/automl/HPOlib2/blob/master/hpolib/benchmarks/nas/nasbench_101.py)       	|
-| TabularBenchmarks - Naval Propulsion          	| NavalPropulsionBenchmark          	| [link](https://github.com/automl/HPOlib2/blob/master/hpolib/benchmarks/nas/tabular_benchmarks.py) 	|
-| TabularBenchmarks - Parkinsons Telemonitoring 	| ParkinsonsTelemonitoringBenchmark 	| [link](https://github.com/automl/HPOlib2/blob/master/hpolib/benchmarks/nas/tabular_benchmarks.py) 	|
-| TabularBenchmarks - Protein Structure         	| ProteinStructureBenchmark         	| [link](https://github.com/automl/HPOlib2/blob/master/hpolib/benchmarks/nas/tabular_benchmarks.py) 	|
-| TabularBenchmarks - Slice Localization        	| SliceLocalizationBenchmark        	| [link](https://github.com/automl/HPOlib2/blob/master/hpolib/benchmarks/nas/tabular_benchmarks.py) 	|
-| XGBoost Benchmark                             	| xgboost                           	| [link](https://github.com/automl/HPOlib2/blob/master/hpolib/benchmarks/ml/xgboost_benchmark.py)   	|
+| Cartpole - Reduced search space               	| cartpolereduced                   	| [link](https://github.com/automl/HPOBench/blob/master/hpobench/benchmarks/rl/cartpole.py)            	|
+| Learna                                        	| learna                            	| [link](https://github.com/automl/HPOBench/blob/master/hpobench/benchmarks/rl/learna_benchmark.py)    	|
+| MetaLearna                                    	| metalearna                        	| [link](https://github.com/automl/HPOBench/blob/master/hpobench/benchmarks/rl/learna_benchmark.py)    	|
+| NasBench101 - Cifar10A                        	| NASCifar10ABenchmark              	| [link](https://github.com/automl/HPOBench/blob/master/hpobench/benchmarks/nas/nasbench_101.py)       	|
+| NasBench101 - Cifar10B                        	| NASCifar10BBenchmark              	| [link](https://github.com/automl/HPOBench/blob/master/hpobench/benchmarks/nas/nasbench_101.py)       	|
+| NasBench101 - Cifar10C                        	| NASCifar10CBenchmark              	| [link](https://github.com/automl/HPOBench/blob/master/hpobench/benchmarks/nas/nasbench_101.py)       	|
+| TabularBenchmarks - Naval Propulsion          	| NavalPropulsionBenchmark          	| [link](https://github.com/automl/HPOBench/blob/master/hpobench/benchmarks/nas/tabular_benchmarks.py) 	|
+| TabularBenchmarks - Parkinsons Telemonitoring 	| ParkinsonsTelemonitoringBenchmark 	| [link](https://github.com/automl/HPOBench/blob/master/hpobench/benchmarks/nas/tabular_benchmarks.py) 	|
+| TabularBenchmarks - Protein Structure         	| ProteinStructureBenchmark         	| [link](https://github.com/automl/HPOBench/blob/master/hpobench/benchmarks/nas/tabular_benchmarks.py) 	|
+| TabularBenchmarks - Slice Localization        	| SliceLocalizationBenchmark        	| [link](https://github.com/automl/HPOBench/blob/master/hpobench/benchmarks/nas/tabular_benchmarks.py) 	|
+| XGBoost Benchmark                             	| xgboost                           	| [link](https://github.com/automl/HPOBench/blob/master/hpobench/benchmarks/ml/xgboost_benchmark.py)   	|
 
 ## How to contribute:
 
@@ -112,7 +112,7 @@ xgboost:
   cutoff_in_s: 1800
   mem_limit_in_mb: 4000
   
-  # Address in the hpolib2
+  # Address in the hpobench
   import_from: ml.xgboost_benchmark
   import_benchmark: XGBoostBenchmark
   
