@@ -103,24 +103,24 @@ def read_lines(file: Path) -> List:
     return lines
 
 
-def load_trajectories_as_df(output_dir, unvalidated):
-    if unvalidated:
-        trajectories_paths = list(output_dir.rglob(f'hpolib_trajectory.txt'))
-        val_str = ''
-    else:
-        trajectories_paths = list(output_dir.rglob(f'hpolib_trajectory_validated.txt'))
-        val_str = 'Validated'
+def load_trajectories_as_df(input_dir, which="test"):
+    if which == "train":
+        trajectories_paths = list(input_dir.rglob(f'hpolib_trajectory.txt'))
+    elif which == "test":
+        trajectories_paths = list(input_dir.rglob(f'hpolib_trajectory_validated.txt'))
+    elif which == "runhistory":
+        trajectories_paths = list(input_dir.rglob(f'hpolib_runhistory.txt'))
     unique_optimizer = defaultdict(lambda: [])
     for path in trajectories_paths:
         opt = path.parent.parent.name
         unique_optimizer[opt].append(path)
-    return unique_optimizer, val_str
+    return unique_optimizer
 
 
 def get_statistics_df(optimizer_df):
     select_cols = ['mean', 'std', 'median', 'q25', 'q75', 'mean_inf', 'up', 'lo']
     # Dataframe for the learning curves per optimizer
-    piv = optimizer_df.pivot(index='total_objective_costs', columns='id', values='function_values')
+    piv = optimizer_df.pivot(index='total_time_used', columns='id', values='function_values')
 
     piv = piv.fillna(method='ffill')
     piv = piv.fillna(method='bfill')
@@ -143,20 +143,35 @@ def get_statistics_df(optimizer_df):
     return piv
 
 
-def df_per_optimizer(key, unvalidated_trajectories):
+def df_per_optimizer(key, unvalidated_trajectories, y_best: float=0):
     optimizer_df = pd.DataFrame()
+
+    if y_best != 0:
+        _log.info("Found y_best = %g; Going to compute regret" % y_best)
+
     for id, traj in enumerate(unvalidated_trajectories):
         trajectory_df = pd.DataFrame(columns=['optimizer', 'id',
-                                              'function_values', 'total_time_used', 'total_objective_costs'])
-        function_values = [record['function_value'] for record in traj[1:]]
+                                              'function_values', 'fidelity_value',
+                                              'total_time_used', 'total_objective_costs'])
+        function_values = [record['function_value']-y_best for record in traj[1:]]
         total_time_used = [record['total_time_used'] for record in traj[1:]]
         total_obj_costs = [record['total_objective_costs'] for record in traj[1:]]
+        costs = [record['cost'] for record in traj[1:]]
+        start = [record['start_time'] for record in traj[1:]]
+        finish = [record['finish_time'] for record in traj[1:]]
+
+        # this is a dict with only one entry
+        fidel_values = [record['fidelity'][list(record['fidelity'])[0]] for record in traj[1:]]
 
         trajectory_df['optimizer'] = [key for _ in range(len(traj[1:]))]
         trajectory_df['id'] = [id for _ in range(len(traj[1:]))]
         trajectory_df['total_time_used'] = total_time_used
         trajectory_df['total_objective_costs'] = total_obj_costs
         trajectory_df['function_values'] = function_values
+        trajectory_df['fidel_values'] = fidel_values
+        trajectory_df['costs'] = costs
+        trajectory_df['start_time'] = start
+        trajectory_df['finish_time'] = finish
 
         optimizer_df = pd.concat([optimizer_df, trajectory_df])
     return optimizer_df
