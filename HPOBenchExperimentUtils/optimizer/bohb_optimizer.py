@@ -10,8 +10,8 @@ from hpbandster.optimizers import BOHB, HyperBand, RandomSearch, H2BO
 from hpobench.abstract_benchmark import AbstractBenchmark
 from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 
-from HPOlibExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
-from HPOlibExperimentUtils.utils.optimizer_utils import get_main_fidelity
+from HPOBenchExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
+from HPOBenchExperimentUtils.utils.optimizer_utils import get_main_fidelity
 
 _log = logging.getLogger(__name__)
 

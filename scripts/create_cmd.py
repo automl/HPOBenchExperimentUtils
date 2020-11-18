@@ -35,7 +35,7 @@ def main(args):
     eval_cmd = []
     evalu_cmd = []
 
-    base = "python %s/HPOlibExperimentUtils" % args.root
+    base = "python %s/HPOBenchExperimentUtils" % args.root
 
     for benchmark in expset_dc[exp]:
         for optimizer in opt_set[opt]:

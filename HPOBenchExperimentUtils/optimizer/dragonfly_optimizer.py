@@ -5,13 +5,13 @@ import os
 import numpy as np
 import json
 
-from HPOlibExperimentUtils.optimizer.base_optimizer import Optimizer
-from HPOlibExperimentUtils.utils.dragonfly_utils import \
+from HPOBenchExperimentUtils.optimizer.base_optimizer import Optimizer
+from HPOBenchExperimentUtils.utils.dragonfly_utils import \
     configspace_to_dragonfly, load_dragonfly_options, generate_trajectory, change_cwd
 from dragonfly import minimise_function, \
     minimise_multifidelity_function
 
-from HPOlibExperimentUtils.core.bookkeeper import Bookkeeper
+from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
 from hpobench.abstract_benchmark import AbstractBenchmark
 from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 

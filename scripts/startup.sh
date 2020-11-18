@@ -1,6 +1,6 @@
 source ~/.bashrc
 
-conda activate hpolib3_36
+conda activate hpobench3_36
 export OPENBLAS_NUM_THREADS=1
 export OMP_NUM_THREADS=1
 export MKL_NUM_THREADS=1

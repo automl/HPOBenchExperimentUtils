@@ -72,7 +72,7 @@ from dragonfly.exd.cp_domain_utils import load_config
 
 
 def load_dragonfly_options(hpoexp_settings: Dict, config: Dict) -> Tuple[Namespace, Dict]:
-    """ Interpret the options provided by HPOlibExperimentUtils to those compatible with dragonfly. """
+    """ Interpret the options provided by HPOBenchExperimentUtils to those compatible with dragonfly. """
 
     partial_options = {
         "max_or_min": "min",

@@ -14,7 +14,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('BOHB on xgboost')
 
 from pathlib import Path
-from HPOlibExperimentUtils import validate_benchmark, run_benchmark
+from HPOBenchExperimentUtils import validate_benchmark, run_benchmark
 from hpobench.util.openml_data_manager import get_openmlcc18_taskids
 
 

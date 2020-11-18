@@ -14,7 +14,7 @@ from hpobench.abstract_benchmark import AbstractBenchmark
 from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 from pebble import concurrent
 
-from HPOlibExperimentUtils.utils import MAXINT
+from HPOBenchExperimentUtils.utils import MAXINT
 
 logger = logging.getLogger('Bookkeeper')
 
@@ -118,11 +118,11 @@ class Bookkeeper:
                  validate: bool = False):
 
         self.benchmark = benchmark
-        self.log_file = output_dir / 'hpolib_runhistory.txt'
-        self.trajectory = output_dir / 'hpolib_trajectory.txt'
-        self.validate_log_file = output_dir / 'hpolib_runhistory_validation.txt'
-        # self.validate_trajectory = output_dir / 'hpolib_trajectory_validation.txt'
-        # self.validate_log_db = output_dir / 'hpolib_runhistory_validation.db'
+        self.log_file = output_dir / 'hpobench_runhistory.txt'
+        self.trajectory = output_dir / 'hpobench_trajectory.txt'
+        self.validate_log_file = output_dir / 'hpobench_runhistory_validation.txt'
+        # self.validate_trajectory = output_dir / 'hpobench_trajectory_validation.txt'
+        # self.validate_log_db = output_dir / 'hpobench_runhistory_validation.db'
 
         self.boot_time = time()
         self.total_objective_costs = 0

@@ -1,15 +1,15 @@
-HPOlibExperimentUtils
+HPOBenchExperimentUtils
 ---------------------
 
 A small tool to easily run different optimizers on HPOBench-benchmarks with the same settings. 
-The HPOlibExpUtils extract for each run a runhistory as well as a trajectory. 
+The HPOBenchExpUtils extract for each run a runhistory as well as a trajectory. 
 
 
 ## Running a benchmark
 
 The hpo run can be started from either the commandline:
 ```python
-from HPOlibExperimentUtils import run_benchmark
+from HPOBenchExperimentUtils import run_benchmark
 run_benchmark(optimizer='hpbandster_bohb_eta_3',
               benchmark='cartpolereduced',
               output_dir='path/to/output',
@@ -37,7 +37,7 @@ Also, by default the containerized version of the benchmark is used. This requir
 local installed benchmarks by adding use_local=True to the function call. 
 
 ## Validating configurations
-The HPOlibExperimentUtils tool also validates previously found trajectories. Validating means running the 
+The HPOBenchExperimentUtils tool also validates previously found trajectories. Validating means running the 
 configuration again but this time on the test-objective function of the benchmark with the highest budget. This step can
 take a lot of time. 
 
@@ -46,7 +46,7 @@ The tool reads all configurations found in the specified path and valdiates them
 Call the validation function again either from code:
 
 ```python
-from HPOlibExperimentUtils import validate_benchmark
+from HPOBenchExperimentUtils import validate_benchmark
 validate_benchmark(benchmark='cartpolereduced',
                    output_dir='path / to / output',
                    rng=0)
@@ -65,9 +65,9 @@ The validated trajectory is automatically saved in human readable form to the ou
 ## Settings
 
 The benchmarks' settings are predefined in the file 
-[benchmark_settings.yaml](./HPOlibExperimentUtils/benchmark_settings.yaml). The settings for the optimizer including 
+[benchmark_settings.yaml](./HPOBenchExperimentUtils/benchmark_settings.yaml). The settings for the optimizer including 
 timelimits and cutoff times are defined in the 
-[optimizer_settings.yaml](./HPOlibExperimentUtils/optimizer_settings.yaml)
+[optimizer_settings.yaml](./HPOBenchExperimentUtils/optimizer_settings.yaml)
 
 ### Available Optimizer settings
 | Optimizer                  	| Available options                                                          	|
@@ -100,7 +100,7 @@ timelimits and cutoff times are defined in the
 
 ### New Benchmark Settings:
 If you want to add a new benchmark setting, add a yaml conform entry in the 
-[benchmark_settings.yaml](./HPOlibExperimentUtils/benchmark_settings.yaml)
+[benchmark_settings.yaml](./HPOBenchExperimentUtils/benchmark_settings.yaml)
 
 Possible options are:
 ```yaml 
@@ -130,7 +130,7 @@ xgboost:
 
 ### New Optimizer Settings:
 Analogously to the benchmark settings, you can add a new optimizer setting to the 
-[optimizer_settings.yaml](./HPOlibExperimentUtils/optimizer_settings.yaml).
+[optimizer_settings.yaml](./HPOBenchExperimentUtils/optimizer_settings.yaml).
 
 ```yaml
 # The name of the optimizer setting can be chosen freely.

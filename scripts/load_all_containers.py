@@ -3,8 +3,8 @@ import yaml
 import os
 
 base_dir = os.path.dirname(os.path.dirname(__file__))
-settings_file = "%s/HPOlibExperimentUtils/" % base_dir
-experiment_settings_path = "%s/HPOlibExperimentUtils/benchmark_settings.yaml" % settings_file
+settings_file = "%s/HPOBenchExperimentUtils/" % base_dir
+experiment_settings_path = "%s/HPOBenchExperimentUtils/benchmark_settings.yaml" % settings_file
 with open(experiment_settings_path, 'r') as fh:
     experiment_settings = yaml.load(fh, yaml.FullLoader)
 

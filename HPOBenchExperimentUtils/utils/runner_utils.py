@@ -119,7 +119,7 @@ def get_benchmark_settings(benchmark: str) -> Dict:
 def load_benchmark(benchmark_name, import_from, use_local: bool) -> Any:
     """
     Load the benchmark object.
-    If not `use_local`:  Then load a container from a given source, defined in the Hpolib.
+    If not `use_local`:  Then load a container from a given source, defined in the HPOBench.
 
     Import via command from hpobench.[container.]benchmarks.<import_from> import <benchmark_name>
 

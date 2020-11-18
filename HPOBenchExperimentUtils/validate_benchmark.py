@@ -4,16 +4,16 @@ from multiprocessing import Value
 from pathlib import Path
 from typing import Union, Dict
 
-from HPOlibExperimentUtils.utils.validation_utils import write_validated_trajectory, get_unvalidated_configurations, \
+from HPOBenchExperimentUtils.utils.validation_utils import write_validated_trajectory, get_unvalidated_configurations, \
     load_trajectories, load_validated_configurations
 
 from hpobench.util.example_utils import set_env_variables_to_use_only_one_core
 
-from HPOlibExperimentUtils.core.bookkeeper import Bookkeeper
-from HPOlibExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_benchmark_settings, \
+from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
+from HPOBenchExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_benchmark_settings, \
     load_benchmark, get_benchmark_names
 
-from HPOlibExperimentUtils import _log as _main_log, _default_log_format
+from HPOBenchExperimentUtils import _log as _main_log, _default_log_format
 
 _main_log.setLevel(level=logging.INFO)
 _log = logging.getLogger(__name__)
@@ -88,7 +88,7 @@ def validate_benchmark(benchmark: str,
 
     assert output_dir.is_dir(), f'Result folder doesn\"t exist: {output_dir}'
 
-    unvalidated_trajectories_paths = list(output_dir.rglob(f'hpolib_trajectory.txt'))
+    unvalidated_trajectories_paths = list(output_dir.rglob(f'hpobench_trajectory.txt'))
     unvalidated_trajectories = load_trajectories(unvalidated_trajectories_paths)
     unvalidated_configurations = get_unvalidated_configurations(unvalidated_trajectories)
     validation_results = {str(configuration): None for configuration in unvalidated_configurations}

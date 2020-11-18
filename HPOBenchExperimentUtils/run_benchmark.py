@@ -7,19 +7,19 @@ from typing import Union, Dict
 from hpobench.util.example_utils import set_env_variables_to_use_only_one_core
 
 try:
-    from HPOlibExperimentUtils.core.bookkeeper import Bookkeeper
+    from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
 except:
     import sys, os.path
     sys.path.append(os.path.expandvars('$HPOEXPUTIL_PATH'))
-    from HPOlibExperimentUtils.core.bookkeeper import Bookkeeper
+    from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
 
-from HPOlibExperimentUtils.utils import PING_OPTIMIZER_IN_S
-from HPOlibExperimentUtils.utils.optimizer_utils import get_optimizer, optimizer_str_to_enum, OptimizerEnum
-from HPOlibExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_benchmark_settings, \
+from HPOBenchExperimentUtils.utils import PING_OPTIMIZER_IN_S
+from HPOBenchExperimentUtils.utils.optimizer_utils import get_optimizer, optimizer_str_to_enum, OptimizerEnum
+from HPOBenchExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_benchmark_settings, \
     load_benchmark, get_benchmark_names, get_optimizer_settings_names, \
     get_optimizer_setting
 
-from HPOlibExperimentUtils import _log as _main_log, _default_log_format
+from HPOBenchExperimentUtils import _log as _main_log, _default_log_format
 _main_log.setLevel(logging.INFO)
 _log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format=_default_log_format)

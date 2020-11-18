@@ -5,11 +5,11 @@ from typing import Union
 import matplotlib.pyplot as plt
 import numpy as np
 
-from HPOlibExperimentUtils import _default_log_format, _log as _main_log
-from HPOlibExperimentUtils.utils.validation_utils import load_trajectories, \
+from HPOBenchExperimentUtils import _default_log_format, _log as _main_log
+from HPOBenchExperimentUtils.utils.validation_utils import load_trajectories, \
     load_trajectories_as_df, df_per_optimizer
-from HPOlibExperimentUtils.utils.plotting_utils import color_per_opt, marker_per_opt
-from HPOlibExperimentUtils.utils.runner_utils import get_optimizer_setting
+from HPOBenchExperimentUtils.utils.plotting_utils import color_per_opt, marker_per_opt
+from HPOBenchExperimentUtils.utils.runner_utils import get_optimizer_setting
 
 _main_log.setLevel(logging.DEBUG)
 _log = logging.getLogger(__name__)

@@ -14,7 +14,7 @@ logger = logging.getLogger('BOHB on cartpole')
 logger.setLevel(level=logging.DEBUG)
 
 from pathlib import Path
-from HPOlibExperimentUtils import validate_benchmark, run_benchmark
+from HPOBenchExperimentUtils import validate_benchmark, run_benchmark
 
 benchmark = 'cartpolereduced'
 output_dir = Path('../example_dir/cartpole')

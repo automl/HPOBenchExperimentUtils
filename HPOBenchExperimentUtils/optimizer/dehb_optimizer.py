@@ -5,8 +5,8 @@ import sys
 import numpy as np
 import json
 
-from HPOlibExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
-from HPOlibExperimentUtils.core.bookkeeper import Bookkeeper
+from HPOBenchExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
+from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
 from hpobench.abstract_benchmark import AbstractBenchmark
 from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 
