@@ -2,6 +2,7 @@
 # PURE RANDOMSEARCH################################################################################################### #
 randomsearch:
   optimizer: randomsearch
+  display_name: "random search"
 
 # DRAGONFLY DEFAULT ################################################################################################## #
 dragonfly_default:
@@ -20,130 +21,66 @@ fabolas:
   num_init_evals: 10
   marginalize_hypers: false
 
-# SMAC HYPERBAND ##################################################################################################### #
-smac_hb_eta_1:
+# SMAC ##################################################################################################### #
+smac_hb_eta_3:
   optimizer: smac_hb
-  eta: 1
+  eta: 3
+  max_stages: 5
+  display_name: "SMAC-HB"
 
-# learna | metalearna
-smac_hb_eta_2_learna:
-  optimizer: smac_hb
-  eta: 2
+smac_sh_eta_3:
+  optimizer: smac_sh
+  eta: 3
+  max_stages: 5
+  display_name: "SMAC-HB"
 
 smac_hb_eta_2:
   optimizer: smac_hb
   eta: 2
-
-# xgboost | cartpolereduced| cartpolefull | NASCifar10ABenchmark | NASCifar10BBenchmark | NASCifar10CBenchmark
-# SliceLocalizationBenchmark | ProteinStructureBenchmark | NavalPropulsionBenchmark | ParkinsonsTelemonitoringBenchmark
-smac_hb_eta_3:
-  optimizer: smac_hb
-  eta: 3
-  max_stages: 4
-
-# SMAC SUCCESSIVE HALVING ############################################################################################ #
-smac_sh_eta_1:
-  optimizer: smac_hb
-  eta: 1
-
-# learna | metalearna
-smac_sh_eta_2_learna:
-  optimizer: smac_sh
-  eta: 2
+  max_stages: 5
+  display_name: "SMAC-SH (eta2)"
 
 smac_sh_eta_2:
   optimizer: smac_sh
   eta: 2
-
-# xgboost | cartpolereduced| cartpolefull | NASCifar10ABenchmark | NASCifar10BBenchmark | NASCifar10CBenchmark
-# SliceLocalizationBenchmark | ProteinStructureBenchmark | NavalPropulsionBenchmark | ParkinsonsTelemonitoringBenchmark
-smac_sh_eta_3:
-  optimizer: smac_sh
-  eta: 3
+  max_stages: 5
+  display_name: "SMAC-SH (eta2)"
 
 # HPBANDSTER BOHB #################################################################################################### #
-# learna | metalearna
-hpbandster_bohb_eta_2_learna:
+hpbandster_bohb_eta_3:
   optimizer: hpbandster_bohb
-  eta: 2
+  eta: 3
+  max_stages: 5
+  display_name: "BOHB"
 
 hpbandster_bohb_eta_2:
   optimizer: hpbandster_bohb
   eta: 2
+  max_stages: 5
+  display_name: "BOHB (eta2)"
 
-hpbandster_bohb_eta_3_test:
-  optimizer: hpbandster_bohb
-  eta: 3
-  num_iterations: 1
-
-# xgboost | cartpolereduced| cartpolefull | NASCifar10ABenchmark | NASCifar10BBenchmark | NASCifar10CBenchmark
-# SliceLocalizationBenchmark | ProteinStructureBenchmark | NavalPropulsionBenchmark | ParkinsonsTelemonitoringBenchmark
-hpbandster_bohb_eta_3:
-  optimizer: hpbandster_bohb
-  eta: 3
-  max_stages: 4
-
-# HPBANDSTER RANDOMSEARCH ############################################################################################ #
-# learna | metalearna
-hpbandster_rs_eta_2_learna:
-  optimizer: hpbandster_rs
-  eta: 2
-
-hpbandster_rs_eta_2:
-  optimizer: hpbandster_rs
-  eta: 2
-
-hpbandster_rs_eta_3_test:
-  optimizer: hpbandster_rs
-  eta: 3
-  num_iterations: 1
-
-# xgboost | cartpolereduced| cartpolefull | NASCifar10ABenchmark | NASCifar10BBenchmark | NASCifar10CBenchmark
-# SliceLocalizationBenchmark | ProteinStructureBenchmark | NavalPropulsionBenchmark | ParkinsonsTelemonitoringBenchmark
-hpbandster_rs_eta_3:
-  optimizer: hpbandster_rs
-  eta: 3
-
-# HPBANDSTER HYPERBAND ############################################################################################### #
-# learna | metalearna
-hpbandster_hb_eta_2_learna:
+hpbandster_hb_eta_3:
   optimizer: hpbandster_hb
-  eta: 2
+  eta: 3
+  max_stages: 5
+  display_name: "HB"
 
 hpbandster_hb_eta_2:
   optimizer: hpbandster_hb
   eta: 2
+  max_stages: 5
+  display_name: "HB (eta2)"
 
-hpbandster_hb_eta_3_test:
-  optimizer: hpbandster_hb
+hpbandster_sh_eta_3:
+  optimizer: hpbandster_sh
   eta: 3
-  num_iterations: 1
+  max_stages: 5
+  display_name: "SH"
 
-# xgboost | cartpolereduced| cartpolefull | NASCifar10ABenchmark | NASCifar10BBenchmark | NASCifar10CBenchmark
-# SliceLocalizationBenchmark | ProteinStructureBenchmark | NavalPropulsionBenchmark | ParkinsonsTelemonitoringBenchmark
-hpbandster_hb_eta_3:
-  optimizer: hpbandster_hb
-  eta: 3
-
-# HPBANDSTER H2BO #################################################################################################### #
-# learna | metalearna
-hpbandster_h2bo_eta_2_learna:
-  optimizer: hpbandster_h2bo
+hpbandster_sh_eta_2:
+  optimizer: hpbandster_sh
   eta: 2
-
-hpbandster_h2bo_eta_2:
-  optimizer: hpbandster_h2bo
-  eta: 2
-
-hpbandster_h2bo_eta_3_test:
-  optimizer: hpbandster_h2bo
-  eta: 3
-  num_iterations: 1
-
-# xgboost | cartpolereduced| cartpolefull | NASCifar10ABenchmark | NASCifar10BBenchmark | NASCifar10CBenchmark
-# SliceLocalizationBenchmark | ProteinStructureBenchmark | NavalPropulsionBenchmark | ParkinsonsTelemonitoringBenchmark
-hpbandster_h2bo_eta_3:
-  optimizer: hpbandster_h2bo
-  eta: 3
+  max_stages: 5
+  display_name: "SH (eta2)"
 
 ...
