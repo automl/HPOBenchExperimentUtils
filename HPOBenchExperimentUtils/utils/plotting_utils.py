@@ -3,7 +3,7 @@ plot_dc = {
     # BOHB paper
     "xlim_lo": 10**3,
     "ylim_lo": 3,
-    "ylim_up": 9,
+    "ylim_up": 70,
     "xscale": "log",
     "yscale": "linear",
     # None
@@ -12,8 +12,8 @@ plot_dc = {
     },
     "BNNOnProteinStructure": {
     "xlim_lo": 10**3,
-    "ylim_lo": 2,
-    "ylim_up": 10,
+    "ylim_lo": 3,
+    "ylim_up": 9,
     "xscale": "log",
     "yscale": "linear",
     # None
@@ -22,7 +22,7 @@ plot_dc = {
     },
     "BNNOnYearPrediction": {
         "xlim_lo": 10**3,
-        "ylim_lo": 10,
+        "ylim_lo": 2,
         "ylim_up": 50,
         "xscale": "log",
         "yscale": "linear",
@@ -42,7 +42,7 @@ plot_dc = {
     },
     "SliceLocalizationBenchmark": {
         "xlim_lo": 10**1,
-        "ylim_lo": 10**-9,
+        "ylim_lo": 10**-8,
         "ylim_up": 10**-1,
         "xscale": "log",
         "yscale": "log",
@@ -54,7 +54,7 @@ plot_dc = {
     },
     "ProteinStructureBenchmark": {
         "xlim_lo": 10**0,
-        "ylim_lo": 10**-7,
+        "ylim_lo": 10**-6,
         "ylim_up": 10**0,
         "xscale": "log",
         "yscale": "log",
@@ -74,7 +74,7 @@ plot_dc = {
     },
     "ParkinsonsTelemonitoringBenchmark": {
         "xlim_lo": 10**0,
-        "ylim_lo": 10**-8,
+        "ylim_lo": 10**-7,
         "ylim_up": 10**-0,
         "xscale": "log",
         "yscale": "log",
@@ -99,17 +99,21 @@ plot_dc = {
     },
    "Cifar100NasBench201Benchmark": {
         "xlim_lo": 10**2,
-        "ylim_lo": 25,
-        "ylim_up": 50,
+        "ylim_lo": 10**-5,
+        "ylim_up": 10**2,
         "xscale": "log",
         "yscale": "log",
+        "ystar_valid": 26.506666642252596,
+        "ystar_test": 26.49666666666667,
    },
    "Cifar10ValidNasBench201Benchmark": {
         "xlim_lo": 10**2,
-        "ylim_lo": 8,
-        "ylim_up": 20,
+        "ylim_lo": 10**-5,
+        "ylim_up": 10**2,
         "xscale": "log",
         "yscale": "log",
+        "ystar_valid": 8.393333349609367,
+        "ystar_test": 8.476666666666677,
    },
    "Cifar10NasBench201Benchmark":  {
         "xlim_lo": 10**2,
@@ -120,10 +124,12 @@ plot_dc = {
    },
    "ImageNetNasBench201Benchmark":   {
         "xlim_lo": 10**2,
-        "ylim_lo": 40,
-        "ylim_up": 100,
+        "ylim_lo": 10**-5,
+        "ylim_up": 10**2,
         "xscale": "log",
         "yscale": "log",
+        "ystar_valid": 53.26666672770182,
+        "ystar_test": 53.1555555352105,
    },
 }
 
@@ -135,7 +141,8 @@ color_per_opt = {
     "smac_hb_eta_3": list_of_colors[1],
     "smac_hb_eta_2": list_of_colors[1],
     "randomsearch": list_of_colors[2],
-    "dragonfly_default": list_of_colors[3]
+    "dragonfly_default": list_of_colors[3],
+    "dehb": list_of_colors[4],
 }
 
 marker_per_opt = {
@@ -145,4 +152,5 @@ marker_per_opt = {
     "smac_hb_eta_2": "s",
     "randomsearch": "v",
     "dragonfly_default": "^",
+    "dehb": "*",
 }
