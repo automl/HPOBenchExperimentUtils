@@ -4,6 +4,7 @@ from typing import Union
 
 import numpy as np
 import pandas as pd
+import scipy.stats as scst
 
 from HPOBenchExperimentUtils.utils.validation_utils import load_trajectories, \
     load_trajectories_as_df, df_per_optimizer
@@ -50,15 +51,60 @@ def save_table(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pa
     def q3(x):
         return x.quantile(0.75)
 
+    def lst(x):
+        return list(x)
+
     # q1 = lambda x: x.quantile(0.25)
     # q3 = lambda x: x.quantile(0.75)
-    aggregate_funcs = ['mean', 'std', 'median', q1, q3, 'min', 'max']
-
+    aggregate_funcs = ['median', q1, q3, lst]
     result_df = result_df.groupby('optimizer').agg({'function_values': aggregate_funcs,
-                                                    'total_time_used': aggregate_funcs})
-
+                                                    'total_time_used': ['median']})
     result_df.columns = ["_".join(x) for x in result_df.columns.ravel()]
+
+    # Compute some statistics
+    opt_keys = list(result_df.index)
+    opt_keys.sort()
+    # get best optimizer
+    best_opt = opt_keys[result_df["function_values_median"].argmin()]
+    best_val = result_df["function_values_lst"][best_opt]
+    print("%s is the best optimizer" % best_opt)
+
+    not_worse = [best_opt, ]
+    for opt in opt_keys:
+        if opt == best_opt: continue
+        opt_val = result_df["function_values_lst"][opt]
+        assert len(opt_val) == len(best_val) == 24
+        # The two-sided test has the null hypothesis that the median of the differences is zero
+        # against the alternative that it is different from zero.
+        s, p = scst.wilcoxon(best_val, opt_val, alternative="two-sided")
+        if p < 0.05:
+            not_worse.append(opt)
+
+    result_df = result_df.round({
+        "function_values_median": 2,
+        "function_values_q1": 2,
+        "function_values_q3": 2,
+        "total_time_used_median": 0,
+    })
+
+    result_df.loc[best_opt, "function_values_median"] = r"textbf{%s}" % result_df["function_values_median"][best_opt]
+    for opt in not_worse:
+        result_df.loc[opt, "function_values_median"] = r"underline{%s}" % result_df["function_values_median"][opt]
+
+    result_df["value"] = result_df['function_values_median'].astype(str) + " [" + result_df['function_values_q1'].astype(str) + ", " + \
+                             result_df['function_values_q3'].astype(str) + "]"
+
+    # select final cols
+    result_df['optimizer'] = result_df.index
+    result_df = result_df[["value"]]
+    result_df = result_df.transpose()
+    result_df["benchmark"] = benchmark
+
+    header = ["benchmark"] + opt_keys
+    result_df = result_df[header]
 
     val_str = 'unvalidated' if unvalidated else 'validated'
     with open(Path(output_dir) / f'{benchmark}_{val_str}_result_table.tex', 'w') as fh:
-        fh.write(result_df.to_latex())
+        latex = result_df.to_latex(index_names=False, index=False)
+        latex = latex.replace('\\{', "{").replace("\\}", "}").replace("underline", "\\underline").replace("textbf", "\\textbf")
+        fh.write(latex)
