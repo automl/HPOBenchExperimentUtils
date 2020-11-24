@@ -185,7 +185,7 @@ def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Un
                 c = json.dumps(record["configuration"], sort_keys=True)
                 f = record['fidelity'][list(record['fidelity'])[0]]
                 f_set.append(f)
-                conf_dc[c][f] = record["cost"]
+                conf_dc[c][f] = record["function_value"]
 
     f_set = np.array(list(set(f_set)))
     f_set.sort()
@@ -207,6 +207,8 @@ def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Un
                 if f1 in conf_dc[c] and f2 in conf_dc[c]:
                     a.append(conf_dc[c][f1])
                     b.append(conf_dc[c][f2])
+            a = np.array(a)
+            b = np.array(b)
             c, _ = scst.spearmanr(a, b)
             cors[(f1, f2)] = (c, len(a))
 
