@@ -67,18 +67,12 @@ def plot_overhead(benchmark: str, output_dir: Union[Path, str], input_dir: Union
     benchmark_spec = plot_dc.get(benchmark, {})
     y_best = benchmark_spec.get("ystar_valid", 0)
 
-    stat_dc = {}
+    plt.figure(figsize=[5, 5])
+    a = plt.subplot(111)
     for opt in opt_rh_dc:
         if len(opt_rh_dc) == 0: continue
         rhs = load_trajectories(opt_rh_dc[opt])
         df = df_per_optimizer(opt, rhs, y_best=y_best)
-        stat_dc[opt] = df
-
-    plt.figure(figsize=[5, 5])
-    a = plt.subplot(111)
-    for opt in stat_dc:
-        # get queried fidels
-        df = stat_dc[opt]
         nseeds = df['id'].unique()
         for seed in nseeds:
             steps = df[df['id'] == seed]["total_time_used"]
@@ -97,7 +91,7 @@ def plot_overhead(benchmark: str, output_dir: Union[Path, str], input_dir: Union
             overall_cost = np.cumsum(overall_cost)
             plt.plot(steps, overall_cost, color=color_per_opt.get(opt, "k"), alpha=0.5, zorder=99,
                      label="%s overall" % label if seed == 0 else None)
-
+        del df
 
     a.legend()
     a.grid(which="both", zorder=0)
@@ -125,18 +119,14 @@ def plot_ecdf(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pat
         ys = np.arange(1, len(xs) + 1) / float(len(xs))
         return xs, ys
 
-    stat_dc = {}
+    plt.figure(figsize=[5, 5])
+    a = plt.subplot(111)
+
     for opt in opt_rh_dc:
         if len(opt_rh_dc) == 0: continue
         rhs = load_trajectories(opt_rh_dc[opt])
         df = df_per_optimizer(opt, rhs, y_best=y_best)
-        stat_dc[opt] = df
-
-    plt.figure(figsize=[5, 5])
-    a = plt.subplot(111)
-    for opt in stat_dc:
         color = color_per_opt.get(opt, "k")
-        df = stat_dc[opt]
 
         obj_vals = df["function_values"]
         x, y = ecdf(obj_vals.to_numpy())
@@ -148,6 +138,7 @@ def plot_ecdf(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pat
             obj_vals = df[df['id'] == seed]["function_values"]
             x, y = ecdf(obj_vals.to_numpy())
             plt.plot(x, y, c=color, alpha=0.2)
+        del df
 
     if y_best != 0:
         plt.xlabel("Optimization Regret")
