@@ -93,7 +93,6 @@ def plot_overhead(benchmark: str, output_dir: Union[Path, str], input_dir: Union
             plt.plot(steps, overhead, color=color_per_opt.get(opt, "k"), linestyle=":", label=label if seed == 0 else None)
 
             overall_cost = df[df['id'] == seed]["finish_time"] - df[df['id'] == seed]["start_time"].iloc[0]
-            overall_cost = np.cumsum(overall_cost)
             plt.plot(steps, overall_cost, color=color_per_opt.get(opt, "k"), alpha=0.5, zorder=99,
                      label="%s overall" % label if seed == 0 else None)
         del df
