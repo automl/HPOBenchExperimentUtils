@@ -67,26 +67,32 @@ def save_table(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pa
     result_df = result_df.groupby('optimizer').agg({'function_values': aggregate_funcs,
                                                     'total_time_used': ['median']})
     result_df.columns = ["_".join(x) for x in result_df.columns.ravel()]
-    print(result_df)
+
     # Compute some statistics
     opt_keys = list(result_df.index)
     opt_keys.sort()
 
     # get best optimizer
     best_opt = opt_keys[result_df["function_values_median"].argmin()]
-    best_val = result_df["function_values_lst"][best_opt]
-    print("%s is the best optimizer" % best_opt)
+    best_opt_ls = [best_opt, ]
+    best_val = np.array(result_df["function_values_lst"][best_opt])
+    _log.info("%s is the best optimizer" % best_opt)
 
     not_worse = []
     for opt in opt_keys:
         if opt == best_opt: continue
-        opt_val = result_df["function_values_lst"][opt]
+        opt_val = np.array(result_df["function_values_lst"][opt])
         assert len(opt_val) == len(best_val) == 24
-        # The two-sided test has the null hypothesis that the median of the differences is zero
-        # against the alternative that it is different from zero.
-        s, p = scst.wilcoxon(best_val, opt_val, alternative="two-sided")
-        if p > 0.05:
-            not_worse.append(opt)
+        
+        if np.sum(best_val - opt_val) == 0:
+            # Results are identical
+            best_opt_ls.append(opt)
+        else:
+            # The two-sided test has the null hypothesis that the median of the differences is zero
+            # against the alternative that it is different from zero.
+            s, p = scst.wilcoxon(best_val, opt_val, alternative="two-sided")
+            if p > 0.05:
+                not_worse.append(opt)
 
     for opt in opt_keys:
         val = result_df["function_values_median"][opt]
@@ -96,7 +102,7 @@ def save_table(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pa
         else: 
             val = "%.3g" % np.round(val, 3)
 
-        if opt == best_opt:
+        if opt in best_opt_ls:
             val = r"underline{textbf{%s}}" % val
         elif opt in not_worse:
             val = r"underline{%s}" % val
