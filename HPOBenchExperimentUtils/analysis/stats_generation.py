@@ -70,7 +70,7 @@ def plot_overhead(benchmark: str, output_dir: Union[Path, str], input_dir: Union
     plt.figure(figsize=[5, 5])
     a = plt.subplot(111)
     for opt in opt_rh_dc:
-        if len(opt_rh_dc) == 0: continue
+        if len(opt_rh_dc[opt]) == 0: continue
         rhs = load_trajectories(opt_rh_dc[opt])
         df = df_per_optimizer(opt, rhs, y_best=y_best)
         nseeds = df['id'].unique()
@@ -81,7 +81,7 @@ def plot_overhead(benchmark: str, output_dir: Union[Path, str], input_dir: Union
             benchmark_cost = df[df['id'] == seed]["finish_time"] - df[df['id'] == seed]["start_time"]
             benchmark_cost = np.cumsum(benchmark_cost)
             plt.plot(steps, benchmark_cost, color='k', alpha=0.5, zorder=99,
-                     label=benchmark if seed == 0 and opt == list(stat_dc.keys())[0] else None)
+                     label=benchmark if seed == 0 and opt == list(opt_rh_dc.keys())[0] else None)
 
             overhead = df[df['id'] == seed]["start_time"] - df[df['id'] == seed]["finish_time"].shift(1)
             overhead = np.cumsum(overhead)

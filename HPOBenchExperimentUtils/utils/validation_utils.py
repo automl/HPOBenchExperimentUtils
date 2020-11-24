@@ -144,15 +144,22 @@ def get_statistics_df(optimizer_df):
 
 
 def df_per_optimizer(key, unvalidated_trajectories, y_best: float=0):
-    optimizer_df = pd.DataFrame()
-
     if y_best != 0:
         _log.info("Found y_best = %g; Going to compute regret" % y_best)
 
+    dataframe = {
+        "optimizer": [],
+        "id": [],
+        "total_time_used": [],
+        "total_objective_costs": [],
+        "function_values": [],
+        "fidel_values": [],
+        "costs": [],
+        "start_time": [],
+        "finish_time": [],
+    }
+
     for id, traj in enumerate(unvalidated_trajectories):
-        trajectory_df = pd.DataFrame(columns=['optimizer', 'id',
-                                              'function_values', 'fidel_values',
-                                              'total_time_used', 'total_objective_costs'])
         function_values = [record['function_value']-y_best for record in traj[1:]]
         total_time_used = [record['total_time_used'] for record in traj[1:]]
         total_obj_costs = [record['total_objective_costs'] for record in traj[1:]]
@@ -163,15 +170,15 @@ def df_per_optimizer(key, unvalidated_trajectories, y_best: float=0):
         # this is a dict with only one entry
         fidel_values = [record['fidelity'][list(record['fidelity'])[0]] for record in traj[1:]]
 
-        trajectory_df['optimizer'] = [key for _ in range(len(traj[1:]))]
-        trajectory_df['id'] = [id for _ in range(len(traj[1:]))]
-        trajectory_df['total_time_used'] = total_time_used
-        trajectory_df['total_objective_costs'] = total_obj_costs
-        trajectory_df['function_values'] = function_values
-        trajectory_df['fidel_values'] = fidel_values
-        trajectory_df['costs'] = costs
-        trajectory_df['start_time'] = start
-        trajectory_df['finish_time'] = finish
+        dataframe["optimizer"].extend([key for _ in range(len(traj[1:]))])
+        dataframe["id"].extend([id for _ in range(len(traj[1:]))])
+        dataframe['total_time_used'].extend(total_time_used)
+        dataframe['total_objective_costs'].extend(total_obj_costs)
+        dataframe['function_values'].extend(function_values)
+        dataframe['fidel_values'].extend(fidel_values)
+        dataframe['costs'].extend(costs)
+        dataframe['start_time'].extend(start)
+        dataframe['finish_time'].extend(finish)
 
-        optimizer_df = pd.concat([optimizer_df, trajectory_df])
+    optimizer_df = pd.DataFrame(dataframe)
     return optimizer_df
