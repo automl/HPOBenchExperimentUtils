@@ -124,7 +124,10 @@ def get_statistics_df(optimizer_df):
     piv = optimizer_df.pivot(index='total_time_used', columns='id', values='function_values')
 
     piv = piv.fillna(method='ffill')
-    piv = piv.fillna(method='bfill')
+    vali = -1
+    for c in piv.columns:
+        vali = max(vali, piv[c].first_valid_index())
+    piv = piv.loc[vali:]
 
     piv['mean'] = piv.mean(axis=1)
     piv['std'] = piv.std(axis=1)
