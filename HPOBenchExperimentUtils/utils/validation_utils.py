@@ -151,7 +151,7 @@ def df_per_optimizer(key, unvalidated_trajectories, y_best: float=0):
 
     for id, traj in enumerate(unvalidated_trajectories):
         trajectory_df = pd.DataFrame(columns=['optimizer', 'id',
-                                              'function_values', 'fidelity_value',
+                                              'function_values', 'fidel_values',
                                               'total_time_used', 'total_objective_costs'])
         function_values = [record['function_value']-y_best for record in traj[1:]]
         total_time_used = [record['total_time_used'] for record in traj[1:]]
