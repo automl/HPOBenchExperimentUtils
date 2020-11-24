@@ -188,6 +188,7 @@ def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Un
                 conf_dc[c][f] = record["cost"]
 
     f_set = np.array(list(set(f_set)))
+    f_set.sort()
     # Clean dc:
     to_rm = []
     for c in conf_dc:
@@ -212,7 +213,7 @@ def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Un
     # Create plot
     plt.figure(figsize=[5, 5])
     a = plt.subplot(111)
-    for fi, f in enumerate(f_set):
+    for fi, f in enumerate(f_set[:-1]):
         plt.scatter(f_set[fi+1:], [cors[(f, f1)][0] for f1 in f_set[fi+1:]], label=f)
     plt.legend()
     plt.xlabel("fidelity")
