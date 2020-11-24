@@ -14,7 +14,7 @@ from hpobench.abstract_benchmark import AbstractBenchmark
 from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 from pebble import concurrent
 
-from HPOBenchExperimentUtils.utils import MAXINT, RUNHISTORY_FILENAME, TRAJECTORY_FILENAME, \
+from HPOBenchExperimentUtils.utils import MAXINT, RUNHISTORY_FILENAME, TRAJECTORY_V1_FILENAME, \
     VALIDATED_RUNHISTORY_FILENAME
 
 logger = logging.getLogger('Bookkeeper')
@@ -100,7 +100,7 @@ def keep_track(validate=False):
                           'cost': result_dict['cost'],
                           'configuration': configuration,
                           'info': result_dict['info'],
-                          'function_call': self.function_calls,
+                          'function_call': self.get_total_tae_used(),
                           'total_time_used': total_time_used,
                           'total_objective_costs': self.total_objective_costs
                           }
@@ -136,7 +136,7 @@ class Bookkeeper:
 
         self.benchmark = benchmark
         self.log_file = output_dir / RUNHISTORY_FILENAME
-        self.trajectory = output_dir / TRAJECTORY_FILENAME
+        self.trajectory = output_dir / TRAJECTORY_V1_FILENAME
         self.validate_log_file = output_dir / VALIDATED_RUNHISTORY_FILENAME
 
         self.boot_time = time()
@@ -213,18 +213,6 @@ class Bookkeeper:
     def get_meta_information(self) -> Dict:
         return self.benchmark.get_meta_information()
 
-    def set_total_time_used(self, total_time_used: float):
-        with self.lock:
-            self.total_time_proxy.value = total_time_used
-
-    def set_total_tae_used(self, total_tae_used: float):
-        with self.lock:
-            self.total_tae_calls_proxy.value = total_tae_used
-
-    def set_total_fuel_used(self, total_fuel_used_proxy: float):
-        with self.lock:
-            self.total_fuel_used_proxy.value = total_fuel_used_proxy
-
     def get_total_time_used(self):
         with self.lock:
             value = self.total_time_proxy.value
@@ -239,6 +227,18 @@ class Bookkeeper:
         with self.lock:
             value = self.total_fuel_used_proxy.value
         return value
+
+    def set_total_time_used(self, total_time_used: float):
+        with self.lock:
+            self.total_time_proxy.value = total_time_used
+
+    def set_total_tae_used(self, total_tae_used: float):
+        with self.lock:
+            self.total_tae_calls_proxy.value = total_tae_used
+
+    def set_total_fuel_used(self, total_fuel_used_proxy: float):
+        with self.lock:
+            self.total_fuel_used_proxy.value = total_fuel_used_proxy
 
     def increase_total_time_used(self, total_time_used_delta: float):
         with self.lock:

@@ -87,7 +87,6 @@ def run_benchmark(optimizer: str,
     if output_dir.is_dir():
         raise ValueError(f"Outputdir {output_dir} already exists, pass")
 
-    output_dir.mkdir(exist_ok=True, parents=True)
     _log.debug(f'Output dir: {output_dir}')
 
     # Load and instantiate the benchmark

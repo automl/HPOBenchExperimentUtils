@@ -5,7 +5,7 @@ from typing import Union
 import numpy as np
 import pandas as pd
 
-from HPOBenchExperimentUtils.utils.validation_utils import load_trajectories, \
+from HPOBenchExperimentUtils.utils.validation_utils import load_json_files, \
     load_trajectories_as_df, df_per_optimizer
 from HPOBenchExperimentUtils import _default_log_format, _log as _main_log
 from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc
@@ -30,7 +30,7 @@ def save_table(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pa
     keys = list(unique_optimizer.keys())
     result_df = pd.DataFrame()
     for key in keys:
-        trajectories = load_trajectories(unique_optimizer[key])
+        trajectories = load_json_files(unique_optimizer[key])
         optimizer_df = df_per_optimizer(
             key=key,
             unvalidated_trajectories=trajectories,

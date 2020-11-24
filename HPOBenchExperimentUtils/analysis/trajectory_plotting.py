@@ -4,7 +4,7 @@ from typing import Union
 
 from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc
 from HPOBenchExperimentUtils import _default_log_format, _log as _main_log
-from HPOBenchExperimentUtils.utils.validation_utils import load_trajectories, load_trajectories_as_df,\
+from HPOBenchExperimentUtils.utils.validation_utils import load_json_files, load_trajectories_as_df,\
     get_statistics_df, df_per_optimizer
 from HPOBenchExperimentUtils.utils.runner_utils import get_optimizer_setting
 
@@ -27,7 +27,7 @@ def read_trajectories(benchmark: str, input_dir: Path, train: bool=True, y_best:
     if len(optimizer_names) == 0:
         raise ValueError("No files found")
     for key in optimizer_names:
-        trajectories = load_trajectories(unique_optimizer[key])
+        trajectories = load_json_files(unique_optimizer[key])
         optimizer_df = df_per_optimizer(key, trajectories, y_best=y_best)
         statistics_df.append(get_statistics_df(optimizer_df))
     return optimizer_names, trajectories, statistics_df

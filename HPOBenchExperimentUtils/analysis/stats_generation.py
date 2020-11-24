@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from HPOBenchExperimentUtils import _default_log_format, _log as _main_log
-from HPOBenchExperimentUtils.utils.validation_utils import load_trajectories, \
+from HPOBenchExperimentUtils.utils.validation_utils import load_json_files, \
     load_trajectories_as_df, df_per_optimizer
 from HPOBenchExperimentUtils.utils.plotting_utils import color_per_opt, marker_per_opt
 from HPOBenchExperimentUtils.utils.runner_utils import get_optimizer_setting
@@ -26,7 +26,7 @@ def plot_fidels(benchmark: str, output_dir: Union[Path, str], input_dir: Union[P
     stat_dc = {}
     for opt in opt_rh_dc:
         if len(opt_rh_dc) == 0: continue
-        rhs = load_trajectories(opt_rh_dc[opt])
+        rhs = load_json_files(opt_rh_dc[opt])
         df = df_per_optimizer(opt, rhs)
         stat_dc[opt] = df
 
@@ -68,7 +68,7 @@ def plot_overhead(benchmark: str, output_dir: Union[Path, str], input_dir: Union
     stat_dc = {}
     for opt in opt_rh_dc:
         if len(opt_rh_dc) == 0: continue
-        rhs = load_trajectories(opt_rh_dc[opt])
+        rhs = load_json_files(opt_rh_dc[opt])
         df = df_per_optimizer(opt, rhs)
         stat_dc[opt] = df
 
