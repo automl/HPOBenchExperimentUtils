@@ -52,24 +52,32 @@ def save_table(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pa
         return x.quantile(0.75)
 
     def lst(x):
+        x = np.array(x)
+        x[x < 1e-6] = 1e-6
         return list(x)
+
+    def median(x):
+        x = np.array(x)
+        x[x < 1e-6] = 1e-6
+        return np.median(x)
 
     # q1 = lambda x: x.quantile(0.25)
     # q3 = lambda x: x.quantile(0.75)
-    aggregate_funcs = ['median', q1, q3, lst]
+    aggregate_funcs = [median, q1, q3, lst]
     result_df = result_df.groupby('optimizer').agg({'function_values': aggregate_funcs,
                                                     'total_time_used': ['median']})
     result_df.columns = ["_".join(x) for x in result_df.columns.ravel()]
-
+    print(result_df)
     # Compute some statistics
     opt_keys = list(result_df.index)
     opt_keys.sort()
+
     # get best optimizer
     best_opt = opt_keys[result_df["function_values_median"].argmin()]
     best_val = result_df["function_values_lst"][best_opt]
     print("%s is the best optimizer" % best_opt)
 
-    not_worse = [best_opt, ]
+    not_worse = []
     for opt in opt_keys:
         if opt == best_opt: continue
         opt_val = result_df["function_values_lst"][opt]
@@ -77,22 +85,31 @@ def save_table(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pa
         # The two-sided test has the null hypothesis that the median of the differences is zero
         # against the alternative that it is different from zero.
         s, p = scst.wilcoxon(best_val, opt_val, alternative="two-sided")
-        if p < 0.05:
+        if p > 0.05:
             not_worse.append(opt)
 
-    result_df = result_df.round({
-        "function_values_median": 2,
-        "function_values_q1": 2,
-        "function_values_q3": 2,
-        "total_time_used_median": 0,
-    })
+    for opt in opt_keys:
+        val = result_df["function_values_median"][opt]
 
-    result_df.loc[best_opt, "function_values_median"] = r"textbf{%s}" % result_df["function_values_median"][best_opt]
-    for opt in not_worse:
-        result_df.loc[opt, "function_values_median"] = r"underline{%s}" % result_df["function_values_median"][opt]
+        if val < 1e-3:
+            val = "%.2e" % val
+        else: 
+            val = "%.3g" % np.round(val, 3)
 
-    result_df["value"] = result_df['function_values_median'].astype(str) + " [" + result_df['function_values_q1'].astype(str) + ", " + \
-                             result_df['function_values_q3'].astype(str) + "]"
+        if opt == best_opt:
+            val = r"underline{textbf{%s}}" % val
+        elif opt in not_worse:
+            val = r"underline{%s}" % val
+
+        result_df.loc[opt, "value"] = val
+
+    #result_df = result_df.round({
+    #    "function_values_median": 3,
+    #    "function_values_q1": 2,
+    #    "function_values_q3": 2,
+    #    "total_time_used_median": 0,
+    #})
+
 
     # select final cols
     result_df['optimizer'] = result_df.index
@@ -104,7 +121,36 @@ def save_table(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pa
     result_df = result_df[header]
 
     val_str = 'unvalidated' if unvalidated else 'validated'
+
+    replace_dc = {
+        '\\{': "{",
+        "\\}": "}",
+        "textbf": "\\textbf",
+        "underline": "\\underline",
+        'xgboostsub': r"\xgboostfrac",
+        'xgboostest': r"\xgboostnest",
+        'cartpolereduced': r"\cartpole",
+        "cartpolefull": "%cartpolefull",
+        'BNNOnBostonHousing': r"\bnnboston",
+        'BNNOnProteinStructure': r"\bnnprotein",
+        'BNNOnYearPrediction': r"\bnnyear",
+        'learna': r"\learna",
+        'NASCifar10ABenchmark': r"\NASA",
+        'NASCifar10BBenchmark': r"\NASB",
+        'NASCifar10CBenchmark': r"\NASC",
+        'SliceLocalizationBenchmark': r"\slice",
+        'ProteinStructureBenchmark': r"\protein",
+        'NavalPropulsionBenchmark': r"\naval",
+        'ParkinsonsTelemonitoringBenchmark': r"\parkinson",
+        'Cifar10NasBench201Benchmark': r"%\nbcifart",
+        'Cifar10ValidNasBench201Benchmark': r"\nbcifartv",
+        'Cifar100NasBench201Benchmark': r"\nbcifarh", 
+        'ImageNetNasBench201Benchmark': r"\nbimage",
+    }
+
     with open(Path(output_dir) / f'{benchmark}_{val_str}_result_table.tex', 'w') as fh:
         latex = result_df.to_latex(index_names=False, index=False)
-        latex = latex.replace('\\{', "{").replace("\\}", "}").replace("underline", "\\underline").replace("textbf", "\\textbf")
+        for i in replace_dc:
+            latex = latex.replace(i, replace_dc[i])
+        print(latex)
         fh.write(latex)
