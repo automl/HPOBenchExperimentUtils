@@ -110,6 +110,8 @@ def load_trajectories_as_df(input_dir, which="test"):
         trajectories_paths = list(input_dir.rglob(f'hpobench_trajectory_validated.txt'))
     elif which == "runhistory":
         trajectories_paths = list(input_dir.rglob(f'hpobench_runhistory.txt'))
+    else:
+        raise ValueError(f'Specified parameter must be one of [train, test, runistory] but was {which}')
     unique_optimizer = defaultdict(lambda: [])
     for path in trajectories_paths:
         opt = path.parent.parent.name

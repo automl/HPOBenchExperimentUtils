@@ -110,7 +110,10 @@ def get_benchmark_settings(benchmark: str) -> Dict:
 
     # fill missing parameter with default ones:
     default_params = dict(num_iterations=10000000,
-                          is_surrogate=False)
+                          is_surrogate=False,
+                          tae_limit=None,
+                          fuel_limit=None)
+
     experiment_settings = dict(default_params, **experiment_settings)
 
     return experiment_settings

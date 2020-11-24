@@ -14,14 +14,15 @@ from hpobench.abstract_benchmark import AbstractBenchmark
 from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 from pebble import concurrent
 
-from HPOBenchExperimentUtils.utils import MAXINT
+from HPOBenchExperimentUtils.utils import MAXINT, RUNHISTORY_FILENAME, TRAJECTORY_FILENAME, \
+    VALIDATED_RUNHISTORY_FILENAME
 
 logger = logging.getLogger('Bookkeeper')
 
 
 def _get_dict_types(d):
-    assert isinstance(d, Dict), "Expected to display items types for a dictionary, but received object of type %s" % \
-                                type(d)
+    assert isinstance(d, Dict), f"Expected to display items types for a dictionary, but received object of " \
+                                f"type {type(d)}"
     return {k: type(v) if not isinstance(v, Dict) else _get_dict_types(v) for k, v in d.items()}
 
 
@@ -40,15 +41,21 @@ def keep_track(validate=False):
                     fidelity: Union[CS.Configuration, Dict, None] = None,
                     rng: Union[np.random.RandomState, int, None] = None, **kwargs):
 
-            self.function_calls += 1
+            self.increase_total_tae_used(1)
+
             start_time = time()
             result_dict = function(self, configuration, fidelity, rng, **kwargs)
+
             # Throw an time error if the function evaluation takes more time than the specified cutoff value.
             # Note: This check is intended to
             try:
                 result_dict = result_dict.result()
             except TimeoutError:
-                self.set_total_time_used(self.cutoff_limit_in_s)
+                # TODO: Fidelity is a dict here. How to extract the value? What to do if it is None?
+                f = _safe_cast_config(fidelity) or None
+                self.increase_total_fuel_used(list(f.values())[0] or 0)
+                self.increase_total_time_used(self.cutoff_limit_in_s)
+
                 return {'function_value': MAXINT,
                         'cost': self.cutoff_limit_in_s,
                         'info': {'fidelity': fidelity or -1234}}
@@ -74,14 +81,17 @@ def keep_track(validate=False):
             # benchmark.
             time_for_evaluation = result_dict['cost']
 
+            # if the fidelity is none: load it from the result dictionary.
+            fidelity = _safe_cast_config(fidelity or result_dict['info']['fidelity'])
+            configuration = _safe_cast_config(configuration)
+
             # Note: We update the proxy variable after checking the conditions here.
             #       This is because, we want to make sure, that this process is not be killed from outside
             #       before it was able to write the current result into the result file.
-            if (self.wall_clock_limit_in_s is None or total_time_used <= self.wall_clock_limit_in_s) \
-                    and time_for_evaluation <= self.cutoff_limit_in_s:
-                configuration = _safe_cast_config(configuration)
-                # if the fidelity is none: load it from the result dictionary.
-                fidelity = _safe_cast_config(fidelity or result_dict['info']['fidelity'])
+            if not total_time_exceeds_limit(total_time_used, self.wall_clock_limit_in_s, time()) \
+                and not used_fuel_exceeds_limit(self.get_total_fuel_used(), self.fuel_limit) \
+                and not tae_exceeds_limit(self.get_total_tae_used(), self.tae_limit) \
+                    and not time_per_config_exceeds_limit(time_for_evaluation, self.cutoff_limit_in_s):
 
                 record = {'start_time': start_time,
                           'finish_time': finish_time,
@@ -102,6 +112,8 @@ def keep_track(validate=False):
                     self.calculate_incumbent(record)
 
             self.set_total_time_used(total_time_used)
+            self.increase_total_fuel_used(list(fidelity.values())[0] or 0)
+
             return result_dict
 
         return wrapped
@@ -112,35 +124,42 @@ class Bookkeeper:
     def __init__(self, benchmark: Union[AbstractBenchmark, AbstractBenchmarkClient],
                  output_dir: Path,
                  total_time_proxy: Any,
+                 total_tae_calls_proxy: Any,
+                 total_fuel_used_proxy: Any,
+                 global_lock: Any,
                  wall_clock_limit_in_s: Union[int, float, None],
+                 tae_limit: Union[int, None],
+                 fuel_limit: Union[int, float, None],
                  cutoff_limit_in_s: Union[int, float],
                  is_surrogate: bool,
                  validate: bool = False):
 
         self.benchmark = benchmark
-        self.log_file = output_dir / 'hpobench_runhistory.txt'
-        self.trajectory = output_dir / 'hpobench_trajectory.txt'
-        self.validate_log_file = output_dir / 'hpobench_runhistory_validation.txt'
-        # self.validate_trajectory = output_dir / 'hpobench_trajectory_validation.txt'
-        # self.validate_log_db = output_dir / 'hpobench_runhistory_validation.db'
+        self.log_file = output_dir / RUNHISTORY_FILENAME
+        self.trajectory = output_dir / TRAJECTORY_FILENAME
+        self.validate_log_file = output_dir / VALIDATED_RUNHISTORY_FILENAME
 
         self.boot_time = time()
         self.total_objective_costs = 0
-        # TODO: Create proxy for tae count
-        self.function_calls = 0
 
         self.inc_budget = None
         self.inc_value = None
 
-        # self.inc_budget_validated = None
-        # self.inc_value_validated = None
-
-        # This variable is a share variable. A proxy to check from outside. It represents the time already used for this
-        # benchmark. It also takes into account if the benchmark is a surrogate.
+        # This variable is a shared variable. A proxy to check from outside. It represents the time already used
+        # by this benchmark. It also takes into account if the benchmark is a surrogate.
         self.total_time_proxy = total_time_proxy
-        self.global_time_lock = Lock()
+
+        # Same as total time proxy, but counts the total used budget
+        self.total_fuel_used_proxy = total_fuel_used_proxy
+
+        # Sums up the number of target algorithm executions.
+        self.total_tae_calls_proxy = total_tae_calls_proxy
+
+        self.lock = global_lock
 
         self.wall_clock_limit_in_s = wall_clock_limit_in_s
+        self.tae_limit = tae_limit
+        self.fuel_limit = fuel_limit
         self.cutoff_limit_in_s = cutoff_limit_in_s
         self.is_surrogate = is_surrogate
 
@@ -195,12 +214,43 @@ class Bookkeeper:
         return self.benchmark.get_meta_information()
 
     def set_total_time_used(self, total_time_used: float):
-        with self.global_time_lock:
+        with self.lock:
             self.total_time_proxy.value = total_time_used
 
+    def set_total_tae_used(self, total_tae_used: float):
+        with self.lock:
+            self.total_tae_calls_proxy.value = total_tae_used
+
+    def set_total_fuel_used(self, total_fuel_used_proxy: float):
+        with self.lock:
+            self.total_fuel_used_proxy.value = total_fuel_used_proxy
+
     def get_total_time_used(self):
-        with self.global_time_lock:
-            return self.total_time_proxy.value
+        with self.lock:
+            value = self.total_time_proxy.value
+        return value
+
+    def get_total_tae_used(self):
+        with self.lock:
+            value = self.total_tae_calls_proxy.value
+        return value
+
+    def get_total_fuel_used(self):
+        with self.lock:
+            value = self.total_fuel_used_proxy.value
+        return value
+
+    def increase_total_time_used(self, total_time_used_delta: float):
+        with self.lock:
+            self.total_time_proxy.value = self.total_time_proxy.value + total_time_used_delta
+
+    def increase_total_tae_used(self, total_tae_used: float):
+        with self.lock:
+            self.total_tae_calls_proxy.value = self.total_tae_calls_proxy.value + total_tae_used
+
+    def increase_total_fuel_used(self, total_fuel_used_proxy: float):
+        with self.lock:
+            self.total_fuel_used_proxy.value = self.total_fuel_used_proxy.value + total_fuel_used_proxy
 
     @staticmethod
     def write_line_to_file(file, dict_to_store, mode='a+'):
@@ -214,6 +264,17 @@ class Bookkeeper:
             fh.write(os.linesep)
 
     def calculate_incumbent(self, record: Dict):
+        """
+        Given a new record (challenging configuration), compare it to the current incumbent.
+        If the challenger is either on a higher budget or on the same budget but with a better performance, make the
+        challenger the new incumbent.
+
+        If the challenger is better, then append it to the trajectory.
+
+        Parameters
+        ----------
+        record : Dict
+        """
         # If any progress has made, Bigger is better, etc.
         fidelity = list(record['fidelity'].values())[0]
 
@@ -227,3 +288,24 @@ class Bookkeeper:
 
     def __del__(self):
         self.benchmark.__del__()
+
+
+def total_time_exceeds_limit(total_time_proxy, time_limit_in_s, start_time):
+    # Wait for the optimizer to finish.
+    # But in case the optimizer crashes somehow, also test for the real time here.
+    # if the limit is None, this condition is not active.
+    return time_limit_in_s is not None and \
+           (total_time_proxy > time_limit_in_s
+            or time() - start_time - 60 > time_limit_in_s)
+
+
+def used_fuel_exceeds_limit(total_fuel_used_proxy, max_fuel):
+    return max_fuel is not None and total_fuel_used_proxy > max_fuel
+
+
+def tae_exceeds_limit(total_tae_calls_proxy, max_tae_calls):
+    return max_tae_calls is not None and total_tae_calls_proxy > max_tae_calls
+
+
+def time_per_config_exceeds_limit(time_per_config, cutoff_limit):
+    return time_per_config > cutoff_limit
