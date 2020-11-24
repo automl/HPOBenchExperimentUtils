@@ -1,9 +1,14 @@
 import logging
 from pathlib import Path
 from typing import Union
+from collections import defaultdict
+import json
 
 import matplotlib.pyplot as plt
+import pandas as pd
+
 import numpy as np
+import scipy.stats as scst
 
 from HPOBenchExperimentUtils import _default_log_format, _log as _main_log
 from HPOBenchExperimentUtils.utils.validation_utils import load_trajectories, \
@@ -152,3 +157,80 @@ def plot_ecdf(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pat
     plt.legend()
     plt.grid(b=True, which="both", axis="both", alpha=0.5)
     plt.savefig(Path(output_dir) / f'{benchmark}_ecdf.png')
+
+
+def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str], **kwargs):
+    _log.info(f'Start plotting corralations for benchmark {benchmark}')
+    input_dir = Path(input_dir) / benchmark
+    assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
+    opt_rh_dc = load_trajectories_as_df(input_dir=input_dir,
+                                        which="runhistory")
+    benchmark_spec = plot_dc.get(benchmark, {})
+    y_best = benchmark_spec.get("ystar_valid", 0)
+
+    conf_dc = defaultdict(dict)
+    f_set = []
+    for opt in opt_rh_dc:
+        if not ("smac" in opt
+                or "dehb" in opt
+                or "hpbands" in opt):
+            _log.info("Skip %s" % opt)
+            continue
+        _log.info("Read %s" % opt)
+        if len(opt_rh_dc[opt]) == 0: continue
+
+        rhs = load_trajectories(opt_rh_dc[opt])
+        for rh in rhs:
+            for record in rh[1:]:
+                c = json.dumps(record["configuration"], sort_keys=True)
+                f = record['fidelity'][list(record['fidelity'])[0]]
+                f_set.append(f)
+                conf_dc[c][f] = record["cost"]
+
+    f_set = np.array(list(set(f_set)))
+    # Clean dc:
+    to_rm = []
+    for c in conf_dc:
+        if len(conf_dc[c]) < 2:
+            to_rm.append(c)
+    for c in to_rm:
+        del conf_dc[c]
+
+    # Start with computing correlations
+    cors = {}
+    for fi, f1 in enumerate(f_set):
+        for f2 in f_set[fi+1:]:
+            a = []
+            b = []
+            for c in conf_dc:
+                if f1 in conf_dc[c] and f2 in conf_dc[c]:
+                    a.append(conf_dc[c][f1])
+                    b.append(conf_dc[c][f2])
+            c, _ = scst.spearmanr(a, b)
+            cors[(f1, f2)] = (c, len(a))
+
+    # Create plot
+    plt.figure(figsize=[5, 5])
+    a = plt.subplot(111)
+    for fi, f in enumerate(f_set):
+        plt.scatter(f_set[fi+1:], [cors[(f, f1)][0] for f1 in f_set[fi+1:]], label=f)
+    plt.legend()
+    plt.xlabel("fidelity")
+    plt.ylabel("Spearman correlation coefficient")
+    plt.grid(b=True, which="both", axis="both", alpha=0.5)
+    plt.savefig(Path(output_dir) / f'{benchmark}_correlation.png')
+
+    # Create table
+    df = defaultdict(list)
+    for fi, f1 in enumerate(f_set[:-1]):
+        for fj, f2 in enumerate(f_set):
+            if fj <= fi:
+                df[f1].append("-")
+            else:
+                df[f1].append("%.3g (%d)" % (np.round(cors[f1, f2][0], 3), cors[f1, f2][1]))
+    df = pd.DataFrame(df, index=f_set)
+    with open(Path(output_dir) / f'{benchmark}_correlation_table.tex', 'w') as fh:
+        latex = df.to_latex(index_names=False, index=True)
+        fh.write(latex)
+
+
