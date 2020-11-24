@@ -65,13 +65,14 @@ def load_trajectories(trajectory_paths: List) -> List:
     if len(trajectory_paths) > 1:
         _log.warning('More than one trajectory file found. Start to combine all found configurations')
 
+    _log.info("Loading %d trajectories" % len(trajectory_paths))
     # Load all trajectories
     found_trajectories = []
     for trajectory_path in trajectory_paths:
         # Read in trajectory:
-        lines = read_lines(trajectory_path)
-
-        trajectory = [json.loads(line) for line in lines]
+        _log.info("Reading %s" % trajectory_path)
+        with trajectory_path.open("r") as fh:
+            trajectory = [json.loads(line) for line in fh]
         found_trajectories.append(trajectory)
     return found_trajectories
 
@@ -146,7 +147,7 @@ def get_statistics_df(optimizer_df):
 def df_per_optimizer(key, unvalidated_trajectories, y_best: float=0):
     if y_best != 0:
         _log.info("Found y_best = %g; Going to compute regret" % y_best)
-
+    _log.info("Creating DataFrame for %d inputs" % len(unvalidated_trajectories))
     dataframe = {
         "optimizer": [],
         "id": [],
@@ -160,6 +161,7 @@ def df_per_optimizer(key, unvalidated_trajectories, y_best: float=0):
     }
 
     for id, traj in enumerate(unvalidated_trajectories):
+        _log.info("Handling input with %d records for %s" % (len(traj), key))
         function_values = [record['function_value']-y_best for record in traj[1:]]
         total_time_used = [record['total_time_used'] for record in traj[1:]]
         total_obj_costs = [record['total_objective_costs'] for record in traj[1:]]
@@ -180,5 +182,5 @@ def df_per_optimizer(key, unvalidated_trajectories, y_best: float=0):
         dataframe['start_time'].extend(start)
         dataframe['finish_time'].extend(finish)
 
-    optimizer_df = pd.DataFrame(dataframe)
-    return optimizer_df
+    dataframe = pd.DataFrame(dataframe)
+    return dataframe
