@@ -72,7 +72,7 @@ from dragonfly.exd.cp_domain_utils import load_config
 
 
 def load_dragonfly_options(hpoexp_settings: Dict, config: Dict) -> Tuple[Namespace, Dict]:
-    """ Interpret the options provided by HPOlibExperimentUtils to those compatible with dragonfly. """
+    """ Interpret the options provided by HPOBenchExperimentUtils to those compatible with dragonfly. """
 
     partial_options = {
         "max_or_min": "min",
@@ -266,7 +266,7 @@ def _configspace_to_dragonfly(params: List[Hyperparameter]) -> Tuple[Dict, List,
     return dragonfly_dict, parsers, costs, maxima
 
 
-def configspace_to_dragonfly(domain_cs: ConfigurationSpace, name="hpolib_benchmark",
+def configspace_to_dragonfly(domain_cs: ConfigurationSpace, name="hpobench_benchmark",
                              fidelity_cs: ConfigurationSpace = None) -> \
         Tuple[Dict, List, Union[List, None], Union[List, None]]:
 

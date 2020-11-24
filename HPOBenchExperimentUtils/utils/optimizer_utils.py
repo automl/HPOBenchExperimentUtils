@@ -5,7 +5,7 @@ from typing import Union, Optional, Any, Dict
 
 import numpy as np
 
-from HPOlibExperimentUtils.utils.runner_utils import get_optimizer_settings_names
+from HPOBenchExperimentUtils.utils.runner_utils import get_optimizer_settings_names
 
 _log = logging.getLogger(__name__)
 
@@ -148,35 +148,35 @@ def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]) -> OptimizerEnum
 def get_optimizer(optimizer_enum):
 
     if optimizer_enum is OptimizerEnum.HPBANDSTER_BOHB:
-        from HPOlibExperimentUtils.optimizer.bohb_optimizer import HpBandSterBOHBOptimizer
+        from HPOBenchExperimentUtils.optimizer.bohb_optimizer import HpBandSterBOHBOptimizer
         optimizer = HpBandSterBOHBOptimizer
     elif optimizer_enum is OptimizerEnum.HPBANDSTER_RS:
-        from HPOlibExperimentUtils.optimizer.bohb_optimizer import HpBandSterRandomSearchOptimizer
+        from HPOBenchExperimentUtils.optimizer.bohb_optimizer import HpBandSterRandomSearchOptimizer
         optimizer = HpBandSterRandomSearchOptimizer
     elif optimizer_enum is OptimizerEnum.HPBANDSTER_HB:
-        from HPOlibExperimentUtils.optimizer.bohb_optimizer import HpBandSterHyperBandOptimizer
+        from HPOBenchExperimentUtils.optimizer.bohb_optimizer import HpBandSterHyperBandOptimizer
         optimizer = HpBandSterHyperBandOptimizer
     elif optimizer_enum is OptimizerEnum.HPBANDSTER_H2BO:
-        from HPOlibExperimentUtils.optimizer.bohb_optimizer import HpBandSterH2BOOptimizer
+        from HPOBenchExperimentUtils.optimizer.bohb_optimizer import HpBandSterH2BOOptimizer
         optimizer = HpBandSterH2BOOptimizer
     elif optimizer_enum is OptimizerEnum.DRAGONFLY:
-        from HPOlibExperimentUtils.optimizer.dragonfly_optimizer import DragonflyOptimizer
+        from HPOBenchExperimentUtils.optimizer.dragonfly_optimizer import DragonflyOptimizer
         optimizer = DragonflyOptimizer
     elif optimizer_enum is OptimizerEnum.DEHB:
-        from HPOlibExperimentUtils.optimizer.dehb_optimizer import DehbOptimizer
+        from HPOBenchExperimentUtils.optimizer.dehb_optimizer import DehbOptimizer
         optimizer = DehbOptimizer
     elif optimizer_enum is OptimizerEnum.FABOLAS:
-        from HPOlibExperimentUtils.optimizer.fabolas_optimizer import FabolasOptimizer
+        from HPOBenchExperimentUtils.optimizer.fabolas_optimizer import FabolasOptimizer
         optimizer = FabolasOptimizer
     elif optimizer_enum is OptimizerEnum.SMAC_HYPERBAND:
-        from HPOlibExperimentUtils.optimizer.smac_optimizer import SMACOptimizerHyperband
+        from HPOBenchExperimentUtils.optimizer.smac_optimizer import SMACOptimizerHyperband
         optimizer = SMACOptimizerHyperband
     elif optimizer_enum is OptimizerEnum.SMAC_SUCCESSIVE_HALVING:
-        from HPOlibExperimentUtils.optimizer.smac_optimizer import SMACOptimizerSuccessiveHalving
+        from HPOBenchExperimentUtils.optimizer.smac_optimizer import SMACOptimizerSuccessiveHalving
         optimizer = SMACOptimizerSuccessiveHalving
 
     elif optimizer_enum is OptimizerEnum.PURE_RANDOMSEARCH:
-        from HPOlibExperimentUtils.optimizer.randomsearch_optimizer import RandomSearchOptimizer
+        from HPOBenchExperimentUtils.optimizer.randomsearch_optimizer import RandomSearchOptimizer
         optimizer = RandomSearchOptimizer
 
     else:

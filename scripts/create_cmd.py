@@ -2,7 +2,7 @@ import argparse
 import os
 
 expset_dc = {
-    "NAS201": ["Cifar10NasBench201Benchmark", "Cifar10ValidNasBench201Benchmark", "Cifar100NasBench201Benchmark", "ImageNetNasBench201Benchmark"],
+    "NAS201": ["Cifar10ValidNasBench201Benchmark", "Cifar100NasBench201Benchmark", "ImageNetNasBench201Benchmark"],
     "NAS101": ["NASCifar10ABenchmark", "NASCifar10BBenchmark", "NASCifar10CBenchmark"],
     "NASTAB": ["SliceLocalizationBenchmark", "ProteinStructureBenchmark", "NavalPropulsionBenchmark", "ParkinsonsTelemonitoringBenchmark"],
     "pybnn": ["BNNOnBostonHousing", "BNNOnProteinStructure", "BNNOnYearPrediction"],
@@ -11,7 +11,7 @@ expset_dc = {
 }
 
 opt_set = {
-    "def": ["hpbandster_bohb_eta_3", "smac_hb_eta_3", "randomsearch", "dragonfly_default"],
+    "def": ["hpbandster_bohb_eta_3", "smac_hb_eta_3", "randomsearch", "dragonfly_default", "dehb"],
 }
 
 
@@ -35,7 +35,7 @@ def main(args):
     eval_cmd = []
     evalu_cmd = []
 
-    base = "python %s/HPOlibExperimentUtils" % args.root
+    base = "python %s/HPOBenchExperimentUtils" % args.root
 
     for benchmark in expset_dc[exp]:
         for optimizer in opt_set[opt]:
@@ -44,7 +44,7 @@ def main(args):
                       % (base, args.out_run, optimizer, benchmark, seed)
                 run_cmd.append(cmd)
                 cmd = "%s/validate_benchmark.py --output_dir %s/%s/%s/run-%d/ --benchmark %s " \
-                      "--rng %d" % (base, args.out_run, optimizer, seed, benchmark, benchmark, 1)
+                      "--rng %d" % (base, args.out_run, benchmark, optimizer, seed, benchmark, 1)
                 val_ind_cmd.append(cmd)
         cmd = "%s/validate_benchmark.py --output_dir %s/%s --benchmark %s --rng %d" \
               % (base, args.out_run, benchmark, benchmark, 1)

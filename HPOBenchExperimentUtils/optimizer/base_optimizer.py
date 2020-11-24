@@ -4,11 +4,11 @@ from pathlib import Path
 from typing import Union, Dict
 
 from ConfigSpace.hyperparameters import OrdinalHyperparameter, UniformIntegerHyperparameter
-from hpolib.abstract_benchmark import AbstractBenchmark
-from hpolib.container.client_abstract_benchmark import AbstractBenchmarkClient
+from hpobench.abstract_benchmark import AbstractBenchmark
+from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 
-from HPOlibExperimentUtils.core.bookkeeper import Bookkeeper
-from HPOlibExperimentUtils.utils.optimizer_utils import prepare_dict_for_sending, get_main_fidelity
+from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
+from HPOBenchExperimentUtils.utils.optimizer_utils import prepare_dict_for_sending, get_main_fidelity
 
 _log = logging.getLogger(__name__)
 

@@ -3,10 +3,10 @@ import pickle
 from pathlib import Path
 from typing import Dict, Union
 
-from hpolib.abstract_benchmark import AbstractBenchmark
-from hpolib.container.client_abstract_benchmark import AbstractBenchmarkClient
+from hpobench.abstract_benchmark import AbstractBenchmark
+from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 
-from HPOlibExperimentUtils.optimizer.base_optimizer import Optimizer
+from HPOBenchExperimentUtils.optimizer.base_optimizer import Optimizer
 
 _log = logging.getLogger(__name__)
 

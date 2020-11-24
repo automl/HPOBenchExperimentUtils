@@ -22,16 +22,16 @@ def read_file(file_name):
 
 
 setuptools.setup(
-    name='HPOlibExperimentUtils',
+    name='HPOBenchExperimentUtils',
     author_email='muelleph@cs.uni-freiburg.de',
     description='Tool for parsing optimization trajectories of SMAC and BOHB',
     long_description=read_file('README.md'),
     long_description_content_type='text/markdown',
     license='Apache-2.0',
-    version=read_file('HPOlibExperimentUtils/__version__.py').split()[-1].strip('\''),
+    version=read_file('HPOBenchExperimentUtils/__version__.py').split()[-1].strip('\''),
     packages=setuptools.find_packages(exclude=['*.tests', '*.tests.*',
                                                'tests.*', 'tests'],),
-    package_data={'HPOlibExperimentUtils': ['benchmark_settings.yaml', 'optimizer_settings.yaml']},
+    package_data={'HPOBenchExperimentUtils': ['benchmark_settings.yaml', 'optimizer_settings.yaml']},
     include_package_data=True,
     python_requires='>=3.6, <=3.8.3',
     install_requires=read_file('./requirements.txt').split('\n'),

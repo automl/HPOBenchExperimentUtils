@@ -1,11 +1,11 @@
 import argparse
 import logging
 
-from HPOlibExperimentUtils.utils.runner_utils import get_benchmark_names
-from HPOlibExperimentUtils.analysis.trajectory_plotting import plot_trajectory
-from HPOlibExperimentUtils.analysis.stats_generation import plot_fidels, plot_overhead
-from HPOlibExperimentUtils.analysis.table_generation import save_table
-from HPOlibExperimentUtils import _default_log_format, _log as _main_log
+from HPOBenchExperimentUtils.utils.runner_utils import get_benchmark_names
+from HPOBenchExperimentUtils.analysis.trajectory_plotting import plot_trajectory
+from HPOBenchExperimentUtils.analysis.stats_generation import plot_fidels, plot_overhead
+from HPOBenchExperimentUtils.analysis.table_generation import save_table
+from HPOBenchExperimentUtils import _default_log_format, _log as _main_log
 
 _main_log.setLevel(logging.DEBUG)
 _log = logging.getLogger(__name__)
@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.INFO, format=_default_log_format)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(prog='HPOlib3 Wrapper - Plotting tool',
+    parser = argparse.ArgumentParser(prog='HPOBench Wrapper - Plotting tool',
                                      description='Plot the trajectories')
 
     parser.add_argument('--output_dir', required=True, type=str)

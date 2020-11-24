@@ -4,11 +4,13 @@ from typing import Union, Dict
 import sys
 import numpy as np
 import json
+import ConfigSpace as CS
 
-from HPOlibExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
-from HPOlibExperimentUtils.core.bookkeeper import Bookkeeper
-from hpolib.abstract_benchmark import AbstractBenchmark
-from hpolib.container.client_abstract_benchmark import AbstractBenchmarkClient
+
+from HPOBenchExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
+from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
+from hpobench.abstract_benchmark import AbstractBenchmark
+from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 
 from dehb.optimizers import DE, DEHB
 from ConfigSpace import UniformFloatHyperparameter, Configuration
@@ -21,13 +23,20 @@ class DehbOptimizer(SingleFidelityOptimizer):
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
         super().__init__(benchmark, settings, output_dir, rng)
 
-        assert isinstance(self.main_fidelity, UniformFloatHyperparameter), \
-            "DEHB only supports UniformFloat hyperparameters as main fidelity, received %s " % self.main_fidelity
+        #assert isinstance(self.main_fidelity, UniformFloatHyperparameter), \
+        #    "DEHB only supports UniformFloat hyperparameters as main fidelity, received %s " % self.main_fidelity
 
         # Common objective function for DE & DEHB representing the benchmark
         def f(config: Configuration, budget=None):
             nonlocal self
             if budget is not None:
+                if isinstance(self.main_fidelity, CS.hyperparameters.UniformIntegerHyperparameter) \
+                        or isinstance(self.main_fidelity, CS.hyperparameters.NormalIntegerHyperparameter) \
+                        or isinstance(self.main_fidelity.default_value, int):
+                    budget = int(budget)
+                else:
+                    budget = float(budget)
+            
                 res = benchmark.objective_function(config, fidelity={self.main_fidelity.name: budget})
             else:
                 res = benchmark.objective_function(config)

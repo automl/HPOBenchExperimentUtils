@@ -5,15 +5,15 @@ import os
 import numpy as np
 import json
 
-from HPOlibExperimentUtils.optimizer.base_optimizer import Optimizer
-from HPOlibExperimentUtils.utils.dragonfly_utils import \
+from HPOBenchExperimentUtils.optimizer.base_optimizer import Optimizer
+from HPOBenchExperimentUtils.utils.dragonfly_utils import \
     configspace_to_dragonfly, load_dragonfly_options, generate_trajectory, change_cwd
 from dragonfly import minimise_function, \
     minimise_multifidelity_function
 
-from HPOlibExperimentUtils.core.bookkeeper import Bookkeeper
-from hpolib.abstract_benchmark import AbstractBenchmark
-from hpolib.container.client_abstract_benchmark import AbstractBenchmarkClient
+from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
+from hpobench.abstract_benchmark import AbstractBenchmark
+from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 
 from ConfigSpace import Configuration
 
@@ -28,7 +28,7 @@ class DragonflyOptimizer(Optimizer):
         config, domain_parsers, fidelity_parsers, fidelity_costs = \
             configspace_to_dragonfly(domain_cs=self.cs, fidelity_cs=fidel_space)
 
-        _log.debug("Based on the HPOlib Benchmark, generated the config:\n%s" % json.dumps(config, indent=4))
+        _log.debug("Based on the HPOBench Benchmark, generated the config:\n%s" % json.dumps(config, indent=4))
 
         self.options, self.config = load_dragonfly_options(hpoexp_settings=self.settings, config=config)
 

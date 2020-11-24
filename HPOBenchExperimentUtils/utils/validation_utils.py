@@ -34,7 +34,7 @@ def write_validated_trajectory(unvalidated_traj: List, validation_results: Dict,
         validated_trajectory.append(entry)
 
     # Write back the validated trajectory
-    validated_trajectory_path = unvalidated_traj_path.parent / 'hpolib_trajectory_validated.txt'
+    validated_trajectory_path = unvalidated_traj_path.parent / 'hpobench_trajectory_validated.txt'
     with validated_trajectory_path.open('w') as fh:
         for dict_to_store in validated_trajectory:
             json.dump(dict_to_store, fh)
@@ -55,7 +55,7 @@ def load_trajectories(trajectory_paths: List) -> List:
     ----------
     output_dir : Path
         Direcotry, where trajectory files with configurations to validate are stored. Can also be a parent
-        directory. Then, read all hpolib_trajectory.txt files.
+        directory. Then, read all hpobench_trajectory.txt files.
 
     Returns
     -------
@@ -78,7 +78,7 @@ def load_trajectories(trajectory_paths: List) -> List:
 
 def load_validated_configurations(output_dir: Path) -> Dict:
     # Try to find previously computed validation run histories. Look also in subfolder for them.
-    validated_runhistory_paths = list(output_dir.rglob(f'hpolib_runhistory_validation.txt'))
+    validated_runhistory_paths = list(output_dir.rglob(f'hpobench_runhistory_validation.txt'))
     validated_configs = {}
     for rh_path in validated_runhistory_paths:
         lines = read_lines(rh_path)
@@ -105,11 +105,11 @@ def read_lines(file: Path) -> List:
 
 def load_trajectories_as_df(input_dir, which="test"):
     if which == "train":
-        trajectories_paths = list(input_dir.rglob(f'hpolib_trajectory.txt'))
+        trajectories_paths = list(input_dir.rglob(f'hpobench_trajectory.txt'))
     elif which == "test":
-        trajectories_paths = list(input_dir.rglob(f'hpolib_trajectory_validated.txt'))
+        trajectories_paths = list(input_dir.rglob(f'hpobench_trajectory_validated.txt'))
     elif which == "runhistory":
-        trajectories_paths = list(input_dir.rglob(f'hpolib_runhistory.txt'))
+        trajectories_paths = list(input_dir.rglob(f'hpobench_runhistory.txt'))
     unique_optimizer = defaultdict(lambda: [])
     for path in trajectories_paths:
         opt = path.parent.parent.name

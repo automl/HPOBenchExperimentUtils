@@ -5,10 +5,10 @@ from typing import Union
 import numpy as np
 import pandas as pd
 
-from HPOlibExperimentUtils.utils.validation_utils import load_trajectories, \
+from HPOBenchExperimentUtils.utils.validation_utils import load_trajectories, \
     load_trajectories_as_df, df_per_optimizer
-from HPOlibExperimentUtils import _default_log_format, _log as _main_log
-from HPOlibExperimentUtils.utils.plotting_utils import plot_dc
+from HPOBenchExperimentUtils import _default_log_format, _log as _main_log
+from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc
 
 
 _main_log.setLevel(logging.DEBUG)

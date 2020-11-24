@@ -4,16 +4,16 @@ from multiprocessing import Value
 from pathlib import Path
 from typing import Union, Dict
 
-from HPOlibExperimentUtils.utils.validation_utils import write_validated_trajectory, get_unvalidated_configurations, \
+from HPOBenchExperimentUtils.utils.validation_utils import write_validated_trajectory, get_unvalidated_configurations, \
     load_trajectories, load_validated_configurations
 
-from hpolib.util.example_utils import set_env_variables_to_use_only_one_core
+from hpobench.util.example_utils import set_env_variables_to_use_only_one_core
 
-from HPOlibExperimentUtils.core.bookkeeper import Bookkeeper
-from HPOlibExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_benchmark_settings, \
+from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
+from HPOBenchExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_benchmark_settings, \
     load_benchmark, get_benchmark_names
 
-from HPOlibExperimentUtils import _log as _main_log, _default_log_format
+from HPOBenchExperimentUtils import _log as _main_log, _default_log_format
 
 _main_log.setLevel(level=logging.INFO)
 _log = logging.getLogger(__name__)
@@ -51,7 +51,7 @@ def validate_benchmark(benchmark: str,
     Parameters
     ----------
     benchmark : str
-        This benchmark is selected from the HPOlib3 and executed. with the optimizer from above.
+        This benchmark is selected from the HPOBench and executed. with the optimizer from above.
         Please have a look at the experiment_settings.json file to see what benchmarks are available.
         Incomplete list of supported benchmarks:
         'cartpolereduced', 'cartpolefull',
@@ -68,27 +68,27 @@ def validate_benchmark(benchmark: str,
     recompute_all : bool, None
         If you want to recompute all validation results regardless of whether already precomputed results exist or not.
     use_local : bool, None
-        If you want to use the HPOlib3 benchamrks in a non-containerizd version (installed locally inside the
+        If you want to use the HPOBench benchamrks in a non-containerizd version (installed locally inside the
         current python environment), you can set this parameter to True. This is not recommend.
     benchmark_params : Dict
         Some benchmarks take special parameters for the initialization. For example, The XGBOostBenchmark takes as
         input a task_id. This task_id specifies the OpenML dataset to use.
 
-        Please take a look into the HPOlib3 Benchamarks to find out if the benchmark needs further parameter.
+        Please take a look into the HPOBench Benchamarks to find out if the benchmark needs further parameter.
         Note: Most of them dont need further parameter.
     """
     _log.info(f'Start validating procedure on benchmark {benchmark}')
 
     if debug:
         _main_log.setLevel(level=logging.DEBUG)
-        from hpolib.util.container_utils import enable_container_debug
+        from hpobench.util.container_utils import enable_container_debug
         enable_container_debug()
 
     output_dir = Path(output_dir)
 
     assert output_dir.is_dir(), f'Result folder doesn\"t exist: {output_dir}'
 
-    unvalidated_trajectories_paths = list(output_dir.rglob(f'hpolib_trajectory.txt'))
+    unvalidated_trajectories_paths = list(output_dir.rglob(f'hpobench_trajectory.txt'))
     unvalidated_trajectories = load_trajectories(unvalidated_trajectories_paths)
     unvalidated_configurations = get_unvalidated_configurations(unvalidated_trajectories)
     validation_results = {str(configuration): None for configuration in unvalidated_configurations}
@@ -109,7 +109,7 @@ def validate_benchmark(benchmark: str,
                                    use_local=use_local)
 
     if not use_local:
-        from hpolib import config_file
+        from hpobench import config_file
         benchmark_params['container_source'] = config_file.container_source
     benchmark = benchmark_obj(rng=rng, **benchmark_params)
 
@@ -156,8 +156,8 @@ def validate_benchmark(benchmark: str,
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(prog='HPOlib3 Wrapper',
-                                     description='HPOlib3 validated a trajectory from a benchmark with a '
+    parser = argparse.ArgumentParser(prog='HPOBench Wrapper',
+                                     description='HPOBench validated a trajectory from a benchmark with a '
                                                  'unified interface',
                                      )
 

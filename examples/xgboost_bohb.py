@@ -6,7 +6,7 @@ This example shows the usage of an Hyperparameter Tuner, such as BOHB on the car
 BOHB is a combination of Bayesian optimization and Hyperband.
 
 Please install the necessary dependencies via ``pip install .[xgboost]``
-and the HPOlib3 ``pip install <dir of hpolib>``
+and the HPOBench ``pip install <dir of hpobench>``
 """
 
 import logging
@@ -14,8 +14,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('BOHB on xgboost')
 
 from pathlib import Path
-from HPOlibExperimentUtils import validate_benchmark, run_benchmark
-from hpolib.util.openml_data_manager import get_openmlcc18_taskids
+from HPOBenchExperimentUtils import validate_benchmark, run_benchmark
+from hpobench.util.openml_data_manager import get_openmlcc18_taskids
 
 
 benchmark = 'xgboost'
