@@ -71,8 +71,8 @@ def plot_overhead(benchmark: str, output_dir: Union[Path, str], input_dir: Union
     a = plt.subplot(111)
     for opt in opt_rh_dc:
         if len(opt_rh_dc[opt]) == 0: continue
-        rhs = load_trajectories(opt_rh_dc[opt])
-        df = df_per_optimizer(opt, rhs, y_best=y_best)
+        df = load_trajectories(opt_rh_dc[opt])
+        df = df_per_optimizer(opt, df, y_best=y_best)
         nseeds = df['id'].unique()
         for seed in nseeds:
             steps = df[df['id'] == seed]["total_time_used"]
@@ -124,8 +124,9 @@ def plot_ecdf(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pat
 
     for opt in opt_rh_dc:
         if len(opt_rh_dc) == 0: continue
-        rhs = load_trajectories(opt_rh_dc[opt])
-        df = df_per_optimizer(opt, rhs, y_best=y_best)
+        df = load_trajectories(opt_rh_dc[opt])
+        df = df_per_optimizer(opt, df, y_best=y_best)
+
         color = color_per_opt.get(opt, "k")
 
         obj_vals = df["function_values"]
