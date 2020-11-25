@@ -20,7 +20,7 @@ def read_trajectories(benchmark: str, input_dir: Path, train: bool=True, y_best:
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
 
     unique_optimizer = load_trajectories_as_df(input_dir=input_dir,
-                                               which="train" if train else "test")
+                                               which="train_v1" if train else "test_v2")
     optimizer_names = list(unique_optimizer.keys())
     statistics_df = []
     _log.critical("Found: " + ",".join(optimizer_names))
@@ -36,6 +36,13 @@ def read_trajectories(benchmark: str, input_dir: Path, train: bool=True, y_best:
 def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
                     criterion: str = 'mean', unvalidated: bool = True, **kwargs):
     _log.info(f'Start plotting trajectories of benchmark {benchmark}')
+
+    input_dir = Path(input_dir)
+    assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
+
+    output_dir = Path(output_dir)
+    output_dir.mkdir(exist_ok=True, parents=True)
+
     benchmark_spec = plot_dc.get(benchmark, {})
     y_best = benchmark_spec.get("ystar_valid", 0) if unvalidated \
         else benchmark_spec.get("ystar_test", 0)
@@ -65,6 +72,7 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
             min_ = min(min_, df['q25'].min())
             max_ = max(max_, df[criterion].max())
 
+    # TODO: This statement has no effect. Overwritten in line 82 without usage
     if y_best != 0:
         ylabel = "Regret"
     else:
@@ -94,4 +102,5 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
     ax.set_title(f'{benchmark}')
     plt.grid(b=True, which="both", axis="both")
     plt.savefig(Path(output_dir) / f'{benchmark}_{val_str}_{criterion}_trajectory.png')
+    plt.close('all')
     return 1

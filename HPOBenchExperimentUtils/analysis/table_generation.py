@@ -19,10 +19,15 @@ logging.basicConfig(level=logging.INFO, format=_default_log_format)
 def save_table(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
                unvalidated: bool = True, **kwargs):
     _log.info(f'Start creating table of benchmark {benchmark}')
+
     input_dir = Path(input_dir) / benchmark
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
+
+    output_dir = Path(output_dir)
+    output_dir.mkdir(exist_ok=True, parents=True)
+
     unique_optimizer = load_trajectories_as_df(input_dir=input_dir,
-                                               which="train" if unvalidated else "test")
+                                               which="train_v1" if unvalidated else "test_v1")
     benchmark_spec = plot_dc.get(benchmark, {})
     y_best_val = benchmark_spec.get("ystar_valid", 0)
     y_best_test = benchmark_spec.get("ystar_test", 0)

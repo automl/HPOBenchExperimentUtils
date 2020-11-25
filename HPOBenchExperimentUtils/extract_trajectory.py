@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import argparse
 
 from pathlib import Path
 from typing import Union, List, Dict
@@ -19,17 +20,32 @@ logging.basicConfig(level=logging.INFO, format=_default_log_format)
 
 def extract_trajectory(output_dir: Union[Path, str], debug: Union[bool, None] = False):
     """
-    TODO:
+    We want to create a trajectory from the results of the previous optimization run.
+    This method collects all runhistories which are in a certain output directory. Note that we search recursively
+    through the specified directory.
+
+    We offer two different trajectories. We refer to them as 'v1' and 'v2'.
+
+    v1: The trajectory has incumbents ordered in time of appearance. A challenger configuration becomes incumbent if it
+    either on a higher budget than the current incumbent OR on the same budget but with a lower (better) function value.
+
+    v2: Similar to v1. But we ignore the budget in this case. Therefore, if a configuration has a better function value
+    than the current incumbent, it becomes the new incumbent.
+
+    After calling this script, the two trajectories are created and stored in the same folder where the runhistory
+    was found.
+
+    NOTE: This script is automatically called, after the optimization process has finished.
 
     STEPS:
     ------
     1) Load all runhistories from the optimization step.
         -> Search for the runhistory files recursively. Perform all other steps for all runhistories.
-    2) Iterate through the histories.
-        3) Read in all runs
+    2) For each history RH.
+        3) Read in all runs of RH
         4) Extract Trajectory 1: Lower is better and larger budget is better.
         5) Extract Trajectory 2: Ignore Budget, only lower is better.
-        6) Save both trajectories to file
+        6) Save both trajectories to file to the same folder as from RH.
     7) THE END.
 
 
@@ -83,24 +99,13 @@ def write_list_of_dicts_to_file(output_file: Path, data: List[Dict]):
 
 if __name__ == "__main__":
 
-    extract_trajectory(output_dir='/home/philipp/Dokumente/Code/HPOlibExperimentUtils/experiments/cartpole/',
-                       debug=True)
+    parser = argparse.ArgumentParser(prog='HPOBench Wrapper',
+                                     description='Extract the trajectories from the runhistory of the optimization run')
 
-    # parser = argparse.ArgumentParser(prog='HPOBench Wrapper',
-    #                                  description='HPOBench validated a trajectory from a benchmark with a '
-    #                                              'unified interface',
-    #                                  )
-    #
-    # parser.add_argument('--output_dir', required=True, type=str)
-    # parser.add_argument('--benchmark', choices=get_benchmark_names(), required=True, type=str)
-    # parser.add_argument('--rng', required=False, default=0, type=int)
-    # parser.add_argument('--recompute_all', action='store_true', default=False)
-    # parser.add_argument('--use_local', action='store_true', default=False)
-    # parser.add_argument('--debug', action='store_true', default=False, help="When given, enables debug mode logging.")
-    #
-    # args, unknown = parser.parse_known_args()
-    # benchmark_params = transform_unknown_params_to_dict(unknown)
-    #
-    # validate_benchmark(**vars(args), **benchmark_params)
+    parser.add_argument('--output_dir', required=True, type=str)
+    parser.add_argument('--debug', action='store_true', default=False, help="When given, enables debug mode logging.")
+
+    args = parser.parse_args()
+    extract_trajectory(output_dir=Path(args.output_dir), debug=args.debug)
 
 

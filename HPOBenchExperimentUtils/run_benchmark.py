@@ -18,6 +18,7 @@ from HPOBenchExperimentUtils.utils.optimizer_utils import get_optimizer, optimiz
 from HPOBenchExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_benchmark_settings, \
     load_benchmark, get_benchmark_names, get_optimizer_settings_names, \
     get_optimizer_setting
+from HPOBenchExperimentUtils.extract_trajectory import extract_trajectory
 
 from HPOBenchExperimentUtils import _log as _main_log, _default_log_format
 
@@ -84,8 +85,7 @@ def run_benchmark(optimizer: str,
 
     output_dir = Path(output_dir) / benchmark / optimizer / f'run-{rng}'
     output_dir = output_dir.absolute()
-    if output_dir.is_dir():
-        raise ValueError(f"Outputdir {output_dir} already exists, pass")
+    output_dir.mkdir(exist_ok=True, parents=True)  # TODO!
 
     _log.debug(f'Output dir: {output_dir}')
 
@@ -154,14 +154,20 @@ def run_benchmark(optimizer: str,
     process.start()
 
     while not total_time_exceeds_limit(benchmark.get_total_time_used(), settings['time_limit_in_s'], start_time) \
-            and not tae_exceeds_limit(benchmark.get_total_tae_used(), settings.get('max_tae_calls', None)) \
-            and not used_fuel_exceeds_limit(benchmark.get_total_fuel_used(), settings.get('max_fuel', None)) \
+            and not tae_exceeds_limit(benchmark.get_total_tae_used(), settings['tae_limit']) \
+            and not used_fuel_exceeds_limit(benchmark.get_total_fuel_used(), settings['fuel_limit']) \
             and process.is_alive():
         sleep(PING_OPTIMIZER_IN_S)
     else:
         process.terminate()
-        _log.info(f'Timelimit: {settings["time_limit_in_s"]} and is now: {benchmark.get_total_time_used()}')
-        _log.info(f'Terminate Process after {time() - start_time}')
+        _log.info(f'Optimization has been finished.\n'
+                  f'Timelimit: {settings["time_limit_in_s"]} and is now: {benchmark.get_total_time_used()}\n'
+                  f'TAE limit: {settings["tae_limit"]} and is now: {benchmark.get_total_tae_used()}\n'
+                  f'Fuel limit: {settings["fuel_limit"]} and is now: {benchmark.get_total_fuel_used()}\n'
+                  f'Terminate Process after {time() - start_time}')
+
+    _log.info(f'Extract the trajectories')
+    extract_trajectory(output_dir=output_dir, debug=debug)
 
     _log.info(f'Run Benchmark - Finished.')
 

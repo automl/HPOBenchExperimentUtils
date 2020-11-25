@@ -20,6 +20,10 @@ def plot_fidels(benchmark: str, output_dir: Union[Path, str], input_dir: Union[P
     _log.info(f'Plotting evaluated fidelities of benchmark {benchmark}')
     input_dir = Path(input_dir) / benchmark
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
+
+    output_dir = Path(output_dir)
+    output_dir.mkdir(exist_ok=True, parents=True)
+
     opt_rh_dc = load_trajectories_as_df(input_dir=input_dir,
                                         which="runhistory")
 
@@ -56,12 +60,17 @@ def plot_fidels(benchmark: str, output_dir: Union[Path, str], input_dir: Union[P
     plt.ylabel("Fidelity")
     plt.tight_layout()
     plt.savefig(Path(output_dir) / f'{benchmark}_fidel.png')
+    plt.close('all')
 
 
 def plot_overhead(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str], **kwargs):
     _log.info(f'Start plotting overhead of benchmark {benchmark}')
     input_dir = Path(input_dir) / benchmark
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
+
+    output_dir = Path(output_dir)
+    output_dir.mkdir(exist_ok=True, parents=True)
+
     opt_rh_dc = load_trajectories_as_df(input_dir=input_dir,
                                         which="runhistory")
 
@@ -107,4 +116,4 @@ def plot_overhead(benchmark: str, output_dir: Union[Path, str], input_dir: Union
     #a.set_ylim([0.1, 10000])
     plt.tight_layout()
     plt.savefig(Path(output_dir) / f'{benchmark}_overhead.png')
-
+    plt.close('all')

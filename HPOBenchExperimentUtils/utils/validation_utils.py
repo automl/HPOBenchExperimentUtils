@@ -8,7 +8,8 @@ from typing import Dict, List
 import numpy as np
 import pandas as pd
 
-from HPOBenchExperimentUtils.utils import VALIDATED_TRAJECTORY_V1_FILENAME, VALIDATED_TRAJECTORY_V2_FILENAME, TRAJECTORY_V1_FILENAME
+from HPOBenchExperimentUtils.utils import VALIDATED_TRAJECTORY_V1_FILENAME, VALIDATED_TRAJECTORY_V2_FILENAME, \
+    TRAJECTORY_V1_FILENAME, TRAJECTORY_V2_FILENAME, RUNHISTORY_FILENAME, VALIDATED_RUNHISTORY_FILENAME
 
 _log = logging.getLogger(__name__)
 
@@ -101,6 +102,9 @@ def load_json_files(file_paths: List[Path]) -> List:
 
 def load_configs_with_function_values_from_runhistories(file_paths: List[Path]):
 
+    if len(file_paths) == 0:
+        return {}
+
     data = load_json_files(file_paths)
 
     configs_dict = {}
@@ -145,15 +149,21 @@ def read_lines(file: Path) -> List:
     return lines
 
 
-def load_trajectories_as_df(input_dir, which="test"):
-    if which == "train":
-        trajectories_paths = list(input_dir.rglob(f'hpobench_trajectory.txt'))
-    elif which == "test":
-        trajectories_paths = list(input_dir.rglob(f'hpobench_trajectory_validated.txt'))
+def load_trajectories_as_df(input_dir, which="test_v1"):
+    if which == "train_v1":
+        trajectories_paths = list(input_dir.rglob(TRAJECTORY_V1_FILENAME))
+    elif which == "train_v2":
+        trajectories_paths = list(input_dir.rglob(TRAJECTORY_V2_FILENAME))
+    elif which == "test_v1":
+        trajectories_paths = list(input_dir.rglob(VALIDATED_TRAJECTORY_V1_FILENAME))
+    elif which == "test_v2":
+        trajectories_paths = list(input_dir.rglob(VALIDATED_TRAJECTORY_V2_FILENAME))
     elif which == "runhistory":
-        trajectories_paths = list(input_dir.rglob(f'hpobench_runhistory.txt'))
+        trajectories_paths = list(input_dir.rglob(RUNHISTORY_FILENAME))
     else:
-        raise ValueError(f'Specified parameter must be one of [train, test, runistory] but was {which}')
+        raise ValueError('Specified parameter must be one of [train_v1, train_v2, test_v1, test_v2, runistory]'
+                         f'but was {which}')
+
     unique_optimizer = defaultdict(lambda: [])
     for path in trajectories_paths:
         opt = path.parent.parent.name
