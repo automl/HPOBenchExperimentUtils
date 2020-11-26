@@ -4,7 +4,7 @@ from typing import Union
 
 from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc, color_per_opt
 from HPOBenchExperimentUtils import _default_log_format, _log as _main_log
-from HPOBenchExperimentUtils.utils.validation_utils import load_trajectories, load_trajectories_as_df,\
+from HPOBenchExperimentUtils.utils.validation_utils import load_json_files, load_trajectories_as_df,\
     get_statistics_df, df_per_optimizer
 from HPOBenchExperimentUtils.utils.runner_utils import get_optimizer_setting
 

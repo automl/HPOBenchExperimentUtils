@@ -88,16 +88,10 @@ def validate_benchmark(benchmark: str,
     # Load both trajectories: The larger-is-better-trajectory (v1) and the only-better-counts-trajectory
     unvalidated_trajectories = load_json_files(unvalidated_trajectories_paths)
 
-<<<<<<< HEAD:HPOBenchExperimentUtils/validate_benchmark.py
-    unvalidated_trajectories_paths = list(output_dir.rglob(f'hpobench_trajectory.txt'))
-    unvalidated_trajectories = load_trajectories(unvalidated_trajectories_paths)
-    unvalidated_configurations = get_unvalidated_configurations(unvalidated_trajectories)
-=======
     # Extract the configurations which should be validated from the both trajectories and combine the results.
     unvalidated_configurations = extract_configs_from_trajectories(unvalidated_trajectories)
 
     # Create a dict that stores the results from the validation procedure.
->>>>>>> developement:HPOlibExperimentUtils/validate_benchmark.py
     validation_results = {str(configuration): None for configuration in unvalidated_configurations}
 
     # STEP 2: Load the results (already validated configurations) from previous runs
