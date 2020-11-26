@@ -6,7 +6,7 @@ plot_dc = {
     "ylim_up": 8, #70,
     "xscale": "log",
     "yscale": "linear",
-    # None
+    # None yet
     "ystar_valid": 0,
     "ystar_test": 0,
     },
@@ -16,7 +16,7 @@ plot_dc = {
     "ylim_up": 5, #9,
     "xscale": "log",
     "yscale": "linear",
-    # None
+    # None yet
     "ystar_valid": 0,
     "ystar_test": 0,
     },
@@ -26,7 +26,7 @@ plot_dc = {
         "ylim_up": 40, #50,
         "xscale": "log",
         "yscale": "linear",
-        # None
+        # None yet
         "ystar_valid": 0,
         "ystar_test": 0,
     },
@@ -36,7 +36,7 @@ plot_dc = {
         "ylim_up": 10**4,
         "xscale": "log",
         "yscale": "log",
-        # None
+        # None yet
         "ystar_valid": 0,
         "ystar_test": 0,
     },
@@ -52,13 +52,17 @@ plot_dc = {
         #
         # configs, te, ve = [], [], []
         # for k in bench.benchmark.data.keys():
-        #     te.append(np.mean(bench.benchmark.data[k]["final_test_error"]))
-        #     ve.append(np.mean(bench.benchmark.data[k]["valid_mse"][:, -1]))
+        #     t = bench.benchmark.data[k]["final_test_error"]
+        #     t = [float(i) for i in t]
+        #     te.append(np.sum(t) / len(t))
+        #     v = bench.benchmark.data[k]["valid_mse"][:, -1]
+        #     v = [float(i) for i in v]
+        #     ve.append(np.sum(v) / len(v))
         #
         # best_test = np.min(te)
         # best_valid = np.min(ve)
-        "ystar_valid": 0.00019159916, #0.00020406871,
-        "ystar_test": 0.00014428208,
+        "ystar_valid": 0.00019159916337230243, #0.00020406871,
+        "ystar_test": 0.00014428208305616863,
     },
     "ProteinStructureBenchmark": {
         "xlim_lo": 10**0,
@@ -72,8 +76,12 @@ plot_dc = {
         #
         # configs, te, ve = [], [], []
         # for k in bench.benchmark.data.keys():
-        #     te.append(np.mean(bench.benchmark.data[k]["final_test_error"]))
-        #     ve.append(np.mean(bench.benchmark.data[k]["valid_mse"][:, -1]))
+        #     t = bench.benchmark.data[k]["final_test_error"]
+        #     t = [float(i) for i in t]
+        #     te.append(np.sum(t) / len(t))
+        #     v = bench.benchmark.data[k]["valid_mse"][:, -1]
+        #     v = [float(i) for i in v]
+        #     ve.append(np.sum(v) / len(v))
         #
         # best_test = np.min(te)
         # best_valid = np.min(ve)
@@ -92,13 +100,17 @@ plot_dc = {
         #
         # configs, te, ve = [], [], []
         # for k in bench.benchmark.data.keys():
-        #     te.append(np.mean(bench.benchmark.data[k]["final_test_error"]))
-        #     ve.append(np.mean(bench.benchmark.data[k]["valid_mse"][:, -1]))
+        #     t = bench.benchmark.data[k]["final_test_error"]
+        #     t = [float(i) for i in t]
+        #     te.append(np.sum(t) / len(t))
+        #     v = bench.benchmark.data[k]["valid_mse"][:, -1]
+        #     v = [float(i) for i in v]
+        #     ve.append(np.sum(v) / len(v))
         #
         # best_test = np.min(te)
         # best_valid = np.min(ve)
-        "ystar_valid": 3.1911346e-05, #3.1911346e-05,
-        "ystar_test": 2.9110292e-05,
+        "ystar_valid": 3.19113473778998e-05, #3.1911346e-05,
+        "ystar_test": 2.9110290597600397e-05,
     },
     "ParkinsonsTelemonitoringBenchmark": {
         "xlim_lo": 10**0,
@@ -112,13 +124,17 @@ plot_dc = {
         #
         # configs, te, ve = [], [], []
         # for k in bench.benchmark.data.keys():
-        #     te.append(np.mean(bench.benchmark.data[k]["final_test_error"]))
-        #     ve.append(np.mean(bench.benchmark.data[k]["valid_mse"][:, -1]))
+        #     t = bench.benchmark.data[k]["final_test_error"]
+        #     t = [float(i) for i in t]
+        #     te.append(np.sum(t) / len(t))
+        #     v = bench.benchmark.data[k]["valid_mse"][:, -1]
+        #     v = [float(i) for i in v]
+        #     ve.append(np.sum(v) / len(v))
         #
         # best_test = np.min(te)
         # best_valid = np.min(ve)
-        "ystar_valid": 0.0067059286, #0.007629349,
-        "ystar_test": 0.004239297,
+        "ystar_valid": 0.0067059280117973685, #0.007629349,
+        "ystar_test": 0.004239296889863908,
     },
     "NASCifar10ABenchmark": {
         "xlim_lo": 10**1,
