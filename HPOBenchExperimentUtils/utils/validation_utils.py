@@ -106,8 +106,8 @@ def load_configs_with_function_values_from_runhistories(file_paths: List[Path]):
         return {}
 
     data = load_json_files(file_paths)
-    configs_dict = {}
 
+    configs_dict = {}
     for runhistory in data:
         for entry in runhistory:
             if 'boot_time' in entry:
@@ -162,6 +162,7 @@ def load_trajectories_as_df(input_dir, which="test_v1"):
     else:
         raise ValueError('Specified parameter must be one of [train_v1, train_v2, test_v1, test_v2, runistory]'
                          f'but was {which}')
+
     unique_optimizer = defaultdict(lambda: [])
     for path in trajectories_paths:
         opt = path.parent.parent.name
