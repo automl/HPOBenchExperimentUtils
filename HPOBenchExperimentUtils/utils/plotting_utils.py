@@ -1,9 +1,9 @@
 plot_dc = {
     "BNNOnBostonHousing": {
     # BOHB paper
-    "xlim_lo": 10**3,
+    "xlim_lo": 10**2,
     "ylim_lo": 3,
-    "ylim_up": 70,
+    "ylim_up": 8, #70,
     "xscale": "log",
     "yscale": "linear",
     # None
@@ -11,9 +11,9 @@ plot_dc = {
     "ystar_test": 0,
     },
     "BNNOnProteinStructure": {
-    "xlim_lo": 10**3,
+    "xlim_lo": 10**2,
     "ylim_lo": 3,
-    "ylim_up": 9,
+    "ylim_up": 5, #9,
     "xscale": "log",
     "yscale": "linear",
     # None
@@ -21,9 +21,9 @@ plot_dc = {
     "ystar_test": 0,
     },
     "BNNOnYearPrediction": {
-        "xlim_lo": 10**3,
+        "xlim_lo": 10**2,
         "ylim_lo": 2,
-        "ylim_up": 50,
+        "ylim_up": 40, #50,
         "xscale": "log",
         "yscale": "linear",
         # None
@@ -83,16 +83,31 @@ plot_dc = {
         "ystar_test": 0.004239297,
     },
     "NASCifar10ABenchmark": {
+        "xlim_lo": 10**1,
+        "ylim_lo": 10**-6,
+        "ylim_up": 10**-0,
+        "xscale": "log",
+        "yscale": "log",
         # https://github.com/automl/nas_benchmarks/blob/master/tabular_benchmarks/nas_cifar10.py#L26
         "ystar_valid": 0.04944576819737756,
         "ystar_test": 0.056824247042338016,
     },
     "NASCifar10BBenchmark": {
+        "xlim_lo": 10**1,
+        "ylim_lo": 10**-3,
+        "ylim_up": 10**-0,
+        "xscale": "log",
+        "yscale": "log",
         # https://github.com/automl/nas_benchmarks/blob/master/tabular_benchmarks/nas_cifar10.py#L26
         "ystar_valid": 0.04944576819737756,
         "ystar_test": 0.056824247042338016,
     },
     "NASCifar10CBenchmark": {
+        "xlim_lo": 10**1,
+        "ylim_lo": 10**-3,
+        "ylim_up": 10**-0,
+        "xscale": "log",
+        "yscale": "log",
         # https://github.com/automl/nas_benchmarks/blob/master/tabular_benchmarks/nas_cifar10.py#L26
         "ystar_valid": 0.04944576819737756,
         "ystar_test": 0.056824247042338016,
