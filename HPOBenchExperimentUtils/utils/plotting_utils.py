@@ -46,10 +46,18 @@ plot_dc = {
         "ylim_up": 10**-1,
         "xscale": "log",
         "yscale": "log",
-        #  bench = SliceLocalizationBenchmark(rng=1, data_path="<path>/fcnet_tabular_benchmarks/")
-        #  c, v, t = bench.benchmark.get_best_configuration()
-        #  print(c, v, t)
-        "ystar_valid": 0.00020406871,
+        # from hpobench.benchmarks.nas.tabular_benchmarks import SliceLocalizationBenchmark
+        # import numpy as np
+        # bench = SliceLocalizationBenchmark(rng=1, data_path=<path>)
+        #
+        # configs, te, ve = [], [], []
+        # for k in bench.benchmark.data.keys():
+        #     te.append(np.mean(bench.benchmark.data[k]["final_test_error"]))
+        #     ve.append(np.mean(bench.benchmark.data[k]["valid_mse"][:, -1]))
+        #
+        # best_test = np.min(te)
+        # best_valid = np.min(ve)
+        "ystar_valid": 0.00019159916, #0.00020406871,
         "ystar_test": 0.00014428208,
     },
     "ProteinStructureBenchmark": {
@@ -58,8 +66,18 @@ plot_dc = {
         "ylim_up": 10**0,
         "xscale": "log",
         "yscale": "log",
-        # None
-        "ystar_valid": 0.22137885,
+        # from hpobench.benchmarks.nas.tabular_benchmarks import ProteinStructureBenchmark
+        # import numpy as np
+        # bench = ProteinStructureBenchmark(rng=1, data_path=<path>)
+        #
+        # configs, te, ve = [], [], []
+        # for k in bench.benchmark.data.keys():
+        #     te.append(np.mean(bench.benchmark.data[k]["final_test_error"]))
+        #     ve.append(np.mean(bench.benchmark.data[k]["valid_mse"][:, -1]))
+        #
+        # best_test = np.min(te)
+        # best_valid = np.min(ve)
+        "ystar_valid": 0.22137885, #0.22137885,
         "ystar_test": 0.21536806,
     },
     "NavalPropulsionBenchmark": {
@@ -68,8 +86,18 @@ plot_dc = {
         "ylim_up": 10**-1,
         "xscale": "log",
         "yscale": "log",
-        # None
-        "ystar_valid": 3.1911346e-05,
+        # from hpobench.benchmarks.nas.tabular_benchmarks import NavalPropulsionBenchmark
+        # import numpy as np
+        # bench = NavalPropulsionBenchmark(rng=1, data_path=<path>)
+        #
+        # configs, te, ve = [], [], []
+        # for k in bench.benchmark.data.keys():
+        #     te.append(np.mean(bench.benchmark.data[k]["final_test_error"]))
+        #     ve.append(np.mean(bench.benchmark.data[k]["valid_mse"][:, -1]))
+        #
+        # best_test = np.min(te)
+        # best_valid = np.min(ve)
+        "ystar_valid": 3.1911346e-05, #3.1911346e-05,
         "ystar_test": 2.9110292e-05,
     },
     "ParkinsonsTelemonitoringBenchmark": {
@@ -78,8 +106,18 @@ plot_dc = {
         "ylim_up": 10**-0,
         "xscale": "log",
         "yscale": "log",
-        # None
-        "ystar_valid": 0.007629349,
+        # from hpobench.benchmarks.nas.tabular_benchmarks import ParkinsonsTelemonitoringBenchmark
+        # import numpy as np
+        # bench = ParkinsonsTelemonitoringBenchmark(rng=1, data_path=<path>)
+        #
+        # configs, te, ve = [], [], []
+        # for k in bench.benchmark.data.keys():
+        #     te.append(np.mean(bench.benchmark.data[k]["final_test_error"]))
+        #     ve.append(np.mean(bench.benchmark.data[k]["valid_mse"][:, -1]))
+        #
+        # best_test = np.min(te)
+        # best_valid = np.min(ve)
+        "ystar_valid": 0067059286, #0.007629349,
         "ystar_test": 0.004239297,
     },
     "NASCifar10ABenchmark": {
