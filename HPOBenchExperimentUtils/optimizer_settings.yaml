@@ -1,0 +1,100 @@
+---
+# PURE RANDOMSEARCH################################################################################################### #
+randomsearch:
+  optimizer: randomsearch
+  display_name: "random search"
+
+# DEHB ############################################################################################################### #
+dehb:
+  optimizer: dehb
+  # Options for strategy:
+  # ['rand1_bin', 'rand2_bin', 'rand2dir_bin', 'best1_bin', 'best2_bin', 'currenttobest1_bin', 'randtobest1_bin',
+  # 'rand1_exp', 'rand2_exp', 'rand2dir_exp', 'best1_exp', 'best2_exp', 'currenttobest1_exp', 'randtobest1_exp']
+  strategy: rand1_bin
+  mutation_factor: 0.5
+  crossover_prob: 0.5
+  gens: 1
+  eta: 3
+  # Options for async_strategy: ['deferred', 'immediate', 'random', 'worst']
+  async_strategy: immediate
+
+# DRAGONFLY DEFAULT ################################################################################################## #
+dragonfly_default:
+  optimizer: dragonfly
+  init_iter_per_dim: 10
+  init_capital_frac: 0.1 # Ignored since 'init_iter_per_dim' is present
+
+# DRAGONFLY REALTIME ################################################################################################# #
+dragonfly_realtime:
+  optimizer: dragonfly
+  init_capital_frac: 0.1
+
+# FABOLAS ############################################################################################################ #
+fabolas:
+  optimizer: fabolas
+  num_init_evals: 10
+  marginalize_hypers: false
+
+# SMAC ##################################################################################################### #
+smac_hb_eta_3:
+  optimizer: smac_hb
+  eta: 3
+  max_stages: 5
+  display_name: "SMAC-HB"
+
+smac_sh_eta_3:
+  optimizer: smac_sh
+  eta: 3
+  max_stages: 5
+  display_name: "SMAC-HB"
+
+smac_hb_eta_2:
+  optimizer: smac_hb
+  eta: 2
+  max_stages: 5
+  display_name: "SMAC-SH (eta2)"
+
+smac_sh_eta_2:
+  optimizer: smac_sh
+  eta: 2
+  max_stages: 5
+  display_name: "SMAC-SH (eta2)"
+
+# HPBANDSTER BOHB #################################################################################################### #
+hpbandster_bohb_eta_3:
+  optimizer: hpbandster_bohb
+  eta: 3
+  max_stages: 5
+  display_name: "BOHB"
+
+hpbandster_bohb_eta_2:
+  optimizer: hpbandster_bohb
+  eta: 2
+  max_stages: 5
+  display_name: "BOHB (eta2)"
+
+hpbandster_hb_eta_3:
+  optimizer: hpbandster_hb
+  eta: 3
+  max_stages: 5
+  display_name: "HB"
+
+hpbandster_hb_eta_2:
+  optimizer: hpbandster_hb
+  eta: 2
+  max_stages: 5
+  display_name: "HB (eta2)"
+
+hpbandster_sh_eta_3:
+  optimizer: hpbandster_sh
+  eta: 3
+  max_stages: 5
+  display_name: "SH"
+
+hpbandster_sh_eta_2:
+  optimizer: hpbandster_sh
+  eta: 2
+  max_stages: 5
+  display_name: "SH (eta2)"
+
+...

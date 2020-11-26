@@ -1,96 +1,135 @@
 ---
-
-cartpolereduced:
-  time_limit_in_s: 86400
-  cutoff_in_s: 1800
-  mem_limit_in_mb: 8000
-  import_from: rl.cartpole
-  import_benchmark: CartpoleReduced
-
-cartpolefull:
-  time_limit_in_s: 86400
-  cutoff_in_s: 1800
-  mem_limit_in_mb: 8000
-  import_from: rl.cartpole
-  import_benchmark: CartpoleFull
-
-xgboost:
-  time_limit_in_s: 4000
-  cutoff_in_s: 1800
-  mem_limit_in_mb: 4000
+# Run for 2h
+xgboostsub:
+  time_limit_in_s: 7200
+  cutoff_in_s: 7200
+  mem_limit_in_mb: 6000
   import_from: ml.xgboost_benchmark
   import_benchmark: XGBoostBenchmark
   main_fidelity: subsample
   is_surrogate: false
 
+xgboostest:
+  time_limit_in_s: 7200
+  cutoff_in_s: 7200
+  mem_limit_in_mb: 6000
+  import_from: ml.xgboost_benchmark
+  import_benchmark: XGBoostBenchmark
+  main_fidelity: n_estimators
+  is_surrogate: false
+
+# Run for 1 d
+cartpolereduced:
+  time_limit_in_s: 86400
+  cutoff_in_s: 1800
+  mem_limit_in_mb: 6000
+  import_from: rl.cartpole
+  import_benchmark: CartpoleReduced
+  is_surrogate: false
+
+cartpolefull:
+  time_limit_in_s: 86400
+  cutoff_in_s: 1800
+  mem_limit_in_mb: 6000
+  import_from: rl.cartpole
+  import_benchmark: CartpoleFull
+  is_surrogate: false
+
+# Run for 1 d (potentially increase to 2d)
+BNNOnBostonHousing:
+  time_limit_in_s: 86400
+  cutoff_in_s: 86400
+  mem_limit_in_mb: 6000
+  import_from: ml.pybnn
+  import_benchmark: BNNOnBostonHousing
+  is_surrogate: false
+
+BNNOnProteinStructure:
+  time_limit_in_s: 86400
+  cutoff_in_s: 86400
+  mem_limit_in_mb: 6000
+  import_from: ml.pybnn
+  import_benchmark: BNNOnProteinStructure
+  is_surrogate: false
+
+BNNOnYearPrediction:
+  time_limit_in_s: 86400
+  cutoff_in_s: 86400
+  mem_limit_in_mb: 6000
+  import_from: ml.pybnn
+  import_benchmark: BNNOnYearPrediction
+  is_surrogate: false
+
+# run for 2d
 learna:
   time_limit_in_s: 172800
   cutoff_in_s: 40000
-  mem_limit_in_mb: 4000
+  mem_limit_in_mb: 6000
   import_from: rl.learna_benchmark
   import_benchmark: Learna
-  num_iterations: 3
+  is_surrogate: false
 
 metalearna:
   time_limit_in_s: 345600
   cutoff_in_s: 40000
-  mem_limit_in_mb: 4000
+  mem_limit_in_mb: 6000
   import_from: rl.learna_benchmark
   import_benchmark: MetaLearna
-  num_iterations: 3
+  is_surrogate: false
 
+# surrogate benchmarks
 NASCifar10ABenchmark:
-  time_limit_in_s: 500000
-  cutoff_in_s: 500000
-  mem_limit_in_mb: 16000
+  time_limit_in_s: 10000000
+  cutoff_in_s: 10000000
+  mem_limit_in_mb: 6000
   import_from: nas.nasbench_101
   import_benchmark: NASCifar10ABenchmark
   is_surrogate: true
 
 NASCifar10BBenchmark:
-  time_limit_in_s: 500000
-  cutoff_in_s: 500000
-  mem_limit_in_mb: 16000
+  time_limit_in_s: 10000000
+  cutoff_in_s: 10000000
+  mem_limit_in_mb: 6000
   import_from: nas.nasbench_101
   import_benchmark: NASCifar10BBenchmark
   is_surrogate: true
 
 NASCifar10CBenchmark:
-  time_limit_in_s: 500000
-  cutoff_in_s: 500000
-  mem_limit_in_mb: 16000
+  time_limit_in_s: 10000000
+  cutoff_in_s: 10000000
+  mem_limit_in_mb: 6000
   import_from: nas.nasbench_101
   import_benchmark: NASCifar10CBenchmark
   is_surrogate: true
 
 SliceLocalizationBenchmark:
-  time_limit_in_s: 500000
-  cutoff_in_s: 500000
-  mem_limit_in_mb: 16000
+  time_limit_in_s: 10000000
+  cutoff_in_s: 10000000
+  mem_limit_in_mb: 6000
   import_from: nas.tabular_benchmarks
   import_benchmark: SliceLocalizationBenchmark
   is_surrogate: true
 
 ProteinStructureBenchmark:
-  time_limit_in_s: 500000
+  time_limit_in_s: 10000000
   cutoff_in_s: 500000
-  mem_limit_in_mb: 16000
+  mem_limit_in_mb: 6000
   import_from: nas.tabular_benchmarks
   import_benchmark: ProteinStructureBenchmark
   is_surrogate: true
 
 NavalPropulsionBenchmark:
-  time_limit_in_s: 500000
-  cutoff_in_s: 500000
-  mem_limit_in_mb: 16000
+  time_limit_in_s: 10000000
+  cutoff_in_s: 10000000
+  mem_limit_in_mb: 6000
   import_from: nas.tabular_benchmarks
   import_benchmark: NavalPropulsionBenchmark
   is_surrogate: true
 
 ParkinsonsTelemonitoringBenchmark:
-  time_limit_in_s: 500000
-  cutoff_in_s: 500000
-  mem_limit_in_mb: 16000
+  time_limit_in_s: 10000000
+  cutoff_in_s: 10000000
+  mem_limit_in_mb: 6000
   import_from: nas.tabular_benchmarks
   import_benchmark: ParkinsonsTelemonitoringBenchmark
   is_surrogate: true
@@ -98,7 +137,7 @@ ParkinsonsTelemonitoringBenchmark:
 Cifar10NasBench201Benchmark:
   time_limit_in_s: 10000000
   cutoff_in_s: 10000000
-  mem_limit_in_mb: 16000
+  mem_limit_in_mb: 6000
   import_from: nas.nasbench_201
   import_benchmark: Cifar10NasBench201Benchmark
   is_surrogate: true
@@ -106,7 +145,7 @@ Cifar10NasBench201Benchmark:
 Cifar10ValidNasBench201Benchmark:
   time_limit_in_s: 10000000
   cutoff_in_s: 10000000
-  mem_limit_in_mb: 16000
+  mem_limit_in_mb: 6000
   import_from: nas.nasbench_201
   import_benchmark: Cifar10ValidNasBench201Benchmark
   is_surrogate: true
@@ -114,7 +153,7 @@ Cifar10ValidNasBench201Benchmark:
 Cifar100NasBench201Benchmark:
   time_limit_in_s: 10000000
   cutoff_in_s: 10000000
-  mem_limit_in_mb: 16000
+  mem_limit_in_mb: 6000
   import_from: nas.nasbench_201
   import_benchmark: Cifar100NasBench201Benchmark
   is_surrogate: true
@@ -122,7 +161,7 @@ Cifar100NasBench201Benchmark:
 ImageNetNasBench201Benchmark:
   time_limit_in_s: 10000000
   cutoff_in_s: 10000000
-  mem_limit_in_mb: 16000
+  mem_limit_in_mb: 6000
   import_from: nas.nasbench_201
   import_benchmark: ImageNetNasBench201Benchmark
   is_surrogate: true

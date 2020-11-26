@@ -1,15 +1,15 @@
-HPOlibExperimentUtils
+HPOBenchExperimentUtils
 ---------------------
 
-A small tool to easily run different optimizers on hpolib2-benchmarks with the same settings. 
-The HPOlibExpUtils extract for each run a runhistory as well as a trajectory. 
+A small tool to easily run different optimizers on HPOBench-benchmarks with the same settings. 
+The HPOBenchExpUtils extract for each run a runhistory as well as a trajectory. 
 
 
 ## Running a benchmark
 
 The hpo run can be started from either the commandline:
 ```python
-from HPOlibExperimentUtils import run_benchmark
+from HPOBenchExperimentUtils import run_benchmark
 run_benchmark(optimizer='hpbandster_bohb_eta_3',
               benchmark='cartpolereduced',
               output_dir='path/to/output',
@@ -32,12 +32,12 @@ stores information about the evaluated configuration.
 
 **Note** that in both cases you can pass benchmark specific parameters to the call. Here, the xgboost benchmark takes an
 openml task id. Please take a look at the benchmarks in the 
-[HPOlib2](https://github.com/automl/HPOlib2/tree/master/hpolib/benchmarks).
+[HPOBench](https://github.com/automl/HPOBench/tree/master/hpobench/benchmarks).
 Also, by default the containerized version of the benchmark is used. This requires singularity 3.5. You can use the 
 local installed benchmarks by adding use_local=True to the function call. 
 
 ## Validating configurations
-The HPOlibExperimentUtils tool also validates previously found trajectories. Validating means running the 
+The HPOBenchExperimentUtils tool also validates previously found trajectories. Validating means running the 
 configuration again but this time on the test-objective function of the benchmark with the highest budget. This step can
 take a lot of time. 
 
@@ -46,7 +46,7 @@ The tool reads all configurations found in the specified path and valdiates them
 Call the validation function again either from code:
 
 ```python
-from HPOlibExperimentUtils import validate_benchmark
+from HPOBenchExperimentUtils import validate_benchmark
 validate_benchmark(benchmark='cartpolereduced',
                    output_dir='path / to / output',
                    rng=0)
@@ -65,9 +65,9 @@ The validated trajectory is automatically saved in human readable form to the ou
 ## Settings
 
 The benchmarks' settings are predefined in the file 
-[benchmark_settings.yaml](./HPOlibExperimentUtils/benchmark_settings.yaml). The settings for the optimizer including 
+[benchmark_settings.yaml](./HPOBenchExperimentUtils/benchmark_settings.yaml). The settings for the optimizer including 
 timelimits and cutoff times are defined in the 
-[optimizer_settings.yaml](./HPOlibExperimentUtils/optimizer_settings.yaml)
+[optimizer_settings.yaml](./HPOBenchExperimentUtils/optimizer_settings.yaml)
 
 ### Available Optimizer settings
 | Optimizer                  	| Available options                                                          	|
@@ -78,28 +78,29 @@ timelimits and cutoff times are defined in the
 | HpBandSter - Random Search 	| hpbandster_rs_eta_2_learna, hpbandster_rs_eta_2, hpbandster_rs_eta_3       	|
 | HpBandSter - Hyperband     	| hpbandster_hb_eta_2_learna, hpbandster_hb_eta_2, hpbandster_hb_eta_3       	|
 | HpBandSter - H2BO          	| hpbandster_h2bo_eta_2_learna, hpbandster_h2bo_eta_2, hpbandster_h2bo_eta_3 	|
+| Dragonfly                   	| dragonfly_default, dragonfly_realtime                                         |
 
 ### Available Benchmarks:
-| Benchmarks                                    	| benchmark token                   	| HPOlib2 Link                                                                                      	|
+| Benchmarks                                    	| benchmark token                   	| HPOBench Link                                                                                      	|
 |-----------------------------------------------	|-----------------------------------	|---------------------------------------------------------------------------------------------------	|
 | Cartpole - Full search space                  	| cartpolefull                      	| Link                                                                                              	|
-| Cartpole - Reduced search space               	| cartpolereduced                   	| [link](https://github.com/automl/HPOlib2/blob/master/hpolib/benchmarks/rl/cartpole.py)            	|
-| Learna                                        	| learna                            	| [link](https://github.com/automl/HPOlib2/blob/master/hpolib/benchmarks/rl/learna_benchmark.py)    	|
-| MetaLearna                                    	| metalearna                        	| [link](https://github.com/automl/HPOlib2/blob/master/hpolib/benchmarks/rl/learna_benchmark.py)    	|
-| NasBench101 - Cifar10A                        	| NASCifar10ABenchmark              	| [link](https://github.com/automl/HPOlib2/blob/master/hpolib/benchmarks/nas/nasbench_101.py)       	|
-| NasBench101 - Cifar10B                        	| NASCifar10BBenchmark              	| [link](https://github.com/automl/HPOlib2/blob/master/hpolib/benchmarks/nas/nasbench_101.py)       	|
-| NasBench101 - Cifar10C                        	| NASCifar10CBenchmark              	| [link](https://github.com/automl/HPOlib2/blob/master/hpolib/benchmarks/nas/nasbench_101.py)       	|
-| TabularBenchmarks - Naval Propulsion          	| NavalPropulsionBenchmark          	| [link](https://github.com/automl/HPOlib2/blob/master/hpolib/benchmarks/nas/tabular_benchmarks.py) 	|
-| TabularBenchmarks - Parkinsons Telemonitoring 	| ParkinsonsTelemonitoringBenchmark 	| [link](https://github.com/automl/HPOlib2/blob/master/hpolib/benchmarks/nas/tabular_benchmarks.py) 	|
-| TabularBenchmarks - Protein Structure         	| ProteinStructureBenchmark         	| [link](https://github.com/automl/HPOlib2/blob/master/hpolib/benchmarks/nas/tabular_benchmarks.py) 	|
-| TabularBenchmarks - Slice Localization        	| SliceLocalizationBenchmark        	| [link](https://github.com/automl/HPOlib2/blob/master/hpolib/benchmarks/nas/tabular_benchmarks.py) 	|
-| XGBoost Benchmark                             	| xgboost                           	| [link](https://github.com/automl/HPOlib2/blob/master/hpolib/benchmarks/ml/xgboost_benchmark.py)   	|
+| Cartpole - Reduced search space               	| cartpolereduced                   	| [link](https://github.com/automl/HPOBench/blob/master/hpobench/benchmarks/rl/cartpole.py)            	|
+| Learna                                        	| learna                            	| [link](https://github.com/automl/HPOBench/blob/master/hpobench/benchmarks/rl/learna_benchmark.py)    	|
+| MetaLearna                                    	| metalearna                        	| [link](https://github.com/automl/HPOBench/blob/master/hpobench/benchmarks/rl/learna_benchmark.py)    	|
+| NasBench101 - Cifar10A                        	| NASCifar10ABenchmark              	| [link](https://github.com/automl/HPOBench/blob/master/hpobench/benchmarks/nas/nasbench_101.py)       	|
+| NasBench101 - Cifar10B                        	| NASCifar10BBenchmark              	| [link](https://github.com/automl/HPOBench/blob/master/hpobench/benchmarks/nas/nasbench_101.py)       	|
+| NasBench101 - Cifar10C                        	| NASCifar10CBenchmark              	| [link](https://github.com/automl/HPOBench/blob/master/hpobench/benchmarks/nas/nasbench_101.py)       	|
+| TabularBenchmarks - Naval Propulsion          	| NavalPropulsionBenchmark          	| [link](https://github.com/automl/HPOBench/blob/master/hpobench/benchmarks/nas/tabular_benchmarks.py) 	|
+| TabularBenchmarks - Parkinsons Telemonitoring 	| ParkinsonsTelemonitoringBenchmark 	| [link](https://github.com/automl/HPOBench/blob/master/hpobench/benchmarks/nas/tabular_benchmarks.py) 	|
+| TabularBenchmarks - Protein Structure         	| ProteinStructureBenchmark         	| [link](https://github.com/automl/HPOBench/blob/master/hpobench/benchmarks/nas/tabular_benchmarks.py) 	|
+| TabularBenchmarks - Slice Localization        	| SliceLocalizationBenchmark        	| [link](https://github.com/automl/HPOBench/blob/master/hpobench/benchmarks/nas/tabular_benchmarks.py) 	|
+| XGBoost Benchmark                             	| xgboost                           	| [link](https://github.com/automl/HPOBench/blob/master/hpobench/benchmarks/ml/xgboost_benchmark.py)   	|
 
 ## How to contribute:
 
 ### New Benchmark Settings:
 If you want to add a new benchmark setting, add a yaml conform entry in the 
-[benchmark_settings.yaml](./HPOlibExperimentUtils/benchmark_settings.yaml)
+[benchmark_settings.yaml](./HPOBenchExperimentUtils/benchmark_settings.yaml)
 
 Possible options are:
 ```yaml 
@@ -111,7 +112,7 @@ xgboost:
   cutoff_in_s: 1800
   mem_limit_in_mb: 4000
   
-  # Address in the hpolib2
+  # Address in the hpobench
   import_from: ml.xgboost_benchmark
   import_benchmark: XGBoostBenchmark
   
@@ -129,7 +130,7 @@ xgboost:
 
 ### New Optimizer Settings:
 Analogously to the benchmark settings, you can add a new optimizer setting to the 
-[optimizer_settings.yaml](./HPOlibExperimentUtils/optimizer_settings.yaml).
+[optimizer_settings.yaml](./HPOBenchExperimentUtils/optimizer_settings.yaml).
 
 ```yaml
 # The name of the optimizer setting can be chosen freely.
@@ -157,3 +158,9 @@ hpbandster_hb_eta_3_test:
 - Implement the run method. 
 - Add a optimizer setting to the optimizer_settings.yaml as described above. 
 It's as simple as that :wink:
+
+### Some optimizer-specific settings:
+| Optimizer                 | setting name          | Description                                                   |
+|---------------------------|-----------------------|---------------------------------------------------------------|
+| Dragonfly                 | init_iter_per_dim     | An integer N such that, given that the benchmark's configuration space has D dimensions, NxD iterations will be used to randomly sample configurations to warm-start the optimizer with. Makes dragonfly use an internal budget type of 'num_evals'. |
+| Dragonfly                 | init_capital_frac     | A value f in the closed interval [0, 1] such that, given that a benchmark specifies a time limit of T seconds, f * t seconds will be used for initialization. Only comes into effect when 'init_iter_per_dim' is not given. Also switches dragonfly's internal budget type to 'realtime'. |
