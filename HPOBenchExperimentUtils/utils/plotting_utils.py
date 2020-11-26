@@ -117,7 +117,7 @@ plot_dc = {
         #
         # best_test = np.min(te)
         # best_valid = np.min(ve)
-        "ystar_valid": 0067059286, #0.007629349,
+        "ystar_valid": 0.0067059286, #0.007629349,
         "ystar_test": 0.004239297,
     },
     "NASCifar10ABenchmark": {
