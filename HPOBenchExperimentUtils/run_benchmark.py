@@ -4,30 +4,30 @@ from pathlib import Path
 from time import time, sleep
 from typing import Union, Dict
 
-from hpobench.util.example_utils import set_env_variables_to_use_only_one_core
-
 try:
-    from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
+    from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper, total_time_exceeds_limit, \
+        used_fuel_exceeds_limit, \
+    tae_exceeds_limit
 except:
     import sys, os.path
     sys.path.append(os.path.expandvars('$HPOEXPUTIL_PATH'))
-    from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
 
+from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
 from HPOBenchExperimentUtils.utils import PING_OPTIMIZER_IN_S
-from HPOBenchExperimentUtils.utils.optimizer_utils import get_optimizer, optimizer_str_to_enum, OptimizerEnum
+from HPOBenchExperimentUtils.utils.optimizer_utils import get_optimizer, optimizer_str_to_enum
 from HPOBenchExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_benchmark_settings, \
     load_benchmark, get_benchmark_names, get_optimizer_settings_names, \
     get_optimizer_setting
+from HPOBenchExperimentUtils.extract_trajectory import extract_trajectory
 
 from HPOBenchExperimentUtils import _log as _main_log, _default_log_format
+
 _main_log.setLevel(logging.INFO)
 _log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format=_default_log_format)
 
-set_env_variables_to_use_only_one_core()
 
-
-def run_benchmark(optimizer: Union[OptimizerEnum, str],
+def run_benchmark(optimizer: str,
                   benchmark: str,
                   output_dir: Union[Path, str],
                   rng: int,
@@ -85,10 +85,8 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
 
     output_dir = Path(output_dir) / benchmark / optimizer / f'run-{rng}'
     output_dir = output_dir.absolute()
-    if output_dir.is_dir():
-        raise ValueError("Outputdir %s already exists, pass" % output_dir)
+    output_dir.mkdir(exist_ok=True, parents=True)  # TODO!
 
-    output_dir.mkdir(exist_ok=True, parents=True)
     _log.debug(f'Output dir: {output_dir}')
 
     # Load and instantiate the benchmark
@@ -104,16 +102,37 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
         benchmark = benchmark_obj(rng=rng, container_source=container_source, **benchmark_params)
     _log.info(f'Benchmark successfully initialized.')
 
-    # Create a Process Manager to get access to the variable "total_time_proxy" of the bookkeeper
-    # This variable represents how much time the optimizer has used
+    # Create a Process Manager to get access to the proxy variables. They represent the state of the optimization
+    # process.
     manager = Manager()
-    total_time_proxy = manager.Value('f', 0)
-    # total_time_proxy = Value('f', 0)
 
-    benchmark = Bookkeeper(benchmark,
-                           output_dir,
-                           total_time_proxy,
+    global_lock = manager.Lock()
+    # from multiprocessing import Lock
+    # global_lock = Lock()
+
+    # This variable count the time the benchmark was evaluated (in seconds).
+    # This is the cost of the objective function + the overhead. Use type double.
+    total_time_proxy = manager.Value('d', 0)
+    # total_time_proxy = Value('d', 0)
+
+    # We can also restrict how often a optimizer is allowed to execute the target algorithm. Encode it as type long.
+    total_tae_calls_proxy = manager.Value('l', 0)
+    # total_tae_calls_proxy = Value('l', 0)
+
+    # Or we can give an upper limit for amount of budget, the optimizer can use. One can think of it as fuel. Running a
+    # benchmark reduces the fuel by `budget`. Use type double.
+    total_fuel_used_proxy = manager.Value('d', 0)
+    # total_fuel_used_proxy = Value('d', 0)
+
+    benchmark = Bookkeeper(benchmark=benchmark,
+                           output_dir=output_dir,
+                           total_time_proxy=total_time_proxy,
+                           total_tae_calls_proxy=total_tae_calls_proxy,
+                           total_fuel_used_proxy=total_fuel_used_proxy,
+                           global_lock=global_lock,
                            wall_clock_limit_in_s=settings['time_limit_in_s'],
+                           tae_limit=settings['tae_limit'],
+                           fuel_limit=settings['fuel_limit'],
                            cutoff_limit_in_s=settings['cutoff_in_s'],
                            is_surrogate=settings['is_surrogate'])
 
@@ -134,28 +153,34 @@ def run_benchmark(optimizer: Union[OptimizerEnum, str],
     process = Process(target=optimizer.run, args=(), kwargs=dict())
     process.start()
 
-    # Wait for the optimizer to finish. But in case the optimizer crashes somehow, also test for the real time here.
-    while settings['time_limit_in_s'] >= benchmark.get_total_time_used() \
-            and settings['time_limit_in_s'] >= (time() - start_time - 60) \
+    while not total_time_exceeds_limit(benchmark.get_total_time_used(), settings['time_limit_in_s'], start_time) \
+            and not tae_exceeds_limit(benchmark.get_total_tae_used(), settings['tae_limit']) \
+            and not used_fuel_exceeds_limit(benchmark.get_total_fuel_used(), settings['fuel_limit']) \
             and process.is_alive():
         sleep(PING_OPTIMIZER_IN_S)
     else:
         process.terminate()
-        _log.info(f'Timelimit: {settings["time_limit_in_s"]} and is now: {benchmark.get_total_time_used()}')
-        _log.info(f'Terminate Process after {time() - start_time}')
+        _log.info(f'Optimization has been finished.\n'
+                  f'Timelimit: {settings["time_limit_in_s"]} and is now: {benchmark.get_total_time_used()}\n'
+                  f'TAE limit: {settings["tae_limit"]} and is now: {benchmark.get_total_tae_used()}\n'
+                  f'Fuel limit: {settings["fuel_limit"]} and is now: {benchmark.get_total_fuel_used()}\n'
+                  f'Terminate Process after {time() - start_time}')
+
+    _log.info(f'Extract the trajectories')
+    extract_trajectory(output_dir=output_dir, debug=debug)
 
     _log.info(f'Run Benchmark - Finished.')
 
 
 if __name__ == "__main__":
-
     import argparse
+
     parser = argparse.ArgumentParser(prog='HPOBench Wrapper',
                                      description='HPOBench running different benchmarks on different optimizer with a '
                                                  'unified interface')
 
     parser.add_argument('--output_dir', required=True, type=str)
-    parser.add_argument('--optimizer', choices=get_optimizer_settings_names(),  required=True, type=str)
+    parser.add_argument('--optimizer', choices=get_optimizer_settings_names(), required=True, type=str)
     parser.add_argument('--benchmark', choices=get_benchmark_names(), required=True, type=str)
     parser.add_argument('--rng', required=False, default=0, type=int)
     parser.add_argument('--use_local', action='store_true', default=False)

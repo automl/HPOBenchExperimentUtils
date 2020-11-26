@@ -79,7 +79,7 @@ def _handle_uniform_float(param: cs.UniformFloatHyperparameter) -> Tuple[Continu
     else:
         map_to_emu = lambda x: x
         map_to_cs = lambda x: x
-    emukit_param =  ContinuousParameter(name=param.name, min_value=min_val, max_value=max_val)
+    emukit_param = ContinuousParameter(name=param.name, min_value=min_val, max_value=max_val)
 
     return emukit_param, map_to_emu, map_to_cs
 

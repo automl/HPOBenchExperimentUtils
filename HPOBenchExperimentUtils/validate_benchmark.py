@@ -1,14 +1,13 @@
 import argparse
 import logging
-from multiprocessing import Value
+from multiprocessing import Value, Lock
 from pathlib import Path
 from typing import Union, Dict
 
-from HPOBenchExperimentUtils.utils.validation_utils import write_validated_trajectory, get_unvalidated_configurations, \
-    load_trajectories, load_validated_configurations
+from HPOBenchExperimentUtils.utils.validation_utils import write_validated_trajectory, extract_configs_from_trajectories, \
+    load_json_files, load_configs_with_function_values_from_runhistories
 
-from hpobench.util.example_utils import set_env_variables_to_use_only_one_core
-
+from HPOBenchExperimentUtils.utils import TRAJECTORY_V1_FILENAME, TRAJECTORY_V2_FILENAME, VALIDATED_RUNHISTORY_FILENAME
 from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
 from HPOBenchExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_benchmark_settings, \
     load_benchmark, get_benchmark_names
@@ -18,8 +17,6 @@ from HPOBenchExperimentUtils import _log as _main_log, _default_log_format
 _main_log.setLevel(level=logging.INFO)
 _log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format=_default_log_format)
-
-set_env_variables_to_use_only_one_core()
 
 
 def validate_benchmark(benchmark: str,
@@ -36,17 +33,13 @@ def validate_benchmark(benchmark: str,
 
     The benchmarks are by default stored in singularity container which are downloaded at the first run.
 
-    The validation script reads in the trajectory files in the output directory. Note that the validation script reads
-    in all the trajectory files found in the given output path.
-    Then all configurations are validated and written via the bookkeeper into a runhistory file.
+    The validation script reads the trajectory files in the output directory. Note that the validation script reads
+    all the trajectory files found recursively in the given output path.
+    Then, all configurations are validated and written via the bookkeeper into a runhistory file.
 
-    To speed up the procedure, we do not clear the validation runhistory, but keep it to check for a later validation
-    run if we have already validated a specific configuration.
-
-    Note:
-    -----
-    If there are more than one trajectory files found in the `output_dir`, the first one is selected for validation.
-    This will change in the future. Then all found trajectories are combined and validated.
+    To speed up the procedure, we do not clear a validated runhistory, but keep it to check for a later validation
+    run if we have already validated a specific configuration. This also applies for the case when the validation
+    stops before it has finished.
 
     Parameters
     ----------
@@ -85,17 +78,35 @@ def validate_benchmark(benchmark: str,
         enable_container_debug()
 
     output_dir = Path(output_dir)
+    assert output_dir.is_dir(), f'Result folder doesn\'t exist: {output_dir}'
 
-    assert output_dir.is_dir(), f'Result folder doesn\"t exist: {output_dir}'
+    # STEP 1: Load the configuration which should be validated.
+    # Find the paths to the trajectory files
+    unvalidated_trajectories_paths = list(output_dir.rglob(TRAJECTORY_V1_FILENAME))
+    unvalidated_trajectories_paths += list(output_dir.rglob(TRAJECTORY_V2_FILENAME))
 
+    # Load both trajectories: The larger-is-better-trajectory (v1) and the only-better-counts-trajectory
+    unvalidated_trajectories = load_json_files(unvalidated_trajectories_paths)
+
+<<<<<<< HEAD:HPOBenchExperimentUtils/validate_benchmark.py
     unvalidated_trajectories_paths = list(output_dir.rglob(f'hpobench_trajectory.txt'))
     unvalidated_trajectories = load_trajectories(unvalidated_trajectories_paths)
     unvalidated_configurations = get_unvalidated_configurations(unvalidated_trajectories)
+=======
+    # Extract the configurations which should be validated from the both trajectories and combine the results.
+    unvalidated_configurations = extract_configs_from_trajectories(unvalidated_trajectories)
+
+    # Create a dict that stores the results from the validation procedure.
+>>>>>>> developement:HPOlibExperimentUtils/validate_benchmark.py
     validation_results = {str(configuration): None for configuration in unvalidated_configurations}
 
-    already_evaluated_configs = load_validated_configurations(output_dir)
-    _log.info(f'Found {len(unvalidated_trajectories_paths)} trajectories with a total of '
-              f'{len(unvalidated_configurations)} configurations (Unique: {len(validation_results)}) to validate.\n'
+    # STEP 2: Load the results (already validated configurations) from previous runs
+    validated_runhistory_paths = list(output_dir.rglob(VALIDATED_RUNHISTORY_FILENAME))
+    already_evaluated_configs = load_configs_with_function_values_from_runhistories(validated_runhistory_paths)
+
+    _log.info(f'Found {len(unvalidated_trajectories_paths)} trajectories '
+              f'with a total of {len(unvalidated_configurations)} '
+              f'configurations (Unique: {len(validation_results)}) to validate.\n'
               f'Also, we found {len(already_evaluated_configs)} already validated configurations.')
 
     if not recompute_all:
@@ -115,22 +126,33 @@ def validate_benchmark(benchmark: str,
 
     # There is no reason why we want to have a wallclock time limit here.
     # Only a cutoff time limit seems to be useful.
-    total_time_proxy = Value('f', 0)
-    benchmark = Bookkeeper(benchmark,
-                           output_dir,
-                           total_time_proxy,
+    total_time_proxy = Value('d', 0)
+    total_tae_calls_proxy = Value('l', 0)
+    total_fuel_used_proxy = Value('d', 0)
+    global_lock = Lock()
+
+    # Step 3: Setup the bookkeeper. It will store the intermediate results directly.
+    benchmark = Bookkeeper(benchmark=benchmark,
+                           output_dir=output_dir,
+                           total_time_proxy=total_time_proxy,
+                           total_tae_calls_proxy=total_tae_calls_proxy,
+                           total_fuel_used_proxy=total_fuel_used_proxy,
+                           global_lock=global_lock,
                            wall_clock_limit_in_s=None,
+                           tae_limit=None,
+                           fuel_limit=None,
                            cutoff_limit_in_s=benchmark_settings['cutoff_in_s'],
                            is_surrogate=benchmark_settings['is_surrogate'],
                            validate=True)
 
     _log.debug(f'Benchmark initialized. Additional benchmark parameters {benchmark_params}')
-
-    _log.info(f'Going to validate {len(unvalidated_configurations)} configuration')
+    num_configs_to_validate = len(unvalidated_configurations) - len(already_evaluated_configs)
+    _log.info(f'Going to validate {num_configs_to_validate} configuration.')
 
     # The default fidelity should be the highest budget.
     default_fidelity = benchmark.get_fidelity_space().get_default_configuration()
 
+    # STEP 4: Validation.
     for i_config, configuration in enumerate(unvalidated_configurations):
         _log.info(f'[{i_config + 1:4d}|{len(unvalidated_configurations):4d}] Evaluate configuration')
         config_str = str(configuration)
