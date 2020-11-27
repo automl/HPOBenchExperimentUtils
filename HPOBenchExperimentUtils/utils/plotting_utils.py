@@ -85,8 +85,8 @@ plot_dc = {
         #
         # best_test = np.min(te)
         # best_valid = np.min(ve)
-        "ystar_valid": 0.22137885, #0.22137885,
-        "ystar_test": 0.21536806,
+        "ystar_valid": 0.221378855407238, #0.22137885,
+        "ystar_test": 0.21536805480718613,
     },
     "NavalPropulsionBenchmark": {
         "xlim_lo": 10**0,
@@ -172,7 +172,11 @@ plot_dc = {
         "ylim_up": 10**2,
         "xscale": "log",
         "yscale": "log",
-        "ystar_valid": 26.506666642252596,
+        #  cifar100           train       (9930, 99.93733333333334)
+        # cifar100            x-valid     (9930, 73.4933333577474)    obj_func
+        # cifar100            x-test      (9930, 73.51333332112631)
+        # cifar100            ori-test    (9930, 73.50333333333333)   obj_func_test
+        "ystar_valid": 26.5066666422526,
         "ystar_test": 26.49666666666667,
    },
    "Cifar10ValidNasBench201Benchmark": {
@@ -181,8 +185,12 @@ plot_dc = {
         "ylim_up": 10**2,
         "xscale": "log",
         "yscale": "log",
-        "ystar_valid": 8.393333349609367,
-        "ystar_test": 8.476666666666677,
+        # cifar10-valid       train       (10154, 100.0)
+        # cifar10-valid       x-valid     (6111, 91.60666665039064)   obj_func
+        # cifar10-valid       ori-test    (1459, 91.52333333333333)   obj_func_test
+        # [27.11.2020] Note: Adding one more digit for ystar_valid
+        "ystar_valid": 8.393333349609364,
+        "ystar_test": 8.47666666666667,
    },
    "Cifar10NasBench201Benchmark":  {
         "xlim_lo": 10**2,
@@ -190,6 +198,8 @@ plot_dc = {
         "ylim_up": 20,
         "xscale": "log",
         "yscale": "log",
+        # cifar10             train       (10484, 99.994)
+        # cifar10             ori-test    (6111, 94.37333333333333)   both
    },
    "ImageNetNasBench201Benchmark":   {
         "xlim_lo": 10**2,
@@ -197,6 +207,10 @@ plot_dc = {
         "ylim_up": 10**2,
         "xscale": "log",
         "yscale": "log",
+        # ImageNet16-120      train       (9930, 73.22918040138735)
+        # ImageNet16-120      x-valid     (10676, 46.73333327229818)  obj_func
+        # ImageNet16-120      x-test      (857, 47.31111100599501)
+        # ImageNet16-120      ori-test    (857, 46.8444444647895)     obj_func_test
         "ystar_valid": 53.26666672770182,
         "ystar_test": 53.1555555352105,
    },
