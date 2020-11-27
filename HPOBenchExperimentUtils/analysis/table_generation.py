@@ -53,12 +53,12 @@ def save_table(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pa
 
     def lst(x):
         x = np.array(x)
-        x[x < 1e-6] = 1e-6
+        #x[x < 1e-6] = 1e-6
         return list(x)
 
     def median(x):
         x = np.array(x)
-        x[x < 1e-6] = 1e-6
+        #x[x < 1e-6] = 1e-6
         return np.median(x)
 
     # q1 = lambda x: x.quantile(0.25)
