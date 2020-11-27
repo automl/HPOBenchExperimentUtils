@@ -20,7 +20,7 @@ def read_trajectories(benchmark: str, input_dir: Path, train: bool=True, y_best:
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
 
     unique_optimizer = load_trajectories_as_df(input_dir=input_dir,
-                                               which="train_v1" if train else "test_v2")
+                                               which="train_v1" if train else "test_v1")
     optimizer_names = list(unique_optimizer.keys())
     statistics_df = []
     _log.critical("Found: " + ",".join(optimizer_names))
