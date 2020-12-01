@@ -33,9 +33,10 @@ class RandomSearchOptimizer(SingleFidelityOptimizer):
         cs = self.benchmark.get_configuration_space(seed=self.rng)
 
         # Either work with min and max budget
-        # self.min_budget, self.max_budget, self.main_fidelity
-        # or use the fidelity definition from the configspace
-        # self.benchmark.get_fidelity_space(seed=self.rng)
+        # self.min_budget, self.max_budget
+        # or use the fidelity definition using the configspace if the optimizer can handle different
+        # types of fidelity, i.e. Ordinal, Continuous, Discrete
+        # self.main_fidelity
 
         results = []
         num_configs = 1
@@ -50,7 +51,7 @@ class RandomSearchOptimizer(SingleFidelityOptimizer):
             # Always sample highest budget/fidelity
             result = self.benchmark.objective_function(
                 configuration, rng=self.rng,
-                fidelity={self.main_fidelity: self.max_budget},
+                fidelity={self.main_fidelity.name: self.max_budget},
                 **self.settings_for_sending,
             )
             results.append((configuration, result))
