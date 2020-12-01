@@ -1,9 +1,16 @@
 import logging
 from typing import Tuple, Callable, Sequence
-from emukit.core import ParameterSpace, ContinuousParameter, DiscreteParameter
+from emukit.core import ParameterSpace, ContinuousParameter
 import ConfigSpace as cs
+from emukit.core.loop import StoppingCondition, LoopState
 
 _log = logging.getLogger(__name__)
+
+
+class InfiniteStoppingCondition(StoppingCondition):
+    """ Implements a simple infinite stopping condition. """
+    def should_stop(self, loop_state: LoopState) -> bool:
+        return False
 
 
 def _handle_uniform_float(param: cs.UniformFloatHyperparameter) -> Tuple[ContinuousParameter, Callable, Callable]:
