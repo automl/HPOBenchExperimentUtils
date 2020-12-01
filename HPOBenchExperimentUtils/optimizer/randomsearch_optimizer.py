@@ -32,6 +32,11 @@ class RandomSearchOptimizer(SingleFidelityOptimizer):
         # Get the configuration space from the benchmark
         cs = self.benchmark.get_configuration_space(seed=self.rng)
 
+        # Either work with min and max budget
+        # self.min_budget, self.max_budget, self.main_fidelity
+        # or use the fidelity definition from the configspace
+        # self.benchmark.get_fidelity_space(seed=self.rng)
+
         results = []
         num_configs = 1
 
@@ -42,8 +47,12 @@ class RandomSearchOptimizer(SingleFidelityOptimizer):
             # Randomly sample a configuration
             _log.debug(f"Iteration: [{num_configs + 1}] Start sampling configurations")
             configuration = cs.sample_configuration()
-            result = self.benchmark.objective_function(configuration, rng=self.rng,
-                                                       **self.settings_for_sending)
+            # Always sample highest budget/fidelity
+            result = self.benchmark.objective_function(
+                configuration, rng=self.rng,
+                fidelity={self.main_fidelity: self.max_budget},
+                **self.settings_for_sending,
+            )
             results.append((configuration, result))
             _log.info(f'Config [{num_configs:6d}] - Result: {result["function_value"]:.4f} - '
                       f'Time Used: {self.benchmark.get_total_time_used()}|'
