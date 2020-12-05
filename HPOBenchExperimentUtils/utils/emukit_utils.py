@@ -3,6 +3,7 @@ from typing import Tuple, Callable, Sequence
 from emukit.core import ParameterSpace, ContinuousParameter
 import ConfigSpace as cs
 from emukit.core.loop import StoppingCondition, LoopState
+from math import log, exp
 
 _log = logging.getLogger(__name__)
 

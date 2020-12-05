@@ -22,7 +22,7 @@ dehb:
 mumbo:
   optimizer: mumbo
   init_samples_per_dim: 10 # Includes fidelity dimension
-  fidelity_step_size: 0.1 # Continuous fidelity parameters are discretized according to this
+  num_fidelity_values: 5 # Continuous fidelity parameters are discretized according to this
   n_optimization_restarts: 5
   num_mc_samples: 10
   grid_size: 500
