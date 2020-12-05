@@ -36,12 +36,11 @@ class GPwithMUMBO(SingleFidelityOptimizer):
         self.original_space = self.benchmark.get_configuration_space()
         self.emukit_space, self.to_emu, self.to_cs = generate_space_mappings(self.original_space)
         if isinstance(self.main_fidelity, cs.UniformFloatHyperparameter):
-            try:
-                num_fidelity_values = settings["num_fidelity_values"]
-            except AttributeError as e:
-                raise AttributeError("When using a continuous fidelity parameter, a step size for discretization must "
-                                     "be given.") from e
-            _log.debug("Discretizing the main fidelity %s for use with MUMBO using a step size of %f." %
+            num_fidelity_values = get_mandatory_optimizer_setting(
+                settings, "num_fidelity_values", err_msg="When using a continuous fidelity parameter, number of "
+                                                         "discrete fidelity levels must be specified in the parameter "
+                                                         "'num_fidelity_values'")
+            _log.debug("Discretizing the main fidelity %s for use with MUMBO into %d fidelity levels." %
                        (self.main_fidelity.name, num_fidelity_values))
             self.info_sources = np.linspace(self.min_budget, self.max_budget, num_fidelity_values)
 

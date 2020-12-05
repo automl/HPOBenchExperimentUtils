@@ -6,19 +6,22 @@ import numpy as np
 
 from HPOBenchExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
 from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
-from HPOBenchExperimentUtils.utils.emukit_utils import generate_space_mappings
+from HPOBenchExperimentUtils.utils.utils import get_mandatory_optimizer_setting
+from HPOBenchExperimentUtils.utils.emukit_utils import generate_space_mappings, InfiniteStoppingCondition
 from hpobench.abstract_benchmark import AbstractBenchmark
 from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
-from emukit.examples.fabolas import fmin_fabolas, FabolasModel
-from emukit.core import ParameterSpace, InformationSourceParameter
 
 import ConfigSpace as cs
 
+from emukit.examples.fabolas import fmin_fabolas, FabolasModel
+from emukit.core import ParameterSpace, InformationSourceParameter, DiscreteParameter
+from emukit.core.loop import UserFunctionWrapper
+from emukit.core.initial_designs.latin_design import LatinDesign
 from emukit.core.optimization import RandomSearchAcquisitionOptimizer
 from emukit.examples.fabolas.continuous_fidelity_entropy_search import ContinuousFidelityEntropySearch
+from emukit.core.optimization import MultiSourceAcquisitionOptimizer, GradientAcquisitionOptimizer
 from emukit.core.acquisition import IntegratedHyperParameterAcquisition, acquisition_per_expected_cost
 from emukit.bayesian_optimization.acquisitions.max_value_entropy_search import MUMBO, _fit_gumbel
-from emukit.core.loop import FixedIntervalUpdater, SequentialPointCalculator
 from emukit.bayesian_optimization.loops.cost_sensitive_bayesian_optimization_loop import \
     CostSensitiveBayesianOptimizationLoop
 
@@ -82,12 +85,11 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
         self.original_space = self.benchmark.get_configuration_space()
         self.emukit_space, self.to_emu, self.to_cs = generate_space_mappings(self.original_space)
         if isinstance(self.main_fidelity, cs.UniformFloatHyperparameter):
-            try:
-                num_fidelity_values = settings["num_fidelity_values"]
-            except AttributeError as e:
-                raise AttributeError("When using a continuous fidelity parameter, a step size for discretization must "
-                                     "be given.") from e
-            _log.debug("Discretizing the main fidelity %s for use with MUMBO using a step size of %f." %
+            num_fidelity_values = get_mandatory_optimizer_setting(
+                settings, "num_fidelity_values", err_msg="When using a continuous fidelity parameter, number of "
+                                                         "discrete fidelity levels must be specified in the parameter "
+                                                         "'num_fidelity_values'")
+            _log.debug("Discretizing the main fidelity %s for use with MUMBO into %d fidelity levels." %
                        (self.main_fidelity.name, num_fidelity_values))
             self.info_sources = np.linspace(self.min_budget, self.max_budget, num_fidelity_values)
 
@@ -98,48 +100,62 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
         elif isinstance(self.main_fidelity, cs.UniformIntegerHyperparameter):
             self.info_sources = np.arange(start=self.min_budget, stop=self.max_budget + 1)
 
-        self.emukit_fidelity = InformationSourceParameter(self.info_sources.shape[0])
-        self.fidelity_emukit_to_cs = lambda s: {self.main_fidelity.name: self.info_sources[s]}
+        self.emukit_fidelity = SmarterInformationSourceParameter(self.info_sources.shape[0], start_ind=1)
+        self.fidelity_emukit_to_cs = lambda s: {self.main_fidelity.name: self.info_sources[int(s)-1]}
 
         def wrapper(inp):
-            x, s = inp[0, :-1], x[0, -1]
-            _log.debug("Calling objective function with configuration %s and fidelity %f." % (x, s))
-            x = cs.Configuration(self.original_space, values={name: func(i) for (name, func), i in zip(self.to_cs, x)})
-            res = benchmark.objective_function(x, fidelity={self.main_fidelity.name: self.fidelity_emukit_to_cs(s)})
-            y, c = res["function_value"], res["cost"]
-            return np.array([[y]]), np.array([[c]])
+
+            _log.debug("Benchmark wrapper received input %s." % str(inp))
+            if inp.ndim == 1:
+                inp = np.expand_dims(inp, axis=0)
+            yvals, costs = [], []
+            for i in range(inp.shape[0]):
+                x, s = inp[0, :-1], inp[0, -1]
+                _log.debug("Calling objective function with configuration %s and fidelity index %s." % (x, s))
+                config = cs.Configuration(self.original_space, values={name: func(i) for (name, func), i in zip(self.to_cs, x)})
+                fidelity = self.fidelity_emukit_to_cs(s)
+                _log.debug("Generated configuration %s, fidelity %s" % (config, fidelity))
+                res = benchmark.objective_function(config, fidelity=fidelity)
+                y, c = res["function_value"], res["cost"]
+                yvals.append(y)
+                costs.append(c)
+
+            return np.asarray(yvals).reshape(-1, 1), np.asarray(costs).reshape(-1, 1)
 
         self.benchmark_caller = wrapper
         self.n_init = get_mandatory_optimizer_setting(settings, "num_init_evals")
 
-    self.optimizer_settings = {
-        "update_interval": get_mandatory_optimizer_setting(settings, "update_interval"),
-        "num_eval_points": get_mandatory_optimizer_setting(settings, "num_eval_points"),
-    }
+        self.optimizer_settings = {
+            "update_interval": get_mandatory_optimizer_setting(settings, "update_interval"),
+            "num_eval_points": get_mandatory_optimizer_setting(settings, "num_eval_points"),
+            "marginalize_hypers": get_mandatory_optimizer_setting(settings, "marginalize_hypers"),
+        }
 
-    self.mumbo_settings = {
-        "num_mc_samples": get_mandatory_optimizer_setting(settings, "num_mc_samples"),
-        "grid_size": get_mandatory_optimizer_setting(settings, "grid_size")
-    }
+        self.mumbo_settings = {
+            "num_mc_samples": get_mandatory_optimizer_setting(settings, "num_mc_samples"),
+            "grid_size": get_mandatory_optimizer_setting(settings, "grid_size")
+        }
 
     def _setup_model(self):
         initial_design = LatinDesign(self.emukit_space)
+        fid_bounds = self.emukit_fidelity.bounds
+        s_min = fid_bounds[0][0]
+        s_max = fid_bounds[0][1]
 
         grid = initial_design.get_samples(self.n_init)
         n_reps = self.n_init // self.info_sources.shape[0] + 1
-        sample_fidelities = np.expand_dims(np.tile(np.arange(self.info_sources.shape[0]), n_reps)[:self.n_init], 1)
+        sample_fidelities = np.expand_dims(np.tile(np.arange(s_min, s_max), n_reps)[:self.n_init], 1)
         X_init = np.concatenate((grid, sample_fidelities), axis=1)
         res = np.array(list(map(self.benchmark_caller, X_init))).reshape((-1, 2))
-        Y_init = res[:, 0]
-        cost_init = res[:, 1]
+        Y_init = res[:, 0][:, None]
+        cost_init = res[:, 1][:, None]
 
         extended_space = ParameterSpace([*(self.emukit_space.parameters), self.emukit_fidelity])
-        s_min, s_max = self.emukit_fidelity.bounds
 
         model_objective = FabolasModel(X_init=X_init, Y_init=Y_init, s_min=s_min, s_max=s_max)
-        model_cost = FabolasModel(X_init=X_init, Y_init=cost_init[:, None], s_min=s_min, s_max=s_max)
+        model_cost = FabolasModel(X_init=X_init, Y_init=cost_init, s_min=s_min, s_max=s_max)
 
-        if marginalize_hypers:
+        if self.optimizer_settings["marginalize_hypers"]:
             acquisition_generator = lambda model: MUMBO(
                 model=model_objective, space=extended_space, target_information_source_index=s_max,
                 num_samples=self.mumbo_settings["num_mc_samples"], grid_size=self.mumbo_settings["grid_size"])
@@ -151,8 +167,12 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
                 num_samples=self.mumbo_settings["num_mc_samples"], grid_size=self.mumbo_settings["grid_size"])
 
         acquisition = acquisition_per_expected_cost(entropy_search, model_cost)
-        acquisition_optimizer = RandomSearchAcquisitionOptimizer(
-            extended_space, num_eval_points=self.optimizer_settings["num_eval_points"])
+        acquisition_optimizer = MultiSourceAcquisitionOptimizer(GradientAcquisitionOptimizer(extended_space),
+                                                                space=extended_space)
+
+        # TODO: Insert note in documentation, hold discussion over change of acquisition optimizer from RandomSearch
+        # acquisition_optimizer = RandomSearchAcquisitionOptimizer(
+        #     extended_space, num_eval_points=self.optimizer_settings["num_eval_points"])
 
         self.optimizer = CostSensitiveBayesianOptimizationLoop(
             space=extended_space, model_objective=model_objective, model_cost=model_cost, acquisition=acquisition,
@@ -164,8 +184,18 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
     def run(self) -> Path:
         _log.info("Starting FABOLAS optimizer with MUMBO acquisition function.")
         self._setup_model()
-        res = fmin_fabolas(func=self.benchmark_caller, space=self.emukit_space, s_min=self.s_min, s_max=self.s_max,
-                           n_iters=sys.maxsize, n_init=self.n_init,
-                           marginalize_hypers=self.settings["marginalize_hypers"])
+        self.optimizer.run_loop(UserFunctionWrapper(self.benchmark_caller, extra_output_names=["cost"]),
+                                InfiniteStoppingCondition())
         _log.info("FABOLAS optimizer finished.")
         return self.output_dir
+
+class SmarterInformationSourceParameter(InformationSourceParameter):
+    """ Because the base implementation is not very compatible with FABOLAS. """
+
+    def __init__(self, n_sources: int, start_ind: int = 0) -> None:
+        """
+        :param n_sources: Number of information sources in the problem
+        """
+        stop_ind = start_ind + n_sources
+        super(InformationSourceParameter, self).__init__('source', np.arange(start_ind, stop_ind))
+
