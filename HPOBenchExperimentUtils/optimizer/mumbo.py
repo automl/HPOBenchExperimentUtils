@@ -89,7 +89,7 @@ class GPwithMUMBO(SingleFidelityOptimizer):
             "grid_size": get_mandatory_optimizer_setting(settings, "grid_size")
         }
 
-
+        _log.info("Finished reading all settings for Multi-Task GP with MUMBO acquisition.")
 
     def _setup_model(self):
 
@@ -98,16 +98,19 @@ class GPwithMUMBO(SingleFidelityOptimizer):
 
         X_init = initial_design.get_samples(self.init_samples_per_dim * augmented_space.dimensionality)
         Y_init = np.asarray([self.benchmark_caller(X_init[i, :]) for i in range(X_init.shape[0])]).reshape(-1, 1)
+        _log.debug("Generated %d warm-start samples." % X_init.shape[0])
 
+        n_fidelity_vals = self.info_sources.shape[0]
         fidelity_kernels = []
-        for _ in range(len(self.emukit_fidelity.bounds)):
+        for _ in range(n_fidelity_vals):
             kernel = RBF(self.emukit_space.dimensionality)
             # TODO: Design decision. Do we care about these values?
             kernel.lengthscale.constrain_bounded(0.01, 0.5)
             fidelity_kernels.append(kernel)
 
         multi_fidelity_kernel = LinearMultiFidelityKernel(fidelity_kernels)
-        n_fidelity_vals = self.info_sources.shape[0]
+        _log.debug("Mixture of %d GP kernels initialized." % len(fidelity_kernels))
+
         gpy_model = GPyLinearMultiFidelityModel(X=X_init, Y=Y_init, kernel=multi_fidelity_kernel,
                                                 n_fidelities=n_fidelity_vals)
 
@@ -120,6 +123,7 @@ class GPwithMUMBO(SingleFidelityOptimizer):
                                       n_optimization_restarts=self.gp_settings["n_optimization_restarts"],
                                       verbose_optimization=False)
         model.optimize()
+        _log.debug("GP initialized.")
 
         cost_acquisition = Cost(np.linspace(start=1. / n_fidelity_vals, stop=1.0, num=n_fidelity_vals))
         mumbo_acquisition = MUMBO(model, augmented_space, num_samples=self.mumbo_settings["num_mc_samples"],
@@ -133,6 +137,7 @@ class GPwithMUMBO(SingleFidelityOptimizer):
                                                   acquisition_optimizer=acquisition_optimizer)
         self.optimizer.loop_start_event.append(emukit_utils.get_init_trajectory_hook(self.output_dir))
         self.optimizer.iteration_end_event.append(emukit_utils.get_trajectory_hook(self.output_dir))
+        _log.debug("Multi-Task GP with MUMBO acquisition ready to run.")
 
     def setup(self):
         pass

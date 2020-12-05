@@ -102,10 +102,10 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
         self.fidelity_emukit_to_cs = lambda s: {self.main_fidelity.name: self.info_sources[int(s)-1]}
 
         def wrapper(inp):
-
             _log.debug("Benchmark wrapper received input %s." % str(inp))
             if inp.ndim == 1:
                 inp = np.expand_dims(inp, axis=0)
+
             yvals, costs = [], []
             for i in range(inp.shape[0]):
                 x, s = inp[0, :-1], inp[0, -1]
@@ -133,11 +133,11 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
             "grid_size": get_mandatory_optimizer_setting(settings, "grid_size")
         }
 
+        _log.info("Finished reading all settings for FABOLAS optimizer with MUMBO acquisition.")
+
     def _setup_model(self):
         initial_design = LatinDesign(self.emukit_space)
-        fid_bounds = self.emukit_fidelity.bounds
-        s_min = fid_bounds[0][0]
-        s_max = fid_bounds[0][1]
+        s_min, s_max = self.emukit_fidelity.bounds[0]
 
         grid = initial_design.get_samples(self.n_init)
         n_reps = self.n_init // self.info_sources.shape[0] + 1
@@ -146,11 +146,13 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
         res = np.array(list(map(self.benchmark_caller, X_init))).reshape((-1, 2))
         Y_init = res[:, 0][:, None]
         cost_init = res[:, 1][:, None]
+        _log.debug("Generated %d warm-start samples." % X_init.shape[0])
 
         extended_space = ParameterSpace([*(self.emukit_space.parameters), self.emukit_fidelity])
 
         model_objective = FabolasModel(X_init=X_init, Y_init=Y_init, s_min=s_min, s_max=s_max)
         model_cost = FabolasModel(X_init=X_init, Y_init=cost_init, s_min=s_min, s_max=s_max)
+        _log.debug("Initialized objective and cost estimation models")
 
         if self.optimizer_settings["marginalize_hypers"]:
             acquisition_generator = lambda model: MUMBO(
@@ -166,6 +168,7 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
         acquisition = acquisition_per_expected_cost(entropy_search, model_cost)
         acquisition_optimizer = MultiSourceAcquisitionOptimizer(GradientAcquisitionOptimizer(extended_space),
                                                                 space=extended_space)
+        _log.debug("MUMBO acquisition function ready.")
 
         # TODO: Insert note in documentation, hold discussion over change of acquisition optimizer from RandomSearch
         # acquisition_optimizer = RandomSearchAcquisitionOptimizer(
@@ -177,6 +180,7 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
 
         self.optimizer.loop_start_event.append(emukit_utils.get_init_trajectory_hook(self.output_dir))
         self.optimizer.iteration_end_event.append(emukit_utils.get_trajectory_hook(self.output_dir))
+        _log.info("FABOLAS optimizer with MUMBO acquisition initialized and ready to run.")
 
     def setup(self):
         pass
