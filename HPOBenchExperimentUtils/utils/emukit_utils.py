@@ -7,6 +7,9 @@ from math import log, exp
 
 _log = logging.getLogger(__name__)
 
+# Sets a tolerance value for clipping sampled emukit values at the edges of a UniformFloat's interval when sampled on a
+# log scale.
+LOGFLOAT_VALUE_RELATIVE_TOLERANCE = 1e-5
 
 class InfiniteStoppingCondition(StoppingCondition):
     """ Implements a simple infinite stopping condition. """
@@ -21,7 +24,7 @@ def _handle_uniform_float(param: cs.UniformFloatHyperparameter) -> Tuple[Continu
         min_val = log(min_val)
         max_val = log(max_val)
         map_to_emu = lambda x: log(x)
-        map_to_cs = lambda x: exp(x)
+        map_to_cs = lambda x: min(param.upper, max(param.upper, exp(x)))
     else:
         map_to_emu = lambda x: x
         map_to_cs = lambda x: x
