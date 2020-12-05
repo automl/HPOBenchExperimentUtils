@@ -2,6 +2,8 @@ import logging
 from pathlib import Path
 from typing import Union, Dict
 import numpy as np
+import time
+import json
 
 from HPOBenchExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
 from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
@@ -44,7 +46,7 @@ class GPwithMUMBO(SingleFidelityOptimizer):
             self.info_sources = np.arange(start=self.min_budget, stop=self.max_budget + fidelity_step_size,
                                           step=fidelity_step_size)
         elif isinstance(self.main_fidelity, cs.OrdinalHyperparameter):
-            self.info_sources = self.main_fidelity.get_seq_order()
+            self.info_sources = np.asarray(self.main_fidelity.get_seq_order())
         elif isinstance(self.main_fidelity, cs.CategoricalHyperparameter):
             self.info_sources = np.asarray(self.main_fidelity.choices)
         elif isinstance(self.main_fidelity, cs.UniformIntegerHyperparameter):
@@ -60,8 +62,8 @@ class GPwithMUMBO(SingleFidelityOptimizer):
             benchmark objective function.
             """
 
-            _log.debug("Calling objective function with configuration %s and fidelity at index %d." %
-                       (x[:-1], x[-1]))
+            _log.debug("Calling objective function with configuration %s and fidelity value %s at index %d." %
+                       (x[:-1], str(self.info_sources[x[-1]]), x[-1]))
             fidelity = self.fidelity_emukit_to_cs(x[-1])
             config = cs.Configuration(self.original_space,
                                       values={name: func(i) for (name, func), i in zip(self.to_cs, x[:-1])})
@@ -70,13 +72,19 @@ class GPwithMUMBO(SingleFidelityOptimizer):
 
         self.benchmark_caller = wrapper
 
-        self.n_init = get_mandatory_optimizer_setting(settings, "num_init_evals")
+        # self.n_init = get_mandatory_optimizer_setting(settings, "num_init_evals")
         self.init_samples_per_dim = get_mandatory_optimizer_setting(settings, "init_samples_per_dim")
-        self.trajectory_samples_per_dim = get_mandatory_optimizer_setting(settings, "trajectory_samples_per_dim")
+        # self.trajectory_samples_per_dim = get_mandatory_optimizer_setting(settings, "trajectory_samples_per_dim")
+        self.gp_settings = {
+            "n_optimization_restarts": get_mandatory_optimizer_setting(settings, "n_optimization_restarts")
+        }
+        self.mumbo_settings = {
+            "num_mc_samples": get_mandatory_optimizer_setting(settings, "num_mc_samples"),
+            "grid_size": get_mandatory_optimizer_setting(settings, "grid_size")
+        }
         self._setup_model()
 
-    @staticmethod
-    def _trajectory_hook(loop: OuterLoop, loop_state: LoopState):
+    def _trajectory_hook(self, loop: OuterLoop, loop_state: LoopState):
         """ A function that is called at the end of each BO iteration in order to record the MUMBO trajectory. """
 
         acq: MUMBO = loop.candidate_point_calculator.acquisition
@@ -90,46 +98,62 @@ class GPwithMUMBO(SingleFidelityOptimizer):
         idx = np.ones((grid.shape[0])) * acq.target_information_source_index
         grid = np.insert(grid, acq.source_idx, idx, axis=1)
         # Get GP posterior at these points
-        fmean, _ = acq.model.predict(grid)
+        fmean, fvar = acq.model.predict(grid)
         mindx = np.argmin(fmean)
         predicted_incumbent = np.delete(grid[mindx], acq.source_idx)
-        # TODO: Write the predicted incumbent to a file
-
+        timestamp = time.time()
+        iteration = loop_state.iteration
+        with open(self.output_dir / "mumbo_trajectory.json", "a") as fp:
+            fp.write(json.dumps(
+                {
+                    "iteration": iteration,
+                    "timestamp": timestamp,
+                    "configuration": predicted_incumbent.tolist(),
+                    "gp_prediction": (fmean[mindx], fvar[mindx])
+                },
+                indent=4
+            ))
 
     def _setup_model(self):
 
-        initial_design = RandomDesign(self.emukit_space)
+        augmented_space = ParameterSpace([*(self.emukit_space.parameters), self.emukit_fidelity])
+        initial_design = RandomDesign(augmented_space)
 
-        X_init = initial_design.get_samples(self.n_init)
-        # TODO: Distribute the sampled points across the various fidelities.
+        X_init = initial_design.get_samples(self.init_samples_per_dim * augmented_space.dimensionality)
         Y_init = np.asarray([self.benchmark_caller(X_init[i, :]) for i in X_init.shape[0]])
 
-        kern_low = RBF(1)
-        kern_low.lengthscale.constrain_bounded(0.01, 0.5)
+        fidelity_kernels = []
+        for _ in range(len(self.emukit_fidelity.bounds)):
+            kernel = RBF(self.emukit_space.dimensionality)
+            # TODO: Design decision. Do we care about these values?
+            kernel.lengthscale.constrain_bounded(0.01, 0.5)
+            fidelity_kernels.append(kernel)
 
-        kern_err = RBF(1)
-        kern_err.lengthscale.constrain_bounded(0.01, 0.5)
-
-        multi_fidelity_kernel = LinearMultiFidelityKernel([kern_low, kern_err])
+        multi_fidelity_kernel = LinearMultiFidelityKernel(fidelity_kernels)
+        n_fidelity_vals = self.info_sources.shape[0]
         gpy_model = GPyLinearMultiFidelityModel(X=X_init, Y=Y_init, kernel=multi_fidelity_kernel,
-                                                n_fidelities=self.info_sources.shape[0])
+                                                n_fidelities=n_fidelity_vals)
 
+        # TODO: Design decision. Do we care about this value?
         gpy_model.likelihood.Gaussian_noise.fix(0.1)
-        gpy_model.likelihood.Gaussian_noise_1.fix(0.1)
+        for i in range(1, len(self.emukit_fidelity.bounds)):
+            getattr(gpy_model.likelihood, f"Gaussian_noise_{i}").fix(0.1)
 
-        model = GPyMultiOutputWrapper(gpy_model, n_outputs=2, n_optimization_restarts=5, verbose_optimization=False)
+        model = GPyMultiOutputWrapper(gpy_model, n_outputs=2,
+                                      n_optimization_restarts=self.gp_settings["n_optimization_restarts"],
+                                      verbose_optimization=False)
         model.optimize()
 
-        augmented_space = ParameterSpace([*(self.emukit_space.parameters), self.emukit_fidelity])
-        cost_acquisition = Cost(np.linspace(start=0.1, stop=1.1, num=self.info_sources.shape[0]))
-        mumbo_acquisition = MUMBO(model, augmented_space, num_samples=5, grid_size=500) / cost_acquisition
+        cost_acquisition = Cost(np.linspace(start=1. / n_fidelity_vals, stop=1.0, num=n_fidelity_vals))
+        mumbo_acquisition = MUMBO(model, augmented_space, num_samples=self.mumbo_settings["num_mc_samples"],
+                                  grid_size=self.mumbo_settings["grid_size"]) / cost_acquisition
         acquisition_optimizer = MultiSourceAcquisitionOptimizer(GradientAcquisitionOptimizer(augmented_space),
                                                                 space=augmented_space)
 
         self.optimizer = BayesianOptimizationLoop(space=augmented_space, model=model, acquisition=mumbo_acquisition,
                                                   update_interval=1, batch_size=1,
                                                   acquisition_optimizer=acquisition_optimizer)
-        self.optimizer.iteration_end_event.append(GPwithMUMBO._trajectory_hook)
+        self.optimizer.iteration_end_event.append(self._trajectory_hook)
 
     def setup(self):
         pass
