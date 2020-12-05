@@ -90,7 +90,6 @@ class GPwithMUMBO(SingleFidelityOptimizer):
             "num_mc_samples": get_mandatory_optimizer_setting(settings, "num_mc_samples"),
             "grid_size": get_mandatory_optimizer_setting(settings, "grid_size")
         }
-        self._setup_model()
 
     def _init_trajectory_hook(self, loop: OuterLoop, loop_state: LoopState):
         """ A function that is called only once, before the optimization begins, to set the stage for recording MUMBO's
@@ -180,6 +179,7 @@ class GPwithMUMBO(SingleFidelityOptimizer):
 
     def run(self) -> Path:
         _log.info("Starting GP optimizer with MUMBO acquisition.")
+        self._setup_model()
         self.optimizer.run_loop(user_function=self.benchmark_caller, stopping_condition=InfiniteStoppingCondition())
         _log.info("GP optimizer with MUMBO acquisition finished.")
         return self.output_dir

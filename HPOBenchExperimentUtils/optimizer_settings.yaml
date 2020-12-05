@@ -44,6 +44,16 @@ fabolas:
   num_init_evals: 10
   marginalize_hypers: false
 
+fabolas_mumbo:
+  optimizer: fabolas_mumbo
+  num_init_evals: 10
+  marginalize_hypers: false
+  update_interval: 1
+  num_eval_points: 2000
+  num_fidelity_values: 5 # Continuous fidelity parameters are discretized according to this
+  num_mc_samples: 10
+  grid_size: 500
+
 # SMAC ##################################################################################################### #
 smac_hb_eta_3:
   optimizer: smac_hb

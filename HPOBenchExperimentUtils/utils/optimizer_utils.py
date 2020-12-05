@@ -82,6 +82,7 @@ class OptimizerEnum(Enum):
     DEHB = 'dehb'
     FABOLAS = 'fabolas'
     MUMBO = 'mumbo'
+    FABOLAS_MUMBO = "fabolas_mumbo"
     PURE_RANDOMSEARCH = 'randomsearch'
 
 
@@ -130,8 +131,11 @@ def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]) -> OptimizerEnum
         elif optimizer == 'dehb':
             return OptimizerEnum.DEHB
 
-        elif optimizer == 'fabolas':
-            return OptimizerEnum.FABOLAS
+        elif 'fabolas' in optimizer:
+            if 'mumbo' in optimizer:
+                return OptimizerEnum.FABOLAS_MUMBO
+            else:
+                return OptimizerEnum.FABOLAS
 
         elif optimizer == 'mumbo':
             return OptimizerEnum.MUMBO
@@ -172,6 +176,9 @@ def get_optimizer(optimizer_enum):
     elif optimizer_enum is OptimizerEnum.FABOLAS:
         from HPOBenchExperimentUtils.optimizer.fabolas_optimizer import FabolasOptimizer
         optimizer = FabolasOptimizer
+    elif optimizer_enum is OptimizerEnum.FABOLAS_MUMBO:
+        from HPOBenchExperimentUtils.optimizer.fabolas_optimizer import FabolasWithMUMBO
+        optimizer = FabolasWithMUMBO
     elif optimizer_enum is OptimizerEnum.MUMBO:
         from HPOBenchExperimentUtils.optimizer.mumbo import GPwithMUMBO
         optimizer = GPwithMUMBO
