@@ -7,7 +7,7 @@ import numpy as np
 from HPOBenchExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
 from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
 from HPOBenchExperimentUtils.utils.utils import get_mandatory_optimizer_setting
-from HPOBenchExperimentUtils.utils.emukit_utils import generate_space_mappings, InfiniteStoppingCondition
+import HPOBenchExperimentUtils.utils.emukit_utils as emukit_utils
 from hpobench.abstract_benchmark import AbstractBenchmark
 from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 
@@ -33,7 +33,7 @@ class FabolasOptimizer(SingleFidelityOptimizer):
 
         super().__init__(benchmark, settings, output_dir, rng)
         self.original_space = self.benchmark.get_configuration_space()
-        self.emukit_space, self.to_emu, self.to_cs = generate_space_mappings(self.original_space)
+        self.emukit_space, self.to_emu, self.to_cs = emukit_utils.generate_space_mappings(self.original_space)
         if isinstance(self.main_fidelity, cs.UniformIntegerHyperparameter):
             _log.debug("Treating integer fidelity parameter %s as the main fidelity used for dataset subsampling." %
                        self.main_fidelity.name)
@@ -83,7 +83,7 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
 
         super().__init__(benchmark, settings, output_dir, rng)
         self.original_space = self.benchmark.get_configuration_space()
-        self.emukit_space, self.to_emu, self.to_cs = generate_space_mappings(self.original_space)
+        self.emukit_space, self.to_emu, self.to_cs = emukit_utils.generate_space_mappings(self.original_space)
         if isinstance(self.main_fidelity, cs.UniformFloatHyperparameter):
             num_fidelity_values = get_mandatory_optimizer_setting(
                 settings, "num_fidelity_values", err_msg="When using a continuous fidelity parameter, number of "
@@ -178,6 +178,9 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
             space=extended_space, model_objective=model_objective, model_cost=model_cost, acquisition=acquisition,
             update_interval=1, acquisition_optimizer=acquisition_optimizer)
 
+        self.optimizer.loop_start_event.append(emukit_utils.get_init_trajectory_hook(self.output_dir))
+        self.optimizer.iteration_end_event.append(emukit_utils.get_trajectory_hook(self.output_dir))
+
     def setup(self):
         pass
 
@@ -185,7 +188,7 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
         _log.info("Starting FABOLAS optimizer with MUMBO acquisition function.")
         self._setup_model()
         self.optimizer.run_loop(UserFunctionWrapper(self.benchmark_caller, extra_output_names=["cost"]),
-                                InfiniteStoppingCondition())
+                                emukit_utils.InfiniteStoppingCondition())
         _log.info("FABOLAS optimizer finished.")
         return self.output_dir
 

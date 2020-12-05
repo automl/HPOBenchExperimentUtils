@@ -7,7 +7,7 @@ import json
 
 from HPOBenchExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
 from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
-from HPOBenchExperimentUtils.utils.emukit_utils import generate_space_mappings, InfiniteStoppingCondition
+import HPOBenchExperimentUtils.utils.emukit_utils as emukit_utils
 from HPOBenchExperimentUtils.utils.utils import get_mandatory_optimizer_setting
 from hpobench.abstract_benchmark import AbstractBenchmark
 from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
@@ -17,7 +17,6 @@ from emukit.core import ParameterSpace, InformationSourceParameter
 from emukit.core.initial_designs import RandomDesign
 from emukit.bayesian_optimization.loops import BayesianOptimizationLoop
 from emukit.core.optimization import MultiSourceAcquisitionOptimizer, GradientAcquisitionOptimizer
-from emukit.core.loop import LoopState, OuterLoop
 from emukit.bayesian_optimization.acquisitions.max_value_entropy_search import MUMBO, _fit_gumbel
 from emukit.core.acquisition import Acquisition
 from emukit.multi_fidelity.models.linear_model import GPyLinearMultiFidelityModel
@@ -34,7 +33,7 @@ class GPwithMUMBO(SingleFidelityOptimizer):
 
         super().__init__(benchmark, settings, output_dir, rng)
         self.original_space = self.benchmark.get_configuration_space()
-        self.emukit_space, self.to_emu, self.to_cs = generate_space_mappings(self.original_space)
+        self.emukit_space, self.to_emu, self.to_cs = emukit_utils.generate_space_mappings(self.original_space)
         if isinstance(self.main_fidelity, cs.UniformFloatHyperparameter):
             num_fidelity_values = get_mandatory_optimizer_setting(
                 settings, "num_fidelity_values", err_msg="When using a continuous fidelity parameter, number of "
@@ -90,46 +89,7 @@ class GPwithMUMBO(SingleFidelityOptimizer):
             "grid_size": get_mandatory_optimizer_setting(settings, "grid_size")
         }
 
-    def _init_trajectory_hook(self, loop: OuterLoop, loop_state: LoopState):
-        """ A function that is called only once, before the optimization begins, to set the stage for recording MUMBO's
-        trajectory. """
 
-        path = self.output_dir / "mumbo_trajectory.json"
-        with open(path, 'w') as fp:
-            # Delete old contents in case the file used to exist.
-            pass
-
-    def _trajectory_hook(self, loop: OuterLoop, loop_state: LoopState):
-        """ A function that is called at the end of each BO iteration in order to record the MUMBO trajectory. """
-        _log.debug("Executing trajectory hook for MUMBO in iteration %d" % loop_state.iteration)
-        # Remember that the MUMBO acquisition was divided by the Cost acquisition before being fed into the optimizer
-        acq: MUMBO = loop.candidate_point_calculator.acquisition.numerator
-        sampler = RandomDesign(acq.space)
-        grid = sampler.get_samples(acq.grid_size)
-        # also add the locations already queried in the previous BO steps
-        grid = np.vstack([acq.model.X, grid])
-        # remove current fidelity index from sample
-        grid = np.delete(grid, acq.source_idx, axis=1)
-        # Add objective function fidelity index to sample
-        idx = np.ones((grid.shape[0])) * acq.target_information_source_index
-        grid = np.insert(grid, acq.source_idx, idx, axis=1)
-        # Get GP posterior at these points
-        fmean, fvar = acq.model.predict(grid)
-        mindx = np.argmin(fmean)
-        predicted_incumbent = np.delete(grid[mindx], acq.source_idx)
-        timestamp = time.time()
-        iteration = loop_state.iteration
-        with open(self.output_dir / "mumbo_trajectory.json", "a") as fp:
-            fp.write(json.dumps(
-                {
-                    "iteration": iteration,
-                    "timestamp": timestamp,
-                    "configuration": predicted_incumbent.tolist(),
-                    "gp_prediction": np.asarray([fmean[mindx], fvar[mindx]]).squeeze().tolist()
-                },
-                indent=4
-            ))
-        _log.debug("Finished executing trajectory hook.")
 
     def _setup_model(self):
 
@@ -170,8 +130,8 @@ class GPwithMUMBO(SingleFidelityOptimizer):
         self.optimizer = BayesianOptimizationLoop(space=augmented_space, model=model, acquisition=mumbo_acquisition,
                                                   update_interval=1, batch_size=1,
                                                   acquisition_optimizer=acquisition_optimizer)
-        self.optimizer.loop_start_event.append(self._init_trajectory_hook)
-        self.optimizer.iteration_end_event.append(self._trajectory_hook)
+        self.optimizer.loop_start_event.append(emukit_utils.get_init_trajectory_hook(self.output_dir))
+        self.optimizer.iteration_end_event.append(emukit_utils.get_trajectory_hook(self.output_dir))
 
     def setup(self):
         pass
@@ -179,7 +139,8 @@ class GPwithMUMBO(SingleFidelityOptimizer):
     def run(self) -> Path:
         _log.info("Starting GP optimizer with MUMBO acquisition.")
         self._setup_model()
-        self.optimizer.run_loop(user_function=self.benchmark_caller, stopping_condition=InfiniteStoppingCondition())
+        self.optimizer.run_loop(user_function=self.benchmark_caller,
+                                stopping_condition=emukit_utils.InfiniteStoppingCondition())
         _log.info("GP optimizer with MUMBO acquisition finished.")
         return self.output_dir
 

@@ -1,15 +1,20 @@
 import logging
 from typing import Tuple, Callable, Sequence
 from emukit.core import ParameterSpace, ContinuousParameter
+from emukit.core.loop import LoopState, OuterLoop, StoppingCondition
+from emukit.core.initial_designs import RandomDesign
+from emukit.bayesian_optimization.acquisitions.max_value_entropy_search import MUMBO
 import ConfigSpace as cs
-from emukit.core.loop import StoppingCondition, LoopState
 from math import log, exp
+from pathlib import Path
+import numpy as np
+import time
+import json
 
 _log = logging.getLogger(__name__)
 
-# Sets a tolerance value for clipping sampled emukit values at the edges of a UniformFloat's interval when sampled on a
-# log scale.
-LOGFLOAT_VALUE_RELATIVE_TOLERANCE = 1e-5
+MUMBO_TRAJECTORY_FILE = "mumbo_trajectory.json"
+
 
 class InfiniteStoppingCondition(StoppingCondition):
     """ Implements a simple infinite stopping condition. """
@@ -71,3 +76,67 @@ def generate_space_mappings(cspace: cs.ConfigurationSpace) -> \
         to_cs.append((parameter.name, map_to_cs))
 
     return ParameterSpace(space), to_emu, to_cs
+
+
+def get_init_trajectory_hook(output_dir: Path):
+    """
+    Generates a before-loop-start hook for recording Information-Theoretic acquisition function MUMBO's real trajectory.
+    :param output_dir: Path
+        The directory where the trajectory will be stored.
+    :return:
+    """
+
+    def hook(loop: OuterLoop, loop_state: LoopState):
+        """ A function that is called only once, before the optimization begins, to set the stage for recording MUMBO's
+        trajectory. """
+
+        path = output_dir / MUMBO_TRAJECTORY_FILE
+        with open(path, 'w') as _:
+            # Delete old contents in case the file used to exist.
+            pass
+
+    return hook
+
+
+def get_trajectory_hook(output_dir: Path):
+    """
+    Generates an end-of-iteration hook for recording Information-Theoretic acquisition function MUMBO's real trajectory.
+    :param output_dir: Path
+        The directory where the trajectory will be stored.
+    :return:
+    """
+
+    def hook(loop: OuterLoop, loop_state: LoopState):
+        """ A function that is called at the end of each BO iteration in order to record the MUMBO trajectory. """
+
+        _log.debug("Executing trajectory hook for MUMBO in iteration %d" % loop_state.iteration)
+        # Remember that the MUMBO acquisition was divided by the Cost acquisition before being fed into the optimizer
+        acq: MUMBO = loop.candidate_point_calculator.acquisition.numerator
+        sampler = RandomDesign(acq.space)
+        grid = sampler.get_samples(acq.grid_size)
+        # also add the locations already queried in the previous BO steps
+        grid = np.vstack([acq.model.X, grid])
+        # remove current fidelity index from sample
+        grid = np.delete(grid, acq.source_idx, axis=1)
+        # Add objective function fidelity index to sample
+        idx = np.ones((grid.shape[0])) * acq.target_information_source_index
+        grid = np.insert(grid, acq.source_idx, idx, axis=1)
+        # Get GP posterior at these points
+        fmean, fvar = acq.model.predict(grid)
+        mindx = np.argmin(fmean)
+        predicted_incumbent = np.delete(grid[mindx], acq.source_idx)
+        timestamp = time.time()
+        iteration = loop_state.iteration
+        with open(output_dir / MUMBO_TRAJECTORY_FILE, "a") as fp:
+            fp.write(json.dumps(
+                {
+                    "iteration": iteration,
+                    "timestamp": timestamp,
+                    "configuration": predicted_incumbent.tolist(),
+                    "gp_prediction": np.asarray([fmean[mindx], fvar[mindx]]).squeeze().tolist()
+                },
+                indent=4
+            ))
+        _log.debug("Finished executing trajectory hook.")
+
+    return hook
