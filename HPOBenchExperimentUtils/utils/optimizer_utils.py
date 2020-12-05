@@ -81,6 +81,7 @@ class OptimizerEnum(Enum):
     DRAGONFLY = 'dragonfly'
     DEHB = 'dehb'
     FABOLAS = 'fabolas'
+    MUMBO = 'mumbo'
     PURE_RANDOMSEARCH = 'randomsearch'
 
 
@@ -123,14 +124,17 @@ def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]) -> OptimizerEnum
             else:
                 fail = True
 
-        elif 'dragonfly' in optimizer or 'df' in optimizer:
+        elif 'dragonfly' in optimizer:
             return OptimizerEnum.DRAGONFLY
 
-        elif 'dehb' in optimizer:
+        elif optimizer == 'dehb':
             return OptimizerEnum.DEHB
 
-        elif 'fabolas' in optimizer:
+        elif optimizer == 'fabolas':
             return OptimizerEnum.FABOLAS
+
+        elif optimizer == 'mumbo':
+            return OptimizerEnum.MUMBO
 
         elif optimizer == 'randomsearch':
             return OptimizerEnum.PURE_RANDOMSEARCH
@@ -168,6 +172,9 @@ def get_optimizer(optimizer_enum):
     elif optimizer_enum is OptimizerEnum.FABOLAS:
         from HPOBenchExperimentUtils.optimizer.fabolas_optimizer import FabolasOptimizer
         optimizer = FabolasOptimizer
+    elif optimizer_enum is OptimizerEnum.MUMBO:
+        from HPOBenchExperimentUtils.optimizer.mumbo import GPwithMUMBO
+        optimizer = GPwithMUMBO
     elif optimizer_enum is OptimizerEnum.SMAC_HYPERBAND:
         from HPOBenchExperimentUtils.optimizer.smac_optimizer import SMACOptimizerHyperband
         optimizer = SMACOptimizerHyperband
