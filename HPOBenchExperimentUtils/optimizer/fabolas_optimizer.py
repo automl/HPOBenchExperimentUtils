@@ -14,14 +14,12 @@ from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 import ConfigSpace as cs
 
 from emukit.examples.fabolas import fmin_fabolas, FabolasModel
-from emukit.core import ParameterSpace, InformationSourceParameter, DiscreteParameter
+from emukit.core import ParameterSpace
 from emukit.core.loop import UserFunctionWrapper
 from emukit.core.initial_designs.latin_design import LatinDesign
-from emukit.core.optimization import RandomSearchAcquisitionOptimizer
-from emukit.examples.fabolas.continuous_fidelity_entropy_search import ContinuousFidelityEntropySearch
 from emukit.core.optimization import MultiSourceAcquisitionOptimizer, GradientAcquisitionOptimizer
 from emukit.core.acquisition import IntegratedHyperParameterAcquisition, acquisition_per_expected_cost
-from emukit.bayesian_optimization.acquisitions.max_value_entropy_search import MUMBO, _fit_gumbel
+from emukit.bayesian_optimization.acquisitions.max_value_entropy_search import MUMBO
 from emukit.bayesian_optimization.loops.cost_sensitive_bayesian_optimization_loop import \
     CostSensitiveBayesianOptimizationLoop
 
@@ -100,7 +98,7 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
         elif isinstance(self.main_fidelity, cs.UniformIntegerHyperparameter):
             self.info_sources = np.arange(start=self.min_budget, stop=self.max_budget + 1)
 
-        self.emukit_fidelity = SmarterInformationSourceParameter(self.info_sources.shape[0], start_ind=1)
+        self.emukit_fidelity = emukit_utils.SmarterInformationSourceParameter(self.info_sources.shape[0], start_ind=1)
         self.fidelity_emukit_to_cs = lambda s: {self.main_fidelity.name: self.info_sources[int(s)-1]}
 
         def wrapper(inp):
@@ -127,7 +125,6 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
 
         self.optimizer_settings = {
             "update_interval": get_mandatory_optimizer_setting(settings, "update_interval"),
-            "num_eval_points": get_mandatory_optimizer_setting(settings, "num_eval_points"),
             "marginalize_hypers": get_mandatory_optimizer_setting(settings, "marginalize_hypers"),
         }
 
@@ -176,7 +173,7 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
 
         self.optimizer = CostSensitiveBayesianOptimizationLoop(
             space=extended_space, model_objective=model_objective, model_cost=model_cost, acquisition=acquisition,
-            update_interval=1, acquisition_optimizer=acquisition_optimizer)
+            update_interval=self.optimizer_settings["update_interval"], acquisition_optimizer=acquisition_optimizer)
 
         self.optimizer.loop_start_event.append(emukit_utils.get_init_trajectory_hook(self.output_dir))
         self.optimizer.iteration_end_event.append(emukit_utils.get_trajectory_hook(self.output_dir))
@@ -191,14 +188,3 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
                                 emukit_utils.InfiniteStoppingCondition())
         _log.info("FABOLAS optimizer finished.")
         return self.output_dir
-
-class SmarterInformationSourceParameter(InformationSourceParameter):
-    """ Because the base implementation is not very compatible with FABOLAS. """
-
-    def __init__(self, n_sources: int, start_ind: int = 0) -> None:
-        """
-        :param n_sources: Number of information sources in the problem
-        """
-        stop_ind = start_ind + n_sources
-        super(InformationSourceParameter, self).__init__('source', np.arange(start_ind, stop_ind))
-

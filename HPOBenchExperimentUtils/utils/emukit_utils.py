@@ -1,6 +1,6 @@
 import logging
 from typing import Tuple, Callable, Sequence
-from emukit.core import ParameterSpace, ContinuousParameter
+from emukit.core import ParameterSpace, ContinuousParameter, InformationSourceParameter
 from emukit.core.loop import LoopState, OuterLoop, StoppingCondition
 from emukit.core.initial_designs import RandomDesign
 from emukit.bayesian_optimization.acquisitions.max_value_entropy_search import MUMBO
@@ -140,3 +140,13 @@ def get_trajectory_hook(output_dir: Path):
         _log.debug("Finished executing trajectory hook.")
 
     return hook
+
+class SmarterInformationSourceParameter(InformationSourceParameter):
+    """ Because the base implementation is not very compatible with FABOLAS. """
+
+    def __init__(self, n_sources: int, start_ind: int = 0) -> None:
+        """
+        :param n_sources: Number of information sources in the problem
+        """
+        stop_ind = start_ind + n_sources
+        super(InformationSourceParameter, self).__init__('source', np.arange(start_ind, stop_ind))

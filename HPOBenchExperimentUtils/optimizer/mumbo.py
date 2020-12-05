@@ -2,8 +2,6 @@ import logging
 from pathlib import Path
 from typing import Union, Dict
 import numpy as np
-import time
-import json
 
 from HPOBenchExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
 from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
@@ -17,7 +15,7 @@ from emukit.core import ParameterSpace, InformationSourceParameter
 from emukit.core.initial_designs import RandomDesign
 from emukit.bayesian_optimization.loops import BayesianOptimizationLoop
 from emukit.core.optimization import MultiSourceAcquisitionOptimizer, GradientAcquisitionOptimizer
-from emukit.bayesian_optimization.acquisitions.max_value_entropy_search import MUMBO, _fit_gumbel
+from emukit.bayesian_optimization.acquisitions.max_value_entropy_search import MUMBO
 from emukit.core.acquisition import Acquisition
 from emukit.multi_fidelity.models.linear_model import GPyLinearMultiFidelityModel
 from emukit.multi_fidelity.kernels.linear_multi_fidelity_kernel import LinearMultiFidelityKernel
@@ -82,7 +80,9 @@ class GPwithMUMBO(SingleFidelityOptimizer):
         self.init_samples_per_dim = get_mandatory_optimizer_setting(settings, "init_samples_per_dim")
         # self.trajectory_samples_per_dim = get_mandatory_optimizer_setting(settings, "trajectory_samples_per_dim")
         self.gp_settings = {
-            "n_optimization_restarts": get_mandatory_optimizer_setting(settings, "n_optimization_restarts")
+            "n_optimization_restarts": get_mandatory_optimizer_setting(settings, "n_optimization_restarts"),
+            "update_interval": get_mandatory_optimizer_setting(settings, "update_interval"),
+            "batch_size": get_mandatory_optimizer_setting(settings, "batch_size"),
         }
         self.mumbo_settings = {
             "num_mc_samples": get_mandatory_optimizer_setting(settings, "num_mc_samples"),
@@ -128,7 +128,8 @@ class GPwithMUMBO(SingleFidelityOptimizer):
                                                                 space=augmented_space)
 
         self.optimizer = BayesianOptimizationLoop(space=augmented_space, model=model, acquisition=mumbo_acquisition,
-                                                  update_interval=1, batch_size=1,
+                                                  update_interval=self.gp_settings["update_interval"],
+                                                  batch_size=self.gp_settings["batch_size"],
                                                   acquisition_optimizer=acquisition_optimizer)
         self.optimizer.loop_start_event.append(emukit_utils.get_init_trajectory_hook(self.output_dir))
         self.optimizer.iteration_end_event.append(emukit_utils.get_trajectory_hook(self.output_dir))
