@@ -115,7 +115,7 @@ def load_configs_with_function_values_from_runhistories(file_paths: List[Path]):
 
             config = str(entry['configuration'])
             func_value = entry['function_value']
-            if config not in configs_dict or configs_dict[config] > func_value:
+            if config not in configs_dict or configs_dict[config]['function_value'] > func_value:
                 configs_dict[config] = entry
 
     return configs_dict
