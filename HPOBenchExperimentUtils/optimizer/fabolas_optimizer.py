@@ -76,6 +76,8 @@ class FabolasOptimizer(SingleFidelityOptimizer):
         return self.output_dir
 
 
+# Fabolas optimizer with the default acquisition function replaced with MTBO MUMBO acquisition.
+# Ref. Section 4.3 of the MUMBO paper: https://arxiv.org/pdf/2006.12093.pdf
 class FabolasWithMUMBO(SingleFidelityOptimizer):
     def __init__(self, benchmark: Union[Bookkeeper, AbstractBenchmark, AbstractBenchmarkClient],
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
