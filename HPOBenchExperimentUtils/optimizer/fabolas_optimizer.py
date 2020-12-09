@@ -61,7 +61,8 @@ class FabolasOptimizer(SingleFidelityOptimizer):
             return res["function_value"], res["cost"]
 
         self.benchmark_caller = wrapper
-        self.n_init = get_mandatory_optimizer_setting(settings, "num_init_evals")
+        self.n_init = int(get_mandatory_optimizer_setting(settings, "init_samples_per_dim") * \
+                      self.emukit_space.dimensionality)
 
     def setup(self):
         pass
@@ -138,7 +139,8 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
             return np.asarray(yvals).reshape(-1, 1), np.asarray(costs).reshape(-1, 1)
 
         self.benchmark_caller = wrapper
-        self.n_init = get_mandatory_optimizer_setting(settings, "num_init_evals")
+        self.n_init = int(get_mandatory_optimizer_setting(settings, "init_samples_per_dim") *
+                          self.emukit_space.dimensionality)
 
         self.optimizer_settings = {
             "update_interval": get_mandatory_optimizer_setting(settings, "update_interval"),
@@ -172,7 +174,7 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
 
         # Samples for the fidelity values
         s_min, s_max = self.emukit_fidelity.bounds[0]
-        sample_fidelities = np.expand_dims(np.tile(np.arange(s_min, s_max), n_reps)[:self.n_init], 1)
+        sample_fidelities = np.expand_dims(np.tile(np.arange(s_min, s_max+1), n_reps)[:self.n_init], 1)
 
         # Append sampled fidelity values to sampled configurations and perform evaluations
         X_init = np.concatenate((grid, sample_fidelities), axis=1)

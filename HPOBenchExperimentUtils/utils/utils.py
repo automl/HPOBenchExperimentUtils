@@ -30,6 +30,6 @@ def get_mandatory_optimizer_setting(settings_dict: dict, setting_name: str, err_
         err_msg = "The optimizer settings must include '%s'." % setting_name
 
     try:
-        return settings_dict.get(setting_name)
-    except AttributeError as e:
-        raise AttributeError(err_msg) from e
+        return settings_dict[setting_name]
+    except KeyError as e:
+        raise KeyError(err_msg) from e

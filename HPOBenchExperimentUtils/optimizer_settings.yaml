@@ -45,12 +45,12 @@ dragonfly_realtime:
 # FABOLAS ############################################################################################################ #
 fabolas:
   optimizer: fabolas
-  num_init_evals: 10
+  init_samples_per_dim: 10
   marginalize_hypers: false
 
 fabolas_mumbo:
   optimizer: fabolas_mumbo
-  num_init_evals: 10
+  init_samples_per_dim: 10
   num_fidelity_values: 5 # Continuous fidelity parameters are discretized according to this
   # FABOLAS optimizer settings
   marginalize_hypers: false
