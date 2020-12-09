@@ -80,8 +80,15 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
 
         super().__init__(benchmark, settings, output_dir, rng)
+
+        # The benchmark defined its configuration space as a ConfigSpace.ConfigurationSpace object. This must be parsed
+        # into emukit's version, an emukit.ParameterSpace object. Additionally, we need mappings between configurations
+        # defined in either of the two conventions.
         self.original_space = self.benchmark.get_configuration_space()
         self.emukit_space, self.to_emu, self.to_cs = emukit_utils.generate_space_mappings(self.original_space)
+
+        # The MUMBO acquisition has been implemented for discrete fidelity values only. Therefore, the fidelity
+        # parameter needs to be appropriately handled.
         if isinstance(self.main_fidelity, cs.UniformFloatHyperparameter):
             num_fidelity_values = get_mandatory_optimizer_setting(
                 settings, "num_fidelity_values", err_msg="When using a continuous fidelity parameter, number of "
@@ -98,10 +105,19 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
         elif isinstance(self.main_fidelity, cs.UniformIntegerHyperparameter):
             self.info_sources = np.arange(start=self.min_budget, stop=self.max_budget + 1)
 
+        # It was necessary to define a custom InformationSourceParameter here because of some minor issues that FABOLAS
+        # had with a DiscreteParameter (the parent class of InformationSourceParameter) beginning at index 0. Using
+        # a sub-class of InformationSourceParameter was, in turn, necessary, because there are internal checks in place
+        # in MUMBO for that.
         self.emukit_fidelity = emukit_utils.SmarterInformationSourceParameter(self.info_sources.shape[0], start_ind=1)
         self.fidelity_emukit_to_cs = lambda s: {self.main_fidelity.name: self.info_sources[int(s)-1]}
 
         def wrapper(inp):
+            ''' Emukit requires this function to accept 2D inputs, with individual configurations aligned along axis 0
+            and the various components of each configuration along axis 1. FABOLAS itself will only query one
+            configuration at a time, but the interface must support multiple. '''
+
+            nonlocal self
             _log.debug("Benchmark wrapper received input %s." % str(inp))
             if inp.ndim == 1:
                 inp = np.expand_dims(inp, axis=0)
@@ -110,7 +126,8 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
             for i in range(inp.shape[0]):
                 x, s = inp[0, :-1], inp[0, -1]
                 _log.debug("Calling objective function with configuration %s and fidelity index %s." % (x, s))
-                config = cs.Configuration(self.original_space, values={name: func(i) for (name, func), i in zip(self.to_cs, x)})
+                config = cs.Configuration(self.original_space,
+                                          values={name: func(i) for (name, func), i in zip(self.to_cs, x)})
                 fidelity = self.fidelity_emukit_to_cs(s)
                 _log.debug("Generated configuration %s, fidelity %s" % (config, fidelity))
                 res = benchmark.objective_function(config, fidelity=fidelity)
@@ -136,24 +153,50 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
         _log.info("Finished reading all settings for FABOLAS optimizer with MUMBO acquisition.")
 
     def _setup_model(self):
-        initial_design = LatinDesign(self.emukit_space)
-        s_min, s_max = self.emukit_fidelity.bounds[0]
+        '''
+        This is almost entirely boilerplate code required to setup a model to work under the emukit framework. This
+        code has been adapted from the convenience wrappers fmin.fmin_fabolas() and fabolas_loop.FabolasLoop from the
+        FABOLAS example in emukit.examples.fabolas, here:
+        https://github.com/EmuKit/emukit/tree/96299e99c5c406b46baf6f0f0bbea70950566918/emukit/examples/fabolas
+        '''
 
+
+        # ############################################################################################################ #
+        # Ref: emukit.examples.fabolas.fmin.fmin_fabolas()
+        # https://github.com/EmuKit/emukit/blob/96299e99c5c406b46baf6f0f0bbea70950566918/emukit/examples/fabolas/fmin.py
+
+        # Generate warm-start samples
+        initial_design = LatinDesign(self.emukit_space)
         grid = initial_design.get_samples(self.n_init)
         n_reps = self.n_init // self.info_sources.shape[0] + 1
+
+        # Samples for the fidelity values
+        s_min, s_max = self.emukit_fidelity.bounds[0]
         sample_fidelities = np.expand_dims(np.tile(np.arange(s_min, s_max), n_reps)[:self.n_init], 1)
+
+        # Append sampled fidelity values to sampled configurations and perform evaluations
         X_init = np.concatenate((grid, sample_fidelities), axis=1)
         res = np.array(list(map(self.benchmark_caller, X_init))).reshape((-1, 2))
         Y_init = res[:, 0][:, None]
         cost_init = res[:, 1][:, None]
         _log.debug("Generated %d warm-start samples." % X_init.shape[0])
+        # ############################################################################################################ #
+
+
+        # ############################################################################################################ #
+        # Ref: emukit.examples.fabolas.fabolas_loop.FabolasLoop
+        # https://github.com/EmuKit/emukit/blob/96299e99c5c406b46baf6f0f0bbea70950566918/emukit/examples/fabolas/fabolas_loop.py
 
         extended_space = ParameterSpace([*(self.emukit_space.parameters), self.emukit_fidelity])
 
+        # The actual FABOLAS model comes into play here
         model_objective = FabolasModel(X_init=X_init, Y_init=Y_init, s_min=s_min, s_max=s_max)
         model_cost = FabolasModel(X_init=X_init, Y_init=cost_init, s_min=s_min, s_max=s_max)
         _log.debug("Initialized objective and cost estimation models")
 
+        # ---------------------- ---------------------- ---------------------- ---------------------- ---------------- #
+        # Insert MUMBO acquisition instead of FABOLAS' MTBO acquisition
+        # Ref. Section 4.3 of the MUMBO paper: https://arxiv.org/pdf/2006.12093.pdf
         if self.optimizer_settings["marginalize_hypers"]:
             acquisition_generator = lambda model: MUMBO(
                 model=model_objective, space=extended_space, target_information_source_index=s_max,
@@ -165,19 +208,26 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
                 model=model_objective, space=extended_space, target_information_source_index=s_max,
                 num_samples=self.mumbo_settings["num_mc_samples"], grid_size=self.mumbo_settings["grid_size"])
 
+        # TODO: Insert note in documentation, hold discussion over change of acquisition optimizer from RandomSearch
         acquisition = acquisition_per_expected_cost(entropy_search, model_cost)
+        # This was used in the MUMBO example code
         acquisition_optimizer = MultiSourceAcquisitionOptimizer(GradientAcquisitionOptimizer(extended_space),
                                                                 space=extended_space)
-        _log.debug("MUMBO acquisition function ready.")
-
-        # TODO: Insert note in documentation, hold discussion over change of acquisition optimizer from RandomSearch
+        # Whereas this was used in the original FABOLAS code
         # acquisition_optimizer = RandomSearchAcquisitionOptimizer(
         #     extended_space, num_eval_points=self.optimizer_settings["num_eval_points"])
+        _log.debug("MUMBO acquisition function ready.")
+        # ---------------------- ---------------------- ---------------------- ---------------------- ---------------- #
 
+        # Define the properties of the BO loop within which the chosen surrogate model (FABOLAS) and acquisition
+        # function (MUMBO) are used for performing BO.
         self.optimizer = CostSensitiveBayesianOptimizationLoop(
             space=extended_space, model_objective=model_objective, model_cost=model_cost, acquisition=acquisition,
             update_interval=self.optimizer_settings["update_interval"], acquisition_optimizer=acquisition_optimizer)
+        # ############################################################################################################ #
 
+        # These are hooks that help us record the trajectory for an information theoretic acquisition function, which
+        # cannot be handled otherwise by the Bookkeeper.
         self.optimizer.loop_start_event.append(emukit_utils.get_init_trajectory_hook(self.output_dir))
         self.optimizer.iteration_end_event.append(emukit_utils.get_trajectory_hook(self.output_dir))
         _log.info("FABOLAS optimizer with MUMBO acquisition initialized and ready to run.")
