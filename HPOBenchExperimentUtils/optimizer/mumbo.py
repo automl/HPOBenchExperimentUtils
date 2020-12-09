@@ -25,13 +25,20 @@ from GPy.kern import RBF
 _log = logging.getLogger(__name__)
 
 
-class GPwithMUMBO(SingleFidelityOptimizer):
+class MultiTaskMUMBO(SingleFidelityOptimizer):
     def __init__(self, benchmark: Union[Bookkeeper, AbstractBenchmark, AbstractBenchmarkClient],
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
 
         super().__init__(benchmark, settings, output_dir, rng)
+
+        # The benchmark defined its configuration space as a ConfigSpace.ConfigurationSpace object. This must be parsed
+        # into emukit's version, an emukit.ParameterSpace object. Additionally, we need mappings between configurations
+        # defined in either of the two conventions.
         self.original_space = self.benchmark.get_configuration_space()
         self.emukit_space, self.to_emu, self.to_cs = emukit_utils.generate_space_mappings(self.original_space)
+
+        # The MUMBO acquisition has been implemented for discrete fidelity values only. Therefore, the fidelity
+        # parameter needs to be appropriately handled.
         if isinstance(self.main_fidelity, cs.UniformFloatHyperparameter):
             num_fidelity_values = get_mandatory_optimizer_setting(
                 settings, "num_fidelity_values", err_msg="When using a continuous fidelity parameter, number of "
@@ -48,6 +55,8 @@ class GPwithMUMBO(SingleFidelityOptimizer):
         elif isinstance(self.main_fidelity, cs.UniformIntegerHyperparameter):
             self.info_sources = np.arange(start=self.min_budget, stop=self.max_budget + 1)
 
+        # InformationSourceParameter is a sub-class of a DiscreteParameter and must be used on account of internal
+        # checks in the MUMBO code for its type.
         self.emukit_fidelity = InformationSourceParameter(self.info_sources.shape[0])
         self.fidelity_emukit_to_cs = lambda s: {self.main_fidelity.name: self.info_sources[s]}
 
@@ -55,7 +64,10 @@ class GPwithMUMBO(SingleFidelityOptimizer):
             """
             Remember that for MUMBO the search space is augmented with a discrete parameter for the fidelity index.
             This wrapper simply parses the configuration and fidelity and sets them up for calling the underlying
-            benchmark objective function.
+            benchmark objective function. Emukit requires this function to accept 2D inputs, with individual
+            configurations aligned along axis 0 and the various components of each configuration along axis 1. If a
+            batch_size of greater than 1 is specified, the BO loop will start calling the wrapper with more than 1
+            input configuration per iteration.
             """
 
             _log.debug("Benchmark wrapper received input %s." % str(x))
@@ -76,9 +88,7 @@ class GPwithMUMBO(SingleFidelityOptimizer):
 
         self.benchmark_caller = wrapper
 
-        # self.n_init = get_mandatory_optimizer_setting(settings, "num_init_evals")
         self.init_samples_per_dim = get_mandatory_optimizer_setting(settings, "init_samples_per_dim")
-        # self.trajectory_samples_per_dim = get_mandatory_optimizer_setting(settings, "trajectory_samples_per_dim")
         self.gp_settings = {
             "n_optimization_restarts": get_mandatory_optimizer_setting(settings, "n_optimization_restarts"),
             "update_interval": get_mandatory_optimizer_setting(settings, "update_interval"),
@@ -92,7 +102,13 @@ class GPwithMUMBO(SingleFidelityOptimizer):
         _log.info("Finished reading all settings for Multi-Task GP with MUMBO acquisition.")
 
     def _setup_model(self):
+        """
+        This is mostly boilerplate code required to setup a BO loop that uses a GP as a surrogate and a MUMBO
+        acquisition function. Ref. MUMBO example code:
+        https://github.com/EmuKit/emukit/blob/master/notebooks/Emukit-tutorial-multi-fidelity-MUMBO-Example.ipynb
+        """
 
+        # Generate warm-start samples
         augmented_space = ParameterSpace([*(self.emukit_space.parameters), self.emukit_fidelity])
         initial_design = RandomDesign(augmented_space)
 
@@ -100,6 +116,7 @@ class GPwithMUMBO(SingleFidelityOptimizer):
         Y_init = np.asarray([self.benchmark_caller(X_init[i, :]) for i in range(X_init.shape[0])]).reshape(-1, 1)
         _log.debug("Generated %d warm-start samples." % X_init.shape[0])
 
+        # Setup kernels for the GP.
         n_fidelity_vals = self.info_sources.shape[0]
         fidelity_kernels = []
         for _ in range(n_fidelity_vals):
@@ -111,6 +128,7 @@ class GPwithMUMBO(SingleFidelityOptimizer):
         multi_fidelity_kernel = LinearMultiFidelityKernel(fidelity_kernels)
         _log.debug("Mixture of %d GP kernels initialized." % len(fidelity_kernels))
 
+        # Initialize the GP for MTBO
         gpy_model = GPyLinearMultiFidelityModel(X=X_init, Y=Y_init, kernel=multi_fidelity_kernel,
                                                 n_fidelities=n_fidelity_vals)
 
@@ -119,22 +137,28 @@ class GPwithMUMBO(SingleFidelityOptimizer):
         for i in range(1, len(self.emukit_fidelity.bounds)):
             getattr(gpy_model.likelihood, f"Gaussian_noise_{i}").fix(0.1)
 
+        # Emukit wrapper for GPy.core.GP
         model = GPyMultiOutputWrapper(gpy_model, n_outputs=2,
                                       n_optimization_restarts=self.gp_settings["n_optimization_restarts"],
                                       verbose_optimization=False)
         model.optimize()
         _log.debug("GP initialized.")
 
+        # Setup the acquisition function
         cost_acquisition = Cost(np.linspace(start=1. / n_fidelity_vals, stop=1.0, num=n_fidelity_vals))
         mumbo_acquisition = MUMBO(model, augmented_space, num_samples=self.mumbo_settings["num_mc_samples"],
                                   grid_size=self.mumbo_settings["grid_size"]) / cost_acquisition
         acquisition_optimizer = MultiSourceAcquisitionOptimizer(GradientAcquisitionOptimizer(augmented_space),
                                                                 space=augmented_space)
 
+        # Setup the BO loop
         self.optimizer = BayesianOptimizationLoop(space=augmented_space, model=model, acquisition=mumbo_acquisition,
                                                   update_interval=self.gp_settings["update_interval"],
                                                   batch_size=self.gp_settings["batch_size"],
                                                   acquisition_optimizer=acquisition_optimizer)
+
+        # These are hooks that help us record the trajectory for an information theoretic acquisition function, which
+        # cannot be handled otherwise by the Bookkeeper.
         self.optimizer.loop_start_event.append(emukit_utils.get_init_trajectory_hook(self.output_dir))
         self.optimizer.iteration_end_event.append(emukit_utils.get_trajectory_hook(self.output_dir))
         _log.debug("Multi-Task GP with MUMBO acquisition ready to run.")
@@ -151,7 +175,8 @@ class GPwithMUMBO(SingleFidelityOptimizer):
         return self.output_dir
 
 
-# Define cost of different fidelities as acquisition function
+# Define cost of different fidelities as acquisition function, taken directly from the MUMBO example code
+# Source: https://github.com/EmuKit/emukit/blob/master/notebooks/Emukit-tutorial-multi-fidelity-MUMBO-Example.ipynb
 class Cost(Acquisition):
     def __init__(self, costs):
         self.costs = costs

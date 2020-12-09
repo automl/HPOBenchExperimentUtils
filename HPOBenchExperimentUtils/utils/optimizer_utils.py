@@ -180,8 +180,8 @@ def get_optimizer(optimizer_enum):
         from HPOBenchExperimentUtils.optimizer.fabolas_optimizer import FabolasWithMUMBO
         optimizer = FabolasWithMUMBO
     elif optimizer_enum is OptimizerEnum.MUMBO:
-        from HPOBenchExperimentUtils.optimizer.mumbo import GPwithMUMBO
-        optimizer = GPwithMUMBO
+        from HPOBenchExperimentUtils.optimizer.mumbo import MultiTaskMUMBO
+        optimizer = MultiTaskMUMBO
     elif optimizer_enum is OptimizerEnum.SMAC_HYPERBAND:
         from HPOBenchExperimentUtils.optimizer.smac_optimizer import SMACOptimizerHyperband
         optimizer = SMACOptimizerHyperband
