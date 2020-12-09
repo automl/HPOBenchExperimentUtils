@@ -91,7 +91,8 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
         self.emukit_space, self.to_emu, self.to_cs = emukit_utils.generate_space_mappings(self.original_space)
 
         # The MUMBO acquisition has been implemented for discrete fidelity values only. Therefore, the fidelity
-        # parameter needs to be appropriately handled.
+        # parameter needs to be appropriately handled. This relates to how FABOLAS handles cost modelling.
+        # TODO: Check if the costs are being specified on a log or linear scale, cf. section 4.3 of the paper.
         if isinstance(self.main_fidelity, cs.UniformFloatHyperparameter):
             num_fidelity_values = get_mandatory_optimizer_setting(
                 settings, "num_fidelity_values", err_msg="When using a continuous fidelity parameter, number of "
@@ -169,16 +170,20 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
         # Ref: emukit.examples.fabolas.fmin.fmin_fabolas()
         # https://github.com/EmuKit/emukit/blob/96299e99c5c406b46baf6f0f0bbea70950566918/emukit/examples/fabolas/fmin.py
 
-        # Generate warm-start samples
+        # Generate warm-start samples. Using the implementation provided in the FABOLAS example, but B.2 in the
+        # appendix of the MUMBO paper indicates RandomDesign should be used here instead. TODO: Need a tie-breaker.
         initial_design = LatinDesign(self.emukit_space)
         grid = initial_design.get_samples(self.n_init)
         n_reps = self.n_init // self.info_sources.shape[0] + 1
 
-        # Samples for the fidelity values
+        # Samples for the fidelity values. Same as the FABOLAS example code.
         s_min, s_max = self.emukit_fidelity.bounds[0]
         sample_fidelities = np.expand_dims(np.tile(np.arange(s_min, s_max+1), n_reps)[:self.n_init], 1)
 
-        # Append sampled fidelity values to sampled configurations and perform evaluations
+        # Append sampled fidelity values to sampled configurations and perform evaluations. Same as the FABOLAS example
+        # code.
+        # TODO: Confirm if the sampling strategy mentioned in the MUMBO paper, section B.2 of the appendix,
+        #  should be used instead.
         X_init = np.concatenate((grid, sample_fidelities), axis=1)
         res = np.array(list(map(self.benchmark_caller, X_init))).reshape((-1, 2))
         Y_init = res[:, 0][:, None]
@@ -193,7 +198,7 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
 
         extended_space = ParameterSpace([*(self.emukit_space.parameters), self.emukit_fidelity])
 
-        # The actual FABOLAS model comes into play here
+        # The actual FABOLAS model comes into play here. Same as the FABOLAS example code.
         model_objective = FabolasModel(X_init=X_init, Y_init=Y_init, s_min=s_min, s_max=s_max)
         model_cost = FabolasModel(X_init=X_init, Y_init=cost_init, s_min=s_min, s_max=s_max)
         _log.debug("Initialized objective and cost estimation models")
@@ -224,7 +229,7 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
         # ---------------------- ---------------------- ---------------------- ---------------------- ---------------- #
 
         # Define the properties of the BO loop within which the chosen surrogate model (FABOLAS) and acquisition
-        # function (MUMBO) are used for performing BO.
+        # function (MUMBO) are used for performing BO. Same as the FABOLAS example code.
         self.optimizer = CostSensitiveBayesianOptimizationLoop(
             space=extended_space, model_objective=model_objective, model_cost=model_cost, acquisition=acquisition,
             update_interval=self.optimizer_settings["update_interval"], acquisition_optimizer=acquisition_optimizer)

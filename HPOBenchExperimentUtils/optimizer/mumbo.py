@@ -25,6 +25,7 @@ from GPy.kern import RBF
 _log = logging.getLogger(__name__)
 
 
+# Refer MUMBO paper: https://arxiv.org/pdf/2006.12093.pdf
 class MultiTaskMUMBO(SingleFidelityOptimizer):
     def __init__(self, benchmark: Union[Bookkeeper, AbstractBenchmark, AbstractBenchmarkClient],
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
@@ -38,7 +39,12 @@ class MultiTaskMUMBO(SingleFidelityOptimizer):
         self.emukit_space, self.to_emu, self.to_cs = emukit_utils.generate_space_mappings(self.original_space)
 
         # The MUMBO acquisition has been implemented for discrete fidelity values only. Therefore, the fidelity
-        # parameter needs to be appropriately handled.
+        # parameter needs to be appropriately handled. The paper does not say much about the modelled query costs, but
+        # section B.1 of the appendix does mention very specific values for each synthetic function's costs. Thus,
+        # the linear interpolation of costs for UniformFloatHyperparameter and UniformIntegerHyperparameter are simply
+        # assumptions made in order to keep the cost estimates comparable to those made our dragonfly code. It should
+        # be noted that MultiTaskMUMBO was used only for the synthetic objective functions in the paper. Other
+        # experiments were performed by combining MUMBO with a different surrogate model, such as FABOLAS for MNIST.
         if isinstance(self.main_fidelity, cs.UniformFloatHyperparameter):
             num_fidelity_values = get_mandatory_optimizer_setting(
                 settings, "num_fidelity_values", err_msg="When using a continuous fidelity parameter, number of "
@@ -106,9 +112,13 @@ class MultiTaskMUMBO(SingleFidelityOptimizer):
         This is mostly boilerplate code required to setup a BO loop that uses a GP as a surrogate and a MUMBO
         acquisition function. Ref. MUMBO example code:
         https://github.com/EmuKit/emukit/blob/master/notebooks/Emukit-tutorial-multi-fidelity-MUMBO-Example.ipynb
+
+        Where no references to the paper are made, it is to be assumed that the code was adapted directly from the
+        above example code but no specific references were found in the paper.
         """
 
-        # Generate warm-start samples
+        # Generate warm-start samples. Same as the MUMBO example code. RandomDesign, as mentioned in B.1 of the
+        # appendix of the MUMBO paper.
         augmented_space = ParameterSpace([*(self.emukit_space.parameters), self.emukit_fidelity])
         initial_design = RandomDesign(augmented_space)
 
@@ -116,7 +126,8 @@ class MultiTaskMUMBO(SingleFidelityOptimizer):
         Y_init = np.asarray([self.benchmark_caller(X_init[i, :]) for i in range(X_init.shape[0])]).reshape(-1, 1)
         _log.debug("Generated %d warm-start samples." % X_init.shape[0])
 
-        # Setup kernels for the GP.
+        # Setup kernels for the GP. No specific references found in the paper except a brief mention in Eq. 3, section
+        # 2.3. Using the code provided in the example notebook.
         n_fidelity_vals = self.info_sources.shape[0]
         fidelity_kernels = []
         for _ in range(n_fidelity_vals):
@@ -128,7 +139,7 @@ class MultiTaskMUMBO(SingleFidelityOptimizer):
         multi_fidelity_kernel = LinearMultiFidelityKernel(fidelity_kernels)
         _log.debug("Mixture of %d GP kernels initialized." % len(fidelity_kernels))
 
-        # Initialize the GP for MTBO
+        # Initialize the GP for MTBO. Same as the MUMBO example code.
         gpy_model = GPyLinearMultiFidelityModel(X=X_init, Y=Y_init, kernel=multi_fidelity_kernel,
                                                 n_fidelities=n_fidelity_vals)
 
@@ -137,21 +148,21 @@ class MultiTaskMUMBO(SingleFidelityOptimizer):
         for i in range(1, len(self.emukit_fidelity.bounds)):
             getattr(gpy_model.likelihood, f"Gaussian_noise_{i}").fix(0.1)
 
-        # Emukit wrapper for GPy.core.GP
+        # Emukit wrapper for GPy.core.GP. Same as the MUMBO example code.
         model = GPyMultiOutputWrapper(gpy_model, n_outputs=2,
                                       n_optimization_restarts=self.gp_settings["n_optimization_restarts"],
                                       verbose_optimization=False)
         model.optimize()
         _log.debug("GP initialized.")
 
-        # Setup the acquisition function
+        # Setup the acquisition function. Same as the MUMBO example code.
         cost_acquisition = Cost(np.linspace(start=1. / n_fidelity_vals, stop=1.0, num=n_fidelity_vals))
         mumbo_acquisition = MUMBO(model, augmented_space, num_samples=self.mumbo_settings["num_mc_samples"],
                                   grid_size=self.mumbo_settings["grid_size"]) / cost_acquisition
         acquisition_optimizer = MultiSourceAcquisitionOptimizer(GradientAcquisitionOptimizer(augmented_space),
                                                                 space=augmented_space)
 
-        # Setup the BO loop
+        # Setup the BO loop. Same as the MUMBO example code.
         self.optimizer = BayesianOptimizationLoop(space=augmented_space, model=model, acquisition=mumbo_acquisition,
                                                   update_interval=self.gp_settings["update_interval"],
                                                   batch_size=self.gp_settings["batch_size"],
