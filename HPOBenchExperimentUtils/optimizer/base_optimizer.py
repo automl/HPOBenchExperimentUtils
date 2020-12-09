@@ -36,6 +36,9 @@ class Optimizer(ABC):
     def run(self):
         raise NotImplementedError()
 
+    def shutdown(self):
+        pass
+
 
 class SingleFidelityOptimizer(Optimizer, ABC):
 

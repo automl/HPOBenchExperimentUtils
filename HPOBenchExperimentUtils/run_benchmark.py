@@ -166,8 +166,11 @@ def run_benchmark(optimizer: str,
                   f'Fuel limit: {settings["fuel_limit"]} and is now: {benchmark.get_total_fuel_used()}\n'
                   f'Terminate Process after {time() - start_time}')
 
+    optimizer.shutdown()
+
     _log.info(f'Extract the trajectories')
     extract_trajectory(output_dir=output_dir, debug=debug)
+
 
     _log.info(f'Run Benchmark - Finished.')
 
