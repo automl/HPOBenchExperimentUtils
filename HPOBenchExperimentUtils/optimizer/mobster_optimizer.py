@@ -105,7 +105,9 @@ class MobSterOptimizer(SingleFidelityOptimizer):
         return d
 
     def make_benchmark(self):
-        @ag.args(**self.ag_space, epochs=self.max_budget, valid_budgets=self.rung_levels)
+        mb = self.max_budget
+        rl = self.rung_levels
+        #@ag.args(**self.ag_space, epochs=mb, valid_budgets=rl)
         def objective_function(args, reporter):
             # Get time used until now
             config = dict()
@@ -128,7 +130,7 @@ class MobSterOptimizer(SingleFidelityOptimizer):
                     eval_time=eval_time,
                     time_step=time.time(), **config)
 
-        return objective_function
+        return ag.args(**self.ag_space, epochs=mb, valid_budgets=rl)(objective_function)
 
     def _fix_runhistory(self):
         if not self.done:
