@@ -17,6 +17,7 @@ from emukit.examples.fabolas import fmin_fabolas, FabolasModel
 from emukit.core import ParameterSpace
 from emukit.core.loop import UserFunctionWrapper
 from emukit.core.initial_designs.latin_design import LatinDesign
+from emukit.core.initial_designs import RandomDesign
 from emukit.core.optimization import MultiSourceAcquisitionOptimizer, GradientAcquisitionOptimizer
 from emukit.core.acquisition import IntegratedHyperParameterAcquisition, acquisition_per_expected_cost
 from emukit.bayesian_optimization.acquisitions.max_value_entropy_search import MUMBO
@@ -24,6 +25,11 @@ from emukit.bayesian_optimization.loops.cost_sensitive_bayesian_optimization_loo
     CostSensitiveBayesianOptimizationLoop
 
 _log = logging.getLogger(__name__)
+
+initial_designs = {
+    "random": RandomDesign,
+    "latin": LatinDesign
+}
 
 class FabolasOptimizer(SingleFidelityOptimizer):
     def __init__(self, benchmark: Union[Bookkeeper, AbstractBenchmark, AbstractBenchmarkClient],
@@ -92,7 +98,6 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
 
         # The MUMBO acquisition has been implemented for discrete fidelity values only. Therefore, the fidelity
         # parameter needs to be appropriately handled. This relates to how FABOLAS handles cost modelling.
-        # TODO: Check if the costs are being specified on a log or linear scale, cf. section 4.3 of the paper.
         if isinstance(self.main_fidelity, cs.UniformFloatHyperparameter):
             num_fidelity_values = get_mandatory_optimizer_setting(
                 settings, "num_fidelity_values", err_msg="When using a continuous fidelity parameter, number of "
@@ -100,14 +105,23 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
                                                          "'num_fidelity_values'")
             _log.debug("Discretizing the main fidelity %s for use with MUMBO into %d fidelity levels." %
                        (self.main_fidelity.name, num_fidelity_values))
-            self.info_sources = np.linspace(self.min_budget, self.max_budget, num_fidelity_values)
 
+            # FABOLAS expects to sample the fidelity values on a log scale. cf. Section B.2 of the MUMBO paper's
+            # appendix. This effectively ignores the log attribute of the parameter.
+            self.info_sources = np.logspace(self.min_budget, self.max_budget, num_fidelity_values)
+
+        # Except for UniformFloatParameters, all other parameters are expected to be aware that FABOLAS assumes a
+        # log-scale sampled fidelity parameter.
         elif isinstance(self.main_fidelity, cs.OrdinalHyperparameter):
             self.info_sources = np.asarray(self.main_fidelity.get_seq_order())
         elif isinstance(self.main_fidelity, cs.CategoricalHyperparameter):
             self.info_sources = np.asarray(self.main_fidelity.choices)
         elif isinstance(self.main_fidelity, cs.UniformIntegerHyperparameter):
-            self.info_sources = np.arange(start=self.min_budget, stop=self.max_budget + 1)
+            if self.main_fidelity.log:
+                raise NotImplementedError("Log-sampled integers were not an expected use case for this code and have "
+                                          "not yet been implemented.")
+            else:
+                self.info_sources = np.arange(start=self.min_budget, stop=self.max_budget + 1)
 
         # It was necessary to define a custom InformationSourceParameter here because of some minor issues that FABOLAS
         # had with a DiscreteParameter (the parent class of InformationSourceParameter) beginning at index 0. Using
@@ -148,6 +162,7 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
         self.optimizer_settings = {
             "update_interval": get_mandatory_optimizer_setting(settings, "update_interval"),
             "marginalize_hypers": get_mandatory_optimizer_setting(settings, "marginalize_hypers"),
+            "initial_design": str(get_mandatory_optimizer_setting(settings, "initial_design")).lower()
         }
 
         self.mumbo_settings = {
@@ -171,8 +186,9 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
         # https://github.com/EmuKit/emukit/blob/96299e99c5c406b46baf6f0f0bbea70950566918/emukit/examples/fabolas/fmin.py
 
         # Generate warm-start samples. Using the implementation provided in the FABOLAS example, but B.2 in the
-        # appendix of the MUMBO paper indicates RandomDesign should be used here instead. TODO: Need a tie-breaker.
-        initial_design = LatinDesign(self.emukit_space)
+        # appendix of the MUMBO paper indicates RandomDesign should be used here instead. Therefore, exposed as a
+        # hyperparameter.
+        initial_design = initial_designs[self.optimizer_settings["initial_design"]](self.emukit_space)
         grid = initial_design.get_samples(self.n_init)
         n_reps = self.n_init // self.info_sources.shape[0] + 1
 
@@ -182,8 +198,6 @@ class FabolasWithMUMBO(SingleFidelityOptimizer):
 
         # Append sampled fidelity values to sampled configurations and perform evaluations. Same as the FABOLAS example
         # code.
-        # TODO: Confirm if the sampling strategy mentioned in the MUMBO paper, section B.2 of the appendix,
-        #  should be used instead.
         X_init = np.concatenate((grid, sample_fidelities), axis=1)
         res = np.array(list(map(self.benchmark_caller, X_init))).reshape((-1, 2))
         Y_init = res[:, 0][:, None]

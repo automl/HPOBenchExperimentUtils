@@ -88,8 +88,10 @@ class MultiTaskMUMBO(SingleFidelityOptimizer):
                                           values={name: func(i) for (name, func), i in zip(self.to_cs, x[i, :-1])})
                 res = benchmark.objective_function(config, fidelity=fidelity)
                 _log.debug("Benchmark evaluation results: %s" % str(res))
-                results.append(res["function_value"])
+                results.append([res["function_value"]])
             results = np.asarray(results)
+            # Assume that the "function_value" results are always scalars, therefore it makes sense to place all
+            # individual values along the 0th axis in case the final result is not 2D for some reason.
             return results if results.ndim == 2 else np.expand_dims(results, axis=1)
 
         self.benchmark_caller = wrapper
@@ -120,11 +122,19 @@ class MultiTaskMUMBO(SingleFidelityOptimizer):
         # Generate warm-start samples. Same as the MUMBO example code. RandomDesign, as mentioned in B.1 of the
         # appendix of the MUMBO paper.
         augmented_space = ParameterSpace([*(self.emukit_space.parameters), self.emukit_fidelity])
-        initial_design = RandomDesign(augmented_space)
+        initial_design = RandomDesign(self.emukit_space)
 
-        X_init = initial_design.get_samples(self.init_samples_per_dim * augmented_space.dimensionality)
-        Y_init = np.asarray([self.benchmark_caller(X_init[i, :]) for i in range(X_init.shape[0])]).reshape(-1, 1)
-        _log.debug("Generated %d warm-start samples." % X_init.shape[0])
+        # For n samples per dim, input space dimensionality D, we generate nxD samples. Then we need to evaluate each
+        # of these samples on every available fidelity value. cf. Section B.1 of the appendix of the paper.
+        n_init = self.init_samples_per_dim * self.emukit_space.dimensionality
+        X_init = np.tile(initial_design.get_samples(n_init), (self.info_sources.shape[0], 1))
+        fmin, fmax = self.emukit_fidelity.bounds[0]
+        sample_fidelities = np.repeat(np.arange(fmin, fmax + 1), repeats=n_init).reshape(-1, 1)
+        X_init = np.concatenate((X_init, sample_fidelities), axis=1)
+        # Y_init = np.asarray([self.benchmark_caller(X_init[i, :]) for i in range(X_init.shape[0])]).reshape(-1, 1)
+        Y_init = self.benchmark_caller(X_init)
+        _log.debug("Generated %d warm-start samples, each evaluated on %d fidelity values, for a total of %d initial "
+                   "evaluations." % (n_init, (fmax - fmin + 1), Y_init.shape[0]))
 
         # Setup kernels for the GP. No specific references found in the paper except a brief mention in Eq. 3, section
         # 2.3. Using the code provided in the example notebook.

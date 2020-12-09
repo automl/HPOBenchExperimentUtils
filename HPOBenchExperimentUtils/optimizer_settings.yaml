@@ -30,8 +30,8 @@ dehb:
 # MUMBO ############################################################################################################## #
 mumbo:
   optimizer: mumbo
-  init_samples_per_dim: 10 # Includes fidelity dimension
-  num_fidelity_values: 5 # Continuous fidelity parameters are discretized according to this
+  init_samples_per_dim: 10
+  num_fidelity_values: 3 # Continuous fidelity parameters are discretized according to this
   # GP Settings
   n_optimization_restarts: 5
   update_interval: 1
@@ -56,12 +56,14 @@ fabolas:
   optimizer: fabolas
   init_samples_per_dim: 10
   marginalize_hypers: false
+  initial_design: Latin # Two options: [Random, Latin]
 
 fabolas_mumbo:
   optimizer: fabolas_mumbo
   init_samples_per_dim: 10
   num_fidelity_values: 5 # Continuous fidelity parameters are discretized according to this
   # FABOLAS optimizer settings
+  initial_design: Latin # Two options: [Random, Latin]
   marginalize_hypers: false
   update_interval: 1
   # MUMBO acquisition settings
