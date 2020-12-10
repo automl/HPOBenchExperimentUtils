@@ -7,8 +7,28 @@ import shutil
 import time
 import types
 
-import autogluon.core as ag
-from autogluon.core.scheduler.hyperband import _get_rung_levels
+try:
+    import autogluon.core as ag
+    from autogluon.core.scheduler.hyperband import _get_rung_levels
+    import autogluon.core.version as v
+    assert v.__version__ == "0.0.15b20201205"
+except:
+    # We need to use this specific version since changes introduces later on won't work with our
+    # setup (https://github.com/awslabs/autogluon/commit/21483d9b9c3b7c5da935e27c46f2a52e0471bf54)
+    raise ValueError("""
+    Autogluon is not installed or the wrong version is installed, please run:\n
+    python3 -m pip install --upgrade pip
+    python3 -m pip install --upgrade setuptools
+    python3 -m pip install --upgrade "mxnet<2.0.0"
+    python3 -m pip install autogluon==0.0.15b20201205
+    """)
+
+try:
+    import dill
+    raise ValueError("`dill` is installed, please remove it via:\npip uninstall dill")
+except ModuleNotFoundError:
+    pass
+
 
 from hpobench.abstract_benchmark import AbstractBenchmark
 from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
