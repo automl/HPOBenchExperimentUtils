@@ -44,33 +44,6 @@ def nothing(self):
     print("Do not stop container")
 
 
-def make_benchmark(mb, rl, benchmark, main_fidelity, cs, ag_space):
-    #@ag.args(**self.ag_space, epochs=mb, valid_budgets=rl)
-    def objective_function(args, reporter):
-        # Get time used until now
-        config = dict()
-        for h in cs.get_hyperparameters():
-            if isinstance(h, UniformIntegerHyperparameter):
-                config[h.name] = np.round(args[h.name])
-            elif isinstance(h, OrdinalHyperparameter):
-                config[h.name] = h.sequence[int(args[h.name])]
-            else:
-                config[h.name] = args[h.name]
-        for epoch in args.valid_budgets:
-            fidelity = {main_fidelity.name: epoch}
-            res = benchmark.objective_function(config, fidelity=fidelity)
-            # Autogluon maximizes, HPOBench returns something to be minimized
-            acc = -res['function_value']
-            eval_time = res['cost']
-            reporter(
-                epoch=epoch,
-                performance=acc,
-                eval_time=eval_time,
-                time_step=time.time(), **config)
-
-    return ag.args(**ag_space, epochs=mb, valid_budgets=rl)(objective_function)
-
-
 class MobSterOptimizer(SingleFidelityOptimizer):
     """
     This class implements a random search optimizer.
@@ -220,7 +193,6 @@ class MobSterOptimizer(SingleFidelityOptimizer):
     def run(self):
         """ Execute the optimization run. Return the path where the results are stored. """
         callback = None
-
         scheduler = ag.scheduler.HyperbandScheduler(self.make_benchmark(),
                                                     resource={'num_cpus': self.num_cpus,
                                                               'num_gpus': self.num_gpus},
@@ -247,7 +219,7 @@ class MobSterOptimizer(SingleFidelityOptimizer):
                                                                     'first_is_default': self.first_is_default},
                                                     # defines the minimum resource level for Hyperband,
                                                     # i.e the minimum number of epochs
-                                                    grace_period=1)
+                                                    grace_period=self.min_budget)
         assert scheduler.terminator.rung_levels == self.rung_levels[:-1], \
             (scheduler.terminator.rung_levels, self.rung_levels[:-1])
         scheduler.run()
