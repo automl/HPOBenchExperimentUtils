@@ -131,7 +131,7 @@ class MobSterOptimizer(SingleFidelityOptimizer):
             config = dict()
             for h in args.cs.get_hyperparameters():
                 if isinstance(h, UniformIntegerHyperparameter):
-                    config[h.name] = np.round(args[h.name])
+                    config[h.name] = int(np.rint(args[h.name]))
                 elif isinstance(h, OrdinalHyperparameter):
                     config[h.name] = h.sequence[int(args[h.name])]
                 else:
