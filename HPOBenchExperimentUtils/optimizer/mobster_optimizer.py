@@ -24,6 +24,33 @@ def nothing(self):
     print("Do not stop container")
 
 
+def make_benchmark(mb, rl, benchmark, main_fidelity, cs, ag_space):
+    #@ag.args(**self.ag_space, epochs=mb, valid_budgets=rl)
+    def objective_function(args, reporter):
+        # Get time used until now
+        config = dict()
+        for h in cs.get_hyperparameters():
+            if isinstance(h, UniformIntegerHyperparameter):
+                config[h.name] = np.round(args[h.name])
+            elif isinstance(h, OrdinalHyperparameter):
+                config[h.name] = h.sequence[int(args[h.name])]
+            else:
+                config[h.name] = args[h.name]
+        for epoch in args.valid_budgets:
+            fidelity = {main_fidelity.name: epoch}
+            res = benchmark.objective_function(config, fidelity=fidelity)
+            # Autogluon maximizes, HPOBench returns something to be minimized
+            acc = -res['function_value']
+            eval_time = res['cost']
+            reporter(
+                epoch=epoch,
+                performance=acc,
+                eval_time=eval_time,
+                time_step=time.time(), **config)
+
+    return ag.args(**ag_space, epochs=mb, valid_budgets=rl)(objective_function)
+
+
 class MobSterOptimizer(SingleFidelityOptimizer):
     """
     This class implements a random search optimizer.
@@ -105,13 +132,11 @@ class MobSterOptimizer(SingleFidelityOptimizer):
         return d
 
     def make_benchmark(self):
-        mb = self.max_budget
-        rl = self.rung_levels
         #@ag.args(**self.ag_space, epochs=mb, valid_budgets=rl)
         def objective_function(args, reporter):
             # Get time used until now
             config = dict()
-            for h in self.cs.get_hyperparameters():
+            for h in args.cs.get_hyperparameters():
                 if isinstance(h, UniformIntegerHyperparameter):
                     config[h.name] = np.round(args[h.name])
                 elif isinstance(h, OrdinalHyperparameter):
@@ -119,9 +144,9 @@ class MobSterOptimizer(SingleFidelityOptimizer):
                 else:
                     config[h.name] = args[h.name]
             for epoch in args.valid_budgets:
-                fidelity = {self.main_fidelity.name: epoch}
+                fidelity = {args.main_fidelity.name: epoch}
                 res = self.benchmark.objective_function(config, fidelity=fidelity)
-                # Autogluon maximizes, HPOBench returns something ot be minimized
+                # Autogluon maximizes, HPOBench returns something to be minimized
                 acc = -res['function_value']
                 eval_time = res['cost']
                 reporter(
@@ -130,7 +155,9 @@ class MobSterOptimizer(SingleFidelityOptimizer):
                     eval_time=eval_time,
                     time_step=time.time(), **config)
 
-        return ag.args(**self.ag_space, epochs=mb, valid_budgets=rl)(objective_function)
+        return ag.args(**self.ag_space, epochs=self.max_budget, valid_budgets=self.rung_levels,
+                       cs=self.cs,
+                       main_fidelity=self.main_fidelity)(objective_function)
 
     def _fix_runhistory(self):
         if not self.done:
@@ -173,6 +200,7 @@ class MobSterOptimizer(SingleFidelityOptimizer):
     def run(self):
         """ Execute the optimization run. Return the path where the results are stored. """
         callback = None
+
         scheduler = ag.scheduler.HyperbandScheduler(self.make_benchmark(),
                                                     resource={'num_cpus': self.num_cpus,
                                                               'num_gpus': self.num_gpus},
