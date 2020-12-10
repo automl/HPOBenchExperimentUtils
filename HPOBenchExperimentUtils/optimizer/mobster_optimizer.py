@@ -114,7 +114,7 @@ class MobSterOptimizer(SingleFidelityOptimizer):
                     # autogluon does not support int with log=True, make this a Real and round
                     d[h.name] = ag.space.Real(lower=h.lower, upper=h.upper, log=True)
                 else:
-                    d[h.name] = ag.space.Int(lower=h.lower, upper=h.upper, log=False)
+                    d[h.name] = ag.space.Int(lower=h.lower, upper=h.upper)
             elif isinstance(h, CategoricalHyperparameter):
                 d[h.name] = ag.space.Categorical(*h.choices)
             elif isinstance(h, OrdinalHyperparameter):
