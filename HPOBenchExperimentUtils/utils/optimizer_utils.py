@@ -84,6 +84,7 @@ class OptimizerEnum(Enum):
     MUMBO = 'mumbo'
     FABOLAS_MUMBO = "fabolas_mumbo"
     PURE_RANDOMSEARCH = 'randomsearch'
+    MOBSTER = 'mobster'
 
 
 def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]) -> OptimizerEnum:
@@ -140,6 +141,9 @@ def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]) -> OptimizerEnum
         elif optimizer == 'mumbo':
             return OptimizerEnum.MUMBO
 
+        elif "mobster" in optimizer:
+            return OptimizerEnum.MOBSTER
+
         elif optimizer == 'randomsearch':
             return OptimizerEnum.PURE_RANDOMSEARCH
 
@@ -188,7 +192,9 @@ def get_optimizer(optimizer_enum):
     elif optimizer_enum is OptimizerEnum.SMAC_SUCCESSIVE_HALVING:
         from HPOBenchExperimentUtils.optimizer.smac_optimizer import SMACOptimizerSuccessiveHalving
         optimizer = SMACOptimizerSuccessiveHalving
-
+    elif optimizer_enum is OptimizerEnum.MOBSTER:
+        from HPOBenchExperimentUtils.optimizer.mobster_optimizer import MobSterOptimizer
+        optimizer = MobSterOptimizer
     elif optimizer_enum is OptimizerEnum.PURE_RANDOMSEARCH:
         from HPOBenchExperimentUtils.optimizer.randomsearch_optimizer import RandomSearchOptimizer
         optimizer = RandomSearchOptimizer

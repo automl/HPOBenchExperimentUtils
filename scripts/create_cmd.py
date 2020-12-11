@@ -5,6 +5,7 @@ expset_dc = {
     "NAS201": ["Cifar10ValidNasBench201Benchmark", "Cifar100NasBench201Benchmark", "ImageNetNasBench201Benchmark"],
     "NAS101": ["NASCifar10ABenchmark", "NASCifar10BBenchmark", "NASCifar10CBenchmark"],
     "NASTAB": ["SliceLocalizationBenchmark", "ProteinStructureBenchmark", "NavalPropulsionBenchmark", "ParkinsonsTelemonitoringBenchmark"],
+    "NAS1SHOT1": ["NASBench1shot1SearchSpace1Benchmark", "NASBench1shot1SearchSpace2Benchmark", "NASBench1shot1SearchSpace3Benchmark"],
     "pybnn": ["BNNOnBostonHousing", "BNNOnProteinStructure", "BNNOnYearPrediction"],
     "rl": ["cartpolereduced"],
     "learna": ["metalearna", "learna"],
@@ -12,6 +13,7 @@ expset_dc = {
 
 opt_set = {
     "def": ["hpbandster_bohb_eta_3", "smac_hb_eta_3", "randomsearch", "dragonfly_default", "dehb"],
+    "mobster": ["mobster",],
 }
 
 
@@ -49,15 +51,19 @@ def main(args):
         cmd = "%s/validate_benchmark.py --output_dir %s/%s --benchmark %s --rng %d" \
               % (base, args.out_run, benchmark, benchmark, 1)
         val_cmd.append(cmd)
-        cmd = "%s/evaluate_benchmark.py --output_dir %s/ --input_dir %s/ --benchmark %s " \
-              "--agg median --what all" % (base, args.out_eval, args.out_run, benchmark)
-        eval_cmd.append(cmd)
-        cmd += " --unvalidated"
-        evalu_cmd.append(cmd)
+        if opt_set == "def":
+            # We only need this once since it works for all optimizers
+            cmd = "%s/evaluate_benchmark.py --output_dir %s/ --input_dir %s/ --benchmark %s " \
+                  "--agg median --what all" % (base, args.out_eval, args.out_run, benchmark)
+            eval_cmd.append(cmd)
+            cmd += " --unvalidated"
+            evalu_cmd.append(cmd)
 
     for c, f in [[run_cmd, run_fl], [val_cmd, val_fl], [eval_cmd, eval_fl],
                  [evalu_cmd, evalu_fl], [val_ind_cmd, val_ind_fl]]:
-        write_cmd(c, f)
+        if len(c) > 1:
+            write_cmd(c, f)
+
 
 
 def write_cmd(cmd_list, out_fl):

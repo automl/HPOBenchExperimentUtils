@@ -282,6 +282,7 @@ color_per_opt = {
     "randomsearch": list_of_colors[2],
     "dragonfly_default": list_of_colors[3],
     "dehb": list_of_colors[4],
+    "mobster": list_of_colors[5],
 }
 
 marker_per_opt = {
@@ -292,4 +293,5 @@ marker_per_opt = {
     "randomsearch": "v",
     "dragonfly_default": "^",
     "dehb": "*",
+    "mobster": "o",
 }

@@ -4,6 +4,14 @@ randomsearch:
   optimizer: randomsearch
   display_name: "random search"
 
+# MoBSter ############################################################################################################ #
+mobster:
+  optimizer: mobster
+  reduction_factor: 3
+  scheduler: "hyperband_promotion"
+  searcher: "bayesopt"
+  display_name: "MoBSter"
+
 # DEHB ############################################################################################################### #
 dehb:
   optimizer: dehb
@@ -17,6 +25,7 @@ dehb:
   eta: 3
   # Options for async_strategy: ['deferred', 'immediate', 'random', 'worst']
   async_strategy: immediate
+  display_name: "DEHB"
 
 # MUMBO ############################################################################################################## #
 mumbo:
