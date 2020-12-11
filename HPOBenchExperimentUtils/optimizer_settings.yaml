@@ -18,6 +18,19 @@ dehb:
   # Options for async_strategy: ['deferred', 'immediate', 'random', 'worst']
   async_strategy: immediate
 
+# MUMBO ############################################################################################################## #
+mumbo:
+  optimizer: mumbo
+  init_samples_per_dim: 10 # Includes fidelity dimension
+  num_fidelity_values: 5 # Continuous fidelity parameters are discretized according to this
+  # GP Settings
+  n_optimization_restarts: 5
+  update_interval: 1
+  batch_size: 1
+  # MUMBO acquisition settings
+  num_mc_samples: 10
+  grid_size: 500
+
 # DRAGONFLY DEFAULT ################################################################################################## #
 dragonfly_default:
   optimizer: dragonfly
@@ -32,8 +45,19 @@ dragonfly_realtime:
 # FABOLAS ############################################################################################################ #
 fabolas:
   optimizer: fabolas
-  num_init_evals: 10
+  init_samples_per_dim: 10
   marginalize_hypers: false
+
+fabolas_mumbo:
+  optimizer: fabolas_mumbo
+  init_samples_per_dim: 10
+  num_fidelity_values: 5 # Continuous fidelity parameters are discretized according to this
+  # FABOLAS optimizer settings
+  marginalize_hypers: false
+  update_interval: 1
+  # MUMBO acquisition settings
+  num_mc_samples: 10
+  grid_size: 500
 
 # SMAC ##################################################################################################### #
 smac_hb_eta_3:
