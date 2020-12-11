@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from typing import Union
 
-from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc
+from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc, color_per_opt
 from HPOBenchExperimentUtils import _default_log_format, _log as _main_log
 from HPOBenchExperimentUtils.utils.validation_utils import load_json_files, load_trajectories_as_df,\
     get_statistics_df, df_per_optimizer
@@ -20,7 +20,7 @@ def read_trajectories(benchmark: str, input_dir: Path, train: bool=True, y_best:
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
 
     unique_optimizer = load_trajectories_as_df(input_dir=input_dir,
-                                               which="train_v1" if train else "test_v2")
+                                               which="train_v1" if train else "test_v1")
     optimizer_names = list(unique_optimizer.keys())
     statistics_df = []
     _log.critical("Found: " + ",".join(optimizer_names))
@@ -59,16 +59,17 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
     max_ = -1
     for key, df in zip(optimizer_names, statistics_df):
         label = get_optimizer_setting(key).get("display_name", key)
-
-        df[criterion].plot.line(drawstyle='steps-post', linewidth=2, ax=ax, label=label)
+        color = color_per_opt.get(key, "k")
+        df[criterion].plot.line(drawstyle='steps-post', linewidth=2, ax=ax, label=label, c=color)
         min_ = min(min_, df[criterion].min())
         max_ = max(max_, df['q25'].max())
+        
         if criterion == 'mean':
-            ax.fill_between(df.index, df['mean'] - df['std'], df['mean'] + df['std'], alpha=0.3, step="post")
+            ax.fill_between(df.index, df['mean'] - df['std'], df['mean'] + df['std'], alpha=0.3, step="post", facecolor=color)
             min_ = min(min_, df[criterion].min())
             max_ = max(max_, df[criterion].max())
         else:
-            ax.fill_between(df.index, df['q25'], df['q75'], alpha=0.3, step="post")
+            ax.fill_between(df.index, df['q25'], df['q75'], alpha=0.3, step="post", facecolor=color)
             min_ = min(min_, df['q25'].min())
             max_ = max(max_, df[criterion].max())
 
@@ -86,8 +87,7 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
     xscale = benchmark_spec.get("xscale", "log")
     yscale = benchmark_spec.get("yscale", "log")
     xlabel = benchmark_spec.get("xlabel", "Runtime in seconds")
-    ylabel = benchmark_spec.get("xlabel", "Loss")
-    test_str = 'Train' if unvalidated else 'Test'
+    test_str = 'Optimized' if unvalidated else 'Test'
     ylabel = f'{criterion.capitalize()} {test_str} {ylabel}'
 
     ax.set_xlim([xl, xu])
@@ -98,9 +98,9 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
     ax.set_ylabel(ylabel)
 
     ax.legend()
-    val_str = '' if unvalidated else 'validated'
+    val_str = 'optimized' if unvalidated else 'validated'
     ax.set_title(f'{benchmark}')
-    plt.grid(b=True, which="both", axis="both")
+    plt.grid(b=True, which="both", axis="both", alpha=0.5)
     plt.savefig(Path(output_dir) / f'{benchmark}_{val_str}_{criterion}_trajectory.png')
     plt.close('all')
     return 1

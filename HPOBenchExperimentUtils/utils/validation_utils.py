@@ -108,7 +108,6 @@ def load_configs_with_function_values_from_runhistories(file_paths: List[Path]):
     data = load_json_files(file_paths)
 
     configs_dict = {}
-
     for runhistory in data:
         for entry in runhistory:
             if 'boot_time' in entry:
@@ -116,7 +115,7 @@ def load_configs_with_function_values_from_runhistories(file_paths: List[Path]):
 
             config = str(entry['configuration'])
             func_value = entry['function_value']
-            if config not in configs_dict or configs_dict[config] > func_value:
+            if config not in configs_dict or configs_dict[config]['function_value'] > func_value:
                 configs_dict[config] = entry
 
     return configs_dict
@@ -177,7 +176,10 @@ def get_statistics_df(optimizer_df):
     piv = optimizer_df.pivot(index='total_time_used', columns='id', values='function_values')
 
     piv = piv.fillna(method='ffill')
-    piv = piv.fillna(method='bfill')
+    vali = -1
+    for c in piv.columns:
+        vali = max(vali, piv[c].first_valid_index())
+    piv = piv.loc[vali:]
 
     piv['mean'] = piv.mean(axis=1)
     piv['std'] = piv.std(axis=1)
@@ -198,15 +200,23 @@ def get_statistics_df(optimizer_df):
 
 
 def df_per_optimizer(key, unvalidated_trajectories, y_best: float=0):
-    optimizer_df = pd.DataFrame()
-
     if y_best != 0:
         _log.info("Found y_best = %g; Going to compute regret" % y_best)
+    _log.info("Creating DataFrame for %d inputs" % len(unvalidated_trajectories))
+    dataframe = {
+        "optimizer": [],
+        "id": [],
+        "total_time_used": [],
+        "total_objective_costs": [],
+        "function_values": [],
+        "fidel_values": [],
+        "costs": [],
+        "start_time": [],
+        "finish_time": [],
+    }
 
     for id, traj in enumerate(unvalidated_trajectories):
-        trajectory_df = pd.DataFrame(columns=['optimizer', 'id',
-                                              'function_values', 'fidelity_value',
-                                              'total_time_used', 'total_objective_costs'])
+        _log.info("Handling input with %d records for %s" % (len(traj), key))
         function_values = [record['function_value']-y_best for record in traj[1:]]
         total_time_used = [record['total_time_used'] for record in traj[1:]]
         total_obj_costs = [record['total_objective_costs'] for record in traj[1:]]
@@ -217,15 +227,15 @@ def df_per_optimizer(key, unvalidated_trajectories, y_best: float=0):
         # this is a dict with only one entry
         fidel_values = [record['fidelity'][list(record['fidelity'])[0]] for record in traj[1:]]
 
-        trajectory_df['optimizer'] = [key for _ in range(len(traj[1:]))]
-        trajectory_df['id'] = [id for _ in range(len(traj[1:]))]
-        trajectory_df['total_time_used'] = total_time_used
-        trajectory_df['total_objective_costs'] = total_obj_costs
-        trajectory_df['function_values'] = function_values
-        trajectory_df['fidel_values'] = fidel_values
-        trajectory_df['costs'] = costs
-        trajectory_df['start_time'] = start
-        trajectory_df['finish_time'] = finish
+        dataframe["optimizer"].extend([key for _ in range(len(traj[1:]))])
+        dataframe["id"].extend([id for _ in range(len(traj[1:]))])
+        dataframe['total_time_used'].extend(total_time_used)
+        dataframe['total_objective_costs'].extend(total_obj_costs)
+        dataframe['function_values'].extend(function_values)
+        dataframe['fidel_values'].extend(fidel_values)
+        dataframe['costs'].extend(costs)
+        dataframe['start_time'].extend(start)
+        dataframe['finish_time'].extend(finish)
 
-        optimizer_df = pd.concat([optimizer_df, trajectory_df])
-    return optimizer_df
+    dataframe = pd.DataFrame(dataframe)
+    return dataframe
