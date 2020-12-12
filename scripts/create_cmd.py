@@ -51,7 +51,7 @@ def main(args):
         cmd = "%s/validate_benchmark.py --output_dir %s/%s --benchmark %s --rng %d" \
               % (base, args.out_run, benchmark, benchmark, 1)
         val_cmd.append(cmd)
-        if opt_set == "def":
+        if opt == "def":
             # We only need this once since it works for all optimizers
             cmd = "%s/evaluate_benchmark.py --output_dir %s/ --input_dir %s/ --benchmark %s " \
                   "--agg median --what all" % (base, args.out_eval, args.out_run, benchmark)
