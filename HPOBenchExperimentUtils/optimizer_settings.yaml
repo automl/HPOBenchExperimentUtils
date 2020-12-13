@@ -27,19 +27,6 @@ dehb:
   async_strategy: immediate
   display_name: "DEHB"
 
-# MUMBO ############################################################################################################## #
-mumbo:
-  optimizer: mumbo
-  init_samples_per_dim: 10
-  num_fidelity_values: 3 # Continuous fidelity parameters are discretized according to this
-  # GP Settings
-  n_optimization_restarts: 5
-  update_interval: 1
-  batch_size: 1
-  # MUMBO acquisition settings
-  num_mc_samples: 10
-  grid_size: 500
-
 # DRAGONFLY DEFAULT ################################################################################################## #
 dragonfly_default:
   optimizer: dragonfly
@@ -51,22 +38,28 @@ dragonfly_realtime:
   optimizer: dragonfly
   init_capital_frac: 0.1
 
-# FABOLAS ############################################################################################################ #
-fabolas:
+# FABOLAS MTBO ####################################################################################################### #
+fabolas_mtbo:
   optimizer: fabolas
+  acquisition: mtbo
   init_samples_per_dim: 10
+  num_fidelity_values: 10 # Continuous fidelity parameters are discretized according to this
   marginalize_hypers: false
   initial_design: Latin # Two options: [Random, Latin]
-
-fabolas_mumbo:
-  optimizer: fabolas_mumbo
-  init_samples_per_dim: 10
-  num_fidelity_values: 5 # Continuous fidelity parameters are discretized according to this
-  # FABOLAS optimizer settings
-  initial_design: Latin # Two options: [Random, Latin]
-  marginalize_hypers: false
   update_interval: 1
-  # MUMBO acquisition settings
+  # MTBO acquisition specific settings
+  num_eval_points: 2000
+
+# FABOLAS MUMBO ###################################################################################################### #
+fabolas_mumbo:
+  optimizer: fabolas
+  acquisition: mumbo
+  init_samples_per_dim: 10
+  num_fidelity_values: 10 # Continuous fidelity parameters are discretized according to this
+  marginalize_hypers: false
+  initial_design: Latin # Two options: [Random, Latin]
+  update_interval: 1
+  # MUMBO acquisition specific settings
   num_mc_samples: 10
   grid_size: 500
 
