@@ -142,6 +142,7 @@ class MultiTaskMUMBO(SingleFidelityOptimizer):
         fidelity_kernels = []
         for _ in range(n_fidelity_vals):
             kernel = RBF(self.emukit_space.dimensionality)
+            # TODO: Expose as hyper the choice: RBF or Matern
             # TODO: Design decision. Do we care about these values?
             kernel.lengthscale.constrain_bounded(0.01, 0.5)
             fidelity_kernels.append(kernel)
