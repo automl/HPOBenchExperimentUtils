@@ -38,6 +38,20 @@ dragonfly_realtime:
   optimizer: dragonfly
   init_capital_frac: 0.1
 
+# MUMBO ############################################################################################################## #
+mumbo:
+  optimizer: mumbo
+  init_samples_per_dim: 3 # Includes fidelity dimension
+  num_fidelity_values: 3 # Continuous fidelity parameters are discretized according to this
+  # GP Settings
+  n_optimization_restarts: 5
+  update_interval: 1
+  batch_size: 1
+  kernel: matern52  # Can be one of ['rbf', 'matern52']
+  # MUMBO acquisition settings
+  num_mc_samples: 10
+  grid_size: 500
+
 # FABOLAS MTBO ####################################################################################################### #
 fabolas_mtbo:
   optimizer: fabolas

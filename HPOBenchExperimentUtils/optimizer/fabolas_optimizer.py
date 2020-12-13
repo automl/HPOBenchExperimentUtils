@@ -41,59 +41,6 @@ initial_designs = {
 
 _fidelity_parameter_name = "subsample"
 
-# class FabolasOptimizer(SingleFidelityOptimizer):
-#     def __init__(self, benchmark: Union[Bookkeeper, AbstractBenchmark, AbstractBenchmarkClient],
-#                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
-#
-#         super().__init__(benchmark, settings, output_dir, rng)
-#         self.original_space = self.benchmark.get_configuration_space()
-#         self.emukit_space, self.to_emu, self.to_cs = emukit_utils.generate_space_mappings(self.original_space)
-#         if isinstance(self.main_fidelity, cs.UniformIntegerHyperparameter):
-#             _log.debug("Treating integer fidelity parameter %s as the main fidelity used for dataset subsampling." %
-#                        self.main_fidelity.name)
-#             self.s_min = max(self.main_fidelity.lower, 1)
-#             self.s_max = self.main_fidelity.upper
-#             self.subsample_to_cs_fidel = lambda x: x
-#         elif isinstance(self.main_fidelity, cs.UniformFloatHyperparameter):
-#             _log.debug("Treating float fidelity parameter %s as the main fidelity used for dataset subsampling." %
-#                        self.main_fidelity.name)
-#             assert hasattr(benchmark.benchmark, 'X_train'), "The benchmark object is expected to have an attribute " \
-#                                                             "'X_train' in order to be compatible with FABOLAS."
-#             assert hasattr(benchmark.benchmark, 'y_train'), "The benchmark object is expected to have an attribute " \
-#                                                             "'y_train' in order to be compatible with FABOLAS."
-#             assert 0.0 <= self.main_fidelity.lower and self.main_fidelity.upper <= 1.0
-#             self.s_min = max(self.main_fidelity.lower * benchmark.benchmark.y_train.shape[0], 1)
-#             self.s_max = self.main_fidelity.upper * benchmark.benchmark.y_train.shape[0]
-#             self.subsample_to_cs_fidel = lambda x: x / self.s_max
-#         else:
-#             raise RuntimeError("The benchmark's main fidelity parameter must be either a float or int, found "
-#                                "type %s" % type(self.main_fidelity))
-#
-#         def wrapper(x, s):
-#             _log.debug("Calling objective function with configuration %s and dataset size %.2f/%.2f." %
-#                        (x, s, self.s_max))
-#             x = cs.Configuration(self.original_space, values={name: func(i) for (name, func), i in zip(self.to_cs, x)})
-#             res = benchmark.objective_function(x, fidelity={self.main_fidelity.name: self.subsample_to_cs_fidel(s)})
-#             return res["function_value"], res["cost"]
-#
-#         self.benchmark_caller = wrapper
-#         self.n_init = int(get_mandatory_optimizer_setting(settings, "init_samples_per_dim") *
-#                           self.emukit_space.dimensionality)
-#
-#     def setup(self):
-#         pass
-#
-#     def run(self) -> Path:
-#         _log.info("Starting FABOLAS optimizer.")
-#         _ = fmin_fabolas(func=self.benchmark_caller, space=self.emukit_space, s_min=self.s_min, s_max=self.s_max,
-#                          n_iters=sys.maxsize, n_init=self.n_init,
-#                          marginalize_hypers=self.settings["marginalize_hypers"])
-#         _log.info("FABOLAS optimizer finished.")
-#         return self.output_dir
-
-
-# Fabolas optimizer with the default acquisition function replaced with MTBO MUMBO acquisition.
-# Ref. Section 4.3 of the MUMBO paper: https://arxiv.org/pdf/2006.12093.pdf
 # noinspection PyPep8Naming
 class FabolasOptimizer(SingleFidelityOptimizer):
     def __init__(self, benchmark: Union[Bookkeeper, AbstractBenchmark, AbstractBenchmarkClient],
@@ -113,12 +60,15 @@ class FabolasOptimizer(SingleFidelityOptimizer):
 
         acquisition_type = str(get_mandatory_optimizer_setting(settings, "acquisition")).lower()
         if acquisition_type == AcquisitionTypes.MUMBO.value:
+            # Fabolas optimizer with the default acquisition function replaced with MTBO MUMBO acquisition.
+            # cf. Section 4.3 of the MUMBO paper: https://arxiv.org/pdf/2006.12093.pdf
             self.acquisition_type = AcquisitionTypes.MUMBO
             self.mumbo_settings = {
                 "num_mc_samples": get_mandatory_optimizer_setting(settings, "num_mc_samples"),
                 "grid_size": get_mandatory_optimizer_setting(settings, "grid_size")
             }
         elif acquisition_type == AcquisitionTypes.MTBO.value:
+            # Fabolas optimizer with the default MTBO acquisition function.
             self.acquisition_type = AcquisitionTypes.MTBO
             self.mtbo_settings = {
                 "num_eval_points": get_mandatory_optimizer_setting(settings, "num_eval_points")
@@ -176,7 +126,7 @@ class FabolasOptimizer(SingleFidelityOptimizer):
                                (self.main_fidelity.name, _fidelity_parameter_name))
         assert isinstance(self.main_fidelity, cs.UniformFloatHyperparameter), \
             "The fidelity parameter should be of type %s, found %s." % \
-            (str(cs.UniformFloatHyperparameter.__class__), str(type(self.main_fidelity)))
+            (str(cs.UniformFloatHyperparameter.__name__), str(type(self.main_fidelity)))
 
         # As per the original sample code, the fidelity values were first discretized by FABOLAS, effectively running
         # continuous fidelity BO on top of Multi-Task BO, cf. emukit.examples.fabolas.fmin_fabolas.fmin().
