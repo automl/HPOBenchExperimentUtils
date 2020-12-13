@@ -8,7 +8,7 @@ import enum
 
 from HPOBenchExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
 from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
-from HPOBenchExperimentUtils.utils.utils import get_mandatory_optimizer_setting
+from HPOBenchExperimentUtils.utils.utils import get_mandatory_optimizer_setting, standard_rng_init
 import HPOBenchExperimentUtils.utils.emukit_utils as emukit_utils
 from hpobench.abstract_benchmark import AbstractBenchmark
 from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
@@ -287,6 +287,11 @@ class FabolasOptimizer(SingleFidelityOptimizer):
 
     def run(self) -> Path:
         _log.info("Starting FABOLAS optimizer with MUMBO acquisition function.")
+
+        # emukit does not expose any interface for setting a random seed any other way, so we reset the global seed here
+        # Generating a new random number from the seed ensures that, for compatible versions of the numpy.random module,
+        # the seeds remain predictable while still handling seed=None in a consistent manner.
+        np.random.seed(standard_rng_init(self.rng).randint(0, 1_000_000))
         self._setup_model()
         self.optimizer.run_loop(UserFunctionWrapper(self.benchmark_caller, extra_output_names=["cost"]),
                                 emukit_utils.InfiniteStoppingCondition())
