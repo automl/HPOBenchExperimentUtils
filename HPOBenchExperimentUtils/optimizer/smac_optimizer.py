@@ -83,11 +83,11 @@ class SMACOptimizer(SingleFidelityOptimizer):
         # Allow at most max_stages stages
         tmp = self.max_budget
         for i in range(self.settings.get('max_stages', 10)):
-            tmp /= self.settings['eta']
+            tmp /= self.settings.get('eta', 3)
         if tmp > self.min_budget:
             self.min_budget = tmp
 
-        smac = self._setupsmac(scenario, optimization_function_wrapper())
+        smac = self._setupsmac(scenario, optimization_function_wrapper)
 
         start_time = time()
         try:
@@ -121,4 +121,5 @@ class SMACOptimizerHPO(SMACOptimizer):
     def _setupsmac(self, scenario, optimization_function_wrapper):
         smac = SMAC4HPO(scenario=scenario, rng=np.random.RandomState(42),
                         tae_runner=optimization_function_wrapper)
+        return smac
 

@@ -186,8 +186,8 @@ def get_optimizer(optimizer_enum):
         from HPOBenchExperimentUtils.optimizer.smac_optimizer import SMACOptimizerHyperband
         optimizer = SMACOptimizerHyperband
     elif optimizer_enum is OptimizerEnum.SMAC_SF:
-        from HPOBenchExperimentUtils.optimizer.smac_optimizer import SMAC4HPO
-        optimizer = SMAC4HPO
+        from HPOBenchExperimentUtils.optimizer.smac_optimizer import SMACOptimizerHPO
+        optimizer = SMACOptimizerHPO
     elif optimizer_enum is OptimizerEnum.SMAC_SUCCESSIVE_HALVING:
         from HPOBenchExperimentUtils.optimizer.smac_optimizer import SMACOptimizerSuccessiveHalving
         optimizer = SMACOptimizerSuccessiveHalving
