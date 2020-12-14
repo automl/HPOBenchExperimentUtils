@@ -8,6 +8,7 @@ import numpy as np
 from hpobench.abstract_benchmark import AbstractBenchmark
 from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 from smac.facade.smac_bohb_facade import BOHB4HPO
+from smac.facade.smac_hpo_facade import SMAC4HPO
 from smac.intensification.hyperband import Hyperband
 from smac.intensification.successive_halving import SuccessiveHalving
 from smac.scenario.scenario import Scenario
@@ -30,13 +31,26 @@ class SMACOptimizer(SingleFidelityOptimizer):
     The intensifier specifies which SMAC-Intensifier (HB or SH) is used.
     """
     def __init__(self, benchmark: Union[Bookkeeper, AbstractBenchmark, AbstractBenchmarkClient],
-                 intensifier: Union[Type[Hyperband], Type[SuccessiveHalving]],
+                 intensifier: Union[Type[Hyperband], Type[SuccessiveHalving], None],
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
         self.intensifier = intensifier
         super().__init__(benchmark, settings, output_dir, rng)
 
     def setup(self):
         pass
+
+    def _setupsmac(self, scenario, optimization_function_wrapper):
+        smac = BOHB4HPO(scenario=scenario,
+                        rng=np.random.RandomState(self.rng),
+                        tae_runner=optimization_function_wrapper,
+                        intensifier=self.intensifier,
+                        # you can also change the intensifier to use like this!
+                        intensifier_kwargs={'initial_budget': self.min_budget,
+                                            'max_budget': self.max_budget,
+                                            'eta': self.settings['eta'],
+                                            }
+                        )
+        return smac
 
     def run(self):
         """ Start the optimization run with SMAC (HB or SH). """
@@ -73,15 +87,7 @@ class SMACOptimizer(SingleFidelityOptimizer):
         if tmp > self.min_budget:
             self.min_budget = tmp
 
-        smac = BOHB4HPO(scenario=scenario,
-                        rng=np.random.RandomState(self.rng),
-                        tae_runner=optimization_function_wrapper,
-                        intensifier=self.intensifier,  # you can also change the intensifier to use like this!
-                        intensifier_kwargs={'initial_budget': self.min_budget,
-                                            'max_budget': self.max_budget,
-                                            'eta': self.settings['eta'], 
-                                            }
-                        )
+        smac = self._setupsmac(scenario, optimization_function_wrapper())
 
         start_time = time()
         try:
@@ -104,3 +110,15 @@ class SMACOptimizerSuccessiveHalving(SMACOptimizer):
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
         super().__init__(benchmark=benchmark, settings=settings, intensifier=SuccessiveHalving,
                          output_dir=output_dir, rng=rng)
+
+
+class SMACOptimizerHPO(SMACOptimizer):
+    def __init__(self, benchmark: Union[Bookkeeper, AbstractBenchmark, AbstractBenchmarkClient],
+                 settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
+        super().__init__(benchmark=benchmark, settings=settings, intensifier=None,
+                         output_dir=output_dir, rng=rng)
+
+    def _setupsmac(self, scenario, optimization_function_wrapper):
+        smac = SMAC4HPO(scenario=scenario, rng=np.random.RandomState(42),
+                        tae_runner=optimization_function_wrapper)
+

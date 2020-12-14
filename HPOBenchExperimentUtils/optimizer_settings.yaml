@@ -78,6 +78,10 @@ fabolas_mumbo:
   grid_size: 500
 
 # SMAC ##################################################################################################### #
+smac_sf:
+  optimizer: smac_sf
+  display_name: "SMAC SF"
+
 smac_hb_eta_3:
   optimizer: smac_hb
   eta: 3
