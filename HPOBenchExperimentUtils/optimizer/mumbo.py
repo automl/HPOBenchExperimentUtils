@@ -6,7 +6,7 @@ import numpy as np
 from HPOBenchExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
 from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
 import HPOBenchExperimentUtils.utils.emukit_utils as emukit_utils
-from HPOBenchExperimentUtils.utils.utils import get_mandatory_optimizer_setting
+from HPOBenchExperimentUtils.utils.utils import get_mandatory_optimizer_setting, standard_rng_init
 from hpobench.abstract_benchmark import AbstractBenchmark
 from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 
@@ -20,12 +20,13 @@ from emukit.core.acquisition import Acquisition
 from emukit.multi_fidelity.models.linear_model import GPyLinearMultiFidelityModel
 from emukit.multi_fidelity.kernels.linear_multi_fidelity_kernel import LinearMultiFidelityKernel
 from emukit.model_wrappers import GPyMultiOutputWrapper
-from GPy.kern import RBF
+from GPy.kern import RBF, Matern52
 
 _log = logging.getLogger(__name__)
 
 
 # Refer MUMBO paper: https://arxiv.org/pdf/2006.12093.pdf
+# noinspection PyPep8Naming
 class MultiTaskMUMBO(SingleFidelityOptimizer):
     def __init__(self, benchmark: Union[Bookkeeper, AbstractBenchmark, AbstractBenchmarkClient],
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
@@ -88,8 +89,10 @@ class MultiTaskMUMBO(SingleFidelityOptimizer):
                                           values={name: func(i) for (name, func), i in zip(self.to_cs, x[i, :-1])})
                 res = benchmark.objective_function(config, fidelity=fidelity)
                 _log.debug("Benchmark evaluation results: %s" % str(res))
-                results.append(res["function_value"])
+                results.append([res["function_value"]])
             results = np.asarray(results)
+            # Assume that the "function_value" results are always scalars, therefore it makes sense to place all
+            # individual values along the 0th axis in case the final result is not 2D for some reason.
             return results if results.ndim == 2 else np.expand_dims(results, axis=1)
 
         self.benchmark_caller = wrapper
@@ -99,6 +102,7 @@ class MultiTaskMUMBO(SingleFidelityOptimizer):
             "n_optimization_restarts": get_mandatory_optimizer_setting(settings, "n_optimization_restarts"),
             "update_interval": get_mandatory_optimizer_setting(settings, "update_interval"),
             "batch_size": get_mandatory_optimizer_setting(settings, "batch_size"),
+            "kernel": str(get_mandatory_optimizer_setting(settings, "kernel")).lower()
         }
         self.mumbo_settings = {
             "num_mc_samples": get_mandatory_optimizer_setting(settings, "num_mc_samples"),
@@ -119,31 +123,46 @@ class MultiTaskMUMBO(SingleFidelityOptimizer):
 
         # Generate warm-start samples. Same as the MUMBO example code. RandomDesign, as mentioned in B.1 of the
         # appendix of the MUMBO paper.
-        augmented_space = ParameterSpace([*(self.emukit_space.parameters), self.emukit_fidelity])
-        initial_design = RandomDesign(augmented_space)
+        augmented_space = ParameterSpace([*self.emukit_space.parameters, self.emukit_fidelity])
+        initial_design = RandomDesign(self.emukit_space)
 
-        X_init = initial_design.get_samples(self.init_samples_per_dim * augmented_space.dimensionality)
-        Y_init = np.asarray([self.benchmark_caller(X_init[i, :]) for i in range(X_init.shape[0])]).reshape(-1, 1)
-        _log.debug("Generated %d warm-start samples." % X_init.shape[0])
+        # For n samples per dim, input space dimensionality D, we generate nxD samples. Then we need to evaluate each
+        # of these samples on every available fidelity value. cf. Section B.1 of the appendix of the paper.
+        n_init = self.init_samples_per_dim * self.emukit_space.dimensionality
+        X_init = np.tile(initial_design.get_samples(n_init), (self.info_sources.shape[0], 1))
+        fmin, fmax = self.emukit_fidelity.bounds[0]
+        sample_fidelities = np.repeat(np.arange(fmin, fmax + 1), repeats=n_init).reshape(-1, 1)
+        X_init = np.concatenate((X_init, sample_fidelities), axis=1)
+        # Y_init = np.asarray([self.benchmark_caller(X_init[i, :]) for i in range(X_init.shape[0])]).reshape(-1, 1)
+        Y_init = self.benchmark_caller(X_init)
+        _log.debug("Generated %d warm-start samples, each evaluated on %d fidelity values, for a total of %d initial "
+                   "evaluations." % (n_init, (fmax - fmin + 1), Y_init.shape[0]))
 
         # Setup kernels for the GP. No specific references found in the paper except a brief mention in Eq. 3, section
         # 2.3. Using the code provided in the example notebook.
         n_fidelity_vals = self.info_sources.shape[0]
         fidelity_kernels = []
+        recognized_kernels = {
+            "rbf": RBF,
+            "matern52": Matern52
+        }
+        try:
+            kernel_type = recognized_kernels[self.gp_settings["kernel"]]
+        except AttributeError:
+            raise ValueError("Unrecognized value %s for 'kernel' in optimizer settings. Must be one of "
+                             "['rbf', 'matern52']." % self.gp_settings["kernel"])
         for _ in range(n_fidelity_vals):
-            kernel = RBF(self.emukit_space.dimensionality)
-            # TODO: Design decision. Do we care about these values?
+            kernel = kernel_type(self.emukit_space.dimensionality)
             kernel.lengthscale.constrain_bounded(0.01, 0.5)
             fidelity_kernels.append(kernel)
 
         multi_fidelity_kernel = LinearMultiFidelityKernel(fidelity_kernels)
-        _log.debug("Mixture of %d GP kernels initialized." % len(fidelity_kernels))
+        _log.debug("Mixture of %d %s kernels initialized." % (len(fidelity_kernels), kernel_type.__name__))
 
         # Initialize the GP for MTBO. Same as the MUMBO example code.
         gpy_model = GPyLinearMultiFidelityModel(X=X_init, Y=Y_init, kernel=multi_fidelity_kernel,
                                                 n_fidelities=n_fidelity_vals)
 
-        # TODO: Design decision. Do we care about this value?
         gpy_model.likelihood.Gaussian_noise.fix(0.1)
         for i in range(1, len(self.emukit_fidelity.bounds)):
             getattr(gpy_model.likelihood, f"Gaussian_noise_{i}").fix(0.1)
@@ -179,6 +198,11 @@ class MultiTaskMUMBO(SingleFidelityOptimizer):
 
     def run(self) -> Path:
         _log.info("Starting GP optimizer with MUMBO acquisition.")
+
+        # emukit does not expose any interface for setting a random seed any other way, so we reset the global seed here
+        # Generating a new random number from the seed ensures that, for compatible versions of the numpy.random module,
+        # the seeds remain predictable while still handling seed=None in a consistent manner.
+        np.random.seed(standard_rng_init(self.rng).randint(0, 1_000_000))
         self._setup_model()
         self.optimizer.run_loop(user_function=self.benchmark_caller,
                                 stopping_condition=emukit_utils.InfiniteStoppingCondition())
