@@ -175,6 +175,7 @@ class MobSterOptimizer(SingleFidelityOptimizer):
                 total_time_used += (record["start_time"] - last_stamp)
                 total_time_used += record["cost"]
                 total_objective_costs += record["cost"]
+                last_stamp = record["finish_time"]
                 function_call += 1
 
                 # Check whether any of these exceeds limit
