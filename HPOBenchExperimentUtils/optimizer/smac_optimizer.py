@@ -123,3 +123,36 @@ class SMACOptimizerHPO(SMACOptimizer):
                         tae_runner=optimization_function_wrapper)
         return smac
 
+    def run(self):
+        """ Start the optimization run with SMAC (HB or SH). """
+        # number_ta_runs = get_number_ta_runs(iterations=self.settings['num_iterations'],
+        #                                     min_budget=self.min_budget,
+        #                                     max_budget=self.max_budget,
+        #                                     eta=self.settings['eta'])
+
+        scenario_dict = {"run_obj": "quality",
+                         "cs": self.cs,
+                         "deterministic": "true",
+                         "limit_resources": False,
+                         "output_dir": str(self.output_dir)}
+
+        scenario = Scenario(scenario_dict)
+
+        def optimization_function_wrapper(cfg, seed):
+            """ Helper-function: simple wrapper to use the benchmark with smac"""
+            fidelity = {self.main_fidelity.name: self.max_budget}
+            result_dict = self.benchmark.objective_function(configuration=cfg,
+                                                            fidelity=fidelity,
+                                                            **self.settings_for_sending,
+                                                            rng=seed)
+            return result_dict['function_value']
+
+        smac = self._setupsmac(scenario, optimization_function_wrapper)
+
+        start_time = time()
+        try:
+            smac.optimize()
+        finally:
+            incumbent = smac.solver.incumbent
+        end_time = time()
+        _log.info(f'Finished Optimization after {int(end_time - start_time):d}s. Incumbent is {incumbent}')
