@@ -119,7 +119,7 @@ class SMACOptimizerHPO(SMACOptimizer):
                          output_dir=output_dir, rng=rng)
 
     def _setupsmac(self, scenario, optimization_function_wrapper):
-        smac = SMAC4HPO(scenario=scenario, rng=np.random.RandomState(42),
+        smac = SMAC4HPO(scenario=scenario, rng=rng,
                         tae_runner=optimization_function_wrapper)
         return smac
 
