@@ -39,7 +39,7 @@ initial_designs = {
     "latin": LatinDesign
 }
 
-_fidelity_parameter_name = "subsample"
+_fidelity_parameter_names = ["subsample", "dataset_fraction"]
 
 # noinspection PyPep8Naming
 class FabolasOptimizer(SingleFidelityOptimizer):
@@ -119,11 +119,11 @@ class FabolasOptimizer(SingleFidelityOptimizer):
         _log.info("Finished reading all settings for FABOLAS optimizer with MUMBO acquisition.")
 
     def _setup_fabolas_fidelity(self):
-        # FABOLAS will only work on a fidelity parameter named in '_fidelity_parameter_name', with values in
+        # FABOLAS will only work on a fidelity parameter named in '_fidelity_parameter_names', with values in
         # (0.0, 1.0].
-        if self.main_fidelity.name != _fidelity_parameter_name:
-            raise RuntimeError("Cannot process unrecognized fidelity parameter %s. Must be %s." %
-                               (self.main_fidelity.name, _fidelity_parameter_name))
+        if self.main_fidelity.name not in _fidelity_parameter_names:
+            raise RuntimeError("Cannot process unrecognized fidelity parameter %s. Must be one of %s." %
+                               (self.main_fidelity.name, str(_fidelity_parameter_names)))
         assert isinstance(self.main_fidelity, cs.UniformFloatHyperparameter), \
             "The fidelity parameter should be of type %s, found %s." % \
             (str(cs.UniformFloatHyperparameter.__name__), str(type(self.main_fidelity)))
