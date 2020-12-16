@@ -36,11 +36,18 @@ def write_validated_trajectory(unvalidated_traj: List, validation_results: Dict,
 
             result_dict = validation_results[config]
 
+            # Update some fields with the validated (new) values.
+            entry['function_value_unvalidated'] = entry['function_value']
             entry['function_value'] = result_dict['function_value']
 
-            # TODO: PM: Discuss which fields need to be overwritten.
-            # entry['info']['fidelity'] = result_dict['info']['fidelity']
-            # entry['fidelity'] = result_dict['fidelity']
+            entry['cost_unvalidated'] = entry['cost']
+            entry['cost'] = result_dict['cost']
+
+            entry['info']['fidelity_unvalidated'] = entry['info']['fidelity']
+            entry['info']['fidelity'] = result_dict['info']['fidelity']
+
+            entry['fidelity_unvalidated'] = entry['fidelity']
+            entry['fidelity'] = result_dict['fidelity']
 
         validated_trajectory.append(entry)
 
