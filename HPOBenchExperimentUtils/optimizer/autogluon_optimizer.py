@@ -13,8 +13,9 @@ try:
     import autogluon.core.version as v
     assert v.__version__ == "0.0.15b20201205"
 except:
-    # We need to use this specific version since changes introduces later on won't work with our
-    # setup (https://github.com/awslabs/autogluon/commit/21483d9b9c3b7c5da935e27c46f2a52e0471bf54)
+    # We need to use this specific version since changes introduces later on fail when pickling the
+    # objective function via dill. The changes were introduced here:
+    # https://github.com/awslabs/autogluon/commit/21483d9b9c3b7c5da935e27c46f2a52e0471bf54
     raise ValueError("""
     Autogluon is not installed or the wrong version is installed, please run:\n
     python3 -m pip install --upgrade pip
@@ -24,6 +25,7 @@ except:
     """)
 
 try:
+    # Even if we use the correct version, we have to make sure that dill is not installed
     import dill
     raise ValueError("`dill` is installed, please remove it via:\npip uninstall dill")
 except ModuleNotFoundError:
@@ -44,11 +46,10 @@ def nothing(self):
     print("Do not stop container")
 
 
-class MobSterOptimizer(SingleFidelityOptimizer):
+class AutogluonOptimizer(SingleFidelityOptimizer):
     """
-    This class implements a random search optimizer.
-    All benchmark and optimizer specific information are stored in the dictionaries
-    benchmark_settings and optimizer_settings.
+    This class implements the HNAS optimization algorithm implemented in autogluon as described here
+    https://github.com/awslabs/autogluon/pull/797
     """
     def __init__(self, benchmark: Union[AbstractBenchmark, AbstractBenchmarkClient],
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
@@ -60,32 +61,38 @@ class MobSterOptimizer(SingleFidelityOptimizer):
         # Set up search space and rung_levels
         self.ag_space = self._get_ag_space()
         if isinstance(self.main_fidelity, UniformFloatHyperparameter):
-            raise ValueError("Mobster can't handle float fidelities")
+            # This would only be the case for dataset fraction as a fidelity and we don't run this
+            # optimizer on these
+            raise ValueError("This optimizer doesn't handle float fidelities")
 
-        # Get time limit
+        # Get time limit, so we know how long we should run the optimization
         self.time_limit = self.benchmark.wall_clock_limit_in_s
         if self.benchmark.is_surrogate:
-            # We limit this to 24h
+            # We limit this and cut the runhistory afterwards in case there are too many evaluations
             self.time_limit = 60*60*24
 
-        # Get Mobster settings
-        self.reduction_factor = self.settings["reduction_factor"]
+        # Get default settings as set in the PR
+        self.reduction_factor = self.settings["reduction_factor"]  # 3 by default
+
         self.searcher = self.settings.get("searcher", "bayesopt")
         assert self.searcher in ("bayesopt", "random"), self.searcher
+
         self.scheduler = self.settings.get("scheduler", "hyperband_promotion")
         assert self.scheduler in ["hyperband_promotion", "hyperband_stopping"]
+
         self.hyperband_type = None
         if self.scheduler == "hyperband_stopping":
             self.hyperband_type = "stopping"
-        elif self.scheduler == "hyperband_promotion":
+        elif self.scheduler == "hyperband_promotion":  # default
             self.hyperband_type = "promotion"
 
-        # Some fixed settings
+        # Some fixed settings we don't touch
         # setting the number of brackets to 1 means that we run effectively successive halving
         self.brackets = int(self.settings.get("brackets", 1))
         self.first_is_default = False
         self.num_gpus = 0
         self.num_cpus = 1
+
         self.rung_levels = self._get_rung_levels()
 
         # Autogluon evaluates every configuration in its own subprocess and thus would
@@ -125,9 +132,8 @@ class MobSterOptimizer(SingleFidelityOptimizer):
         return d
 
     def make_benchmark(self):
-        #@ag.args(**self.ag_space, epochs=mb, valid_budgets=rl)
         def objective_function(args, reporter):
-            # Get time used until now
+            # Build configuration
             config = dict()
             for h in args.cs.get_hyperparameters():
                 if isinstance(h, UniformIntegerHyperparameter):
@@ -136,6 +142,8 @@ class MobSterOptimizer(SingleFidelityOptimizer):
                     config[h.name] = h.sequence[int(args[h.name])]
                 else:
                     config[h.name] = args[h.name]
+
+            # Iterate only over fidelities that are interesting to the optimizer
             for epoch in args.valid_budgets:
                 fidelity = {args.main_fidelity.name: epoch}
                 res = self.benchmark.objective_function(config, fidelity=fidelity)
@@ -149,10 +157,10 @@ class MobSterOptimizer(SingleFidelityOptimizer):
                     time_step=time.time(), **config)
 
         return ag.args(**self.ag_space, epochs=self.max_budget, valid_budgets=self.rung_levels,
-                       cs=self.cs,
-                       main_fidelity=self.main_fidelity)(objective_function)
+                       cs=self.cs, main_fidelity=self.main_fidelity)(objective_function)
 
     def _fix_runhistory(self):
+        # We change the timestamps in the runhistory post-hoc
         if not self.done:
             raise ValueError("Optimization not yet finished")
         dest = Path.joinpath(self.benchmark.log_file.parent,
@@ -198,13 +206,10 @@ class MobSterOptimizer(SingleFidelityOptimizer):
                                                     resource={'num_cpus': self.num_cpus,
                                                               'num_gpus': self.num_gpus},
                                                     # Autogluon runs until it either reaches num_trials or time_out
+                                                    # This is None for most benchmarks
                                                     num_trials=self.benchmark.tae_limit,
                                                     time_out=self.time_limit,
-                                                    # This argument defines the metric that will be maximized.
-                                                    # Make sure that you report this back in the objective function.
                                                     reward_attr='performance',
-                                                    # The metric along we make scheduling decision. Needs to be also
-                                                    # reported back to AutoGluon in the objective function.
                                                     time_attr='epoch',
                                                     brackets=self.brackets,
                                                     checkpoint=None,
@@ -215,12 +220,12 @@ class MobSterOptimizer(SingleFidelityOptimizer):
                                                     # training_history_callback_delta_secs=args.store_results_period,
                                                     reduction_factor=self.reduction_factor,
                                                     type=self.hyperband_type,
-                                                    # rung_levels = [2, 7, 22, 66, 199],
+                                                    # TODO Maybe we want to manually set the rung levels to avoid
+                                                    # having too many levels. We limit these to 5 for other optimizers
                                                     search_options={'random_seed': self.rng,
                                                                     'first_is_default': self.first_is_default},
-                                                    # defines the minimum resource level for Hyperband,
-                                                    # i.e the minimum number of epochs
                                                     grace_period=self.min_budget)
+        # Just to make sure that our assumption on the run levels is correct
         assert scheduler.terminator.rung_levels == self.rung_levels[:-1], \
             (scheduler.terminator.rung_levels, self.rung_levels[:-1])
         scheduler.run()
