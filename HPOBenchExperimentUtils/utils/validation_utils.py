@@ -49,6 +49,12 @@ def write_validated_trajectory(unvalidated_traj: List, validation_results: Dict,
             entry['fidelity_unvalidated'] = entry['fidelity']
             entry['fidelity'] = result_dict['fidelity']
 
+            entry['start_time_unvalidated'] = entry['start_time']
+            entry['start_time'] = result_dict['start_time']
+
+            entry['finish_time_unvalidated'] = entry['finish_time']
+            entry['finish_time'] = result_dict['finish_time']
+
         validated_trajectory.append(entry)
 
     # Write back the validated trajectory
