@@ -279,10 +279,11 @@ color_per_opt = {
     "hpbandster_bohb_eta_2": list_of_colors[0],
     "smac_hb_eta_3": list_of_colors[1],
     "smac_hb_eta_2": list_of_colors[1],
+    "smac_sf": list_of_colors[6],
     "randomsearch": list_of_colors[2],
     "dragonfly_default": list_of_colors[3],
     "dehb": list_of_colors[4],
-    "mobster": list_of_colors[5],
+    "autogluon": list_of_colors[5],
 }
 
 marker_per_opt = {
@@ -290,8 +291,9 @@ marker_per_opt = {
     "hpbandster_bohb_eta_2": "o",
     "smac_hb_eta_3": "s",
     "smac_hb_eta_2": "s",
+    "smac_sf": "s",
     "randomsearch": "v",
     "dragonfly_default": "^",
     "dehb": "*",
-    "mobster": "o",
+    "autogluon": "o",
 }
