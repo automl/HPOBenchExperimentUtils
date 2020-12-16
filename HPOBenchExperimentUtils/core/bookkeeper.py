@@ -102,7 +102,8 @@ def keep_track(validate=False):
                           'info': result_dict['info'],
                           'function_call': self.get_total_tae_used(),
                           'total_time_used': total_time_used,
-                          'total_objective_costs': self.total_objective_costs
+                          'total_objective_costs': self.total_objective_costs,
+                          'total_fuel_used': self.get_total_fuel_used(),
                           }
 
                 log_file = self.log_file if not validate else self.validate_log_file

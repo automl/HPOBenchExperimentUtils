@@ -36,11 +36,24 @@ def write_validated_trajectory(unvalidated_traj: List, validation_results: Dict,
 
             result_dict = validation_results[config]
 
+            # Update some fields with the validated (new) values.
+            entry['function_value_unvalidated'] = entry['function_value']
             entry['function_value'] = result_dict['function_value']
 
-            # TODO: PM: Discuss which fields need to be overwritten.
-            # entry['info']['fidelity'] = result_dict['info']['fidelity']
-            # entry['fidelity'] = result_dict['fidelity']
+            entry['cost_unvalidated'] = entry['cost']
+            entry['cost'] = result_dict['cost']
+
+            entry['info']['fidelity_unvalidated'] = entry['info']['fidelity']
+            entry['info']['fidelity'] = result_dict['info']['fidelity']
+
+            entry['fidelity_unvalidated'] = entry['fidelity']
+            entry['fidelity'] = result_dict['fidelity']
+
+            entry['start_time_unvalidated'] = entry['start_time']
+            entry['start_time'] = result_dict['start_time']
+
+            entry['finish_time_unvalidated'] = entry['finish_time']
+            entry['finish_time'] = result_dict['finish_time']
 
         validated_trajectory.append(entry)
 
@@ -55,6 +68,8 @@ def write_validated_trajectory(unvalidated_traj: List, validation_results: Dict,
         for dict_to_store in validated_trajectory:
             json.dump(dict_to_store, fh)
             fh.write(os.linesep)
+
+    _log.info(f'Writing the trajectory to {validated_trajectory_path} was successful.')
 
 
 def extract_configs_from_trajectories(trajectories: List) -> List:
