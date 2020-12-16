@@ -4,13 +4,13 @@ randomsearch:
   optimizer: randomsearch
   display_name: "random search"
 
-# MoBSter ############################################################################################################ #
-mobster:
-  optimizer: mobster
+# Autogluon HNAS ############################################################################################################ #
+autogluon:
+  optimizer: autogluon
   reduction_factor: 3
   scheduler: "hyperband_promotion"
   searcher: "bayesopt"
-  display_name: "MoBSter"
+  display_name: "autogluon"
 
 # DEHB ############################################################################################################### #
 dehb:
