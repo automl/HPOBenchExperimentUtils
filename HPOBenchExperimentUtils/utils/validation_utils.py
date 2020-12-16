@@ -69,6 +69,8 @@ def write_validated_trajectory(unvalidated_traj: List, validation_results: Dict,
             json.dump(dict_to_store, fh)
             fh.write(os.linesep)
 
+    _log.info(f'Writing the trajectory to {validated_trajectory_path} was successful.')
+
 
 def extract_configs_from_trajectories(trajectories: List) -> List:
     """

@@ -170,6 +170,7 @@ def validate_benchmark(benchmark: str,
     for unvalidated_traj, unvalidated_traj_path in zip(unvalidated_trajectories, unvalidated_trajectories_paths):
         write_validated_trajectory(unvalidated_traj, validation_results, unvalidated_traj_path)
 
+    _log.info('Validating the trajectory was successful.')
     return 1
 
 
