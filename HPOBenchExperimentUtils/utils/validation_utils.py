@@ -111,7 +111,7 @@ def load_json_files(file_paths: List[Path]) -> List:
     List
         List of lists. Each list contains the content of a json file.
     """
-    
+
     start = time.time()
     assert len(file_paths) >= 1
 
