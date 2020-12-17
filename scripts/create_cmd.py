@@ -1,19 +1,34 @@
 import argparse
 import os
+from hpobench.util.openml_data_manager import get_openmlcc18_taskids
+
 
 expset_dc = {
-    "NAS201": ["Cifar10ValidNasBench201Benchmark", "Cifar100NasBench201Benchmark", "ImageNetNasBench201Benchmark"],
+    "NAS201": ["Cifar10ValidNasBench201Benchmark", "Cifar100NasBench201Benchmark",
+               "ImageNetNasBench201Benchmark"],
     "NAS101": ["NASCifar10ABenchmark", "NASCifar10BBenchmark", "NASCifar10CBenchmark"],
-    "NASTAB": ["SliceLocalizationBenchmark", "ProteinStructureBenchmark", "NavalPropulsionBenchmark", "ParkinsonsTelemonitoringBenchmark"],
-    "NAS1SHOT1": ["NASBench1shot1SearchSpace1Benchmark", "NASBench1shot1SearchSpace2Benchmark", "NASBench1shot1SearchSpace3Benchmark"],
+    "NASTAB": ["SliceLocalizationBenchmark", "ProteinStructureBenchmark",
+               "NavalPropulsionBenchmark", "ParkinsonsTelemonitoringBenchmark"],
+    "NAS1SHOT1": ["NASBench1shot1SearchSpace1Benchmark", "NASBench1shot1SearchSpace2Benchmark",
+                  "NASBench1shot1SearchSpace3Benchmark"],
     "pybnn": ["BNNOnBostonHousing", "BNNOnProteinStructure", "BNNOnYearPrediction"],
     "rl": ["cartpolereduced"],
     "learna": ["metalearna", "learna"],
+    "paramnetsteps": ["ParamNetAdultOnStepsBenchmark", "ParamNetHiggsOnStepsBenchmark",
+                      "ParamNetLetterOnStepsBenchmark", "ParamNetMnistOnStepsBenchmark",
+                      "ParamNetOptdigitsOnStepsBenchmark", "ParamNetPokerOnStepsBenchmark"],
+    "paramnettime": ["ParamNetAdultOnTimeBenchmark", "ParamNetHiggsOnTimeBenchmark",
+                     "ParamNetLetterOnTimeBenchmark", "ParamNetMnistOnTimeBenchmark",
+                     "ParamNetOptdigitsOnTimeBenchmark",  "ParamNetPokerOnTimeBenchmark"],
+    "svm": ["svm", ],
+    "xgboostsub": ["xgboostsub", ],
+    "xgboostest": ["xgboostest", ]
 }
 
 opt_set = {
-    "def": ["hpbandster_bohb_eta_3", "smac_hb_eta_3", "randomsearch", "dragonfly_default", "dehb"],
-    "mobster": ["mobster",],
+    "def": ["hpbandster_bohb_eta_3", "smac_hb_eta_3", "randomsearch", "dehb"],
+    "mobster": ["mobster", ],
+    "dragonfly_default": ["dragonfly_default", ],
 }
 
 
@@ -28,8 +43,8 @@ def main(args):
     val_fl = "%s/val_%s_%s_%d.cmd" % (args.out_cmd, exp, opt, nrep)
     val_ind_fl = "%s/valind_%s_%s_%d.cmd" % (args.out_cmd, exp, opt, nrep)
     run_fl = "%s/run_%s_%s_%d.cmd" % (args.out_cmd, exp, opt, nrep)
-    eval_fl = "%s/eval_%s_%s_%d.cmd" % (args.out_cmd, exp, opt, nrep)
-    evalu_fl = "%s/evalunv_%s_%s_%d.cmd" % (args.out_cmd, exp, opt, nrep)
+    eval_fl = "%s/eval_%s.cmd" % (args.out_cmd, exp)
+    evalu_fl = "%s/evalunv_%s.cmd" % (args.out_cmd, exp)
 
     run_cmd = []
     val_cmd = []
@@ -42,12 +57,25 @@ def main(args):
     for benchmark in expset_dc[exp]:
         for optimizer in opt_set[opt]:
             for seed in range(1, nrep+1):
-                cmd = "%s/run_benchmark.py --output_dir %s --optimizer %s --benchmark %s --rng %s" \
-                      % (base, args.out_run, optimizer, benchmark, seed)
-                run_cmd.append(cmd)
-                cmd = "%s/validate_benchmark.py --output_dir %s/%s/%s/run-%d/ --benchmark %s " \
-                      "--rng %d" % (base, args.out_run, benchmark, optimizer, seed, benchmark, 1)
-                val_ind_cmd.append(cmd)
+                if benchmark in ["svm", "xgboostsub", "xgboostest"]:
+                    for tid in get_openmlcc18_taskids():
+                        cmd = "%s/run_benchmark.py --output_dir %s --optimizer %s --benchmark %s" \
+                              " --rng %s --task_id %d" % \
+                              (base, args.out_run, optimizer, benchmark, seed, tid)
+                        run_cmd.append(cmd)
+                        cmd = "%s/validate_benchmark.py --output_dir %s/%s/%d/%s/run-%d/ " \
+                              "--benchmark %s --task_id %d --rng %d" % \
+                              (base, args.out_run, benchmark, tid, optimizer, seed, benchmark, seed,
+                               tid)
+                        val_ind_cmd.append(cmd)
+                else:
+                    cmd = "%s/run_benchmark.py --output_dir %s --optimizer %s --benchmark %s " \
+                          "--rng %s" % (base, args.out_run, optimizer, benchmark, seed)
+                    run_cmd.append(cmd)
+                    cmd = "%s/validate_benchmark.py --output_dir %s/%s/%s/run-%d/ --benchmark %s " \
+                          "--rng %d" % (base, args.out_run, benchmark, optimizer, seed, benchmark,
+                                        seed)
+                    val_ind_cmd.append(cmd)
         cmd = "%s/validate_benchmark.py --output_dir %s/%s --benchmark %s --rng %d" \
               % (base, args.out_run, benchmark, benchmark, 1)
         val_cmd.append(cmd)
@@ -63,7 +91,6 @@ def main(args):
                  [evalu_cmd, evalu_fl], [val_ind_cmd, val_ind_fl]]:
         if len(c) > 1:
             write_cmd(c, f)
-
 
 
 def write_cmd(cmd_list, out_fl):

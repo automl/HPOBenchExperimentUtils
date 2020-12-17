@@ -186,6 +186,25 @@ ParamNetPokerOnTimeBenchmark:
 
 # surrogate benchmarks - nas101
 
+NASCifar10ABenchmark_fixed_seed_0:
+  time_limit_in_s: 10000000
+  cutoff_in_s: 10000000
+  mem_limit_in_mb: 6000
+  import_from: nas.nasbench_101
+  import_benchmark: NASCifar10ABenchmark
+  is_surrogate: true
+  run_index: 0
+
+NASCifar10ABenchmark_random_seed:
+  time_limit_in_s: 10000000
+  cutoff_in_s: 10000000
+  mem_limit_in_mb: 6000
+  import_from: nas.nasbench_101
+  import_benchmark: NASCifar10ABenchmark
+  is_surrogate: true
+  random_seed_name: "run_index"
+  random_seed_choice: [0, 1, 2]
+
 NASCifar10ABenchmark:
   time_limit_in_s: 10000000
   cutoff_in_s: 10000000
