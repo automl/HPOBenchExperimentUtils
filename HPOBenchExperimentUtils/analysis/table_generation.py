@@ -16,8 +16,43 @@ _log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format=_default_log_format)
 
 
-def save_table(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
-               unvalidated: bool = True, **kwargs):
+def write_latex(result_df, output_file):
+    replace_dc = {
+        '\\{': "{",
+        "\\}": "}",
+        "textbf": "\\textbf",
+        "underline": "\\underline",
+        'xgboostsub': r"\xgboostfrac",
+        'xgboostest': r"\xgboostnest",
+        'cartpolereduced': r"\cartpole",
+        "cartpolefull": "%cartpolefull",
+        'BNNOnBostonHousing': r"\bnnboston",
+        'BNNOnProteinStructure': r"\bnnprotein",
+        'BNNOnYearPrediction': r"\bnnyear",
+        'learna': r"\learna",
+        'NASCifar10ABenchmark': r"\NASA",
+        'NASCifar10BBenchmark': r"\NASB",
+        'NASCifar10CBenchmark': r"\NASC",
+        'SliceLocalizationBenchmark': r"\slice",
+        'ProteinStructureBenchmark': r"\protein",
+        'NavalPropulsionBenchmark': r"\naval",
+        'ParkinsonsTelemonitoringBenchmark': r"\parkinson",
+        'Cifar10NasBench201Benchmark': r"%\nbcifart",
+        'Cifar10ValidNasBench201Benchmark': r"\nbcifartv",
+        'Cifar100NasBench201Benchmark': r"\nbcifarh",
+        'ImageNetNasBench201Benchmark': r"\nbimage",
+    }
+
+    with open(output_file, 'w') as fh:
+        latex = result_df.to_latex(index_names=False, index=False)
+        for i in replace_dc:
+            latex = latex.replace(i, replace_dc[i])
+        print(latex)
+        fh.write(latex)
+
+
+def save_median_table(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
+                      unvalidated: bool = True, **kwargs):
     _log.info(f'Start creating table of benchmark {benchmark}')
     input_dir = Path(input_dir) / benchmark
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
@@ -126,36 +161,5 @@ def save_table(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pa
     result_df = result_df[header]
 
     val_str = 'unvalidated' if unvalidated else 'validated'
-
-    replace_dc = {
-        '\\{': "{",
-        "\\}": "}",
-        "textbf": "\\textbf",
-        "underline": "\\underline",
-        'xgboostsub': r"\xgboostfrac",
-        'xgboostest': r"\xgboostnest",
-        'cartpolereduced': r"\cartpole",
-        "cartpolefull": "%cartpolefull",
-        'BNNOnBostonHousing': r"\bnnboston",
-        'BNNOnProteinStructure': r"\bnnprotein",
-        'BNNOnYearPrediction': r"\bnnyear",
-        'learna': r"\learna",
-        'NASCifar10ABenchmark': r"\NASA",
-        'NASCifar10BBenchmark': r"\NASB",
-        'NASCifar10CBenchmark': r"\NASC",
-        'SliceLocalizationBenchmark': r"\slice",
-        'ProteinStructureBenchmark': r"\protein",
-        'NavalPropulsionBenchmark': r"\naval",
-        'ParkinsonsTelemonitoringBenchmark': r"\parkinson",
-        'Cifar10NasBench201Benchmark': r"%\nbcifart",
-        'Cifar10ValidNasBench201Benchmark': r"\nbcifartv",
-        'Cifar100NasBench201Benchmark': r"\nbcifarh",
-        'ImageNetNasBench201Benchmark': r"\nbimage",
-    }
-
-    with open(Path(output_dir) / f'{benchmark}_{val_str}_result_table.tex', 'w') as fh:
-        latex = result_df.to_latex(index_names=False, index=False)
-        for i in replace_dc:
-            latex = latex.replace(i, replace_dc[i])
-        print(latex)
-        fh.write(latex)
+    output_file = Path(output_dir) / f'{benchmark}_{val_str}_result_table.tex'
+    write_latex(result_df=result_df, output_file=output_file)
