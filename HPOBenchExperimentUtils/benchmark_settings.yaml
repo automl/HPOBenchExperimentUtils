@@ -18,6 +18,15 @@ xgboostest:
   main_fidelity: n_estimators
   is_surrogate: false
 
+svm:
+  time_limit_in_s: 7200
+  cutoff_in_s: 7200
+  mem_limit_in_mb: 6000
+  import_from: ml.svm_benchmark
+  import_benchmark: SupportVectorMachine
+  main_fidelity: dataset_fraction
+  is_surrogate: false
+
 # Run for 1 d
 cartpolereduced:
   time_limit_in_s: 86400
