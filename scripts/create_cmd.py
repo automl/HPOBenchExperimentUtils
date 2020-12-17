@@ -27,8 +27,10 @@ expset_dc = {
 
 opt_set = {
     "def": ["hpbandster_bohb_eta_3", "smac_hb_eta_3", "randomsearch", "dehb"],
-    "mobster": ["mobster", ],
+    "autogluon": ["autogluon", ],
     "dragonfly_default": ["dragonfly_default", ],
+    "fabolas": ["fabolas_mtbo", "fabolas_mumbo"],
+    "mumbo": ["mumbo", ],
 }
 
 
