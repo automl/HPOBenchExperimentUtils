@@ -19,16 +19,19 @@ expset_dc = {
                       "ParamNetOptdigitsOnStepsBenchmark", "ParamNetPokerOnStepsBenchmark"],
     "paramnettime": ["ParamNetAdultOnTimeBenchmark", "ParamNetHiggsOnTimeBenchmark",
                      "ParamNetLetterOnTimeBenchmark", "ParamNetMnistOnTimeBenchmark",
-                     "ParamNetOptdigitsOnTimeBenchmark",  "ParamNetPokerOnTimeBenchmark"],
+                     "ParamNetOptdigitsOnTimeBenchmark", "ParamNetPokerOnTimeBenchmark"],
     "svm": ["svm", ],
     "xgboostsub": ["xgboostsub", ],
     "xgboostest": ["xgboostest", ]
 }
 
 opt_set = {
-    "def": ["hpbandster_bohb_eta_3", "smac_hb_eta_3", "randomsearch", "dehb"],
+    "rs": ["randomsearch", ],
+    "dehb": ["dehb", ],
+    "hpband": ["hpbandster_bohb_eta_3", "hpbandster_hb_eta_3"],
+    "smac": ["smac_hb_eta_3", "smac_sf"],
     "autogluon": ["autogluon", ],
-    "dragonfly_default": ["dragonfly_default", ],
+    "dragonfly": ["dragonfly_default", ],
     "fabolas": ["fabolas_mtbo", "fabolas_mumbo"],
     "mumbo": ["mumbo", ],
 }
@@ -81,7 +84,7 @@ def main(args):
         cmd = "%s/validate_benchmark.py --output_dir %s/%s --benchmark %s --rng %d" \
               % (base, args.out_run, benchmark, benchmark, 1)
         val_cmd.append(cmd)
-        if opt == "def":
+        if opt == "rs":
             # We only need this once since it works for all optimizers
             cmd = "%s/evaluate_benchmark.py --output_dir %s/ --input_dir %s/ --benchmark %s " \
                   "--agg median --what all" % (base, args.out_eval, args.out_run, benchmark)
