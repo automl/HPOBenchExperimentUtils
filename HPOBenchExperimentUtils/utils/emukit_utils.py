@@ -29,10 +29,10 @@ def _handle_uniform_float(param: cs.UniformFloatHyperparameter) -> Tuple[Continu
         min_val = log(min_val)
         max_val = log(max_val)
         map_to_emu = lambda x: log(x)
-        map_to_cs = lambda x: min(param.upper, max(param.upper, exp(x)))
+        map_to_cs = lambda x: np.clip(exp(x), param.lower, param.upper)
     else:
         map_to_emu = lambda x: x
-        map_to_cs = lambda x: x
+        map_to_cs = lambda x: np.clip(x, param.lower, param.upper)
     emukit_param = ContinuousParameter(name=param.name, min_value=min_val, max_value=max_val)
 
     return emukit_param, map_to_emu, map_to_cs
