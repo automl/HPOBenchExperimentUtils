@@ -115,15 +115,7 @@ class HpBandSterBOHBOptimizer(HpBandSterBaseOptimizer):
     def __init__(self, benchmark: Union[AbstractBenchmark, AbstractBenchmarkClient],
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
         super(HpBandSterBOHBOptimizer, self).__init__(benchmark=benchmark, intensifier=BOHB, settings=settings,
-
                                                       output_dir=output_dir, rng=rng)
-
-
-class HpBandSterRandomSearchOptimizer(HpBandSterBaseOptimizer):
-    def __init__(self, benchmark: Union[AbstractBenchmark, AbstractBenchmarkClient],
-                 settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
-        super(HpBandSterRandomSearchOptimizer, self).__init__(benchmark=benchmark, intensifier=RandomSearch,
-                                                              settings=settings, output_dir=output_dir, rng=rng)
 
 
 class HpBandSterHyperBandOptimizer(HpBandSterBaseOptimizer):
@@ -131,13 +123,6 @@ class HpBandSterHyperBandOptimizer(HpBandSterBaseOptimizer):
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
         super(HpBandSterHyperBandOptimizer, self).__init__(benchmark=benchmark, intensifier=HyperBand,
                                                            settings=settings, output_dir=output_dir, rng=rng)
-
-
-class HpBandSterH2BOOptimizer(HpBandSterBaseOptimizer):
-    def __init__(self, benchmark: Union[AbstractBenchmark, AbstractBenchmarkClient],
-                 settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
-        super(HpBandSterH2BOOptimizer, self).__init__(benchmark=benchmark, intensifier=H2BO,
-                                                      settings=settings, output_dir=output_dir, rng=rng)
 
 
 class CustomWorker(Worker):

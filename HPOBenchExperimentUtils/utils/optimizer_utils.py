@@ -73,8 +73,6 @@ class OptimizerEnum(Enum):
         return str(self.value)
 
     HPBANDSTER_HB = 'hpbandster_hyperband'
-    HPBANDSTER_H2BO = 'hpbandster_h2bo'
-    HPBANDSTER_RS = 'hpbandster_randomsearch'
     HPBANDSTER_BOHB = 'hpbandster_bohb'
     SMAC_SF = "smac_sf"
     SMAC_HYPERBAND = 'smac_hyperband'
@@ -111,10 +109,6 @@ def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]) -> OptimizerEnum
                 return OptimizerEnum.HPBANDSTER_BOHB
             elif 'hyperband' in optimizer or 'hb' in optimizer:
                 return OptimizerEnum.HPBANDSTER_HB
-            elif 'randomsearch' in optimizer or 'rs' in optimizer:
-                return OptimizerEnum.HPBANDSTER_RS
-            elif 'h2bo' in optimizer:
-                return OptimizerEnum.HPBANDSTER_H2BO
             else:
                 fail = True
 
@@ -161,15 +155,9 @@ def get_optimizer(optimizer_enum):
     if optimizer_enum is OptimizerEnum.HPBANDSTER_BOHB:
         from HPOBenchExperimentUtils.optimizer.bohb_optimizer import HpBandSterBOHBOptimizer
         optimizer = HpBandSterBOHBOptimizer
-    elif optimizer_enum is OptimizerEnum.HPBANDSTER_RS:
-        from HPOBenchExperimentUtils.optimizer.bohb_optimizer import HpBandSterRandomSearchOptimizer
-        optimizer = HpBandSterRandomSearchOptimizer
     elif optimizer_enum is OptimizerEnum.HPBANDSTER_HB:
         from HPOBenchExperimentUtils.optimizer.bohb_optimizer import HpBandSterHyperBandOptimizer
         optimizer = HpBandSterHyperBandOptimizer
-    elif optimizer_enum is OptimizerEnum.HPBANDSTER_H2BO:
-        from HPOBenchExperimentUtils.optimizer.bohb_optimizer import HpBandSterH2BOOptimizer
-        optimizer = HpBandSterH2BOOptimizer
     elif optimizer_enum is OptimizerEnum.DRAGONFLY:
         from HPOBenchExperimentUtils.optimizer.dragonfly_optimizer import DragonflyOptimizer
         optimizer = DragonflyOptimizer
