@@ -101,8 +101,7 @@ class FabolasOptimizer(SingleFidelityOptimizer):
             for i in range(inp.shape[0]):
                 x, s = inp[0, :-1], inp[0, -1]
                 _log.debug("Calling objective function with configuration %s and fidelity index %s." % (x, s))
-                config = cs.Configuration(self.original_space,
-                                          values={name: func(i) for (name, func), i in zip(self.to_cs, x)})
+                config = cs.Configuration(self.original_space, values=self.to_cs(x))
                 fidelity = self.fidelity_emukit_to_cs(s)
                 _log.debug("Generated configuration %s, fidelity %s" % (config, fidelity))
                 res = benchmark.objective_function(config, fidelity=fidelity)
