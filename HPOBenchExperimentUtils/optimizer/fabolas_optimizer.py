@@ -99,7 +99,7 @@ class FabolasOptimizer(SingleFidelityOptimizer):
 
             yvals, costs = [], []
             for i in range(inp.shape[0]):
-                x, s = inp[0, :-1], inp[0, -1]
+                x, s = inp[i, :-1], inp[i, -1]
                 _log.debug("Calling objective function with configuration %s and fidelity index %s." % (x, s))
                 config = cs.Configuration(self.original_space, values=self.to_cs(x))
                 fidelity = self.fidelity_emukit_to_cs(s)
