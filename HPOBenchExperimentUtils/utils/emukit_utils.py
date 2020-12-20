@@ -30,7 +30,7 @@ def _handle_uniform_float(param: cs.UniformFloatHyperparameter) -> Tuple[Continu
         min_val = log(min_val)
         max_val = log(max_val)
         def map_to_emu(x): return log(x)
-        def map_to_cs(x): return np.clip(np.exp(x), param.lower, param.upper)
+        def map_to_cs(x): return np.clip(exp(x), param.lower, param.upper)
     else:
         def map_to_emu(x): return x
         def map_to_cs(x): return np.clip(x, param.lower, param.upper)
