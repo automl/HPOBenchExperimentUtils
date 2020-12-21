@@ -56,7 +56,7 @@ class MultiTaskMUMBO(SingleFidelityOptimizer):
             self.info_sources = np.linspace(self.min_budget, self.max_budget, num_fidelity_values)
 
         elif isinstance(self.main_fidelity, cs.OrdinalHyperparameter):
-            self.info_sources = np.asarray(self.main_fidelity.get_seq_order())
+            self.info_sources = np.asarray(self.main_fidelity.sequence)
         elif isinstance(self.main_fidelity, cs.CategoricalHyperparameter):
             self.info_sources = np.asarray(self.main_fidelity.choices)
         elif isinstance(self.main_fidelity, cs.UniformIntegerHyperparameter):

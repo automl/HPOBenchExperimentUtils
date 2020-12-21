@@ -123,29 +123,45 @@ class FabolasOptimizer(SingleFidelityOptimizer):
         if self.main_fidelity.name not in _fidelity_parameter_names:
             raise RuntimeError("Cannot process unrecognized fidelity parameter %s. Must be one of %s." %
                                (self.main_fidelity.name, str(_fidelity_parameter_names)))
-        assert isinstance(self.main_fidelity, cs.UniformFloatHyperparameter), \
-            "The fidelity parameter should be of type %s, found %s." % \
-            (str(cs.UniformFloatHyperparameter.__name__), str(type(self.main_fidelity)))
 
         # As per the original sample code, the fidelity values were first discretized by FABOLAS, effectively running
         # continuous fidelity BO on top of Multi-Task BO, cf. emukit.examples.fabolas.fmin_fabolas.fmin().
         _log.debug("Discretizing the dataset sizes for use with FABOLAS into %d fidelity levels on a log2 scale." %
                    self.num_fidelity_values)
 
-        # FABOLAS expects to sample the fidelity values on a log scale. The following code effectively ignores the log
-        # attribute of the parameter.
-        # As per the interface of FabolasModel, s_min and s_max should not be fractions but dataset sizes.
-        s_min = max(self.min_budget * self.dataset_size, 1)
-        s_max = max(self.max_budget * self.dataset_size, 1)
-        self.budgets = np.rint(np.logspace(start=log2(s_min), stop=log2(s_max), num=self.num_fidelity_values, base=2.0))
+        if type(self.main_fidelity) == cs.OrdinalHyperparameter:
+            # Assume that the OrdinalHyperparameter sequence contains exact budget sizes.
+            self.main_fidelity: cs.OrdinalHyperparameter
+            self.budgets = np.asarray(self.main_fidelity.sequence)
+            s_min = self.budgets[0]
+            s_max = self.budgets[-1]
+            ordinal = True
+        else:
+            # Assume that the sample budgets need to be extracted from a range of values.
+            # FABOLAS expects to sample the fidelity values on a log scale. The following code effectively ignores
+            # the log attribute of the parameter.
+            # As per the interface of FabolasModel, s_min and s_max should not be fractions but dataset sizes.
+            s_min = max(self.min_budget * self.dataset_size, 1)
+            s_max = max(self.max_budget * self.dataset_size, 1)
+            self.budgets = np.rint(np.clip(np.power(0.5, np.arange(self.num_fidelity_values - 1, -1, -1)) * s_max,
+                                       s_min, s_max)).astype(int)
+            # Needed to avoid introducing more ifs.
+            # def fid_op(s): return np.clip(s, s_min, s_max) / s_max
+            ordinal = False
 
         if self.acquisition_type is AcquisitionTypes.MUMBO:
             # To summarize, MUMBO will be given the fidelity values as a list of indices, each corresponding to an
             # actual dataset_fraction value sampled on a log2 scale and stored in 'budgets'. Thus, the value retrieved
             # from budgets needs to be clipped to account for any numerical inconsistencies arising out of the chained
             # log and exp operations.
-            def map_fn(s: float):
-                return {self.main_fidelity.name: max(s_min, min(s_max, self.budgets[int(s)])) / s_max}
+            if ordinal:
+                # s is an index, budget contains integers, the fidelity is expected to be an exact integer
+                def map_fn(s: int):
+                    return {self.main_fidelity.name: self.budgets[int(s)]}
+            else:
+                # s is an index, budget contains integers, the fidelity is expected to be a fraction in [0.0, 1.0]
+                def map_fn(s: int): return {self.main_fidelity.name: np.clip(self.budgets[int(s)],
+                                                                             s_min, s_max) / s_max}
 
             self.fidelity_emukit_to_cs = map_fn
 
@@ -156,8 +172,14 @@ class FabolasOptimizer(SingleFidelityOptimizer):
             # self.fabolas_fidelity = emukit_utils.SmarterInformationSourceParameter(self.budgets.shape[0], start_ind=1)
             self.fabolas_fidelity = InformationSourceParameter(self.budgets.shape[0])
         elif self.acquisition_type is AcquisitionTypes.MTBO:
-            def map_fn(s: int):
-                return {self.main_fidelity.name: s / s_max}
+            if ordinal:
+                # s is a size in integers, budget contains integers, fidelity is expected to be an integer - find
+                # closest fit for s in budgets
+                def map_fn(s: int): return {self.main_fidelity.name: self.budgets[np.abs(self.budgets - s).argmin()]}
+            else:
+                # s is a size in integers, budget contains sizes in integers, fidelity is expected to be a fraction in
+                # the range [0.0, 1.0]
+                def map_fn(s: int): return {self.main_fidelity.name: np.clip(s, s_min, s_max) / s_max}
 
             self.fidelity_emukit_to_cs = map_fn
             self.fabolas_fidelity = ContinuousParameter("s", s_min, s_max)
@@ -285,7 +307,7 @@ class FabolasOptimizer(SingleFidelityOptimizer):
         pass
 
     def run(self) -> Path:
-        _log.info("Starting FABOLAS optimizer with MUMBO acquisition function.")
+        _log.info("Starting FABOLAS optimizer.")
 
         # emukit does not expose any interface for setting a random seed any other way, so we reset the global seed here
         # Generating a new random number from the seed ensures that, for compatible versions of the numpy.random module,
