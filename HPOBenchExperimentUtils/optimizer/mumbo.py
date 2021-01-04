@@ -56,7 +56,7 @@ class MultiTaskMUMBO(SingleFidelityOptimizer):
             self.info_sources = np.linspace(self.min_budget, self.max_budget, num_fidelity_values)
 
         elif isinstance(self.main_fidelity, cs.OrdinalHyperparameter):
-            self.info_sources = np.asarray(self.main_fidelity.get_seq_order())
+            self.info_sources = np.asarray(self.main_fidelity.sequence)
         elif isinstance(self.main_fidelity, cs.CategoricalHyperparameter):
             self.info_sources = np.asarray(self.main_fidelity.choices)
         elif isinstance(self.main_fidelity, cs.UniformIntegerHyperparameter):
@@ -85,8 +85,7 @@ class MultiTaskMUMBO(SingleFidelityOptimizer):
                 _log.debug("Extracted configuration: %s" % str(x[i, :-1]))
                 _log.debug("Extracted fidelity value: %s" % str(self.info_sources[int(x[i, -1])]))
                 fidelity = self.fidelity_emukit_to_cs(int(x[i, -1]))
-                config = cs.Configuration(self.original_space,
-                                          values={name: func(i) for (name, func), i in zip(self.to_cs, x[i, :-1])})
+                config = cs.Configuration(self.original_space, values=self.to_cs(x[i, :-1]))
                 res = benchmark.objective_function(config, fidelity=fidelity)
                 _log.debug("Benchmark evaluation results: %s" % str(res))
                 results.append([res["function_value"]])
