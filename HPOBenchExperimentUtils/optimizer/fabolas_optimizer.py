@@ -270,7 +270,7 @@ class FabolasOptimizer(SingleFidelityOptimizer):
             # These are hooks that help us record the trajectory for an information theoretic acquisition function,
             # which cannot be handled otherwise by the Bookkeeper.
             self.optimizer.loop_start_event.append(emukit_utils.get_init_trajectory_hook(self.output_dir))
-            self.optimizer.iteration_end_event.append(emukit_utils.get_trajectory_hook(self.output_dir))
+            self.optimizer.iteration_end_event.append(emukit_utils.get_trajectory_hook(self.output_dir, self.to_cs))
             _log.info("FABOLAS optimizer with MUMBO acquisition initialized and ready to run.")
         else:
             # AcquisitionType.MTBO

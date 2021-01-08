@@ -1,5 +1,5 @@
 import logging
-from typing import Tuple, Callable, Sequence
+from typing import Tuple, Callable, Sequence, Dict, Any
 from emukit.core import ParameterSpace, ContinuousParameter, DiscreteParameter, OneHotEncoding, CategoricalParameter, \
     Parameter
 from emukit.core.loop import LoopState, OuterLoop, StoppingCondition
@@ -131,7 +131,7 @@ def generate_space_mappings(cspace: cs.ConfigurationSpace, valid_types: Sequence
         to_emu.append((parameter.name, map_to_emu))
         to_cs.append((parameter.name, map_to_cs))
 
-    def config_to_cs(x: np.ndarray):
+    def config_to_cs(x: np.ndarray) -> Dict[str, Any]:
         """ Combines individual parameter parsers into one function for parsing an entire configuration in one go. """
         idx = 0
         conf = {}
@@ -172,11 +172,14 @@ def get_init_trajectory_hook(output_dir: Path):
     return hook
 
 
-def get_trajectory_hook(output_dir: Path):
+def get_trajectory_hook(output_dir: Path, fn_map_config_to_cs: Callable):
     """
     Generates an end-of-iteration hook for recording Information-Theoretic acquisition function MUMBO's real trajectory.
     :param output_dir: Path
         The directory where the trajectory will be stored.
+    :param fn_map_config_to_cs: Callable
+        A callable object that accepts a 1-D numpy NDArray object as input and returns a ConfigSpace.Configuration
+        compatible dictionary mapping parameters to values. Consult emukit_utils.generate_space_mappings.config_to_cs().
     :return:
     """
 
@@ -209,7 +212,7 @@ def get_trajectory_hook(output_dir: Path):
                     "function_value": None,
                     "fidelity": None,
                     "cost": None,
-                    "configuration": predicted_incumbent.tolist(),
+                    "configuration": fn_map_config_to_cs(predicted_incumbent),
                     "info": {
                         "fidelity": None,
                         "function_call": None,
