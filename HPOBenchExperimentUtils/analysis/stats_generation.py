@@ -199,9 +199,10 @@ def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Un
                 c = json.dumps(record["configuration"], sort_keys=True)
                 f = record['fidelity'][list(record['fidelity'])[0]]
                 f_set.append(f)
-                conf_dc[c][f] = record["cost"]
+                conf_dc[c][f] = record["function_value"]
 
     f_set = np.array(list(set(f_set)))
+    f_set.sort()
     # Clean dc:
     to_rm = []
     for c in conf_dc:

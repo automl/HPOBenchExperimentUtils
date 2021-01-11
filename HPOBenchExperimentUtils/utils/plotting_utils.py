@@ -282,16 +282,16 @@ plot_dc = {
    },
    "ParamNetAdultOnTimeBenchmark": {
         "xlim_lo": 10**0,
-        "ylim_lo": 10**-3,
-        "ylim_up": 10**1,
+        "ylim_lo": 10**-1, #-3,
+        "ylim_up": 10**0, #1,
         "xscale": "log",
         "yscale": "log",
         "ystar_valid": 0,
         "ystar_test": 0,
    },
    "ParamNetHiggsOnStepsBenchmark": {
-        "xlim_lo": 10**0,
-        "ylim_lo": 10**-3,
+        "xlim_lo": 10**2,
+        "ylim_lo": 10**-5,
         "ylim_up": 10**-1,
         "xscale": "log",
         "yscale": "log",
@@ -300,8 +300,8 @@ plot_dc = {
    },
    "ParamNetHiggsOnTimeBenchmark": {
         "xlim_lo": 10**0,
-        "ylim_lo": 10**-3,
-        "ylim_up": 10**-1,
+        "ylim_lo": 2*10**-1, #10**-3,
+        "ylim_up": 4*10**-1, #10**-1,
         "xscale": "log",
         "yscale": "log",
         "ystar_valid": 0,
@@ -318,7 +318,7 @@ plot_dc = {
    },
    "ParamNetLetterOnTimeBenchmark": {
         "xlim_lo": 10**0,
-        "ylim_lo": 10**-3.5,
+        "ylim_lo": 10**-2, #-3.5,
         "ylim_up": 10**0,
         "xscale": "log",
         "yscale": "log",
@@ -336,7 +336,7 @@ plot_dc = {
    },
    "ParamNetMnistOnTimeBenchmark": {
         "xlim_lo": 10**0,
-        "ylim_lo": 10**-4.5,
+        "ylim_lo": 10**-2, #-4.5,
         "ylim_up": 10**0,
         "xscale": "log",
         "yscale": "log",
@@ -354,7 +354,7 @@ plot_dc = {
    },
    "ParamNetOptdigitsOnTimeBenchmark": {
         "xlim_lo": 10**0,
-        "ylim_lo": 10**-3.5,
+        "ylim_lo": 10**-2, #-3.5,
         "ylim_up": 10**0,
         "xscale": "log",
         "yscale": "log",
@@ -372,7 +372,7 @@ plot_dc = {
    },
    "ParamNetPokerOnTimeBenchmark": {
         "xlim_lo": 10**2,
-        "ylim_lo": 10**-5,
+        "ylim_lo": 10**-4, #-5,
         "ylim_up": 10**2,
         "xscale": "log",
         "yscale": "log",
@@ -381,11 +381,12 @@ plot_dc = {
    }
 }
 
-list_of_colors = ['#1b9e77', '#d95f02', '#7570b3', '#e7298a', '#66a61e', '#e6ab02', '#a6761d']
+list_of_colors = ['#1b9e77', '#d95f02', '#7570b3', '#e7298a', '#66a61e', '#e6ab02', '#a6761d', '#666666']
 
 color_per_opt = {
     "hpbandster_bohb_eta_3": list_of_colors[0],
     "hpbandster_bohb_eta_2": list_of_colors[0],
+    "hpbandster_hb_eta_3": list_of_colors[],
     "smac_hb_eta_3": list_of_colors[1],
     "smac_hb_eta_2": list_of_colors[1],
     "smac_sf": list_of_colors[6],
@@ -398,6 +399,7 @@ color_per_opt = {
 marker_per_opt = {
     "hpbandster_bohb_eta_3": "o",
     "hpbandster_bohb_eta_2": "o",
+    "hpbandster_hb_eta_3": "o",
     "smac_hb_eta_3": "s",
     "smac_hb_eta_2": "s",
     "smac_sf": "s",
