@@ -41,8 +41,8 @@ dragonfly_realtime:
 # MUMBO ############################################################################################################## #
 mumbo:
   optimizer: mumbo
-  init_samples_per_dim: 3 # Includes fidelity dimension
-  num_fidelity_values: 3 # Continuous fidelity parameters are discretized according to this
+  init_samples_per_dim: 10
+  num_fidelity_values: 10 # Continuous fidelity parameters are discretized according to this
   # GP Settings
   n_optimization_restarts: 5
   update_interval: 1
@@ -92,13 +92,13 @@ smac_sh_eta_3:
   optimizer: smac_sh
   eta: 3
   max_stages: 5
-  display_name: "SMAC-HB"
+  display_name: "SMAC-SH"
 
 smac_hb_eta_2:
   optimizer: smac_hb
   eta: 2
   max_stages: 5
-  display_name: "SMAC-SH (eta2)"
+  display_name: "SMAC-HB (eta2)"
 
 smac_sh_eta_2:
   optimizer: smac_sh
@@ -130,17 +130,4 @@ hpbandster_hb_eta_2:
   eta: 2
   max_stages: 5
   display_name: "HB (eta2)"
-
-hpbandster_sh_eta_3:
-  optimizer: hpbandster_sh
-  eta: 3
-  max_stages: 5
-  display_name: "SH"
-
-hpbandster_sh_eta_2:
-  optimizer: hpbandster_sh
-  eta: 2
-  max_stages: 5
-  display_name: "SH (eta2)"
-
 ...

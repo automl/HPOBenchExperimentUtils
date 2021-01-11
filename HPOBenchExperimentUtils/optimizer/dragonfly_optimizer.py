@@ -64,7 +64,10 @@ class DragonflyOptimizer(Optimizer):
                 fidels = parse_fidelities(z)
                 _log.debug("Calling multi-fidelity objective with configuration %s at fidelity %s" % (
                     conf.get_dictionary(), fidels))
-                ret = self.benchmark.objective_function(conf, fidelity=fidels)
+                ret = self.benchmark.objective_function(conf,
+                                                        fidelity=fidels,
+                                                        **self.settings_for_sending,
+                                                        )
                 _log.debug("multi-fidelity objective returned %s" % (str(ret)))
                 return ret['function_value']
 
