@@ -162,5 +162,6 @@ def save_median_table(benchmark: str, output_dir: Union[Path, str], input_dir: U
     result_df = result_df[header]
 
     val_str = 'unvalidated' if unvalidated else 'validated'
-    output_file = Path(output_dir) / f'{benchmark}_{val_str}_result_table.tex'
+    output_file = Path(output_dir) / f'result_table_{benchmark}_{val_str}.tex'
     write_latex(result_df=result_df, output_file=output_file)
+
