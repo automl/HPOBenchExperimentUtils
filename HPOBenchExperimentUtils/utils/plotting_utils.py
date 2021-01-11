@@ -386,7 +386,7 @@ list_of_colors = ['#1b9e77', '#d95f02', '#7570b3', '#e7298a', '#66a61e', '#e6ab0
 color_per_opt = {
     "hpbandster_bohb_eta_3": list_of_colors[0],
     "hpbandster_bohb_eta_2": list_of_colors[0],
-    "hpbandster_hb_eta_3": list_of_colors[],
+    "hpbandster_hb_eta_3": list_of_colors[7],
     "smac_hb_eta_3": list_of_colors[1],
     "smac_hb_eta_2": list_of_colors[1],
     "smac_sf": list_of_colors[6],
