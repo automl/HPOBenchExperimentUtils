@@ -31,12 +31,24 @@ def plot_fidels(benchmark: str, output_dir: Union[Path, str], input_dir: Union[P
     opt_rh_dc = load_trajectories_as_df(input_dir=input_dir,
                                         which="runhistory")
 
+    other_stats_dc = dict()
     stat_dc = {}
     for opt in opt_rh_dc:
         if len(opt_rh_dc) == 0: continue
+        other_stats_dc[opt] = defaultdict(list)
         rhs = load_json_files(opt_rh_dc[opt])
+        for rh in rhs:
+            final_time = rh[-1]["finish_time"] - rh[0]["boot_time"]
+            bench_time = rh[-1]["total_time_used"]
+            calls = rh[-1]["function_call"]
+            other_stats_dc[opt]["final_time"].append(final_time)
+            other_stats_dc[opt]["bench_time"].append(bench_time)
+            other_stats_dc[opt]["calls"].append(calls)
         df = df_per_optimizer(opt, rhs)
         stat_dc[opt] = df
+
+    with open(Path(output_dir) / f'stats_{benchmark}.json', "w") as fh:
+        json.dump(other_stats_dc, fh)
 
     plt.figure(figsize=[5*len(stat_dc), 5])
 
@@ -63,7 +75,7 @@ def plot_fidels(benchmark: str, output_dir: Union[Path, str], input_dir: Union[P
 
     plt.ylabel("Fidelity")
     plt.tight_layout()
-    plt.savefig(Path(output_dir) / f'{benchmark}_fidel.png')
+    plt.savefig(Path(output_dir) / f'fidel_{benchmark}.png')
     plt.close('all')
 
 
@@ -118,7 +130,7 @@ def plot_overhead(benchmark: str, output_dir: Union[Path, str], input_dir: Union
     a.set_xlim([1, a.set_xlim()[1]])
     #a.set_ylim([0.1, 10000])
     plt.tight_layout()
-    plt.savefig(Path(output_dir) / f'{benchmark}_overhead.png')
+    plt.savefig(Path(output_dir) / f'overhead_{benchmark}.png')
     plt.close('all')
 
 
@@ -232,7 +244,7 @@ def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Un
     plt.xlabel("fidelity")
     plt.ylabel("Spearman correlation coefficient")
     plt.grid(b=True, which="both", axis="both", alpha=0.5)
-    plt.savefig(Path(output_dir) / f'{benchmark}_correlation.png')
+    plt.savefig(Path(output_dir) / f'correlation_{benchmark}.png')
 
     # Create table
     df = defaultdict(list)
@@ -243,6 +255,6 @@ def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Un
             else:
                 df[f1].append("%.3g (%d)" % (np.round(cors[f1, f2][0], 3), cors[f1, f2][1]))
     df = pd.DataFrame(df, index=f_set)
-    with open(Path(output_dir) / f'{benchmark}_correlation_table.tex', 'w') as fh:
+    with open(Path(output_dir) / f'correlation_table_{benchmark}.tex', 'w') as fh:
         latex = df.to_latex(index_names=False, index=True)
         fh.write(latex)
