@@ -32,8 +32,14 @@ def plot_fidels(benchmark: str, output_dir: Union[Path, str], input_dir: Union[P
                                         which="runhistory")
 
     other_stats_dc = dict()
-    stat_dc = {}
-    for opt in opt_rh_dc:
+    best_val = 1000
+    other_stats_dc["lowest"] = best_val
+
+    plt.figure(figsize=[5*len(opt_rh_dc), 5])
+    ax_old = None
+
+    for i, opt in enumerate(opt_rh_dc):
+        _log.info("Handling %s" % opt)
         if len(opt_rh_dc) == 0: continue
         other_stats_dc[opt] = defaultdict(list)
         rhs = load_json_files(opt_rh_dc[opt])
@@ -45,33 +51,32 @@ def plot_fidels(benchmark: str, output_dir: Union[Path, str], input_dir: Union[P
             other_stats_dc[opt]["bench_time"].append(bench_time)
             other_stats_dc[opt]["calls"].append(calls)
         df = df_per_optimizer(opt, rhs)
-        stat_dc[opt] = df
+        ax = plt.subplot(1, len(opt_rh_dc), i+1, sharey=ax_old)
+        
+        thresh = 10000
+        if df.shape[0] > thresh:
+            sub = df[["fidel_values", "total_time_used"]].sample(n=thresh, random_state=1)
+        else:
+            sub = df[["fidel_values", "total_time_used"]]
+        avg = sub.shape[0] / len(df['id'].unique())
+        
+        max_f = np.max(sub["fidel_values"])
+        vals = np.min(df.query('fidel_values == @max_f')["function_values"])
+        best_val = np.min([best_val, vals])
+        other_stats_dc["lowest"] = best_val
 
-    with open(Path(output_dir) / f'stats_{benchmark}.json', "w") as fh:
-        json.dump(other_stats_dc, fh)
-
-    plt.figure(figsize=[5*len(stat_dc), 5])
-
-    ax_old = None
-    for i, opt in enumerate(stat_dc):
-        ax = plt.subplot(1, len(stat_dc), i+1, sharey=ax_old)
-        # get queried fidels
-        df = stat_dc[opt]
-        nseeds = df['id'].unique()
-        avg = []
-        for seed in nseeds:
-            fidels = df[df['id'] == seed]["fidel_values"]
-            avg.append(len(fidels))
-            steps = df[df['id'] == seed]["total_time_used"]
-            label = get_optimizer_setting(opt).get("display_name", opt)
-
-            plt.scatter(steps, fidels, edgecolor=color_per_opt.get(opt, "k"), facecolor="none",
-                        marker=marker_per_opt[opt], alpha=0.5,
-                        label=label if seed == nseeds[-1] else None)
+        label = get_optimizer_setting(opt).get("display_name", opt)
+        plt.scatter(sub["total_time_used"], sub["fidel_values"], edgecolor=color_per_opt.get(opt, "k"), facecolor="none",
+                    marker=marker_per_opt[opt], alpha=0.5,
+                    label=label)
         plt.xscale("log")
         plt.xlabel("Runtime in seconds")
-        plt.legend(title="%g evals on avg" % np.mean(avg))
+        plt.legend(title="%g evals on avg" % avg)
         ax_old = ax
+        del rhs, df, sub
+
+    with open(Path(output_dir) / f'stats_{benchmark}.json', "w") as fh:
+        json.dump(other_stats_dc, fh, indent=4, sort_keys=True)
 
     plt.ylabel("Fidelity")
     plt.tight_layout()
@@ -90,18 +95,12 @@ def plot_overhead(benchmark: str, output_dir: Union[Path, str], input_dir: Union
     opt_rh_dc = load_trajectories_as_df(input_dir=input_dir,
                                         which="runhistory")
 
-    stat_dc = {}
+    plt.figure(figsize=[5, 5])
+    a = plt.subplot(111)
     for opt in opt_rh_dc:
         if len(opt_rh_dc) == 0: continue
         rhs = load_json_files(opt_rh_dc[opt])
         df = df_per_optimizer(opt, rhs)
-        stat_dc[opt] = df
-
-    plt.figure(figsize=[5, 5])
-    a = plt.subplot(111)
-    for opt in stat_dc:
-        # get queried fidels
-        df = stat_dc[opt]
         nseeds = df['id'].unique()
         for seed in nseeds:
             steps = df[df['id'] == seed]["total_time_used"]
@@ -110,7 +109,7 @@ def plot_overhead(benchmark: str, output_dir: Union[Path, str], input_dir: Union
             benchmark_cost = df[df['id'] == seed]["finish_time"] - df[df['id'] == seed]["start_time"]
             benchmark_cost = np.cumsum(benchmark_cost)
             plt.plot(steps, benchmark_cost, color='k', alpha=0.5, zorder=99,
-                     label=benchmark if seed == 0 and opt == list(stat_dc.keys())[0] else None)
+                     label=benchmark if seed == 0 and opt == list(opt_rh_dc.keys())[0] else None)
 
             overhead = df[df['id'] == seed]["start_time"] - df[df['id'] == seed]["finish_time"].shift(1)
             overhead = np.cumsum(overhead)
@@ -148,19 +147,14 @@ def plot_ecdf(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pat
         ys = np.arange(1, len(xs) + 1) / float(len(xs))
         return xs, ys
 
-    stat_dc = {}
+    plt.figure(figsize=[5, 5])
+    a = plt.subplot(111)
+
     for opt in opt_rh_dc:
         if len(opt_rh_dc) == 0: continue
         rhs = load_json_files(opt_rh_dc[opt])
         df = df_per_optimizer(opt, rhs, y_best=y_best)
-        stat_dc[opt] = df
-
-    plt.figure(figsize=[5, 5])
-    a = plt.subplot(111)
-    for opt in stat_dc:
         color = color_per_opt.get(opt, "k")
-        df = stat_dc[opt]
-
         obj_vals = df["function_values"]
         x, y = ecdf(obj_vals.to_numpy())
         label = get_optimizer_setting(opt).get("display_name", opt)
@@ -182,7 +176,7 @@ def plot_ecdf(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pat
     plt.tight_layout()
     plt.legend()
     plt.grid(b=True, which="both", axis="both", alpha=0.5)
-    plt.savefig(Path(output_dir) / f'{benchmark}_ecdf.png')
+    plt.savefig(Path(output_dir) / f'ecdf_{benchmark}.png')
 
 
 def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str], **kwargs):
