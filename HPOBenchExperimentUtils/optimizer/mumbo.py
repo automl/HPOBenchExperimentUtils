@@ -53,9 +53,9 @@ class MultiTaskMUMBO(SingleFidelityOptimizer):
         # experiments were performed by combining MUMBO with a different surrogate model, such as FABOLAS for MNIST.
         if isinstance(self.main_fidelity, cs.UniformFloatHyperparameter):
             num_fidelity_values = get_mandatory_optimizer_setting(
-                settings, "num_fidelity_values", err_msg="When using a continuous fidelity parameter, number of "
-                                                         "discrete fidelity levels must be specified in the parameter "
-                                                         "'num_fidelity_values'")
+                settings, "num_fidelity_values",
+                err_msg="When using a continuous fidelity parameter, number of discrete fidelity levels must be "
+                        "specified in the parameter 'num_fidelity_values'")
             _log.debug("Discretizing the main fidelity %s for use with MUMBO into %d fidelity levels." %
                        (self.main_fidelity.name, num_fidelity_values))
             self.info_sources = np.linspace(self.min_budget, self.max_budget, num_fidelity_values)
@@ -65,7 +65,13 @@ class MultiTaskMUMBO(SingleFidelityOptimizer):
         elif isinstance(self.main_fidelity, cs.CategoricalHyperparameter):
             self.info_sources = np.asarray(self.main_fidelity.choices)
         elif isinstance(self.main_fidelity, cs.UniformIntegerHyperparameter):
-            self.info_sources = np.arange(start=self.min_budget, stop=self.max_budget + 1)
+            num_fidelity_values = get_mandatory_optimizer_setting(
+                settings, "num_fidelity_values",
+                err_msg="When using a continuous fidelity parameter, number of discrete fidelity levels must be "
+                        "specified in the parameter 'num_fidelity_values'")
+            self.info_sources = np.floor(np.linspace(self.min_budget, self.max_budget, num_fidelity_values,
+                                                     endpoint=True)).astype(int)
+
         else:
             raise NotImplementedError(f"Handling fidelity parameters of type {type(self.main_fidelity)} has not yet "
                                       f"been implemented for MUMBO.")
