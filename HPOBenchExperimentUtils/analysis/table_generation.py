@@ -117,7 +117,8 @@ def save_median_table(benchmark: str, output_dir: Union[Path, str], input_dir: U
     for opt in opt_keys:
         if opt == best_opt: continue
         opt_val = np.array(result_df["function_values_lst"][opt])
-        assert len(opt_val) == len(best_val) == 24
+        if not len(opt_val) == len(best_val) == 24:
+            print("There are not 24 repetitions")
 
         if np.sum(best_val - opt_val) == 0:
             # Results are identical
@@ -161,5 +162,6 @@ def save_median_table(benchmark: str, output_dir: Union[Path, str], input_dir: U
     result_df = result_df[header]
 
     val_str = 'unvalidated' if unvalidated else 'validated'
-    output_file = Path(output_dir) / f'{benchmark}_{val_str}_result_table.tex'
+    output_file = Path(output_dir) / f'result_table_{benchmark}_{val_str}.tex'
     write_latex(result_df=result_df, output_file=output_file)
+
