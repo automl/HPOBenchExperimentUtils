@@ -6,7 +6,7 @@ xgboostsub:
   mem_limit_in_mb: 6000
   import_from: ml.xgboost_benchmark
   import_benchmark: XGBoostBenchmark
-  main_fidelity: subsample
+  main_fidelity: dataset_fraction
   is_surrogate: false
 
 xgboostest:
