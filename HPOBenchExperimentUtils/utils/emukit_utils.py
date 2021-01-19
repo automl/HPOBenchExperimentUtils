@@ -10,7 +10,7 @@ from math import log, exp
 from pathlib import Path
 import numpy as np
 import time
-import json
+import json_tricks as json
 
 _log = logging.getLogger(__name__)
 
