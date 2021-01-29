@@ -13,7 +13,6 @@ from HPOBenchExperimentUtils.utils.runner_utils import get_optimizer_setting
 
 _main_log.setLevel(logging.DEBUG)
 _log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, format=_default_log_format)
 
 
 def plot_fidels(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str], **kwargs):

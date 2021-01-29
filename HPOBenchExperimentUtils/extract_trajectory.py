@@ -11,11 +11,10 @@ from HPOBenchExperimentUtils.utils.validation_utils import load_json_files
 
 from HPOBenchExperimentUtils.utils import TRAJECTORY_V1_FILENAME, TRAJECTORY_V2_FILENAME, RUNHISTORY_FILENAME
 
-from HPOBenchExperimentUtils import _log as _main_log, _default_log_format
+from HPOBenchExperimentUtils import _log as _root_log
 
-_main_log.setLevel(level=logging.INFO)
+_root_log.setLevel(level=logging.INFO)
 _log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, format=_default_log_format)
 
 
 def extract_trajectory(output_dir: Union[Path, str], debug: Union[bool, None] = False):
