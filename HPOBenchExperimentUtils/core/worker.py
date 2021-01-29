@@ -1,17 +1,15 @@
-import logging
 import json
+import logging
 import sys
 import threading
+from pathlib import Path
+from time import time, sleep
+from typing import Union, Dict
 
 import Pyro4
-import Pyro4.util
-import Pyro4.naming
 import Pyro4.errors
-
-from typing import Union, Dict
-from time import time, sleep
-from pathlib import Path
-
+import Pyro4.naming
+import Pyro4.util
 from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 
 from HPOBenchExperimentUtils.core import WORKER_WAIT_FOR_SCHEDULER_TO_START_IN_S, \

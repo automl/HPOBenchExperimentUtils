@@ -1,8 +1,8 @@
-import Pyro4
-import Pyro4.errors
-
 import threading
 from time import sleep
+
+import Pyro4
+import Pyro4.errors
 
 
 class DaemonObject(object):
