@@ -15,16 +15,13 @@ from hpobench.abstract_benchmark import AbstractBenchmark
 from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 from pebble import concurrent
 
+from HPOBenchExperimentUtils.core.record import Record
+from HPOBenchExperimentUtils.utils.io import write_line_to_file
+
 from HPOBenchExperimentUtils.utils import MAXINT, RUNHISTORY_FILENAME, TRAJECTORY_V1_FILENAME, \
     VALIDATED_RUNHISTORY_FILENAME
 
 logger = logging.getLogger('Bookkeeper')
-
-
-def _get_dict_types(d):
-    assert isinstance(d, Dict), f"Expected to display items types for a dictionary, but received object of " \
-                                f"type {type(d)}"
-    return {k: type(v) if not isinstance(v, Dict) else _get_dict_types(v) for k, v in d.items()}
 
 
 def _safe_cast_config(configuration):
@@ -57,9 +54,11 @@ def keep_track(validate=False):
                 self.increase_total_fuel_used(list(f.values())[0] or 0)
                 self.increase_total_time_used(self.cutoff_limit_in_s)
 
-                return {'function_value': MAXINT,
-                        'cost': self.cutoff_limit_in_s,
-                        'info': {'fidelity': fidelity or -1234}}
+                record = Record(function_value=MAXINT,
+                                cost=self.cutoff_limit_in_s,
+                                info={'fidelity': fidelity or -1234})
+
+                return record.get_dictionary()
 
             # We can only compute the finish time after we obtain the result()
             finish_time = time()
@@ -94,18 +93,19 @@ def keep_track(validate=False):
                 and not tae_exceeds_limit(self.get_total_tae_used(), self.tae_limit) \
                     and not time_per_config_exceeds_limit(time_for_evaluation, self.cutoff_limit_in_s):
 
-                record = {'start_time': start_time,
-                          'finish_time': finish_time,
-                          'function_value': result_dict['function_value'],
-                          'fidelity': fidelity,
-                          'cost': result_dict['cost'],
-                          'configuration': configuration,
-                          'info': result_dict['info'],
-                          'function_call': self.get_total_tae_used(),
-                          'total_time_used': total_time_used,
-                          'total_objective_costs': self.total_objective_costs,
-                          'total_fuel_used': self.get_total_fuel_used(),
-                          }
+                record = Record(start_time=start_time,
+                                finish_time=finish_time,
+                                function_value=result_dict['function_value'],
+                                fidelity=fidelity,
+                                cost=result_dict['cost'],
+                                configuration=configuration,
+                                info=result_dict['info'],
+                                function_call=self.get_total_tae_used(),
+                                total_time_used=total_time_used,
+                                total_objective_costs=self.total_objective_costs,
+                                total_fuel_used=self.get_total_fuel_used())
+
+                record = record.get_dictionary()
 
                 log_file = self.log_file if not validate else self.validate_log_file
                 self.write_line_to_file(log_file, record)
@@ -117,7 +117,6 @@ def keep_track(validate=False):
             self.increase_total_fuel_used(list(fidelity.values())[0] or 0)
 
             return result_dict
-
         return wrapped
     return wrapper
 
@@ -279,14 +278,7 @@ class Bookkeeper:
 
     @staticmethod
     def write_line_to_file(file, dict_to_store, mode='a+'):
-        with file.open(mode) as fh:
-            try:
-                json_tricks.dump(dict_to_store, fh)
-            except TypeError as e:
-                logger.error(f"Failed to serialize dictionary to JSON. Received the following types as "
-                             f"input:\n{_get_dict_types(dict_to_store)}")
-                raise e
-            fh.write(os.linesep)
+        write_line_to_file(file, dict_to_store, mode)
 
     def calculate_incumbent(self, record: Dict):
         """

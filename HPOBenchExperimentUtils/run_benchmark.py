@@ -5,14 +5,13 @@ from time import time, sleep
 from typing import Union, Dict
 
 try:
-    from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper, total_time_exceeds_limit, \
-        used_fuel_exceeds_limit, \
-    tae_exceeds_limit
+    from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
 except:
     import sys, os.path
     sys.path.append(os.path.expandvars('$HPOEXPUTIL_PATH'))
 
-from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
+from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper, total_time_exceeds_limit, used_fuel_exceeds_limit, \
+    tae_exceeds_limit
 from HPOBenchExperimentUtils.utils import PING_OPTIMIZER_IN_S
 from HPOBenchExperimentUtils.utils.optimizer_utils import get_optimizer, optimizer_str_to_enum
 from HPOBenchExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_benchmark_settings, \
@@ -177,7 +176,6 @@ def run_benchmark(optimizer: str,
 
     _log.info(f'Extract the trajectories')
     extract_trajectory(output_dir=output_dir, debug=debug)
-
 
     _log.info(f'Run Benchmark - Finished.')
 
