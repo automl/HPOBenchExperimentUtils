@@ -13,7 +13,6 @@ from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc
 
 _main_log.setLevel(logging.DEBUG)
 _log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, format=_default_log_format)
 
 
 def write_latex(result_df, output_file):

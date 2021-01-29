@@ -12,7 +12,6 @@ import matplotlib.pyplot as plt
 
 _main_log.setLevel(logging.DEBUG)
 _log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, format=_default_log_format)
 
 
 def read_trajectories(benchmark: str, input_dir: Path, train: bool=True, y_best: float=0.0):

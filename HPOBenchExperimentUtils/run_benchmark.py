@@ -19,11 +19,10 @@ from HPOBenchExperimentUtils.utils.runner_utils import transform_unknown_params_
     get_optimizer_setting
 from HPOBenchExperimentUtils.extract_trajectory import extract_trajectory
 
-from HPOBenchExperimentUtils import _log as _main_log, _default_log_format
+from HPOBenchExperimentUtils import _log as _root_log
 
-_main_log.setLevel(logging.INFO)
+_root_log.setLevel(logging.INFO)
 _log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, format=_default_log_format)
 
 
 def run_benchmark(optimizer: str,
@@ -70,7 +69,7 @@ def run_benchmark(optimizer: str,
     _log.info(f'Start running benchmark {benchmark} with optimizer setting {optimizer}.')
 
     if debug:
-        _main_log.setLevel(level=logging.DEBUG)
+        _root_log.setLevel(level=logging.DEBUG)
         from hpobench.util.container_utils import enable_container_debug
         enable_container_debug()
 
