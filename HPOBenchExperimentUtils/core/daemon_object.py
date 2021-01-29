@@ -9,7 +9,7 @@ class DaemonObject(object):
     def __init__(self, ns_ip, ns_port, registration_name, logger):
         # This flag indicates that the daemon is running, so the worker can be found by the scheduler.
         # The starting procedure sets this flag to True.
-        # When it is set to false, then the daemon automatically stops.
+        # It is the looping condition for the thread. When it is set to false, then the daemon automatically stops.
         self.thread_is_running = False
 
         self.logger = logger
@@ -27,13 +27,15 @@ class DaemonObject(object):
         self.logger.debug(f'The object has the uri: {str(self.uri)}')
 
     def __start_daemon(self):
-        # Start the Pyro daemon. The daemon allows other objects to interact with this worker.
-        # Also: make it a daemon process. Then the thread gets killed when the worker is shut down
+        """
+        Start the Pyro daemon. The daemon allows other objects to interact with this worker.
+        Also: make it a daemon process. Then the thread gets killed when the worker is shut down
+        """
         thread = threading.Thread(target=self.__run_daemon, name=f'Thread: {self.registration_name}', daemon=True)
         thread.start()
 
-        # give the thread some time to start
-        sleep(1)
+        # Give the thread some time to start
+        sleep(2)
         return thread
 
     def __run_daemon(self):
@@ -41,8 +43,10 @@ class DaemonObject(object):
         This is the background thread that registers the object in the nameserver. Also, it starts the request loop
         to make the object able to receive requests.
 
-        When the flag `thread_is_running` is set to False (from outside), then the request loop stops and the daemon shuts
-        down. Also, since this thread is a daemon thread, it automatically stops, when the main thread terminates.
+        When the flag `thread_is_running` is set to False (also from outside possible), then the request loop stops
+        and the daemon shuts down.
+
+        Since this thread is a daemon thread, it automatically stops, when the main thread terminates.
         """
         self.thread_is_running = True
 
@@ -58,3 +62,12 @@ class DaemonObject(object):
         except Pyro4.errors.NamingError as e:
             self.logger.error('We could not find the nameserver. Please make sure that it is running.')
             self.logger.exception(e)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.__del__()
+
+    def __del__(self):
+        self.thread_is_running = False

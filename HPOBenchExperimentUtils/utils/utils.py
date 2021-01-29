@@ -24,6 +24,7 @@ def time_limit(seconds):
     finally:
         signal.alarm(0)
 
+
 def get_mandatory_optimizer_setting(settings_dict: dict, setting_name: str, err_msg: str = None):
     """ Convenience function that tries to fetch a given string from the settings dictionary and raises an error if it
     is not found. """
@@ -35,6 +36,7 @@ def get_mandatory_optimizer_setting(settings_dict: dict, setting_name: str, err_
         return settings_dict[setting_name]
     except KeyError as e:
         raise KeyError(err_msg) from e
+
 
 def standard_rng_init(rng: Union[np.random.RandomState, int, None]):
     if isinstance(rng, np.random.RandomState):
