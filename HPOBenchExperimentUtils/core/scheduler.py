@@ -214,6 +214,11 @@ class Scheduler(DaemonObject):
 
     def __del__(self):
         self.logger.debug('Shutdown..')
+
+        if self.credentials_file.exists():
+            self.logger.debug(f'Going to delete the credentials file: {self.credentials_file}')
+            self.credentials_file.unlink()
+
         if self.lock_dir.exists():
             self.logger.debug(f'Going to delete the lock file directory {self.lock_dir}')
             shutil.rmtree(self.lock_dir)

@@ -109,32 +109,27 @@ def run_benchmark(optimizer: str,
 
     # Create a Process Manager to get access to the proxy variables. They represent the state of the optimization
     # process.
-    manager = Manager()
-
-    global_lock = manager.Lock()
-    # from multiprocessing import Lock
-    # global_lock = Lock()
+    # manager = Manager()
 
     # This variable count the time the benchmark was evaluated (in seconds).
     # This is the cost of the objective function + the overhead. Use type double.
-    total_time_proxy = manager.Value('d', 0)
-    # total_time_proxy = Value('d', 0)
+    # total_time_proxy = manager.Value('d', 0)
+    total_time_proxy = Value('d', 0)
 
     # We can also restrict how often a optimizer is allowed to execute the target algorithm. Encode it as type long.
-    total_tae_calls_proxy = manager.Value('l', 0)
-    # total_tae_calls_proxy = Value('l', 0)
+    # total_tae_calls_proxy = manager.Value('l', 0)
+    total_tae_calls_proxy = Value('l', 0)
 
     # Or we can give an upper limit for amount of budget, the optimizer can use. One can think of it as fuel. Running a
     # benchmark reduces the fuel by `budget`. Use type double.
-    total_fuel_used_proxy = manager.Value('d', 0)
-    # total_fuel_used_proxy = Value('d', 0)
+    # total_fuel_used_proxy = manager.Value('d', 0)
+    total_fuel_used_proxy = Value('d', 0)
 
     benchmark = Bookkeeper(benchmark=benchmark,
                            output_dir=output_dir,
                            total_time_proxy=total_time_proxy,
                            total_tae_calls_proxy=total_tae_calls_proxy,
                            total_fuel_used_proxy=total_fuel_used_proxy,
-                           global_lock=global_lock,
                            wall_clock_limit_in_s=settings['time_limit_in_s'],
                            tae_limit=settings['tae_limit'],
                            fuel_limit=settings['fuel_limit'],
