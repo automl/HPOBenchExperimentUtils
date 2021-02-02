@@ -177,9 +177,20 @@ class Bookkeeper:
                            rng: Union[np.random.RandomState, int, None] = None, **kwargs) -> Dict:
         @concurrent.process(timeout=self.cutoff_limit_in_s)
         def __objective_function(configuration, fidelity, **benchmark_settings_for_sending):
-            return self.benchmark.objective_function(configuration=configuration,
-                                                     fidelity=fidelity,
-                                                     **benchmark_settings_for_sending)
+            if "random_seed_name" in benchmark_settings_for_sending:
+                new_dc = copy.copy(benchmark_settings_for_sending)
+                tmp_rng = np.random.RandomState()
+                new_idx = int(tmp_rng.choice(benchmark_settings_for_sending["random_seed_choice"]))
+                new_dc[benchmark_settings_for_sending["random_seed_name"]] = new_idx
+                del new_dc["random_seed_name"]
+                del new_dc["random_seed_choice"]
+                return self.benchmark.objective_function(configuration=configuration,
+                                                         fidelity=fidelity,
+                                                         **new_dc)
+            else:
+                return self.benchmark.objective_function(configuration=configuration,
+                                                         fidelity=fidelity,
+                                                         **benchmark_settings_for_sending)
 
         result_dict = __objective_function(configuration=configuration,
                                            fidelity=fidelity,

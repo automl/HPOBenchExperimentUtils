@@ -1,9 +1,16 @@
-import json
+try:
+    import ujson as json
+    print("Use ujson")
+except:
+    import json
+    print("Using json. Installing ujson could provide speedup")
+
 import logging
 import os
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List
+import time
 
 import numpy as np
 import pandas as pd
@@ -104,14 +111,17 @@ def load_json_files(file_paths: List[Path]) -> List:
     List
         List of lists. Each list contains the content of a json file.
     """
+    
+    start = time.time()
     assert len(file_paths) >= 1
 
     data = []
     for file in file_paths:
         lines = read_lines(file)
-
         file_content = [json.loads(line) for line in lines]
         data.append(file_content)
+    dur = time.time() - start
+    _log.info("Reading %d files took %f sec" % (len(file_paths), dur))
     return data
 
 

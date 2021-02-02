@@ -68,7 +68,10 @@ class DehbOptimizer(SingleFidelityOptimizer):
                 else:
                     budget = float(budget)
             
-                res = benchmark.objective_function(config, fidelity={self.main_fidelity.name: budget})
+                res = benchmark.objective_function(config,
+                                                   fidelity={self.main_fidelity.name: budget},
+                                                   **self.settings_for_sending,
+                                                   )
             else:
                 res = benchmark.objective_function(config)
             fitness, cost = res['function_value'], res['cost']

@@ -13,6 +13,7 @@ from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 import ConfigSpace as cs
 from emukit.core import ParameterSpace, InformationSourceParameter
 from emukit.core.initial_designs import RandomDesign
+from emukit.core.initial_designs.latin_design import LatinDesign
 from emukit.bayesian_optimization.loops import BayesianOptimizationLoop
 from emukit.core.optimization import MultiSourceAcquisitionOptimizer, GradientAcquisitionOptimizer
 from emukit.bayesian_optimization.acquisitions.max_value_entropy_search import MUMBO
@@ -24,6 +25,10 @@ from GPy.kern import RBF, Matern52
 
 _log = logging.getLogger(__name__)
 
+initial_designs = {
+    "random": RandomDesign,
+    "latin": LatinDesign
+}
 
 # Refer MUMBO paper: https://arxiv.org/pdf/2006.12093.pdf
 # noinspection PyPep8Naming
@@ -48,19 +53,28 @@ class MultiTaskMUMBO(SingleFidelityOptimizer):
         # experiments were performed by combining MUMBO with a different surrogate model, such as FABOLAS for MNIST.
         if isinstance(self.main_fidelity, cs.UniformFloatHyperparameter):
             num_fidelity_values = get_mandatory_optimizer_setting(
-                settings, "num_fidelity_values", err_msg="When using a continuous fidelity parameter, number of "
-                                                         "discrete fidelity levels must be specified in the parameter "
-                                                         "'num_fidelity_values'")
+                settings, "num_fidelity_values",
+                err_msg="When using a continuous fidelity parameter, number of discrete fidelity levels must be "
+                        "specified in the parameter 'num_fidelity_values'")
             _log.debug("Discretizing the main fidelity %s for use with MUMBO into %d fidelity levels." %
                        (self.main_fidelity.name, num_fidelity_values))
             self.info_sources = np.linspace(self.min_budget, self.max_budget, num_fidelity_values)
 
         elif isinstance(self.main_fidelity, cs.OrdinalHyperparameter):
-            self.info_sources = np.asarray(self.main_fidelity.get_seq_order())
+            self.info_sources = np.asarray(self.main_fidelity.sequence)
         elif isinstance(self.main_fidelity, cs.CategoricalHyperparameter):
             self.info_sources = np.asarray(self.main_fidelity.choices)
         elif isinstance(self.main_fidelity, cs.UniformIntegerHyperparameter):
-            self.info_sources = np.arange(start=self.min_budget, stop=self.max_budget + 1)
+            num_fidelity_values = get_mandatory_optimizer_setting(
+                settings, "num_fidelity_values",
+                err_msg="When using a continuous fidelity parameter, number of discrete fidelity levels must be "
+                        "specified in the parameter 'num_fidelity_values'")
+            self.info_sources = np.floor(np.linspace(self.min_budget, self.max_budget, num_fidelity_values,
+                                                     endpoint=True)).astype(int)
+
+        else:
+            raise NotImplementedError(f"Handling fidelity parameters of type {type(self.main_fidelity)} has not yet "
+                                      f"been implemented for MUMBO.")
 
         # InformationSourceParameter is a sub-class of a DiscreteParameter and must be used on account of internal
         # checks in the MUMBO code for its type.
@@ -85,8 +99,7 @@ class MultiTaskMUMBO(SingleFidelityOptimizer):
                 _log.debug("Extracted configuration: %s" % str(x[i, :-1]))
                 _log.debug("Extracted fidelity value: %s" % str(self.info_sources[int(x[i, -1])]))
                 fidelity = self.fidelity_emukit_to_cs(int(x[i, -1]))
-                config = cs.Configuration(self.original_space,
-                                          values={name: func(i) for (name, func), i in zip(self.to_cs, x[i, :-1])})
+                config = cs.Configuration(self.original_space, values=self.to_cs(x[i, :-1]))
                 res = benchmark.objective_function(config, fidelity=fidelity)
                 _log.debug("Benchmark evaluation results: %s" % str(res))
                 results.append([res["function_value"]])
@@ -98,6 +111,7 @@ class MultiTaskMUMBO(SingleFidelityOptimizer):
         self.benchmark_caller = wrapper
 
         self.init_samples_per_dim = get_mandatory_optimizer_setting(settings, "init_samples_per_dim")
+        self.initial_design_type = initial_designs[str(settings.get("initial_design", "random")).lower()]
         self.gp_settings = {
             "n_optimization_restarts": get_mandatory_optimizer_setting(settings, "n_optimization_restarts"),
             "update_interval": get_mandatory_optimizer_setting(settings, "update_interval"),
@@ -124,19 +138,23 @@ class MultiTaskMUMBO(SingleFidelityOptimizer):
         # Generate warm-start samples. Same as the MUMBO example code. RandomDesign, as mentioned in B.1 of the
         # appendix of the MUMBO paper.
         augmented_space = ParameterSpace([*self.emukit_space.parameters, self.emukit_fidelity])
-        initial_design = RandomDesign(self.emukit_space)
+        initial_design = self.initial_design_type(self.emukit_space)
 
-        # For n samples per dim, input space dimensionality D, we generate nxD samples. Then we need to evaluate each
-        # of these samples on every available fidelity value. cf. Section B.1 of the appendix of the paper.
+        # For n samples per dim, input space dimensionality D, we generate nxD samples.
+        # As per Section B.1 of the appendix of the paper, we need to evaluate each of these samples on every available
+        # fidelity value, but that is wasteful for non-synthetic benchmarks, so we opt for uniformly distributing the
+        # fidelity values across the sampled initial configurations. It is assumed that the number of unique fidelity
+        # values is less than the number of sampled configurations.
         n_init = self.init_samples_per_dim * self.emukit_space.dimensionality
-        X_init = np.tile(initial_design.get_samples(n_init), (self.info_sources.shape[0], 1))
+        X_init = initial_design.get_samples(n_init)
+        n_reps = n_init // self.info_sources.shape[0] + 1
         fmin, fmax = self.emukit_fidelity.bounds[0]
-        sample_fidelities = np.repeat(np.arange(fmin, fmax + 1), repeats=n_init).reshape(-1, 1)
+        sample_fidelities = np.tile(np.arange(fmin, fmax + 1), n_reps)[:n_init].reshape(-1, 1)
         X_init = np.concatenate((X_init, sample_fidelities), axis=1)
-        # Y_init = np.asarray([self.benchmark_caller(X_init[i, :]) for i in range(X_init.shape[0])]).reshape(-1, 1)
         Y_init = self.benchmark_caller(X_init)
         _log.debug("Generated %d warm-start samples, each evaluated on %d fidelity values, for a total of %d initial "
-                   "evaluations." % (n_init, (fmax - fmin + 1), Y_init.shape[0]))
+                   "evaluations using initial design %s." % (n_init, (fmax - fmin + 1), Y_init.shape[0],
+                                                             self.initial_design_type.__name__))
 
         # Setup kernels for the GP. No specific references found in the paper except a brief mention in Eq. 3, section
         # 2.3. Using the code provided in the example notebook.
@@ -190,7 +208,7 @@ class MultiTaskMUMBO(SingleFidelityOptimizer):
         # These are hooks that help us record the trajectory for an information theoretic acquisition function, which
         # cannot be handled otherwise by the Bookkeeper.
         self.optimizer.loop_start_event.append(emukit_utils.get_init_trajectory_hook(self.output_dir))
-        self.optimizer.iteration_end_event.append(emukit_utils.get_trajectory_hook(self.output_dir))
+        self.optimizer.iteration_end_event.append(emukit_utils.get_trajectory_hook(self.output_dir, self.to_cs))
         _log.debug("Multi-Task GP with MUMBO acquisition ready to run.")
 
     def setup(self):

@@ -100,6 +100,6 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
     val_str = 'optimized' if unvalidated else 'validated'
     ax.set_title(f'{benchmark}')
     plt.grid(b=True, which="both", axis="both", alpha=0.5)
-    plt.savefig(Path(output_dir) / f'{benchmark}_{val_str}_{criterion}_trajectory.png')
+    plt.savefig(Path(output_dir) / f'trajectory_{benchmark}_{val_str}_{criterion}.png')
     plt.close('all')
     return 1

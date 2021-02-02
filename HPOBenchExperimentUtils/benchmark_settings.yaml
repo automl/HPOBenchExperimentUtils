@@ -6,7 +6,7 @@ xgboostsub:
   mem_limit_in_mb: 6000
   import_from: ml.xgboost_benchmark
   import_benchmark: XGBoostBenchmark
-  main_fidelity: subsample
+  main_fidelity: dataset_fraction
   is_surrogate: false
 
 xgboostest:
@@ -16,6 +16,15 @@ xgboostest:
   import_from: ml.xgboost_benchmark
   import_benchmark: XGBoostBenchmark
   main_fidelity: n_estimators
+  is_surrogate: false
+
+svm:
+  time_limit_in_s: 7200
+  cutoff_in_s: 7200
+  mem_limit_in_mb: 6000
+  import_from: ml.svm_benchmark
+  import_benchmark: SupportVectorMachine
+  main_fidelity: dataset_fraction
   is_surrogate: false
 
 # Run for 1 d
@@ -77,7 +86,125 @@ metalearna:
   import_benchmark: MetaLearna
   is_surrogate: false
 
-# surrogate benchmarks
+# surrogate benchmarks - paramnet
+
+ParamNetAdultOnStepsBenchmark:
+  time_limit_in_s: 604800 # 7 days
+  cutoff_in_s: 604800
+  mem_limit_in_mb: 6000
+  import_from: surrogates.paramnet_benchmark
+  import_benchmark: ParamNetAdultOnStepsBenchmark
+  is_surrogate: true
+
+ParamNetAdultOnTimeBenchmark:
+  time_limit_in_s: 604800
+  cutoff_in_s: 604800
+  mem_limit_in_mb: 6000
+  import_from: surrogates.paramnet_benchmark
+  import_benchmark: ParamNetAdultOnTimeBenchmark
+  is_surrogate: true
+
+ParamNetHiggsOnStepsBenchmark:
+  time_limit_in_s: 604800 # 7 days
+  cutoff_in_s: 604800
+  mem_limit_in_mb: 6000
+  import_from: surrogates.paramnet_benchmark
+  import_benchmark: ParamNetHiggsOnStepsBenchmark
+  is_surrogate: true
+
+ParamNetHiggsOnTimeBenchmark:
+  time_limit_in_s: 604800
+  cutoff_in_s: 604800
+  mem_limit_in_mb: 6000
+  import_from: surrogates.paramnet_benchmark
+  import_benchmark: ParamNetHiggsOnTimeBenchmark
+  is_surrogate: true
+
+ParamNetLetterOnStepsBenchmark:
+  time_limit_in_s: 604800 # 7 days
+  cutoff_in_s: 604800
+  mem_limit_in_mb: 6000
+  import_from: surrogates.paramnet_benchmark
+  import_benchmark: ParamNetLetterOnStepsBenchmark
+  is_surrogate: true
+
+ParamNetLetterOnTimeBenchmark:
+  time_limit_in_s: 604800
+  cutoff_in_s: 604800
+  mem_limit_in_mb: 6000
+  import_from: surrogates.paramnet_benchmark
+  import_benchmark: ParamNetLetterOnTimeBenchmark
+  is_surrogate: true
+
+ParamNetMnistOnStepsBenchmark:
+  time_limit_in_s: 604800 # 7 days
+  cutoff_in_s: 604800
+  mem_limit_in_mb: 6000
+  import_from: surrogates.paramnet_benchmark
+  import_benchmark: ParamNetMnistOnStepsBenchmark
+  is_surrogate: true
+
+ParamNetMnistOnTimeBenchmark:
+  time_limit_in_s: 604800
+  cutoff_in_s: 604800
+  mem_limit_in_mb: 6000
+  import_from: surrogates.paramnet_benchmark
+  import_benchmark: ParamNetMnistOnTimeBenchmark
+  is_surrogate: true
+
+ParamNetOptdigitsOnStepsBenchmark:
+  time_limit_in_s: 604800 # 7 days
+  cutoff_in_s: 604800
+  mem_limit_in_mb: 6000
+  import_from: surrogates.paramnet_benchmark
+  import_benchmark: ParamNetOptdigitsOnStepsBenchmark
+  is_surrogate: true
+
+ParamNetOptdigitsOnTimeBenchmark:
+  time_limit_in_s: 604800
+  cutoff_in_s: 604800
+  mem_limit_in_mb: 6000
+  import_from: surrogates.paramnet_benchmark
+  import_benchmark: ParamNetOptdigitsOnTimeBenchmark
+  is_surrogate: true
+
+ParamNetPokerOnStepsBenchmark:
+  time_limit_in_s: 604800 # 7 days
+  cutoff_in_s: 604800
+  mem_limit_in_mb: 6000
+  import_from: surrogates.paramnet_benchmark
+  import_benchmark: ParamNetPokerOnStepsBenchmark
+  is_surrogate: true
+
+ParamNetPokerOnTimeBenchmark:
+  time_limit_in_s: 604800
+  cutoff_in_s: 604800
+  mem_limit_in_mb: 6000
+  import_from: surrogates.paramnet_benchmark
+  import_benchmark: ParamNetPokerOnTimeBenchmark
+  is_surrogate: true
+
+# surrogate benchmarks - nas101
+
+NASCifar10ABenchmark_fixed_seed_0:
+  time_limit_in_s: 10000000
+  cutoff_in_s: 10000000
+  mem_limit_in_mb: 6000
+  import_from: nas.nasbench_101
+  import_benchmark: NASCifar10ABenchmark
+  is_surrogate: true
+  run_index: 0
+
+NASCifar10ABenchmark_random_seed:
+  time_limit_in_s: 10000000
+  cutoff_in_s: 10000000
+  mem_limit_in_mb: 6000
+  import_from: nas.nasbench_101
+  import_benchmark: NASCifar10ABenchmark
+  is_surrogate: true
+  random_seed_name: "run_index"
+  random_seed_choice: [0, 1, 2]
+
 NASCifar10ABenchmark:
   time_limit_in_s: 10000000
   cutoff_in_s: 10000000
@@ -101,6 +228,8 @@ NASCifar10CBenchmark:
   import_from: nas.nasbench_101
   import_benchmark: NASCifar10CBenchmark
   is_surrogate: true
+
+# surrogate benchmarks - nashpo
 
 SliceLocalizationBenchmark:
   time_limit_in_s: 10000000
@@ -134,13 +263,7 @@ ParkinsonsTelemonitoringBenchmark:
   import_benchmark: ParkinsonsTelemonitoringBenchmark
   is_surrogate: true
 
-Cifar10NasBench201Benchmark:
-  time_limit_in_s: 10000000
-  cutoff_in_s: 10000000
-  mem_limit_in_mb: 6000
-  import_from: nas.nasbench_201
-  import_benchmark: Cifar10NasBench201Benchmark
-  is_surrogate: true
+# surrogate benchmarks - nas201
 
 Cifar10ValidNasBench201Benchmark:
   time_limit_in_s: 10000000
@@ -165,6 +288,8 @@ ImageNetNasBench201Benchmark:
   import_from: nas.nasbench_201
   import_benchmark: ImageNetNasBench201Benchmark
   is_surrogate: true
+
+# surrogate benchmarks - nas1shot1
 
 NASBench1shot1SearchSpace1Benchmark:
   time_limit_in_s: 10000000

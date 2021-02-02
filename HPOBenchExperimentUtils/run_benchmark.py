@@ -81,7 +81,12 @@ def run_benchmark(optimizer: str,
     optimizer_enum = optimizer_str_to_enum(optimizer_settings['optimizer'])
     _log.debug(f'Optimizer: {optimizer_enum}')
 
-    output_dir = Path(output_dir) / benchmark / optimizer / f'run-{rng}'
+    if "task_id" in benchmark_params:
+        dname = "%s/%d" % (benchmark, benchmark_params["task_id"])
+    else:
+        dname = benchmark
+
+    output_dir = Path(output_dir) / dname / optimizer / f'run-{rng}'
     output_dir = output_dir.absolute()
     if output_dir.is_dir():
         raise ValueError("Outputdir %s already exists, pass" % output_dir)
