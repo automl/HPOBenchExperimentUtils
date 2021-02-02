@@ -1,3 +1,34 @@
+"""
+How to use the DEHB Optimizer
+
+1) Download the Source Code
+git clone https://github.com/automl/DEHB.git
+
+ #TODO: Update to new version.
+# We are currently using the first version of it.
+cd DEHB
+git checkout b8dcba7b38bf6e7fc8ce3e84ea567b66132e0eb5
+
+2) Add the project to your Python Path
+export PYTHONPATH=~/DEHB:$PYTHONPATH
+
+3) Requirements
+- dask distributed:
+```
+conda install dask distributed -c conda-forge
+```
+OR
+```
+python -m pip install dask distributed --upgrade
+```
+
+- Other things to install:
+```
+pip install numpy, ConfigSpace
+```
+
+"""
+
 import logging
 from pathlib import Path
 from typing import Union, Dict
