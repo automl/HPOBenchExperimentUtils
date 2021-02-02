@@ -120,6 +120,11 @@ def validate_benchmark(benchmark: str,
     benchmark_settings = get_benchmark_settings(benchmark)
     credentials_file = output_dir / f'HPBenchExpUtils_pyro4_nameserver_{run_id}.json'
 
+    # If the old credentials file exists, we have to delete it. Otherwise a worker could connect to an old address and
+    # throw an error.
+    if credentials_file.exists():
+        credentials_file.unlink()
+
     # If we only like to have a single worker:
     if procedure == 'start_worker':
         from HPOBenchExperimentUtils.core.worker import start_worker
