@@ -262,6 +262,10 @@ def start_worker(benchmark: str,
     credentials_dir = Path(credentials_dir)
     credentials_file = credentials_dir / f'HPBenchExpUtils_pyro4_nameserver_{run_id}.json'
 
+    # In case the scheduler was not closed gracefully, it might happen, that the old credentials file is still there.
+    # Wait some time to give the scheduler time to overwrite it.
+    sleep(10)
+
     # Wait X seconds for the scheduler to start the nameserver
     cred_file_discovery_start = time()
     logger.debug('Start discovering the nameserver credentials.')
