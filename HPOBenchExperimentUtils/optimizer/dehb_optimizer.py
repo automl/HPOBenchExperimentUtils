@@ -87,15 +87,22 @@ class DehbOptimizer(SingleFidelityOptimizer):
 
         # Initializing DEHB object
         self.dehb = DEHB(cs=cs, dimensions=dimensions, f=f, strategy=self.settings["strategy"],
-                    mutation_factor=self.settings["mutation_factor"], crossover_prob=self.settings["crossover_prob"],
-                    eta=self.settings["eta"], min_budget=self.min_budget, max_budget=self.max_budget,
-                    generations=self.settings["gens"], async_strategy=self.settings["async_strategy"])
+                         mutation_factor=self.settings["mutation_factor"],
+                         crossover_prob=self.settings["crossover_prob"],
+                         eta=self.settings["eta"], min_budget=self.min_budget, max_budget=self.max_budget,
+                         generations=self.settings["gens"], async_strategy=self.settings["async_strategy"])
 
     def setup(self):
         pass
 
-    def run(self) -> Path:
+    def run(self):
         np.random.seed(self.rng)
         # Running DE iterations
-        traj, runtime, history = self.dehb.run(iterations=self.settings["iter"], verbose=self.settings["verbose"],
-                                               debug=_log.level <= logging.DEBUG)
+        try:
+            traj, runtime, history = self.dehb.run(iterations=self.settings["iter"],
+                                                   verbose=self.settings["verbose"],
+                                                   debug=_log.level <= logging.DEBUG)
+        except TypeError as e:
+            # The interface has changed for the DEHB optimizer. The new version has brackets instead of iterations.
+            traj, runtime, history = self.dehb.run(brackets=self.settings["iter"],
+                                                   verbose=self.settings["verbose"] or _log.level <= logging.DEBUG)
