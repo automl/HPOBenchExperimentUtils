@@ -182,11 +182,11 @@ NASBench1shot1SearchSpace2Benchmark:
   import_benchmark: NASBench1shot1SearchSpace2Benchmark
   is_surrogate: true
 
-NASBench1shot1SearchSpace1Benchmark:
+NASBench1shot1SearchSpace3Benchmark:
   time_limit_in_s: 10000000
   cutoff_in_s: 10000000
   mem_limit_in_mb: 6000
   import_from: nas.nasbench_1shot1
-  import_benchmark: NASBench1shot1SearchSpace2Benchmark
+  import_benchmark: NASBench1shot1SearchSpace3Benchmark
   is_surrogate: true
 ...

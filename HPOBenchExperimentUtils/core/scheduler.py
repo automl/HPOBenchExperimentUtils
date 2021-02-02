@@ -17,7 +17,6 @@ from HPOBenchExperimentUtils.core.daemon_object import DaemonObject
 from HPOBenchExperimentUtils.utils import VALIDATED_RUNHISTORY_FILENAME
 from HPOBenchExperimentUtils.utils.io import write_line_to_file
 
-main_logger = logging.getLogger('Main Process')
 
 # Organize the tasks of the scheduler in a list with objects of the following form:
 Content = namedtuple('Content', ['Configuration', 'Fidelity', 'Additional'])
@@ -29,7 +28,7 @@ sys.excepthook = Pyro4.util.excepthook
 class Scheduler(DaemonObject):
     def __init__(self, run_id: Union[int, str], ns_ip: str, ns_port: int, output_dir: Path,
                  contents: List[NamedTuple], debug: bool = False):
-        self.logger = logging.getLogger('Scheduler')
+        self.logger = logging.getLogger(__name__)
         if debug:
             self.logger.setLevel(logging.DEBUG)
 
@@ -41,6 +40,9 @@ class Scheduler(DaemonObject):
 
         self.output_dir = Path(output_dir)
         self.runhistory_file = self.output_dir / VALIDATED_RUNHISTORY_FILENAME
+
+        self.credentials_file = self.output_dir / f'HPBenchExpUtils_pyro4_nameserver_{run_id}.json'
+
         self.lock_dir = self.output_dir / f'Lockfiles_{self.scheduler_id}'
         try:
             self.lock_dir.mkdir(parents=True)

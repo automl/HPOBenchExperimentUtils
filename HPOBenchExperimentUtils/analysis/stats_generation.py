@@ -5,7 +5,7 @@ from typing import Union
 import matplotlib.pyplot as plt
 import numpy as np
 
-from HPOBenchExperimentUtils import _default_log_format, _log as _main_log
+from HPOBenchExperimentUtils import _log as _main_log
 from HPOBenchExperimentUtils.utils.validation_utils import load_json_files, \
     load_trajectories_as_df, df_per_optimizer
 from HPOBenchExperimentUtils.utils.plotting_utils import color_per_opt, marker_per_opt

@@ -42,6 +42,7 @@ initial_designs = {
 
 _fidelity_parameter_names = ["subsample", "dataset_fraction"]
 
+
 # noinspection PyPep8Naming
 class FabolasOptimizer(SingleFidelityOptimizer):
     def __init__(self, benchmark: Union[Bookkeeper, AbstractBenchmark, AbstractBenchmarkClient],

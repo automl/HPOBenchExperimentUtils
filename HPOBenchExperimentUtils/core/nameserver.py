@@ -5,7 +5,7 @@ from pathlib import Path
 
 import Pyro4.naming
 
-logger = logging.getLogger('Nameserver')
+logger = logging.getLogger(__name__)
 
 
 def start_nameserver(ns_ip: str = '127.0.0.1',

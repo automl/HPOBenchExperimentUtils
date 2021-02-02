@@ -10,16 +10,15 @@ except:
     import sys, os.path
     sys.path.append(os.path.expandvars('$HPOEXPUTIL_PATH'))
 
+from HPOBenchExperimentUtils import _log as _root_log
 from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper, total_time_exceeds_limit, used_fuel_exceeds_limit, \
     tae_exceeds_limit
+from HPOBenchExperimentUtils.extract_trajectory import extract_trajectory
 from HPOBenchExperimentUtils.utils import PING_OPTIMIZER_IN_S
 from HPOBenchExperimentUtils.utils.optimizer_utils import get_optimizer, optimizer_str_to_enum
 from HPOBenchExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_benchmark_settings, \
     load_benchmark, get_benchmark_names, get_optimizer_settings_names, \
     get_optimizer_setting
-from HPOBenchExperimentUtils.extract_trajectory import extract_trajectory
-
-from HPOBenchExperimentUtils import _log as _root_log
 
 _root_log.setLevel(logging.INFO)
 _log = logging.getLogger(__name__)
@@ -70,6 +69,7 @@ def run_benchmark(optimizer: str,
 
     if debug:
         _root_log.setLevel(level=logging.DEBUG)
+        _log.setLevel(level=logging.DEBUG)
         from hpobench.util.container_utils import enable_container_debug
         enable_container_debug()
 
@@ -159,7 +159,9 @@ def run_benchmark(optimizer: str,
             and process.is_alive():
         sleep(PING_OPTIMIZER_IN_S)
     else:
+        _log.debug('CALLING TERMINATE()')
         process.terminate()
+        _log.debug('PROCESS TERMINATED0')
         _log.info(f'Optimization has been finished.\n'
                   f'Timelimit: {settings["time_limit_in_s"]} and is now: {benchmark.get_total_time_used()}\n'
                   f'TAE limit: {settings["tae_limit"]} and is now: {benchmark.get_total_tae_used()}\n'
