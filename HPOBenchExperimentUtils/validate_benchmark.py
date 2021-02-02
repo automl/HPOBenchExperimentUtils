@@ -109,6 +109,7 @@ def validate_benchmark(benchmark: str,
     _root_log.info(f'Start validating procedure on benchmark {benchmark}')
 
     if debug:
+        _root_log.setLevel(level=logging.DEBUG)
         main_logger.setLevel(level=logging.DEBUG)
         from hpobench.util.container_utils import enable_container_debug
         enable_container_debug()

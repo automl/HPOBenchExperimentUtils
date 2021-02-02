@@ -17,10 +17,7 @@ from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
 from HPOBenchExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
 from HPOBenchExperimentUtils.utils.optimizer_utils import get_number_ta_runs
 
-_log = logging.getLogger('Optimizer')
-# logging.basicConfig(level=logging.DEBUG)
-root_logger = logging.getLogger()
-#root_logger.setLevel(logging.DEBUG)
+_log = logging.getLogger(__name__)
 
 
 class SMACOptimizer(SingleFidelityOptimizer):

@@ -8,7 +8,7 @@ import scipy.stats as scst
 
 from HPOBenchExperimentUtils.utils.validation_utils import load_json_files, \
     load_trajectories_as_df, df_per_optimizer
-from HPOBenchExperimentUtils import _default_log_format, _log as _main_log
+from HPOBenchExperimentUtils import  _log as _main_log
 from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc
 
 _main_log.setLevel(logging.DEBUG)

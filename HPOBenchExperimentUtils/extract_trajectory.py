@@ -60,7 +60,7 @@ def extract_trajectory(output_dir: Union[Path, str], debug: Union[bool, None] = 
     _log.info('Start extracting the trajectories')
 
     if debug:
-        _main_log.setLevel(level=logging.DEBUG)
+        _root_log.setLevel(level=logging.DEBUG)
 
     output_dir = Path(output_dir)
     assert output_dir.is_dir(), f'Result folder doesn\'t exist: {output_dir}'

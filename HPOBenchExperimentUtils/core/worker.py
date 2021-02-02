@@ -63,7 +63,7 @@ class Worker(DaemonObject):
 
         """
         self.benchmark_settings = benchmark_settings
-
+        self.logger.debug(f'Start Benchmark with the settings: {benchmark_settings}')
         # Load and instantiate the benchmark
         benchmark_obj = load_benchmark(benchmark_name=benchmark_settings['import_benchmark'],
                                        import_from=benchmark_settings['import_from'],
@@ -169,6 +169,7 @@ class Worker(DaemonObject):
         start_time = time()
         wallclock_time_limit = self.benchmark_settings.get('time_limit_in_s')
 
+        self.logger.debug(f'Start Worker Loop. Time limit is {wallclock_time_limit}s.')
         while time() - start_time <= wallclock_time_limit:
             self.is_working = True
 
@@ -253,7 +254,7 @@ def start_worker(benchmark: str,
         logger.setLevel(logging.DEBUG)
 
     logger.info('Call Worker Main')
-    logger.debug(f'Benchmark Params: {vars(benchmark_params)}')
+    logger.debug(f'Benchmark Params: {benchmark_params}')
 
     benchmark_settings = get_benchmark_settings(benchmark)
 
@@ -278,7 +279,7 @@ def start_worker(benchmark: str,
     with credentials_file.open('r') as fh:
         ns_ip, ns_port = json.load(fh)
 
-    logger.info('Credentials loaded from file. Going to start the worker.')
+    logger.info(f'Credentials loaded from file. Nameserver has address: {ns_ip}:{ns_port}. Going to start the worker.')
 
     with Worker(run_id=run_id, worker_id=worker_id, ns_ip=ns_ip, ns_port=ns_port, debug=debug) as worker:
         worker.start_up(benchmark_settings, benchmark_params, rng, use_local)
