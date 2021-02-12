@@ -250,8 +250,9 @@ plot_dc = {
         "ylim_up": 10**0, #10**2,
         "xscale": "log",
         "yscale": "log",
-        "ystar_valid": 0,
-        "ystar_test": 0,
+        # scripts/Nas1shot1_Incumbent.py
+        "ystar_valid": 1-0.9471821784973145,
+        "ystar_test": 1-0.9420072237650553,
    },
    "NASBench1shot1SearchSpace2Benchmark": {
         "xlim_lo": 10**2,
@@ -259,8 +260,9 @@ plot_dc = {
         "ylim_up": 10**0, #10**2,
         "xscale": "log",
         "yscale": "log",
-        "ystar_valid": 0,
-        "ystar_test": 0,
+        # scripts/Nas1shot1_Incumbent.py
+        "ystar_valid": 1-0.9456797440846761,
+        "ystar_test": 1-0.9396701256434122,
    },
    "NASBench1shot1SearchSpace3Benchmark": {
         "xlim_lo": 10**2,
@@ -268,8 +270,9 @@ plot_dc = {
         "ylim_up": 10**0, #10**2,
         "xscale": "log",
         "yscale": "log",
-        "ystar_valid": 0,
-        "ystar_test": 0,
+        # scripts/Nas1shot1_Incumbent.py
+        "ystar_valid": 1-0.9473824898401896,
+        "ystar_test": 1-0.941773513952891,
    },
    "ParamNetAdultOnStepsBenchmark": {
         "xlim_lo": 10**0,
