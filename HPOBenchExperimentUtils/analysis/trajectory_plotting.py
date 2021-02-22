@@ -58,7 +58,11 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
     min_ = 100000
     max_ = -1
     for key, df in zip(optimizer_names, statistics_df):
-        label = get_optimizer_setting(key).get("display_name", key)
+        try:
+            label = get_optimizer_setting(key).get("display_name", key)
+        except:
+            _log.critical(f'Skip unknown optimizer {key}')
+            continue
         color = color_per_opt.get(key, "k")
         df[criterion].plot.line(drawstyle='steps-post', linewidth=2, ax=ax, label=label, c=color)
         min_ = min(min_, df[criterion].min())
