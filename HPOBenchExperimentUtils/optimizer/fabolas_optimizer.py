@@ -104,7 +104,8 @@ class FabolasOptimizer(SingleFidelityOptimizer):
                 config = cs.Configuration(self.original_space, values=self.to_cs(x))
                 fidelity = self.fidelity_emukit_to_cs(s)
                 _log.debug("Generated configuration %s, fidelity %s" % (config, fidelity))
-                res = benchmark.objective_function(config, fidelity=fidelity)
+                res = benchmark.objective_function(config, fidelity=fidelity,
+                                                   **self.settings_for_sending)
                 y, c = res["function_value"], res["cost"]
                 yvals.append(y)
                 costs.append(c)

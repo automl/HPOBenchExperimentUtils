@@ -146,7 +146,8 @@ class AutogluonOptimizer(SingleFidelityOptimizer):
             # Iterate only over fidelities that are interesting to the optimizer
             for epoch in args.valid_budgets:
                 fidelity = {args.main_fidelity.name: epoch}
-                res = self.benchmark.objective_function(config, fidelity=fidelity)
+                res = self.benchmark.objective_function(config, fidelity=fidelity,
+                                                        **self.settings_for_sending)
                 # Autogluon maximizes, HPOBench returns something to be minimized
                 acc = -res['function_value']
                 eval_time = res['cost']

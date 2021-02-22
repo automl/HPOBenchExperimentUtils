@@ -100,7 +100,8 @@ class MultiTaskMUMBO(SingleFidelityOptimizer):
                 _log.debug("Extracted fidelity value: %s" % str(self.info_sources[int(x[i, -1])]))
                 fidelity = self.fidelity_emukit_to_cs(int(x[i, -1]))
                 config = cs.Configuration(self.original_space, values=self.to_cs(x[i, :-1]))
-                res = benchmark.objective_function(config, fidelity=fidelity)
+                res = benchmark.objective_function(config, fidelity=fidelity,
+                                                   **self.settings_for_sending)
                 _log.debug("Benchmark evaluation results: %s" % str(res))
                 results.append([res["function_value"]])
             results = np.asarray(results)
