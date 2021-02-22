@@ -179,20 +179,19 @@ class Bookkeeper:
                            rng: Union[np.random.RandomState, int, None] = None, **kwargs) -> Dict:
         @concurrent.process(timeout=self.cutoff_limit_in_s)
         def __objective_function(configuration, fidelity, **benchmark_settings_for_sending):
+            send = copy.copy(benchmark_settings_for_sending)
             if "random_seed_name" in benchmark_settings_for_sending:
-                new_dc = copy.copy(benchmark_settings_for_sending)
                 tmp_rng = np.random.RandomState()
                 new_idx = int(tmp_rng.choice(benchmark_settings_for_sending["random_seed_choice"]))
-                new_dc[benchmark_settings_for_sending["random_seed_name"]] = new_idx
-                del new_dc["random_seed_name"]
-                del new_dc["random_seed_choice"]
-                return self.benchmark.objective_function(configuration=configuration,
-                                                         fidelity=fidelity,
-                                                         **new_dc)
-            else:
-                return self.benchmark.objective_function(configuration=configuration,
-                                                         fidelity=fidelity,
-                                                         **benchmark_settings_for_sending)
+                send[benchmark_settings_for_sending["random_seed_name"]] = new_idx
+                del send["random_seed_name"]
+                del send["random_seed_choice"]
+
+            if "for_test" in send:
+                del send["for_test"]
+            return self.benchmark.objective_function(configuration=configuration,
+                                                     fidelity=fidelity,
+                                                     **send)
 
         result_dict = __objective_function(configuration=configuration,
                                            fidelity=fidelity,
@@ -207,9 +206,22 @@ class Bookkeeper:
 
         @concurrent.process(timeout=self.cutoff_limit_in_s)
         def __objective_function_test(configuration, fidelity, **benchmark_settings_for_sending):
+            send = copy.copy(benchmark_settings_for_sending)
+            if "random_seed_name" in benchmark_settings_for_sending:
+                tmp_rng = np.random.RandomState()
+                new_idx = int(tmp_rng.choice(benchmark_settings_for_sending["random_seed_choice"]))
+                send[benchmark_settings_for_sending["random_seed_name"]] = new_idx
+                del send["random_seed_name"]
+                del send["random_seed_choice"]
+
+            if "for_test" in send:
+                for k in send["for_test"]:
+                    send[k] = send["for_test"][k]
+                del send["for_test"]
+
             return self.benchmark.objective_function_test(configuration=configuration,
                                                           fidelity=fidelity,
-                                                          **benchmark_settings_for_sending)
+                                                          **send)
 
         result_dict = __objective_function_test(configuration=configuration,
                                                 fidelity=fidelity,

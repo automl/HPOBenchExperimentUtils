@@ -194,6 +194,8 @@ NASCifar10ABenchmark_fixed_seed_0:
   import_benchmark: NASCifar10ABenchmark
   is_surrogate: true
   run_index: 0
+  for_test: {'run_index': [0, 1, 2]}
+
 
 NASCifar10ABenchmark_random_seed:
   time_limit_in_s: 10000000
@@ -204,6 +206,7 @@ NASCifar10ABenchmark_random_seed:
   is_surrogate: true
   random_seed_name: "run_index"
   random_seed_choice: [0, 1, 2]
+  for_test: {'run_index': [ 0, 1, 2 ] }
 
 NASCifar10ABenchmark:
   time_limit_in_s: 10000000
