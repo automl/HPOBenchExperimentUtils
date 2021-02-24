@@ -24,7 +24,8 @@ sys.excepthook = Pyro4.util.excepthook
 
 class Worker(DaemonObject):
 
-    def __init__(self, worker_id: int, run_id: Union[int, str], ns_ip: str, ns_port: int, debug: bool = False):
+    def __init__(self, worker_id: int, run_id: Union[int, str], ns_ip: str, ns_port: int, object_ip: str,
+                 debug: bool = False):
         # Unique name of the worker
         self.worker_id = f'Worker_{run_id}_{worker_id}_{threading.get_ident()}'
 
@@ -40,7 +41,8 @@ class Worker(DaemonObject):
         self.benchmark = None  # type: Union[AbstractBenchmarkClient, None]
         self.benchmark_settings = None  # type: [Dict, None]
 
-        super(Worker, self).__init__(ns_ip=ns_ip, ns_port=ns_port, registration_name=self.worker_id, logger=self.logger)
+        super(Worker, self).__init__(ns_ip=ns_ip, ns_port=ns_port, object_ip=object_ip,
+                                     registration_name=self.worker_id, logger=self.logger)
 
         self.logger.debug(f'The worker is successfully started. It has the ID: {worker_id}. The nameserver is reachable'
                           f'here: {ns_ip}:{ns_port}')
@@ -128,8 +130,11 @@ class Worker(DaemonObject):
         except AttributeError:
             thread_state = False
 
-        self.logger.debug(
-            f'The worker state: thread_is_running: {self.thread_is_running} - thread responsible: {thread_state}')
+        if not self.thread_is_running or not thread_state:
+            self.logger.info('The benchmark thread of this worker is not alive anymore.\n'
+                             f'The worker state: thread_is_running: {self.thread_is_running} '
+                             f'- thread responsible: {thread_state}')
+
         return self.thread_is_running and thread_state
 
     def run(self, wait_for_scheduler_to_start_in_s: int = WORKER_WAIT_FOR_SCHEDULER_TO_START_IN_S) -> None:
@@ -175,7 +180,6 @@ class Worker(DaemonObject):
 
             # First, request a configuration (fidelity, additional)
             with Pyro4.Proxy(scheduler_uri) as scheduler:
-                # TODO: Handle Timeout? Use async (Future)?
                 configuration, fidelity, additional, msg_contains_item = scheduler.get_content(self.uri)
 
             self.logger.debug(f'Received: {configuration}, {fidelity}, {additional}.'
@@ -194,7 +198,13 @@ class Worker(DaemonObject):
             # Send the result back to the scheduler
             with Pyro4.Proxy(scheduler_uri) as scheduler:
                 self.logger.debug('Trying to send the result back to the scheduler.')
-                successful = scheduler.register_result(configuration, fidelity, additional, record_dict)
+                try:
+                    successful = scheduler.register_result(configuration, fidelity, additional, record_dict)
+                except Pyro4.errors.CommunicationError as e:
+                    self.logger.exception('The worker cannot register the result to the Scheduler. Stop this worker.')
+                    self.logger.exception(e)
+                    break
+
                 self.logger.debug(f'The results was successfully sent to the scheduler? {successful}')
 
             self.is_working = False
@@ -232,6 +242,11 @@ class Worker(DaemonObject):
 
         return scheduler_uri
 
+    @Pyro4.expose
+    @Pyro4.oneway
+    def shutdown(self):
+        self.__del__()
+
     def __del__(self):
         self.logger.info('Calling the Shutdown method')
         self.benchmark.__del__()
@@ -242,6 +257,7 @@ def start_worker(benchmark: str,
                  credentials_dir: Union[Path, str],
                  run_id: int,
                  worker_id: int,
+                 worker_ip_address: str,
                  rng: int,
                  use_local: Union[bool, None] = False,
                  debug: Union[bool, None] = False,
@@ -260,7 +276,7 @@ def start_worker(benchmark: str,
 
     # Load the nameserver address
     credentials_dir = Path(credentials_dir)
-    credentials_file = credentials_dir / f'HPBenchExpUtils_pyro4_nameserver_{run_id}.json'
+    credentials_file = credentials_dir / f'HPOBenchExpUtils_nameserver_{run_id}.json'
 
     # In case the scheduler was not closed gracefully, it might happen, that the old credentials file is still there.
     # Wait some time to give the scheduler time to overwrite it.
@@ -285,7 +301,8 @@ def start_worker(benchmark: str,
 
     logger.info(f'Credentials loaded from file. Nameserver has address: {ns_ip}:{ns_port}. Going to start the worker.')
 
-    with Worker(run_id=run_id, worker_id=worker_id, ns_ip=ns_ip, ns_port=ns_port, debug=debug) as worker:
+    with Worker(run_id=run_id, worker_id=worker_id, ns_ip=ns_ip, ns_port=ns_port, debug=debug,
+                object_ip=worker_ip_address) as worker:
         worker.start_up(benchmark_settings, benchmark_params, rng, use_local)
         worker.run()
 

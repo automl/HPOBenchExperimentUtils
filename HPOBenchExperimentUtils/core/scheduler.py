@@ -26,7 +26,7 @@ sys.excepthook = Pyro4.util.excepthook
 
 @Pyro4.behavior(instance_mode='single')
 class Scheduler(DaemonObject):
-    def __init__(self, run_id: Union[int, str], ns_ip: str, ns_port: int, output_dir: Path,
+    def __init__(self, run_id: Union[int, str], ns_ip: str, ns_port: int, object_ip: str, output_dir: Path,
                  contents: List[NamedTuple], debug: bool = False):
         self.logger = logging.getLogger(__name__)
         if debug:
@@ -64,9 +64,9 @@ class Scheduler(DaemonObject):
         # This dictionary stores the results. The key is a pair of configuration and fidelity.
         self.results = {}
 
-        # Start the pyro daemon in the background, such that the object can be found by the worker.
-        super(Scheduler, self).__init__(ns_ip=ns_ip, ns_port=ns_port, registration_name=self.scheduler_id,
-                                        logger=self.logger)
+        # Start the pyro daemon in the background, such that the object can be found by the workers.
+        super(Scheduler, self).__init__(ns_ip=ns_ip, ns_port=ns_port, object_ip=object_ip,
+                                        registration_name=self.scheduler_id, logger=self.logger)
 
     def run(self):
         """
@@ -82,9 +82,9 @@ class Scheduler(DaemonObject):
         # Loop until we have no configs to validate left and no configuration is currrently processed.
         while len(self.contents) != 0 or len(self.uri_to_configuration_fidelity_mapping) != 0:
 
-            self.logger.debug(f'Still {len(self.contents)}|{self.total_num_contents} in queue. '
-                              f'Currently {len(self.uri_to_configuration_fidelity_mapping)} configs are processed by '
-                              'workers.')
+            self.logger.info(f'Still {len(self.contents)}|{self.total_num_contents} in queue. '
+                             f'Currently {len(self.uri_to_configuration_fidelity_mapping)} configs are processed by '
+                             'workers.')
 
             # Ping the workers and check if they are still responsive.
             self.check_worker()
@@ -113,30 +113,39 @@ class Scheduler(DaemonObject):
             if len(workers) != 0:
                 self.time_since_last_connection_to_worker = time()
 
-            # self.time_since_last_connection_to_worker = self.time_since_last_connection_to_worker or len(workers) > 0
-
             for worker_name, worker_uri in workers.items():
                 with Pyro4.Proxy(worker_uri) as worker:
+                    bind_successful = False
+
                     # Check if worker is alive
                     try:
                         worker._pyroBind()
+                        bind_successful = True
                         worker.is_alive()
                     except Pyro4.errors.CommunicationError:
                         # Check if all "currently working" worker are still available
                         if worker_uri in self.uri_to_configuration_fidelity_mapping:
                             self.logger.warning('A worker which has not registered its results, is not '
-                                                'reachable anymore. Reschedule its configuration.')
+                                                f'reachable anymore. Reschedule its configuration.')
 
-                            config, fidelity, additional = self._get_entry_from_mapping_by_uri(worker_uri)
-                            self.contents.append(Content(config, fidelity, additional))
-                            self._remove_from_mapping_by_uri(worker_uri)
+                            with lockutils.lock(name='get_content_lock', external=True, do_log=False, delay=0.01,
+                                                lock_path=f'{self.lock_dir}/lock_get_content'):
+                                self._reschedule_configuration(worker_uri)
 
-                        self.logger.error(f'Worker {worker_uri} is not reachable. Remove it from the nameserver')
+                        self.logger.error(f'Worker {worker_name} is not reachable. Remove it from the nameserver.')
+
+                        reason = 'worker.isAlive()' if bind_successful else '_pyroBind()'
+                        self.logger.debug(f'Worker Uri: {worker_uri} '
+                                          f'Reason for crash: {reason}')
+
+                        try:
+                            worker.shutdown()
+                        except Pyro4.errors.CommunicationError:
+                            pass
 
                         try:
                             worker._pyroRelease()
-                            worker.is_running = False
-                        except Pyro4.errors.CommunicationError:
+                        except (Pyro4.errors.CommunicationError, Pyro4.errors.ConnectionClosedError):
                             pass
 
     @Pyro4.expose
@@ -145,8 +154,8 @@ class Scheduler(DaemonObject):
         configuration, fidelity, additional, msg_contains_item = {}, {}, {}, False
 
         self.logger.debug('Acquire Lock for getting a task')
-        with lockutils.lock(name='get_content_lock', external=True, do_log=False, delay=0.3,
-                                           lock_path=f'{self.lock_dir}/lock_get_content'):
+        with lockutils.lock(name='get_content_lock', external=True, do_log=False, delay=0.01,
+                            lock_path=f'{self.lock_dir}/lock_get_content'):
             if len(self.contents) >= 1:
                 configuration, fidelity, additional = self.contents.pop(0)
 
@@ -166,10 +175,12 @@ class Scheduler(DaemonObject):
                           f'- Additional: {additional}')
         self.logger.debug(f'Received Result: {result_dict}')
 
-        self.results[(str(configuration), str(fidelity), str(additional))] = result_dict
-        self._remove_from_mapping_by_config_fidelity(configuration, fidelity, additional)
+        with lockutils.lock(name='get_content_lock', external=True, do_log=False, delay=0.01,
+                            lock_path=f'{self.lock_dir}/lock_get_content'):
+            self.results[(str(configuration), str(fidelity), str(additional))] = result_dict
+            self._remove_from_mapping_by_config_fidelity(configuration, fidelity, additional)
 
-        with lockutils.lock(name='write_results_to_file', external=True, do_log=False, delay=0.3,
+        with lockutils.lock(name='write_results_to_file', external=True, do_log=False, delay=0.01,
                                          lock_path=f'{self.lock_dir}/write_results'):
             write_line_to_file(self.runhistory_file, result_dict)
 
@@ -190,6 +201,11 @@ class Scheduler(DaemonObject):
         uri = self.__cast_uri_to_str(uri)
         self.configuration_fidelity_to_uri_mapping[(str(configuration), str(fidelity), str(additional))] = uri
         self.uri_to_configuration_fidelity_mapping[uri] = (configuration, fidelity, additional)
+
+    def _reschedule_configuration(self, worker_uri):
+            config, fidelity, additional = self._get_entry_from_mapping_by_uri(worker_uri)
+            self.contents.append(Content(config, fidelity, additional))
+            self._remove_from_mapping_by_uri(worker_uri)
 
     def _remove_from_mapping_by_uri(self, uri):
         uri = self.__cast_uri_to_str(uri)
