@@ -6,7 +6,7 @@ import Pyro4.errors
 
 
 class DaemonObject(object):
-    def __init__(self, ns_ip, ns_port, registration_name, logger):
+    def __init__(self, ns_ip, ns_port, object_ip, registration_name, logger):
         # This flag indicates that the daemon is running, so the worker can be found by the scheduler.
         # The starting procedure sets this flag to True.
         # It is the looping condition for the thread. When it is set to false, then the daemon automatically stops.
@@ -17,6 +17,10 @@ class DaemonObject(object):
         # Where to find the nameserver:
         self.ns_ip = ns_ip
         self.ns_port = ns_port
+
+        # The Ip address of this object. The object's daemon creates a URI so that the others can communicate with
+        # this object. Therefore, we need the current ip address.
+        self.object_ip = object_ip
 
         # This object is registered in the nameserver with this name.
         self.registration_name = registration_name
@@ -51,8 +55,9 @@ class DaemonObject(object):
         self.thread_is_running = True
 
         try:
-            with Pyro4.Daemon() as daemon:
+            with Pyro4.Daemon(host=self.object_ip, port=0) as daemon:
                 self.uri = daemon.register(self)
+                self.logger.debug(f'Register {self.registration_name} at {self.uri}')
 
                 with Pyro4.locateNS(host=self.ns_ip, port=self.ns_port) as nameserver:
                     nameserver.register(self.registration_name, self.uri)

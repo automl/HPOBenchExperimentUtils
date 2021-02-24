@@ -118,20 +118,21 @@ def validate_benchmark(benchmark: str,
     assert output_dir.is_dir(), f'Result folder doesn\'t exist: {output_dir}'
 
     benchmark_settings = get_benchmark_settings(benchmark)
-    credentials_file = output_dir / f'HPBenchExpUtils_pyro4_nameserver_{run_id}.json'
+    credentials_file = output_dir / f'HPOBenchExpUtils_nameserver_{run_id}.json'
+
+    current_ip = nic_name_to_host(interface)
+
+    # If we only like to have a single worker:
+    if procedure == 'start_worker':
+        from HPOBenchExperimentUtils.core.worker import start_worker
+        start_worker(benchmark=benchmark, credentials_dir=output_dir, run_id=run_id, worker_id=worker_id,
+                     worker_ip_address=current_ip, rng=rng, use_local=use_local, debug=debug, **benchmark_params)
+        return 1
 
     # If the old credentials file exists, we have to delete it. Otherwise a worker could connect to an old address and
     # throw an error.
     if credentials_file.exists():
         credentials_file.unlink()
-
-    # If we only like to have a single worker:
-    if procedure == 'start_worker':
-        from HPOBenchExperimentUtils.core.worker import start_worker
-        start_worker(benchmark=benchmark, credentials_dir=output_dir, run_id=run_id,
-                     worker_id=worker_id, rng=rng, use_local=use_local, debug=debug,
-                     **benchmark_params)
-        return 1
 
     # Otherwise we want to start a scheduler. The scheduler reads in all the configurations and
     # distributes them to the worker.
@@ -140,7 +141,7 @@ def validate_benchmark(benchmark: str,
         raise ValueError(f'Procedure must be either start_scheduler or start_worker, but was {procedure}')
 
     # Start a nameserver in the background
-    ns_ip = nic_name_to_host(interface)
+    ns_ip = current_ip
 
     # STEP 1: Load the configuration which should be validated.
     # Find the paths to the trajectory files
@@ -183,7 +184,9 @@ def validate_benchmark(benchmark: str,
                                       credentials_file=credentials_file,
                                       thread_name=f'HPOBenchExpUtils Run {run_id}')
 
-    with Worker(run_id=run_id, worker_id=worker_id, ns_ip=ns_ip, ns_port=ns_port, debug=debug) as worker:
+    with Worker(run_id=run_id, worker_id=worker_id, ns_ip=ns_ip, ns_port=ns_port, object_ip=current_ip,
+                debug=debug) as worker:
+
         worker.start_up(benchmark_settings, benchmark_params, rng, use_local)
         main_logger.debug(f'Benchmark initialized. Additional benchmark parameters {benchmark_params}')
         worker_thread = threading.Thread(target=worker.run, name=f'Worker Thread {worker_id}', daemon=True)
@@ -196,8 +199,8 @@ def validate_benchmark(benchmark: str,
 
         contents = [Content(config, default_fidelity, benchmark_params) for config in unvalidated_configurations]
 
-        with Scheduler(run_id=run_id, ns_ip=ns_ip, ns_port=ns_port, output_dir=output_dir, contents=contents) \
-            as scheduler:
+        with Scheduler(run_id=run_id, ns_ip=ns_ip, ns_port=ns_port, object_ip=current_ip,
+                       output_dir=output_dir, contents=contents) as scheduler:
 
             main_logger.info('Start Scheduler')
             main_logger.info(f'Going to validate {len(unvalidated_configurations)} configuration.')
@@ -233,6 +236,7 @@ def parse_args():
                                          'validated results into this directory, too.')
     common_args_parser.add_argument('--run_id', type=str, required=True, help='Unique name of the run')
     common_args_parser.add_argument('--worker_id', type=int, required=True, help='Unique name of the worker')
+    common_args_parser.add_argument('--interface', type=str, default='lo', required=False)
     common_args_parser.add_argument('--rng', required=False, default=0, type=int)
     common_args_parser.add_argument('--use_local', action='store_true', default=False)
     common_args_parser.add_argument('--debug', action='store_true', default=False,
@@ -241,7 +245,6 @@ def parse_args():
     # Now, specify if the scheduler should start or just a single worker.
     scheduler_parser = subparsers.add_parser('start_scheduler', help='Start the Scheduler, Nameserver and a Worker',
                                              parents=[common_args_parser])
-    scheduler_parser.add_argument('--interface', type=str, default='lo', required=False)
     scheduler_parser.add_argument('--nameserver_port', type=int, default=0, required=False)
     scheduler_parser.add_argument('--recompute_all', action='store_true', default=False)
 
