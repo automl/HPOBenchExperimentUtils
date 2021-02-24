@@ -109,20 +109,16 @@ def run_benchmark(optimizer: str,
 
     # Create a Process Manager to get access to the proxy variables. They represent the state of the optimization
     # process.
-    # manager = Manager()
 
     # This variable count the time the benchmark was evaluated (in seconds).
     # This is the cost of the objective function + the overhead. Use type double.
-    # total_time_proxy = manager.Value('d', 0)
     total_time_proxy = Value('d', 0)
 
     # We can also restrict how often a optimizer is allowed to execute the target algorithm. Encode it as type long.
-    # total_tae_calls_proxy = manager.Value('l', 0)
     total_tae_calls_proxy = Value('l', 0)
 
     # Or we can give an upper limit for amount of budget, the optimizer can use. One can think of it as fuel. Running a
     # benchmark reduces the fuel by `budget`. Use type double.
-    # total_fuel_used_proxy = manager.Value('d', 0)
     total_fuel_used_proxy = Value('d', 0)
 
     benchmark = Bookkeeper(benchmark=benchmark,
@@ -161,7 +157,7 @@ def run_benchmark(optimizer: str,
     else:
         _log.debug('CALLING TERMINATE()')
         process.terminate()
-        _log.debug('PROCESS TERMINATED0')
+        _log.debug('PROCESS TERMINATED')
         _log.info(f'Optimization has been finished.\n'
                   f'Timelimit: {settings["time_limit_in_s"]} and is now: {benchmark.get_total_time_used()}\n'
                   f'TAE limit: {settings["tae_limit"]} and is now: {benchmark.get_total_tae_used()}\n'
