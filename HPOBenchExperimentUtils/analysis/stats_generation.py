@@ -13,7 +13,7 @@ from HPOBenchExperimentUtils import _default_log_format, _log as _main_log
 from HPOBenchExperimentUtils.utils.validation_utils import load_json_files, \
     load_trajectories_as_df, df_per_optimizer
 from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc, color_per_opt, marker_per_opt
-from HPOBenchExperimentUtils.utils.runner_utils import get_optimizer_setting
+from HPOBenchExperimentUtils.utils.runner_utils import get_optimizer_setting, get_benchmark_settings
 
 _main_log.setLevel(logging.DEBUG)
 _log = logging.getLogger(__name__)
@@ -253,3 +253,47 @@ def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Un
     with open(Path(output_dir) / f'correlation_table_{benchmark}.tex', 'w') as fh:
         latex = df.to_latex(index_names=False, index=True)
         fh.write(latex)
+
+
+def get_stats(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str], **kwargs):
+    _log.info(f'Start plotting corralations for benchmark {benchmark}')
+    input_dir = Path(input_dir) / benchmark
+    assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
+    opt_rh_dc = load_trajectories_as_df(input_dir=input_dir,
+                                        which="runhistory")
+    benchmark_settings = get_benchmark_settings(benchmark)
+
+    stats = {"lowest_val": 10000000}
+
+    for opt in opt_rh_dc:
+        _log.info("Read %s" % opt)
+        if len(opt_rh_dc[opt]) == 0: continue
+        stats[opt] = {
+            "sim_wc_time": [],
+            "diff_wc_time": [],
+            "n_calls": [],
+            "act_wc_time": [],
+        }
+        for fl in opt_rh_dc[opt]:
+            with open(fl, "r") as fh:
+                lines = fh.readlines()
+            rh = [json.loads(line) for line in lines]
+
+            fids = np.array([list(e["fidelity"].values())[0] for e in rh])
+            vals = np.array([list(e["function_value"].values())[0] for e in rh])
+            high_fid = max(fids)
+            lowest = np.min(vals[fids == high_fid])
+            stats["lowest_val"] = np.min(stats["lowest_val"], lowest)
+
+            boot_time = rh[0]["boot_time"]
+            sim_wc_time = rh[-1]["total_time_used"]
+            diff_wc_time = benchmark_settings["time_limit_in_s"] - sim_wc_time
+            n_calls = len(rh)-1
+            act_wc_time = rh[-1]["finish_time"] - boot_time
+            stats[opt]["sim_wc_time"].append(sim_wc_time)
+            stats[opt]["diff_wc_time"].append(diff_wc_time)
+            stats[opt]["n_calls"].append(n_calls)
+            stats[opt]["act_wc_time"].append(act_wc_time)
+
+    with open(Path(output_dir) / f'stats_{benchmark}.json', 'w') as fh:
+        json.dump(stats, fh)

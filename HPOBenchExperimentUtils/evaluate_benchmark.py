@@ -3,7 +3,8 @@ import logging
 
 from HPOBenchExperimentUtils.utils.runner_utils import get_benchmark_names
 from HPOBenchExperimentUtils.analysis.trajectory_plotting import plot_trajectory
-from HPOBenchExperimentUtils.analysis.stats_generation import plot_fidels, plot_overhead, plot_ecdf, plot_correlation
+from HPOBenchExperimentUtils.analysis.stats_generation import plot_fidels, plot_overhead, \
+    plot_ecdf, plot_correlation, get_stats
 from HPOBenchExperimentUtils.analysis.table_generation import save_median_table
 from HPOBenchExperimentUtils import _default_log_format, _log as _main_log
 
@@ -19,8 +20,8 @@ if __name__ == "__main__":
     parser.add_argument('--output_dir', required=True, type=str)
     parser.add_argument('--input_dir', required=True, type=str)
     parser.add_argument('--benchmark', choices=get_benchmark_names(), required=True, type=str)
-    parser.add_argument('--what', choices=["all", "best_found", "auc", "over_time", "other",
-                                           "ecdf", "correlation"], default="all")
+    parser.add_argument('--what', choices=["all", "best_found", "over_time", "other",
+                                           "ecdf", "correlation", "stats"], default="all")
     parser.add_argument('--agg', choices=["mean", "median"], default="median")
     parser.add_argument('--unvalidated', action='store_true', default=False)
 
@@ -37,6 +38,9 @@ if __name__ == "__main__":
 
     if args.what in ("all", "correlation"):
         plot_correlation(**vars(args))
+
+    if args.what in ("all", "stats"):
+        get_stats(**vars(args))
 
     if args.what in ("all", "other"):
         if args.unvalidated is False:
