@@ -74,7 +74,7 @@ def plot_fidels(benchmark: str, output_dir: Union[Path, str], input_dir: Union[P
         ax_old = ax
         del rhs, df, sub
 
-    with open(Path(output_dir) / f'stats_{benchmark}.json', "w") as fh:
+    with open(Path(output_dir) / f'stats1_{benchmark}.json', "w") as fh:
         json.dump(other_stats_dc, fh, indent=4, sort_keys=True)
 
     plt.ylabel("Fidelity")
@@ -294,5 +294,5 @@ def get_stats(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pat
             stats[opt]["n_calls"].append(n_calls)
             stats[opt]["act_wc_time"].append(act_wc_time)
 
-    with open(Path(output_dir) / f'stats_{benchmark}.json', 'w') as fh:
+    with open(Path(output_dir) / f'stats2_{benchmark}.json', 'w') as fh:
         json.dump(stats, fh, indent=4, sort_keys=True)
