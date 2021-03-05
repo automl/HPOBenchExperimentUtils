@@ -6,11 +6,10 @@ from HPOBenchExperimentUtils.analysis.trajectory_plotting import plot_trajectory
 from HPOBenchExperimentUtils.analysis.stats_generation import plot_fidels, plot_overhead, \
     plot_ecdf, plot_correlation, get_stats
 from HPOBenchExperimentUtils.analysis.table_generation import save_median_table
-from HPOBenchExperimentUtils import _default_log_format, _log as _main_log
+from HPOBenchExperimentUtils import _log as _root_log
 
-_main_log.setLevel(logging.DEBUG)
+_root_log.setLevel(logging.DEBUG)
 _log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, format=_default_log_format)
 
 
 if __name__ == "__main__":

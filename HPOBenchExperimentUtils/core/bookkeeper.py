@@ -3,28 +3,23 @@ import os
 import copy
 from concurrent.futures import TimeoutError
 from functools import wraps
-from multiprocessing import Lock
 from pathlib import Path
 from time import time
 from typing import Union, List, Dict, Any
 
 import ConfigSpace as CS
-import json_tricks
 import numpy as np
 from hpobench.abstract_benchmark import AbstractBenchmark
 from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 from pebble import concurrent
+from oslo_concurrency import lockutils
 
+from HPOBenchExperimentUtils.core.record import Record
 from HPOBenchExperimentUtils.utils import MAXINT, RUNHISTORY_FILENAME, TRAJECTORY_V1_FILENAME, \
     VALIDATED_RUNHISTORY_FILENAME
+from HPOBenchExperimentUtils.utils.io import write_line_to_file
 
-logger = logging.getLogger('Bookkeeper')
-
-
-def _get_dict_types(d):
-    assert isinstance(d, Dict), f"Expected to display items types for a dictionary, but received object of " \
-                                f"type {type(d)}"
-    return {k: type(v) if not isinstance(v, Dict) else _get_dict_types(v) for k, v in d.items()}
+logger = logging.getLogger(__name__)
 
 
 def _safe_cast_config(configuration):
@@ -57,9 +52,11 @@ def keep_track(validate=False):
                 self.increase_total_fuel_used(list(f.values())[0] or 0)
                 self.increase_total_time_used(self.cutoff_limit_in_s)
 
-                return {'function_value': MAXINT,
-                        'cost': self.cutoff_limit_in_s,
-                        'info': {'fidelity': fidelity or -1234}}
+                record = Record(function_value=MAXINT,
+                                cost=self.cutoff_limit_in_s,
+                                info={'fidelity': fidelity or -1234})
+
+                return record.get_dictionary()
 
             # We can only compute the finish time after we obtain the result()
             finish_time = time()
@@ -94,30 +91,32 @@ def keep_track(validate=False):
                 and not tae_exceeds_limit(self.get_total_tae_used(), self.tae_limit) \
                     and not time_per_config_exceeds_limit(time_for_evaluation, self.cutoff_limit_in_s):
 
-                record = {'start_time': start_time,
-                          'finish_time': finish_time,
-                          'function_value': result_dict['function_value'],
-                          'fidelity': fidelity,
-                          'cost': result_dict['cost'],
-                          'configuration': configuration,
-                          'info': result_dict['info'],
-                          'function_call': self.get_total_tae_used(),
-                          'total_time_used': total_time_used,
-                          'total_objective_costs': self.total_objective_costs,
-                          'total_fuel_used': self.get_total_fuel_used(),
-                          }
+                record = Record(start_time=start_time,
+                                finish_time=finish_time,
+                                function_value=result_dict['function_value'],
+                                fidelity=fidelity,
+                                cost=result_dict['cost'],
+                                configuration=configuration,
+                                info=result_dict['info'],
+                                function_call=self.get_total_tae_used(),
+                                total_time_used=total_time_used,
+                                total_objective_costs=self.total_objective_costs,
+                                total_fuel_used=self.get_total_fuel_used())
+
+                record = record.get_dictionary()
 
                 log_file = self.log_file if not validate else self.validate_log_file
                 self.write_line_to_file(log_file, record)
 
                 if not validate:
                     self.calculate_incumbent(record)
+            else:
+                logger.info('We have reached a time limit. We do not write the current record into the trajectory.')
 
             self.set_total_time_used(total_time_used)
             self.increase_total_fuel_used(list(fidelity.values())[0] or 0)
 
             return result_dict
-
         return wrapped
     return wrapper
 
@@ -128,7 +127,6 @@ class Bookkeeper:
                  total_time_proxy: Any,
                  total_tae_calls_proxy: Any,
                  total_fuel_used_proxy: Any,
-                 global_lock: Any,
                  wall_clock_limit_in_s: Union[int, float, None],
                  tae_limit: Union[int, None],
                  fuel_limit: Union[int, float, None],
@@ -157,7 +155,9 @@ class Bookkeeper:
         # Sums up the number of target algorithm executions.
         self.total_tae_calls_proxy = total_tae_calls_proxy
 
-        self.lock = global_lock
+        self.lock_dir = output_dir / 'lock_dir'
+        self.lock_dir.mkdir(parents=True, exist_ok=True)
+        self.lock_file = self.lock_dir / 'attribute_lock'
 
         self.wall_clock_limit_in_s = wall_clock_limit_in_s
         self.tae_limit = tae_limit
@@ -239,54 +239,65 @@ class Bookkeeper:
         return self.benchmark.get_meta_information()
 
     def get_total_time_used(self):
-        with self.lock:
+        lock = lockutils.lock(name='attribute_lock', external=True, do_log=False,
+                              lock_path=f'{self.lock_file}', delay=0.3)
+        with lock:
             value = self.total_time_proxy.value
         return value
 
     def get_total_tae_used(self):
-        with self.lock:
+        lock = lockutils.lock(name='attribute_lock', external=True, do_log=False,
+                              lock_path=f'{self.lock_file}', delay=0.3)
+        with lock:
             value = self.total_tae_calls_proxy.value
         return value
 
     def get_total_fuel_used(self):
-        with self.lock:
+        lock = lockutils.lock(name='attribute_lock', external=True, do_log=False,
+                              lock_path=f'{self.lock_file}', delay=0.3)
+        with lock:
             value = self.total_fuel_used_proxy.value
         return value
 
     def set_total_time_used(self, total_time_used: float):
-        with self.lock:
+        lock = lockutils.lock(name='attribute_lock', external=True, do_log=False,
+                              lock_path=f'{self.lock_file}', delay=0.3)
+        with lock:
             self.total_time_proxy.value = total_time_used
 
     def set_total_tae_used(self, total_tae_used: float):
-        with self.lock:
+        lock = lockutils.lock(name='attribute_lock', external=True, do_log=False,
+                              lock_path=f'{self.lock_file}', delay=0.3)
+        with lock:
             self.total_tae_calls_proxy.value = total_tae_used
 
     def set_total_fuel_used(self, total_fuel_used_proxy: float):
-        with self.lock:
+        lock = lockutils.lock(name='attribute_lock', external=True, do_log=False,
+                              lock_path=f'{self.lock_file}', delay=0.3)
+        with lock:
             self.total_fuel_used_proxy.value = total_fuel_used_proxy
 
     def increase_total_time_used(self, total_time_used_delta: float):
-        with self.lock:
+        lock = lockutils.lock(name='attribute_lock', external=True, do_log=False,
+                              lock_path=f'{self.lock_file}', delay=0.3)
+        with lock:
             self.total_time_proxy.value = self.total_time_proxy.value + total_time_used_delta
 
     def increase_total_tae_used(self, total_tae_used: float):
-        with self.lock:
+        lock = lockutils.lock(name='attribute_lock', external=True, do_log=False,
+                              lock_path=f'{self.lock_file}', delay=0.3)
+        with lock:
             self.total_tae_calls_proxy.value = self.total_tae_calls_proxy.value + total_tae_used
 
     def increase_total_fuel_used(self, total_fuel_used_proxy: float):
-        with self.lock:
+        lock = lockutils.lock(name='attribute_lock', external=True, do_log=False,
+                              lock_path=f'{self.lock_file}', delay=0.3)
+        with lock:
             self.total_fuel_used_proxy.value = self.total_fuel_used_proxy.value + total_fuel_used_proxy
 
     @staticmethod
     def write_line_to_file(file, dict_to_store, mode='a+'):
-        with file.open(mode) as fh:
-            try:
-                json_tricks.dump(dict_to_store, fh)
-            except TypeError as e:
-                logger.error(f"Failed to serialize dictionary to JSON. Received the following types as "
-                             f"input:\n{_get_dict_types(dict_to_store)}")
-                raise e
-            fh.write(os.linesep)
+        write_line_to_file(file, dict_to_store, mode)
 
     def calculate_incumbent(self, record: Dict):
         """
@@ -312,6 +323,10 @@ class Bookkeeper:
             self.write_line_to_file(self.trajectory, record, mode='a')
 
     def __del__(self):
+        if self.lock_dir.exists():
+            import shutil
+            shutil.rmtree(self.lock_dir)
+
         self.benchmark.__del__()
 
 
@@ -319,9 +334,9 @@ def total_time_exceeds_limit(total_time_proxy, time_limit_in_s, start_time):
     # Wait for the optimizer to finish.
     # But in case the optimizer crashes somehow, also test for the real time here.
     # if the limit is None, this condition is not active.
-    return time_limit_in_s is not None and \
-           (total_time_proxy > time_limit_in_s
-            or time() - start_time - 60 > time_limit_in_s)
+    return (time_limit_in_s is not None
+            and (total_time_proxy > time_limit_in_s
+                 or time() - start_time > time_limit_in_s))
 
 
 def used_fuel_exceeds_limit(total_fuel_used_proxy, max_fuel):

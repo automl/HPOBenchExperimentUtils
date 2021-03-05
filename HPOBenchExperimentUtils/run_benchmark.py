@@ -5,26 +5,23 @@ from time import time, sleep
 from typing import Union, Dict
 
 try:
-    from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper, total_time_exceeds_limit, \
-        used_fuel_exceeds_limit, \
-    tae_exceeds_limit
+    from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
 except:
     import sys, os.path
     sys.path.append(os.path.expandvars('$HPOEXPUTIL_PATH'))
 
-from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
+from HPOBenchExperimentUtils import _log as _root_log
+from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper, total_time_exceeds_limit, used_fuel_exceeds_limit, \
+    tae_exceeds_limit
+from HPOBenchExperimentUtils.extract_trajectory import extract_trajectory
 from HPOBenchExperimentUtils.utils import PING_OPTIMIZER_IN_S
 from HPOBenchExperimentUtils.utils.optimizer_utils import get_optimizer, optimizer_str_to_enum
 from HPOBenchExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_benchmark_settings, \
     load_benchmark, get_benchmark_names, get_optimizer_settings_names, \
     get_optimizer_setting
-from HPOBenchExperimentUtils.extract_trajectory import extract_trajectory
 
-from HPOBenchExperimentUtils import _log as _main_log, _default_log_format
-
-_main_log.setLevel(logging.INFO)
+_root_log.setLevel(logging.INFO)
 _log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, format=_default_log_format)
 
 
 def run_benchmark(optimizer: str,
@@ -71,7 +68,8 @@ def run_benchmark(optimizer: str,
     _log.info(f'Start running benchmark {benchmark} with optimizer setting {optimizer}.')
 
     if debug:
-        _main_log.setLevel(level=logging.DEBUG)
+        _root_log.setLevel(level=logging.DEBUG)
+        _log.setLevel(level=logging.DEBUG)
         from hpobench.util.container_utils import enable_container_debug
         enable_container_debug()
 
@@ -111,32 +109,23 @@ def run_benchmark(optimizer: str,
 
     # Create a Process Manager to get access to the proxy variables. They represent the state of the optimization
     # process.
-    manager = Manager()
-
-    global_lock = manager.Lock()
-    # from multiprocessing import Lock
-    # global_lock = Lock()
 
     # This variable count the time the benchmark was evaluated (in seconds).
     # This is the cost of the objective function + the overhead. Use type double.
-    total_time_proxy = manager.Value('d', 0)
-    # total_time_proxy = Value('d', 0)
+    total_time_proxy = Value('d', 0)
 
     # We can also restrict how often a optimizer is allowed to execute the target algorithm. Encode it as type long.
-    total_tae_calls_proxy = manager.Value('l', 0)
-    # total_tae_calls_proxy = Value('l', 0)
+    total_tae_calls_proxy = Value('l', 0)
 
     # Or we can give an upper limit for amount of budget, the optimizer can use. One can think of it as fuel. Running a
     # benchmark reduces the fuel by `budget`. Use type double.
-    total_fuel_used_proxy = manager.Value('d', 0)
-    # total_fuel_used_proxy = Value('d', 0)
+    total_fuel_used_proxy = Value('d', 0)
 
     benchmark = Bookkeeper(benchmark=benchmark,
                            output_dir=output_dir,
                            total_time_proxy=total_time_proxy,
                            total_tae_calls_proxy=total_tae_calls_proxy,
                            total_fuel_used_proxy=total_fuel_used_proxy,
-                           global_lock=global_lock,
                            wall_clock_limit_in_s=settings['time_limit_in_s'],
                            tae_limit=settings['tae_limit'],
                            fuel_limit=settings['fuel_limit'],
@@ -166,7 +155,9 @@ def run_benchmark(optimizer: str,
             and process.is_alive():
         sleep(PING_OPTIMIZER_IN_S)
     else:
+        _log.debug('CALLING TERMINATE()')
         process.terminate()
+        _log.debug('PROCESS TERMINATED')
         _log.info(f'Optimization has been finished.\n'
                   f'Timelimit: {settings["time_limit_in_s"]} and is now: {benchmark.get_total_time_used()}\n'
                   f'TAE limit: {settings["tae_limit"]} and is now: {benchmark.get_total_tae_used()}\n'
@@ -177,7 +168,6 @@ def run_benchmark(optimizer: str,
 
     _log.info(f'Extract the trajectories')
     extract_trajectory(output_dir=output_dir, debug=debug)
-
 
     _log.info(f'Run Benchmark - Finished.')
 

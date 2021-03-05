@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Union
 
 from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc, color_per_opt
-from HPOBenchExperimentUtils import _default_log_format, _log as _main_log
+from HPOBenchExperimentUtils import _log as _main_log
 from HPOBenchExperimentUtils.utils.validation_utils import load_json_files, load_trajectories_as_df,\
     get_statistics_df, df_per_optimizer
 from HPOBenchExperimentUtils.utils.runner_utils import get_optimizer_setting
@@ -12,7 +12,6 @@ import matplotlib.pyplot as plt
 
 _main_log.setLevel(logging.DEBUG)
 _log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, format=_default_log_format)
 
 
 def read_trajectories(benchmark: str, input_dir: Path, train: bool=True, y_best: float=0.0):

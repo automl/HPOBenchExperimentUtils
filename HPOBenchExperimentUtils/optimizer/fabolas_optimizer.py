@@ -30,6 +30,7 @@ from emukit.bayesian_optimization.loops.cost_sensitive_bayesian_optimization_loo
 
 _log = logging.getLogger(__name__)
 
+
 class AcquisitionTypes(enum.Enum):
     MTBO = "mtbo"
     MUMBO = "mumbo"
@@ -40,6 +41,7 @@ initial_designs = {
 }
 
 _fidelity_parameter_names = ["subsample", "dataset_fraction"]
+
 
 # noinspection PyPep8Naming
 class FabolasOptimizer(SingleFidelityOptimizer):

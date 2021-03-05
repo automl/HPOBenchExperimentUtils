@@ -3,5 +3,5 @@ pandas>=0.25
 numpy>=1.15
 matplotlib>=3.0.0
 setuptools>=49.6.0
-configspace>=0.4.15
+configspace>=0.4.12
 pebble>=4.5.3

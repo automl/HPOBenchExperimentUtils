@@ -9,7 +9,7 @@ import pandas as pd
 from collections import defaultdict
 import scipy.stats as scst
 
-from HPOBenchExperimentUtils import _default_log_format, _log as _main_log
+from HPOBenchExperimentUtils import _log as _main_log
 from HPOBenchExperimentUtils.utils.validation_utils import load_json_files, \
     load_trajectories_as_df, df_per_optimizer
 from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc, color_per_opt, marker_per_opt
@@ -17,7 +17,6 @@ from HPOBenchExperimentUtils.utils.runner_utils import get_optimizer_setting, ge
 
 _main_log.setLevel(logging.DEBUG)
 _log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, format=_default_log_format)
 
 
 def plot_fidels(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str], **kwargs):
@@ -279,11 +278,11 @@ def get_stats(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pat
                 lines = fh.readlines()
             rh = [json.loads(line) for line in lines]
 
-            fids = np.array([list(e["fidelity"].values())[0] for e in rh])
-            vals = np.array([list(e["function_value"].values())[0] for e in rh])
+            fids = np.array([list(e["fidelity"].values())[0] for e in rh[1:]])
+            vals = np.array([e["function_value"] for e in rh[1:]])
             high_fid = max(fids)
             lowest = np.min(vals[fids == high_fid])
-            stats["lowest_val"] = np.min(stats["lowest_val"], lowest)
+            stats["lowest_val"] = min(stats["lowest_val"], lowest)
 
             boot_time = rh[0]["boot_time"]
             sim_wc_time = rh[-1]["total_time_used"]
@@ -296,4 +295,4 @@ def get_stats(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pat
             stats[opt]["act_wc_time"].append(act_wc_time)
 
     with open(Path(output_dir) / f'stats_{benchmark}.json', 'w') as fh:
-        json.dump(stats, fh)
+        json.dump(stats, fh, indent=4, sort_keys=True)
