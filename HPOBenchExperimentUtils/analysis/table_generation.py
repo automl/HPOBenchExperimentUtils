@@ -51,20 +51,26 @@ def write_latex(result_df, output_file):
 
 
 def save_median_table(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
-                      unvalidated: bool = True, **kwargs):
+                      unvalidated: bool = True, which: str = "v1",
+                      opt_list: Union[list[str], None] = None, **kwargs):
     _log.info(f'Start creating table of benchmark {benchmark}')
     input_dir = Path(input_dir) / benchmark
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
     unique_optimizer = load_trajectories_as_df(input_dir=input_dir,
-                                               which="train_v1" if unvalidated else
-                                               "test_v1")
+                                               which=f'train_{which}' if unvalidated else
+                                               f'test_{which}')
     benchmark_spec = plot_dc.get(benchmark, {})
     y_best_val = benchmark_spec.get("ystar_valid", 0)
     y_best_test = benchmark_spec.get("ystar_test", 0)
 
     keys = list(unique_optimizer.keys())
+    if opt_list is None:
+        opt_list = keys
     result_df = pd.DataFrame()
     for key in keys:
+        if key not in opt_list:
+            _log.info(f'Skip {key}')
+            continue
         trajectories = load_json_files(unique_optimizer[key])
         optimizer_df = df_per_optimizer(
             key=key,
@@ -161,6 +167,6 @@ def save_median_table(benchmark: str, output_dir: Union[Path, str], input_dir: U
     result_df = result_df[header]
 
     val_str = 'unvalidated' if unvalidated else 'validated'
-    output_file = Path(output_dir) / f'result_table_{benchmark}_{val_str}.tex'
+    output_file = Path(output_dir) / f'result_table_{benchmark}_{val_str}_{which}.tex'
     write_latex(result_df=result_df, output_file=output_file)
 

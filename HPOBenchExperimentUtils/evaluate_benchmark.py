@@ -23,27 +23,32 @@ if __name__ == "__main__":
                                            "ecdf", "correlation", "stats"], default="all")
     parser.add_argument('--agg', choices=["mean", "median"], default="median")
     parser.add_argument('--unvalidated', action='store_true', default=False)
-
+    parser.add_argument('--which', choices=["v1", "v2"], default="v1")
     args, unknown = parser.parse_known_args()
 
+    list_of_opt_to_consider = ["autogluon", "dragonfly_default", "randomsearch",
+                               "smac_sf", "smac_hb_eta_3",
+                               "dehb", "hpbandster_bohb_eta_3", "hpbandster_hb_eta_3",
+                               #"mumbo",
+                               ]
     if args.what in ("all", "best_found"):
-        save_median_table(**vars(args))
+        save_median_table(**vars(args), opt_list=list_of_opt_to_consider)
 
     if args.what in ("all", "over_time"):
-        plot_trajectory(criterion=args.agg, **vars(args))
+        plot_trajectory(criterion=args.agg, **vars(args), opt_list=list_of_opt_to_consider)
 
     if args.what in ("all", "ecdf"):
-        plot_ecdf(**vars(args))
+        plot_ecdf(**vars(args), opt_list=list_of_opt_to_consider)
 
     if args.what in ("all", "correlation"):
-        plot_correlation(**vars(args))
+        plot_correlation(**vars(args), opt_list=list_of_opt_to_consider)
 
     if args.what in ("all", "stats"):
-        get_stats(**vars(args))
+        get_stats(**vars(args), opt_list=list_of_opt_to_consider)
 
     if args.what in ("all", "other"):
         if args.unvalidated is False:
             _log.critical("Statistics will be plotted on unvalidated data")
-        plot_fidels(**vars(args))
-        plot_overhead(**vars(args))
+        plot_fidels(**vars(args), opt_list=list_of_opt_to_consider)
+        plot_overhead(**vars(args), opt_list=list_of_opt_to_consider)
 

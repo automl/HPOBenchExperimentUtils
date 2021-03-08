@@ -19,7 +19,8 @@ _main_log.setLevel(logging.DEBUG)
 _log = logging.getLogger(__name__)
 
 
-def plot_fidels(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str], **kwargs):
+def plot_fidels(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
+                opt_list: Union[list[str], None]=None, **kwargs):
     _log.info(f'Plotting evaluated fidelities of benchmark {benchmark}')
     input_dir = Path(input_dir) / benchmark
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
@@ -29,6 +30,8 @@ def plot_fidels(benchmark: str, output_dir: Union[Path, str], input_dir: Union[P
 
     opt_rh_dc = load_trajectories_as_df(input_dir=input_dir,
                                         which="runhistory")
+    if opt_list is None:
+        opt_list = list(opt_rh_dc.keys())
 
     other_stats_dc = dict()
     best_val = 1000
@@ -38,7 +41,9 @@ def plot_fidels(benchmark: str, output_dir: Union[Path, str], input_dir: Union[P
     ax_old = None
 
     for i, opt in enumerate(opt_rh_dc):
-        _log.info("Handling %s" % opt)
+        _log.info(f'Handling {opt}')
+        if opt not in opt_list:
+            _log.info(f'Skip {opt}')
         if len(opt_rh_dc) == 0: continue
         other_stats_dc[opt] = defaultdict(list)
         rhs = load_json_files(opt_rh_dc[opt])
@@ -83,7 +88,8 @@ def plot_fidels(benchmark: str, output_dir: Union[Path, str], input_dir: Union[P
     plt.close('all')
 
 
-def plot_overhead(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str], **kwargs):
+def plot_overhead(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
+                  opt_list: Union[list[str], None]=None, **kwargs):
     _log.info(f'Start plotting overhead of benchmark {benchmark}')
     input_dir = Path(input_dir) / benchmark
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
@@ -93,10 +99,15 @@ def plot_overhead(benchmark: str, output_dir: Union[Path, str], input_dir: Union
 
     opt_rh_dc = load_trajectories_as_df(input_dir=input_dir,
                                         which="runhistory")
+    if opt_list is None:
+        opt_list = list(opt_rh_dc.keys())
 
     plt.figure(figsize=[5, 5])
     a = plt.subplot(111)
     for opt in opt_rh_dc:
+        _log.info(f'Handling {opt}')
+        if opt not in opt_list:
+            _log.info(f'Skip {opt}')
         if len(opt_rh_dc) == 0: continue
         rhs = load_json_files(opt_rh_dc[opt])
         df = df_per_optimizer(opt, rhs)
@@ -132,7 +143,8 @@ def plot_overhead(benchmark: str, output_dir: Union[Path, str], input_dir: Union
     plt.close('all')
 
 
-def plot_ecdf(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str], **kwargs):
+def plot_ecdf(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
+              opt_list: Union[list[str], None] = None, **kwargs):
     _log.info(f'Start plotting ECDFs for benchmark {benchmark}')
     input_dir = Path(input_dir) / benchmark
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
@@ -149,7 +161,12 @@ def plot_ecdf(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pat
     plt.figure(figsize=[5, 5])
     a = plt.subplot(111)
 
+    if opt_list is None:
+        opt_list = list(opt_rh_dc.keys())
+
     for opt in opt_rh_dc:
+        if opt not in opt_list:
+            _log.info(f'Skip {opt}')
         if len(opt_rh_dc) == 0: continue
         rhs = load_json_files(opt_rh_dc[opt])
         df = df_per_optimizer(opt, rhs, y_best=y_best)
@@ -178,23 +195,28 @@ def plot_ecdf(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pat
     plt.savefig(Path(output_dir) / f'ecdf_{benchmark}.png')
 
 
-def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str], **kwargs):
+def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
+                     opt_list: Union[list[str], None] = None, **kwargs):
     _log.info(f'Start plotting corralations for benchmark {benchmark}')
     input_dir = Path(input_dir) / benchmark
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
     opt_rh_dc = load_trajectories_as_df(input_dir=input_dir,
                                         which="runhistory")
-    benchmark_spec = plot_dc.get(benchmark, {})
-    y_best = benchmark_spec.get("ystar_valid", 0)
 
     conf_dc = defaultdict(dict)
     f_set = []
+
+    if opt_list is None:
+        opt_list = list(opt_rh_dc.keys())
+
     for opt in opt_rh_dc:
         if not ("smac" in opt
                 or "dehb" in opt
                 or "hpbands" in opt):
-            _log.info("Skip %s" % opt)
+            _log.info(f'Neither smac, dehb nor hpband: {opt}')
             continue
+        if opt not in opt_list:
+            _log.info("Skip %s" % opt)
         _log.info("Read %s" % opt)
         if len(opt_rh_dc[opt]) == 0: continue
 
@@ -254,7 +276,8 @@ def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Un
         fh.write(latex)
 
 
-def get_stats(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str], **kwargs):
+def get_stats(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
+              opt_list: Union[list[str], None] = None, **kwargs):
     _log.info(f'Start plotting corralations for benchmark {benchmark}')
     input_dir = Path(input_dir) / benchmark
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
@@ -264,8 +287,14 @@ def get_stats(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pat
 
     stats = {"lowest_val": 10000000}
 
+    if opt_list is None:
+        opt_list = list(opt_rh_dc.keys())
+
     for opt in opt_rh_dc:
-        _log.info("Read %s" % opt)
+        _log.info(f'Read {opt}')
+        if opt not in opt_list:
+            _log.info(f'skip {opt}')
+            continue
         if len(opt_rh_dc[opt]) == 0: continue
         stats[opt] = {
             "sim_wc_time": [],

@@ -14,18 +14,23 @@ _main_log.setLevel(logging.DEBUG)
 _log = logging.getLogger(__name__)
 
 
-def read_trajectories(benchmark: str, input_dir: Path, train: bool=True, y_best: float=0.0):
+def read_trajectories(benchmark: str, input_dir: Path, train: bool=True, y_best: float=0.0,
+                      which: str="v1", opt_list: Union[list[str], None] = None):
     input_dir = Path(input_dir) / benchmark
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
 
-    unique_optimizer = load_trajectories_as_df(input_dir=input_dir,
-                                               which="train_v1" if train else "test_v1")
+    unique_optimizer = load_trajectories_as_df(
+        input_dir=input_dir, which=f'train_{which}' if train else f'test_{which}')
     optimizer_names = list(unique_optimizer.keys())
+    if opt_list is None:
+        opt_list = optimizer_names
     statistics_df = []
     _log.critical("Found: " + ",".join(optimizer_names))
     if len(optimizer_names) == 0:
         raise ValueError("No files found")
     for key in optimizer_names:
+        if key not in opt_list:
+            _log.info(f'Skip {key}')
         trajectories = load_json_files(unique_optimizer[key])
         optimizer_df = df_per_optimizer(key, trajectories, y_best=y_best)
         statistics_df.append(get_statistics_df(optimizer_df))
@@ -33,7 +38,8 @@ def read_trajectories(benchmark: str, input_dir: Path, train: bool=True, y_best:
 
 
 def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
-                    criterion: str = 'mean', unvalidated: bool = True, **kwargs):
+                    criterion: str = 'mean', unvalidated: bool = True, which: str = "v1",
+                    opt_list: Union[list[str], None] = None,  **kwargs):
     _log.info(f'Start plotting trajectories of benchmark {benchmark}')
 
     input_dir = Path(input_dir)
@@ -51,6 +57,7 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
         input_dir=Path(input_dir),
         train=unvalidated,
         y_best=y_best,
+        which=which,
     )
     # start plotting the trajectories:
     f, ax = plt.subplots(1, 1)
@@ -104,6 +111,6 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
     val_str = 'optimized' if unvalidated else 'validated'
     ax.set_title(f'{benchmark}')
     plt.grid(b=True, which="both", axis="both", alpha=0.5)
-    plt.savefig(Path(output_dir) / f'trajectory_{benchmark}_{val_str}_{criterion}.png')
+    plt.savefig(Path(output_dir) / f'trajectory_{benchmark}_{val_str}_{criterion}_{which}.png')
     plt.close('all')
     return 1
