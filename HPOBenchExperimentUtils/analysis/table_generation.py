@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Union
+from typing import Union, List
 
 import numpy as np
 import pandas as pd
@@ -52,7 +52,7 @@ def write_latex(result_df, output_file):
 
 def save_median_table(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
                       unvalidated: bool = True, which: str = "v1",
-                      opt_list: Union[list[str], None] = None, **kwargs):
+                      opt_list: Union[List[str], None] = None, **kwargs):
     _log.info(f'Start creating table of benchmark {benchmark}')
     input_dir = Path(input_dir) / benchmark
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'

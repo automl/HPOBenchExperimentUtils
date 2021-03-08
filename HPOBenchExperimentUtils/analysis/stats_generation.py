@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Union
+from typing import Union, List
 
 import json
 import matplotlib.pyplot as plt
@@ -20,7 +20,7 @@ _log = logging.getLogger(__name__)
 
 
 def plot_fidels(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
-                opt_list: Union[list[str], None]=None, **kwargs):
+                opt_list: Union[List[str], None]=None, **kwargs):
     _log.info(f'Plotting evaluated fidelities of benchmark {benchmark}')
     input_dir = Path(input_dir) / benchmark
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
@@ -71,7 +71,7 @@ def plot_fidels(benchmark: str, output_dir: Union[Path, str], input_dir: Union[P
 
         label = get_optimizer_setting(opt).get("display_name", opt)
         plt.scatter(sub["total_time_used"], sub["fidel_values"], edgecolor=color_per_opt.get(opt, "k"), facecolor="none",
-                    marker=marker_per_opt[opt], alpha=0.5,
+                    marker=marker_per_opt.get(opt, "o"), alpha=0.5,
                     label=label)
         plt.xscale("log")
         plt.xlabel("Runtime in seconds")
@@ -89,7 +89,7 @@ def plot_fidels(benchmark: str, output_dir: Union[Path, str], input_dir: Union[P
 
 
 def plot_overhead(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
-                  opt_list: Union[list[str], None]=None, **kwargs):
+                  opt_list: Union[List[str], None]=None, **kwargs):
     _log.info(f'Start plotting overhead of benchmark {benchmark}')
     input_dir = Path(input_dir) / benchmark
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
@@ -144,7 +144,7 @@ def plot_overhead(benchmark: str, output_dir: Union[Path, str], input_dir: Union
 
 
 def plot_ecdf(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
-              opt_list: Union[list[str], None] = None, **kwargs):
+              opt_list: Union[List[str], None] = None, **kwargs):
     _log.info(f'Start plotting ECDFs for benchmark {benchmark}')
     input_dir = Path(input_dir) / benchmark
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
@@ -196,7 +196,7 @@ def plot_ecdf(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pat
 
 
 def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
-                     opt_list: Union[list[str], None] = None, **kwargs):
+                     opt_list: Union[List[str], None] = None, **kwargs):
     _log.info(f'Start plotting corralations for benchmark {benchmark}')
     input_dir = Path(input_dir) / benchmark
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
@@ -277,7 +277,7 @@ def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Un
 
 
 def get_stats(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
-              opt_list: Union[list[str], None] = None, **kwargs):
+              opt_list: Union[List[str], None] = None, **kwargs):
     _log.info(f'Start plotting corralations for benchmark {benchmark}')
     input_dir = Path(input_dir) / benchmark
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'

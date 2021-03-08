@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Union
+from typing import Union, List
 
 from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc, color_per_opt
 from HPOBenchExperimentUtils import _log as _main_log
@@ -15,7 +15,7 @@ _log = logging.getLogger(__name__)
 
 
 def read_trajectories(benchmark: str, input_dir: Path, train: bool=True, y_best: float=0.0,
-                      which: str="v1", opt_list: Union[list[str], None] = None):
+                      which: str="v1", opt_list: Union[List[str], None] = None):
     input_dir = Path(input_dir) / benchmark
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
 
@@ -39,7 +39,7 @@ def read_trajectories(benchmark: str, input_dir: Path, train: bool=True, y_best:
 
 def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
                     criterion: str = 'mean', unvalidated: bool = True, which: str = "v1",
-                    opt_list: Union[list[str], None] = None,  **kwargs):
+                    opt_list: Union[List[str], None] = None,  **kwargs):
     _log.info(f'Start plotting trajectories of benchmark {benchmark}')
 
     input_dir = Path(input_dir)
@@ -58,6 +58,7 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
         train=unvalidated,
         y_best=y_best,
         which=which,
+        opt_list=opt_list,
     )
     # start plotting the trajectories:
     f, ax = plt.subplots(1, 1)
