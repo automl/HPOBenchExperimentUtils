@@ -136,6 +136,26 @@ plot_dc = {
         "ystar_valid": 0.0067059280117973685, #0.007629349,
         "ystar_test": 0.00423929700627923,
     },
+    "NASCifar10ABenchmark_fixed_seed_0": {
+        "xlim_lo": 10**1,
+        "ylim_lo": 10**-6,
+        "ylim_up": 10**-0,
+        "xscale": "log",
+        "yscale": "log",
+        # https://github.com/automl/nas_benchmarks/blob/master/tabular_benchmarks/nas_cifar10.py#L26
+        "ystar_valid": 0.04944576819737756,
+        "ystar_test": 0.056824247042338016,
+    },
+    "NASCifar10ABenchmark_random_seed": {
+        "xlim_lo": 10**1,
+        "ylim_lo": 10**-6,
+        "ylim_up": 10**-0,
+        "xscale": "log",
+        "yscale": "log",
+        # https://github.com/automl/nas_benchmarks/blob/master/tabular_benchmarks/nas_cifar10.py#L26
+        "ystar_valid": 0.04944576819737756,
+        "ystar_test": 0.056824247042338016,
+    },
     "NASCifar10ABenchmark": {
         "xlim_lo": 10**1,
         "ylim_lo": 10**-6,
@@ -166,7 +186,7 @@ plot_dc = {
         "ystar_valid": 0.04944576819737756,
         "ystar_test": 0.056824247042338016,
     },
-   "Cifar100NasBench201Benchmark": {
+    "Cifar100NasBench201Benchmark": {
         "xlim_lo": 10**2,
         "ylim_lo": 10**-5,
         "ylim_up": 10**2,
@@ -191,8 +211,8 @@ plot_dc = {
         # print(b, best_test, best_valid)
         "ystar_valid": 26.49666666666667,
         "ystar_test": 26.48666667887369,
-   },
-   "Cifar10ValidNasBench201Benchmark": {
+    },
+    "Cifar10ValidNasBench201Benchmark": {
         "xlim_lo": 10**2,
         "ylim_lo": 10**-5,
         "ylim_up": 10**2,
@@ -217,8 +237,8 @@ plot_dc = {
         # print(b, best_test, best_valid)
         "ystar_valid": 8.393333349609364,
         "ystar_test": 8.476666666666674,
-   },
-   "ImageNetNasBench201Benchmark":   {
+    },
+    "ImageNetNasBench201Benchmark": {
         "xlim_lo": 10**2,
         "ylim_lo": 10**-5,
         "ylim_up": 10**2,
@@ -243,38 +263,41 @@ plot_dc = {
         # print(b, best_test, best_valid)
         "ystar_valid": 53.1555555352105,
         "ystar_test": 52.68888899400499,
-   },
-   "NASBench1shot1SearchSpace1Benchmark": {
+    },
+    "NASBench1shot1SearchSpace1Benchmark": {
         "xlim_lo": 10**2,
-        "ylim_lo": 10**-2, #10**-5,
-        "ylim_up": 10**0, #10**2,
+        "ylim_lo": 10**-2,
+        "ylim_up": 10**0,
         "xscale": "log",
         "yscale": "log",
         # scripts/Nas1shot1_Incumbent.py
         "ystar_valid": 1-0.9471821784973145,
         "ystar_test": 1-0.9420072237650553,
-   },
-   "NASBench1shot1SearchSpace2Benchmark": {
+
+    },
+    "NASBench1shot1SearchSpace2Benchmark": {
         "xlim_lo": 10**2,
-        "ylim_lo": 10**-2, #10**-5,
-        "ylim_up": 10**0, #10**2,
+        "ylim_lo": 10**-2,
+        "ylim_up": 10**0,
         "xscale": "log",
         "yscale": "log",
         # scripts/Nas1shot1_Incumbent.py
         "ystar_valid": 1-0.9456797440846761,
         "ystar_test": 1-0.9396701256434122,
-   },
-   "NASBench1shot1SearchSpace3Benchmark": {
+
+    },
+    "NASBench1shot1SearchSpace3Benchmark": {
         "xlim_lo": 10**2,
-        "ylim_lo": 10**-2, #10**-5,
-        "ylim_up": 10**0, #10**2,
+        "ylim_lo": 10**-2,
+        "ylim_up": 10**0,
         "xscale": "log",
         "yscale": "log",
         # scripts/Nas1shot1_Incumbent.py
         "ystar_valid": 1-0.9473824898401896,
         "ystar_test": 1-0.941773513952891,
-   },
-   "ParamNetAdultOnStepsBenchmark": {
+
+    },
+    "ParamNetAdultOnStepsBenchmark": {
         "xlim_lo": 10**0,
         "ylim_lo": 10**-3,
         "ylim_up": 10**1,
@@ -282,8 +305,8 @@ plot_dc = {
         "yscale": "log",
         "ystar_valid": 0,
         "ystar_test": 0,
-   },
-   "ParamNetAdultOnTimeBenchmark": {
+    },
+    "ParamNetAdultOnTimeBenchmark": {
         "xlim_lo": 10**0,
         "ylim_lo": 10**-3,
         "ylim_up": 10**1,
@@ -292,8 +315,8 @@ plot_dc = {
         # from stats json file Jan 13th
         "ystar_valid": 0.14355555522441862,
         "ystar_test": 0,
-   },
-   "ParamNetHiggsOnStepsBenchmark": {
+    },
+    "ParamNetHiggsOnStepsBenchmark": {
         "xlim_lo": 10**2,
         "ylim_lo": 10**-5,
         "ylim_up": 10**-1,
@@ -301,18 +324,18 @@ plot_dc = {
         "yscale": "log",
         "ystar_valid": 0,
         "ystar_test": 0,
-   },
-   "ParamNetHiggsOnTimeBenchmark": {
+    },
+    "ParamNetHiggsOnTimeBenchmark": {
         "xlim_lo": 10**0,
         "ylim_lo": 10**-3,
         "ylim_up": 10**-1,
         "xscale": "log",
         "yscale": "log",
         # from stats json file Jan 13th
-        "ystar_valid": 0.2739252715252642,
+        "ystar_valid": 0.14355555522441862,
         "ystar_test": 0,
-   },
-   "ParamNetLetterOnStepsBenchmark": {
+    },
+    "ParamNetLetterOnStepsBenchmark": {
         "xlim_lo": 10**0,
         "ylim_lo": 10**-3.5,
         "ylim_up": 10**0,
@@ -320,8 +343,8 @@ plot_dc = {
         "yscale": "log",
         "ystar_valid": 0,
         "ystar_test": 0,
-   },
-   "ParamNetLetterOnTimeBenchmark": {
+    },
+    "ParamNetLetterOnTimeBenchmark": {
         "xlim_lo": 10**0,
         "ylim_lo": 10**-3.5,
         "ylim_up": 10**0,
@@ -330,8 +353,8 @@ plot_dc = {
         # from stats json file Jan 13th
         "ystar_valid": 0.030800543060296292,
         "ystar_test": 0,
-   },
-   "ParamNetMnistOnStepsBenchmark": {
+    },
+    "ParamNetMnistOnStepsBenchmark": {
         "xlim_lo": 10**0,
         "ylim_lo": 10**-4.5,
         "ylim_up": 10**0,
@@ -339,18 +362,18 @@ plot_dc = {
         "yscale": "log",
         "ystar_valid": 0,
         "ystar_test": 0,
-   },
-   "ParamNetMnistOnTimeBenchmark": {
+    },
+    "ParamNetMnistOnTimeBenchmark": {
         "xlim_lo": 10**0,
-        "ylim_lo": 10**-4.5,
+        "ylim_lo": 10**-2, #-4.5,
         "ylim_up": 10**0,
         "xscale": "log",
         "yscale": "log",
         # from stats json file Jan 13th
         "ystar_valid": 0.015030009039640423,
         "ystar_test": 0,
-   },
-   "ParamNetOptdigitsOnStepsBenchmark": {
+    },
+    "ParamNetOptdigitsOnStepsBenchmark": {
         "xlim_lo": 10**0,
         "ylim_lo": 10**-3.5,
         "ylim_up": 10**0,
@@ -358,8 +381,8 @@ plot_dc = {
         "yscale": "log",
         "ystar_valid": 0,
         "ystar_test": 0,
-   },
-   "ParamNetOptdigitsOnTimeBenchmark": {
+    },
+    "ParamNetOptdigitsOnTimeBenchmark": {
         "xlim_lo": 10**0,
         "ylim_lo": 10**-3.5,
         "ylim_up": 10**0,
@@ -377,17 +400,15 @@ plot_dc = {
         "yscale": "log",
         "ystar_valid": 0,
         "ystar_test": 0,
-   },
-   "ParamNetPokerOnTimeBenchmark": {
-        "xlim_lo": 10**2,
-        "ylim_lo": 10**-4, #-5,
+    },
+    "ParamNetPokerOnTimeBenchmark": {
         "ylim_up": 10**2,
         "xscale": "log",
         "yscale": "log",
         # from stats json file Jan 13th
         "ystar_valid": 0.00016679192417291545,
         "ystar_test": 0,
-   }
+    }
 }
 
 list_of_colors = ['#1b9e77', '#d95f02', '#7570b3', '#e7298a', '#66a61e', '#e6ab02', '#a6761d', '#666666']
