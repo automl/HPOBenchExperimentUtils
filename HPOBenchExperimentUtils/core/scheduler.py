@@ -113,6 +113,9 @@ class Scheduler(DaemonObject):
             if len(workers) != 0:
                 self.time_since_last_connection_to_worker = time()
 
+            if self.logger.level == logging.DEBUG:
+                self.logger.debug(f'List of found workers: {workers}')
+
             for worker_name, worker_uri in workers.items():
                 with Pyro4.Proxy(worker_uri) as worker:
                     bind_successful = False

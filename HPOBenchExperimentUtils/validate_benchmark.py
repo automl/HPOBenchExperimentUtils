@@ -121,6 +121,7 @@ def validate_benchmark(benchmark: str,
     credentials_file = output_dir / f'HPOBenchExpUtils_nameserver_{run_id}.json'
 
     current_ip = nic_name_to_host(interface)
+    _root_log.debug(f'ValidateBenchmark: Current IP: {current_ip}')
 
     # If we only like to have a single worker:
     if procedure == 'start_worker':
@@ -236,7 +237,9 @@ def parse_args():
                                          'validated results into this directory, too.')
     common_args_parser.add_argument('--run_id', type=str, required=True, help='Unique name of the run')
     common_args_parser.add_argument('--worker_id', type=int, required=True, help='Unique name of the worker')
-    common_args_parser.add_argument('--interface', type=str, default='lo', required=False)
+    common_args_parser.add_argument('--interface', type=str, required=True,
+                                    help='Name of the interface, where the machines can communicate. '
+                                         'E.g. lo for localhost')
     common_args_parser.add_argument('--rng', required=False, default=0, type=int)
     common_args_parser.add_argument('--use_local', action='store_true', default=False)
     common_args_parser.add_argument('--debug', action='store_true', default=False,

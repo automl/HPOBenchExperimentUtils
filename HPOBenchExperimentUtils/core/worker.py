@@ -300,6 +300,7 @@ def start_worker(benchmark: str,
         ns_ip, ns_port = json.load(fh)
 
     logger.info(f'Credentials loaded from file. Nameserver has address: {ns_ip}:{ns_port}. Going to start the worker.')
+    logger.debug(f'Worker will be started on the machine: {worker_ip_address}')
 
     with Worker(run_id=run_id, worker_id=worker_id, ns_ip=ns_ip, ns_port=ns_port, debug=debug,
                 object_ip=worker_ip_address) as worker:
