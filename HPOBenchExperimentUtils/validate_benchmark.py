@@ -121,7 +121,7 @@ def validate_benchmark(benchmark: str,
     credentials_file = output_dir / f'HPOBenchExpUtils_nameserver_{run_id}.json'
 
     current_ip = nic_name_to_host(interface)
-    _root_log.debug(f'ValidateBenchmark: Current IP: {current_ip}')
+    _root_log.info(f'ValidateBenchmark: Current IP: {current_ip}')
 
     # If we only like to have a single worker:
     if procedure == 'start_worker':
@@ -155,26 +155,45 @@ def validate_benchmark(benchmark: str,
     # Extract the configurations which should be validated from the both trajectories and combine the results.
     configurations = extract_configs_from_trajectories(trajectories)
 
-    # Create a dict that stores the results from the validation procedure.
-    validation_results = {str(configuration): None for configuration in configurations}
-
-    # STEP 2: Load the results (already validated configurations) from previous runs
+    # Load the results (already validated configurations) from previous runs
     validated_runhistory_paths = list(output_dir.rglob(VALIDATED_RUNHISTORY_FILENAME))
     already_evaluated_configs = load_configs_with_function_values_from_runhistories(validated_runhistory_paths)
 
-    # Get the configurations to validate.
-    unvalidated_configurations = [config for config in configurations if str(config) not in already_evaluated_configs]
+    # This dict stores all results from the validation procedure (key is the configuration but as str)
+    validation_results = {}
+
+    # Memorize all configurations (as dicts)
+    unvalidated_configurations_total = []
+
+    # Store the configurations (as dicts) for which we dont have already results from previous runs.
+    unvalidated_configurations = []
+
+    # Get the actual configurations to validate (Remove duplicates)
+    for config in configurations:
+        config_str = str(config)
+
+        # The configuration is not unique and we have already seen it
+        if config_str in validation_results:
+            continue
+
+        validation_results[str(config)] = None
+        unvalidated_configurations_total.append(config)
+
+        # We have not validated this configuration previously
+        if config_str not in already_evaluated_configs:
+            unvalidated_configurations.append(config)
+
     main_logger.info('Finished loading unvalidated and already validated configurations')
-    main_logger.info(f'Found {len(trajectories_paths)} trajectories '
-                     f'with a total of {len(configurations)} '
-                     f'configurations (Unique: {len(validation_results)}) to validate.\n'
-                     f'Also, we found {len(already_evaluated_configs)} already validated configurations.')
+    main_logger.info(f'Found {len(trajectories_paths)} trajectories with a total of {len(configurations)} configs. '
+                     f'(Unique: {len(validation_results)})')
+    main_logger.info(f'Found {len(already_evaluated_configs)} already validated configurations.')
 
     if recompute_all:
-        main_logger.info('Going to recompute all configurations')
-        unvalidated_configurations = configurations
+        main_logger.info('Recompute all configurations.')
+        unvalidated_configurations = unvalidated_configurations_total
     else:
         validation_results.update(already_evaluated_configs)
+    main_logger.info(f'Going to evaluate {len(unvalidated_configurations)} configurations.')
 
     if len(unvalidated_configurations) == 0:
         main_logger.info(f'There are no configurations to evaluate. Stop this procedure')
@@ -203,8 +222,8 @@ def validate_benchmark(benchmark: str,
         with Scheduler(run_id=run_id, ns_ip=ns_ip, ns_port=ns_port, object_ip=current_ip,
                        output_dir=output_dir, contents=contents) as scheduler:
 
-            main_logger.info('Start Scheduler')
-            main_logger.info(f'Going to validate {len(unvalidated_configurations)} configuration.')
+            main_logger.info('Start the Scheduler')
+            main_logger.info(f'Going to validate {len(contents)} configuration.')
 
             scheduler.run()
             results = scheduler.get_results_by_configuration()

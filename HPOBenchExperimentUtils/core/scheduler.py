@@ -178,14 +178,24 @@ class Scheduler(DaemonObject):
                           f'- Additional: {additional}')
         self.logger.debug(f'Received Result: {result_dict}')
 
+        skip_writing = False
         with lockutils.lock(name='get_content_lock', external=True, do_log=False, delay=0.01,
                             lock_path=f'{self.lock_dir}/lock_get_content'):
             self.results[(str(configuration), str(fidelity), str(additional))] = result_dict
-            self._remove_from_mapping_by_config_fidelity(configuration, fidelity, additional)
 
-        with lockutils.lock(name='write_results_to_file', external=True, do_log=False, delay=0.01,
-                                         lock_path=f'{self.lock_dir}/write_results'):
-            write_line_to_file(self.runhistory_file, result_dict)
+            try:
+                self._remove_from_mapping_by_config_fidelity(configuration, fidelity, additional)
+            except KeyError as e:
+                self.logger.warning('The current worker was not able to register its result. It is likely that the '
+                                    'scheduler was not able to reach the worker. Don\'t write the config to the '
+                                    'runhistory.'
+                                    f'The error message was: {e}')
+                skip_writing = True
+
+        if not skip_writing:
+            with lockutils.lock(name='write_results_to_file', external=True, do_log=False, delay=0.01,
+                                             lock_path=f'{self.lock_dir}/write_results'):
+                write_line_to_file(self.runhistory_file, result_dict)
 
         return True
 
