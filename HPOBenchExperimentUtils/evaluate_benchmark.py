@@ -36,11 +36,11 @@ if __name__ == "__main__":
                                #"mumbo",
                                ]
 
-    if args.rank is False:
+    if args.rank is None:
         assert args.benchmark is not None, f"If rank={args.rank}, then --benchmark must be set"
     else:
         _log.info("Only plotting ranks")
-        plot_ranks(**vars(args), benchmarks=benchmark_families[args.rank],
+        plot_ranks(**vars(args), benchmarks=benchmark_families[args.rank], familyname=args.rank,
                    opt_list=list_of_opt_to_consider)
         sys.exit(1)
 
