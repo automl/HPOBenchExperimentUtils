@@ -515,3 +515,23 @@ def unify_layout(ax, fontsize=15, legend_args=None, title=None):
     if title is not None:
         ax.set_title(title, fontsize=fontsize)
     ax.grid(b=True, which="both", axis="both", alpha=0.5)
+
+
+benchmark_families = {
+    "NAS201": ["Cifar10ValidNasBench201Benchmark", "Cifar100NasBench201Benchmark",
+               "ImageNetNasBench201Benchmark"],
+    "NAS101": ["NASCifar10ABenchmark", "NASCifar10BBenchmark", ], #"NASCifar10CBenchmark"],
+    "NASTAB": ["SliceLocalizationBenchmark", "ProteinStructureBenchmark",
+               "NavalPropulsionBenchmark", "ParkinsonsTelemonitoringBenchmark", ],
+    "NAS1SHOT1": ["NASBench1shot1SearchSpace1Benchmark", "NASBench1shot1SearchSpace2Benchmark",
+                  "NASBench1shot1SearchSpace3Benchmark", ],
+    "pybnn": ["BNNOnBostonHousing", "BNNOnProteinStructure", "BNNOnYearPrediction", ],
+    "rl": ["cartpolereduced"],
+    "learna": ["metalearna", "learna"],
+    "paramnetsteps": ["ParamNetAdultOnStepsBenchmark", "ParamNetHiggsOnStepsBenchmark",
+                      "ParamNetLetterOnStepsBenchmark", "ParamNetMnistOnStepsBenchmark",
+                      "ParamNetOptdigitsOnStepsBenchmark", "ParamNetPokerOnStepsBenchmark", ],
+    "paramnettime": ["ParamNetAdultOnTimeBenchmark", "ParamNetHiggsOnTimeBenchmark",
+                     "ParamNetLetterOnTimeBenchmark", "ParamNetMnistOnTimeBenchmark",
+                     "ParamNetOptdigitsOnTimeBenchmark", "ParamNetPokerOnTimeBenchmark", ],
+}

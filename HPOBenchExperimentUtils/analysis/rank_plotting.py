@@ -111,7 +111,10 @@ def plot_ranks(benchmarks: List[str], output_dir: Union[Path, str], input_dir: U
             ranks_for_model.append(ranking.loc[:, model])
         ranks_for_model = pd.DataFrame(ranks_for_model)
         ranks_for_model = ranks_for_model.fillna(method='ffill', axis=1)
-        final_ranks.append(ranks_for_model.mean(skipna=True))
+        if criterion == "mean":
+            final_ranks.append(ranks_for_model.mean(skipna=True))
+        elif criterion == "median":
+            final_ranks.append(ranks_for_model.median(skipna=True))
 
     # Step 3. Plot the average ranks over time.
     ######################################################################################
@@ -132,8 +135,8 @@ def plot_ranks(benchmarks: List[str], output_dir: Union[Path, str], input_dir: U
         plt.xlabel("Simulated runtime in seconds")
     else:
         plt.xlabel("Runtime in seconds")
-    ax.set_ylabel('Average rank')
-    ax.set_ylim([0.9, len(opt_list)])
+    ax.set_ylabel(f"{criterion.capitalize()} rank")
+    ax.set_ylim([0.9, len(opt_list)+0.1])
     ax.set_xlim(10, horizon)
     ax.set_xscale(benchmark_spec.get("xscale", "log"))
 
