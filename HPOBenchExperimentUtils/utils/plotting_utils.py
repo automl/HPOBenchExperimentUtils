@@ -1,29 +1,29 @@
 plot_dc = {
     "BNNOnBostonHousing": {
-    # BOHB paper
-    "xlim_lo": 10**2,
-    "ylim_lo": 3,
-    "ylim_up": 8, #70,
-    "xscale": "log",
-    "yscale": "linear",
-    # None yet
-    "ystar_valid": 0,
-    "ystar_test": 0,
+        # BOHB paper
+        "xlim_lo": 10**2,
+        "ylim_lo": 3,
+        "ylim_up": 8,
+        "xscale": "log",
+        "yscale": "linear",
+        # None yet
+        "ystar_valid": 0,
+        "ystar_test": 0,
     },
     "BNNOnProteinStructure": {
-    "xlim_lo": 10**2,
-    "ylim_lo": 3,
-    "ylim_up": 5, #9,
-    "xscale": "log",
-    "yscale": "linear",
-    # None yet
-    "ystar_valid": 0,
-    "ystar_test": 0,
+        "xlim_lo": 10**2,
+        "ylim_lo": 3,
+        "ylim_up": 5,
+        "xscale": "log",
+        "yscale": "linear",
+        # None yet
+        "ystar_valid": 0,
+        "ystar_test": 0,
     },
     "BNNOnYearPrediction": {
         "xlim_lo": 10**2,
         "ylim_lo": 2,
-        "ylim_up": 40, #50,
+        "ylim_up": 40,
         "xscale": "log",
         "yscale": "linear",
         # None yet
@@ -41,9 +41,9 @@ plot_dc = {
         "ystar_test": 0,
     },
     "SliceLocalizationBenchmark": {
-        "xlim_lo": 10**1,
-        "ylim_lo": 10**-8,
-        "ylim_up": 10**-1,
+        "xlim_lo": 10**0,
+        "ylim_lo": 10**-6,
+        "ylim_up": 10**0,
         "xscale": "log",
         "yscale": "log",
         # from hpobench.benchmarks.nas.tabular_benchmarks import SliceLocalizationBenchmark
@@ -66,7 +66,7 @@ plot_dc = {
     },
     "ProteinStructureBenchmark": {
         "xlim_lo": 10**0,
-        "ylim_lo": 10**-6,
+        "ylim_lo": 10**-4,
         "ylim_up": 10**0,
         "xscale": "log",
         "yscale": "log",
@@ -90,8 +90,8 @@ plot_dc = {
     },
     "NavalPropulsionBenchmark": {
         "xlim_lo": 10**0,
-        "ylim_lo": 10**-9,
-        "ylim_up": 10**-1,
+        "ylim_lo": 10**-6,
+        "ylim_up": 10**0,
         "xscale": "log",
         "yscale": "log",
         # from hpobench.benchmarks.nas.tabular_benchmarks import NavalPropulsionBenchmark
@@ -114,7 +114,7 @@ plot_dc = {
     },
     "ParkinsonsTelemonitoringBenchmark": {
         "xlim_lo": 10**0,
-        "ylim_lo": 10**-7,
+        "ylim_lo": 10**-4,
         "ylim_up": 10**-0,
         "xscale": "log",
         "yscale": "log",
@@ -138,7 +138,7 @@ plot_dc = {
     },
     "NASCifar10ABenchmark_fixed_seed_0": {
         "xlim_lo": 10**1,
-        "ylim_lo": 10**-6,
+        "ylim_lo": 10**-3.5,
         "ylim_up": 10**-0,
         "xscale": "log",
         "yscale": "log",
@@ -148,7 +148,7 @@ plot_dc = {
     },
     "NASCifar10ABenchmark_random_seed": {
         "xlim_lo": 10**1,
-        "ylim_lo": 10**-6,
+        "ylim_lo": 10**-3.5,
         "ylim_up": 10**-0,
         "xscale": "log",
         "yscale": "log",
@@ -158,7 +158,7 @@ plot_dc = {
     },
     "NASCifar10ABenchmark": {
         "xlim_lo": 10**1,
-        "ylim_lo": 10**-6,
+        "ylim_lo": 10**-3.5,
         "ylim_up": 10**-0,
         "xscale": "log",
         "yscale": "log",
@@ -188,7 +188,7 @@ plot_dc = {
     },
     "Cifar100NasBench201Benchmark": {
         "xlim_lo": 10**2,
-        "ylim_lo": 10**-5,
+        "ylim_lo": 10**-1,
         "ylim_up": 10**2,
         "xscale": "log",
         "yscale": "log",
@@ -214,7 +214,7 @@ plot_dc = {
     },
     "Cifar10ValidNasBench201Benchmark": {
         "xlim_lo": 10**2,
-        "ylim_lo": 10**-5,
+        "ylim_lo": 10**-2,
         "ylim_up": 10**2,
         "xscale": "log",
         "yscale": "log",
@@ -240,7 +240,7 @@ plot_dc = {
     },
     "ImageNetNasBench201Benchmark": {
         "xlim_lo": 10**2,
-        "ylim_lo": 10**-5,
+        "ylim_lo": 10**-1,
         "ylim_up": 10**2,
         "xscale": "log",
         "yscale": "log",
@@ -307,13 +307,13 @@ plot_dc = {
         "ystar_test": 0,
     },
     "ParamNetAdultOnTimeBenchmark": {
-        "xlim_lo": 10**0,
+        "xlim_lo": 10**1,
         "ylim_lo": 10**-3,
-        "ylim_up": 10**1,
+        "ylim_up": 10**-1,
         "xscale": "log",
         "yscale": "log",
-        # from stats json file Jan 13th
-        "ystar_valid": 0.14355555522441862,
+        # from stats json file March 9th
+        "ystar_valid": 0.1437777783975557,
         "ystar_test": 0,
     },
     "ParamNetHiggsOnStepsBenchmark": {
@@ -326,13 +326,13 @@ plot_dc = {
         "ystar_test": 0,
     },
     "ParamNetHiggsOnTimeBenchmark": {
-        "xlim_lo": 10**0,
+        "xlim_lo": 10**1,
         "ylim_lo": 10**-3,
         "ylim_up": 10**-1,
         "xscale": "log",
         "yscale": "log",
-        # from stats json file Jan 13th
-        "ystar_valid": 0.14355555522441862,
+        # from stats json file March 9th
+        "ystar_valid": 0.2739252715252642,
         "ystar_test": 0,
     },
     "ParamNetLetterOnStepsBenchmark": {
@@ -350,7 +350,7 @@ plot_dc = {
         "ylim_up": 10**0,
         "xscale": "log",
         "yscale": "log",
-        # from stats json file Jan 13th
+        # from stats json file March 9th
         "ystar_valid": 0.030800543060296292,
         "ystar_test": 0,
     },
@@ -364,13 +364,13 @@ plot_dc = {
         "ystar_test": 0,
     },
     "ParamNetMnistOnTimeBenchmark": {
-        "xlim_lo": 10**0,
-        "ylim_lo": 10**-2, #-4.5,
+        "xlim_lo": 10**1,
+        "ylim_lo": 10**-4,
         "ylim_up": 10**0,
         "xscale": "log",
         "yscale": "log",
-        # from stats json file Jan 13th
-        "ystar_valid": 0.015030009039640423,
+        # from stats json file March 9th
+        "ystar_valid": 0.014969998741149893,
         "ystar_test": 0,
     },
     "ParamNetOptdigitsOnStepsBenchmark": {
@@ -388,7 +388,7 @@ plot_dc = {
         "ylim_up": 10**0,
         "xscale": "log",
         "yscale": "log",
-        # from stats json file Jan 13th
+        # from stats json file March 9th
         "ystar_valid": 0.011504424673266123,
         "ystar_test": 0,
    },
@@ -402,13 +402,75 @@ plot_dc = {
         "ystar_test": 0,
     },
     "ParamNetPokerOnTimeBenchmark": {
+        "xlim_lo": 10**2,
+        "ylim_lo": 10**-4,
+        "ylim_up": 10**0,
+        "xscale": "log",
+        "yscale": "log",
+        # from stats json file March 9th
+        "ystar_valid": 0.00016679192417291545,
+        "ystar_test": 0,
+    },
+    "NASCifar10ABenchmark_fixed_seed_0": {
+        "xlim_lo": 10**1,
+        "ylim_lo": 10**-3.5,
+        "ylim_up": 10**-0,
+        "xscale": "log",
+        "yscale": "log",
+        # https://github.com/automl/nas_benchmarks/blob/master/tabular_benchmarks/nas_cifar10.py#L26
+        "ystar_valid": 0.04944576819737756,
+        "ystar_test": 0.056824247042338016,
+    },
+    "NASCifar10ABenchmark_random_seed": {
+        # See original benchmark
+        "xlim_lo": 10**1,
+        "ylim_lo": 10**-3.5,
+        "ylim_up": 10**-0,
+        "xscale": "log",
+        "yscale": "log",
+        "ystar_valid": 0.04944576819737756,
+        "ystar_test": 0.056824247042338016,
+    },
+    "ProteinStructureBenchmark_fixed_seed_0": {
+        # See original benchmark
+        "xlim_lo": 10**0,
+        "ylim_lo": 10**-4,
+        "ylim_up": 10**0,
+        "xscale": "log",
+        "yscale": "log",
+        "ystar_valid": 0.221378855407238,
+        "ystar_test": 0.21536806225776672,
+    },
+    "ProteinStructureBenchmark_random_seed": {
+        # See original benchmark
+        "xlim_lo": 10**0,
+        "ylim_lo": 10**-4,
+        "ylim_up": 10**0,
+        "xscale": "log",
+        "yscale": "log",
+        "ystar_valid": 0.221378855407238,
+        "ystar_test": 0.21536806225776672,    
+    },
+    "Cifar10ValidNasBench201Benchmark_fixed_seed_777": {
+        # See original benchmark
+        "xlim_lo": 10**2,
+        "ylim_lo": 10**-2,
         "ylim_up": 10**2,
         "xscale": "log",
         "yscale": "log",
-        # from stats json file Jan 13th
-        "ystar_valid": 0.00016679192417291545,
-        "ystar_test": 0,
-    }
+        "ystar_valid": 8.393333349609364,
+        "ystar_test": 8.476666666666674,
+    },
+    "Cifar10ValidNasBench201Benchmark_random_seed": {
+        # See original benchmark
+        "xlim_lo": 10**2,
+        "ylim_lo": 10**-2,
+        "ylim_up": 10**2,
+        "xscale": "log",
+        "yscale": "log",
+        "ystar_valid": 8.393333349609364,
+        "ystar_test": 8.476666666666674,    
+    },
 }
 
 list_of_colors = ['#1b9e77', '#d95f02', '#7570b3', '#e7298a', '#66a61e', '#e6ab02', '#a6761d', '#666666']

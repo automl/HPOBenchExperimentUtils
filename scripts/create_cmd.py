@@ -8,21 +8,24 @@ expset_dc = {
                "ImageNetNasBench201Benchmark"],
     "NAS101": ["NASCifar10ABenchmark", "NASCifar10BBenchmark", "NASCifar10CBenchmark"],
     "NASTAB": ["SliceLocalizationBenchmark", "ProteinStructureBenchmark",
-               "NavalPropulsionBenchmark", "ParkinsonsTelemonitoringBenchmark"],
+               "NavalPropulsionBenchmark", "ParkinsonsTelemonitoringBenchmark", ],
     "NAS1SHOT1": ["NASBench1shot1SearchSpace1Benchmark", "NASBench1shot1SearchSpace2Benchmark",
-                  "NASBench1shot1SearchSpace3Benchmark"],
-    "pybnn": ["BNNOnBostonHousing", "BNNOnProteinStructure", "BNNOnYearPrediction"],
+                  "NASBench1shot1SearchSpace3Benchmark", ],
+    "pybnn": ["BNNOnBostonHousing", "BNNOnProteinStructure", "BNNOnYearPrediction", ],
     "rl": ["cartpolereduced"],
     "learna": ["metalearna", "learna"],
     "paramnetsteps": ["ParamNetAdultOnStepsBenchmark", "ParamNetHiggsOnStepsBenchmark",
                       "ParamNetLetterOnStepsBenchmark", "ParamNetMnistOnStepsBenchmark",
-                      "ParamNetOptdigitsOnStepsBenchmark", "ParamNetPokerOnStepsBenchmark"],
+                      "ParamNetOptdigitsOnStepsBenchmark", "ParamNetPokerOnStepsBenchmark", ],
     "paramnettime": ["ParamNetAdultOnTimeBenchmark", "ParamNetHiggsOnTimeBenchmark",
                      "ParamNetLetterOnTimeBenchmark", "ParamNetMnistOnTimeBenchmark",
-                     "ParamNetOptdigitsOnTimeBenchmark", "ParamNetPokerOnTimeBenchmark"],
+                     "ParamNetOptdigitsOnTimeBenchmark", "ParamNetPokerOnTimeBenchmark", ],
     "svm": ["svm", ],
     "xgboostsub": ["xgboostsub", ],
-    "xgboostest": ["xgboostest", ]
+    "xgboostest": ["xgboostest", ],
+    "seeds": ["NASCifar10ABenchmark_fixed_seed_0", "NASCifar10ABenchmark_random_seed", 
+              "ProteinStructureBenchmark_fixed_seed_0", "ProteinStructureBenchmark_random_seed",
+              "Cifar10ValidNasBench201Benchmark_fixed_seed_777", "Cifar10ValidNasBench201Benchmark_random_seed", ],
 }
 
 opt_set = {
@@ -41,6 +44,7 @@ def main(args):
     exp = args.exp
     opt = args.opt
     nrep = args.nrep
+    nworker = args.nworker
 
     if not os.path.isdir(args.out_cmd):
         os.mkdir(args.out_cmd)
@@ -53,7 +57,6 @@ def main(args):
 
     run_cmd = []
     val_cmd = []
-    val_ind_cmd = []
     eval_cmd = []
     evalu_cmd = []
 
@@ -68,22 +71,11 @@ def main(args):
                               " --rng %s --task_id %d" % \
                               (base, args.out_run, optimizer, benchmark, seed, tid)
                         run_cmd.append(cmd)
-                        cmd = "%s/validate_benchmark.py --output_dir %s/%s/%d/%s/run-%d/ " \
-                              "--benchmark %s --task_id %d --rng %d" % \
-                              (base, args.out_run, benchmark, tid, optimizer, seed, benchmark, seed,
-                               tid)
-                        val_ind_cmd.append(cmd)
                 else:
                     cmd = "%s/run_benchmark.py --output_dir %s --optimizer %s --benchmark %s " \
                           "--rng %s" % (base, args.out_run, optimizer, benchmark, seed)
                     run_cmd.append(cmd)
-                    cmd = "%s/validate_benchmark.py --output_dir %s/%s/%s/run-%d/ --benchmark %s " \
-                          "--rng %d" % (base, args.out_run, benchmark, optimizer, seed, benchmark,
-                                        seed)
-                    val_ind_cmd.append(cmd)
-        cmd = "%s/validate_benchmark.py --output_dir %s/%s --benchmark %s --rng %d" \
-              % (base, args.out_run, benchmark, benchmark, 1)
-        val_cmd.append(cmd)
+            
         if opt == "rs":
             # We only need this once since it works for all optimizers
             cmd = "%s/evaluate_benchmark.py --output_dir %s/ --input_dir %s/ --benchmark %s " \
@@ -92,9 +84,17 @@ def main(args):
             cmd += " --unvalidated"
             evalu_cmd.append(cmd)
 
-    for c, f in [[run_cmd, run_fl], [val_cmd, val_fl], [eval_cmd, eval_fl],
-                 [evalu_cmd, evalu_fl], [val_ind_cmd, val_ind_fl]]:
-        if len(c) > 1:
+            cmd = "%s/validate_benchmark.py start_scheduler --interface eno1 --recompute_all --benchmark %s " \
+              "--output_dir %s/%s --run_id %s --worker_id 0" % (base, benchmark, args.out_run, benchmark, benchmark)
+            val_cmd.append(cmd)
+            for i in range(nworker):
+                cmd = "sleep 360; %s/validate_benchmark.py start_worker --interface eno1 --benchmark %s " \
+                      "--output_dir %s/%s --run_id %s --worker_id %d" % (base, benchmark, args.out_run, benchmark, benchmark, i+1)
+                val_cmd.append(cmd)
+
+    for c, f in [[run_cmd, run_fl], [eval_cmd, eval_fl],
+                 [evalu_cmd, evalu_fl], [val_cmd, val_fl]]:
+        if len(c) > 0:
             write_cmd(c, f)
 
 
@@ -120,6 +120,7 @@ if __name__ == "__main__":
     parser.add_argument('--out-eval', default="./plots", type=str)
     parser.add_argument('--out-cmd', default="./", type=str)
     parser.add_argument('--root', default="./")
+    parser.add_argument('--nworker', default=50)
     
     args, unknown = parser.parse_known_args()
     main(args)
