@@ -12,7 +12,8 @@ import scipy.stats as scst
 from HPOBenchExperimentUtils import _log as _main_log
 from HPOBenchExperimentUtils.utils.validation_utils import load_json_files, \
     load_trajectories_as_df, df_per_optimizer
-from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc, color_per_opt, marker_per_opt
+from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc, color_per_opt, marker_per_opt,\
+    unify_layout
 from HPOBenchExperimentUtils.utils.runner_utils import get_optimizer_setting, get_benchmark_settings
 
 _main_log.setLevel(logging.DEBUG)
@@ -74,8 +75,11 @@ def plot_fidels(benchmark: str, output_dir: Union[Path, str], input_dir: Union[P
                     marker=marker_per_opt.get(opt, "o"), alpha=0.5,
                     label=label)
         plt.xscale("log")
-        plt.xlabel("Runtime in seconds")
-        plt.legend(title="%g evals on avg" % avg)
+        if get_benchmark_settings(benchmark)["is_surrogate"]:
+            plt.xlabel("Simulated runtime in seconds")
+        else:
+            plt.xlabel("Runtime in seconds")
+        unify_layout(ax, legend_args={"title": "%g evals on avg" % avg})
         ax_old = ax
         del rhs, df, sub
 
@@ -130,14 +134,16 @@ def plot_overhead(benchmark: str, output_dir: Union[Path, str], input_dir: Union
             plt.plot(steps, overall_cost, color=color_per_opt.get(opt, "k"), alpha=0.5, zorder=99,
                      label="%s overall" % label if seed == 0 else None)
 
-    a.legend()
-    a.grid(which="both", zorder=0)
     a.set_yscale("log")
     a.set_xscale("log")
-    a.set_xlabel("Runtime in seconds")
+    if get_benchmark_settings(benchmark)["is_surrogate"]:
+        a.set_xlabel("Simulated runtime in seconds")
+    else:
+        a.set_xlabel("Runtime in seconds")
     a.set_ylabel("Cumulated overhead in seconds")
     a.set_xlim([1, a.set_xlim()[1]])
-    #a.set_ylim([0.1, 10000])
+
+    unify_layout(a)
     plt.tight_layout()
     plt.savefig(Path(output_dir) / f'overhead_{benchmark}.png')
     plt.close('all')
@@ -189,8 +195,9 @@ def plot_ecdf(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pat
     plt.ylabel("P(x < X)")
     yscale = benchmark_spec.get("yscale", "log")
     plt.xscale(yscale)
+
+    unify_layout(a)
     plt.tight_layout()
-    plt.legend()
     plt.grid(b=True, which="both", axis="both", alpha=0.5)
     plt.savefig(Path(output_dir) / f'ecdf_{benchmark}.png')
 
@@ -255,11 +262,12 @@ def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Un
     plt.figure(figsize=[5, 5])
     a = plt.subplot(111)
     for fi, f in enumerate(f_set):
-        plt.scatter(f_set[fi+1:], [cors[(f, f1)][0] for f1 in f_set[fi+1:]], label=f)
-    plt.legend()
-    plt.xlabel("fidelity")
-    plt.ylabel("Spearman correlation coefficient")
-    plt.grid(b=True, which="both", axis="both", alpha=0.5)
+        a.scatter(f_set[fi+1:], [cors[(f, f1)][0] for f1 in f_set[fi+1:]], label=f)
+
+    a.set_xlabel("fidelity")
+    a.set_ylabel("Spearman correlation coefficient")
+    unify_layout(a)
+    plt.tight_layout()
     plt.savefig(Path(output_dir) / f'correlation_{benchmark}.png')
 
     # Create table
