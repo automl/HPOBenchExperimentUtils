@@ -184,7 +184,7 @@ ParamNetPokerOnTimeBenchmark:
   import_benchmark: ParamNetPokerOnTimeBenchmark
   is_surrogate: true
 
-# surrogate benchmarks - nas101
+# benchmarks handling seeds
 
 NASCifar10ABenchmark_fixed_seed_0:
   time_limit_in_s: 10000000
@@ -196,7 +196,6 @@ NASCifar10ABenchmark_fixed_seed_0:
   run_index: 0
   for_test: {'run_index': [0, 1, 2]}
 
-
 NASCifar10ABenchmark_random_seed:
   time_limit_in_s: 10000000
   cutoff_in_s: 10000000
@@ -206,7 +205,51 @@ NASCifar10ABenchmark_random_seed:
   is_surrogate: true
   random_seed_name: "run_index"
   random_seed_choice: [0, 1, 2]
-  for_test: {'run_index': [ 0, 1, 2 ] }
+  for_test: {'run_index': [0, 1, 2]}
+
+ProteinStructureBenchmark_fixed_seed_0:
+  time_limit_in_s: 10000000
+  cutoff_in_s: 500000
+  mem_limit_in_mb: 6000
+  import_from: nas.tabular_benchmarks
+  import_benchmark: ProteinStructureBenchmark
+  is_surrogate: true
+  run_index: 0
+  for_test: {'run_index': [0, 1, 2, 3]}
+
+ProteinStructureBenchmark_random_seed:
+  time_limit_in_s: 10000000
+  cutoff_in_s: 500000
+  mem_limit_in_mb: 6000
+  import_from: nas.tabular_benchmarks
+  import_benchmark: ProteinStructureBenchmark
+  is_surrogate: true
+  random_seed_name: "run_index"
+  random_seed_choice: [0, 1, 2, 3]
+  for_test: {'run_index': [0, 1, 2, 3]}
+
+Cifar10ValidNasBench201Benchmark_fixed_seed_777:
+  time_limit_in_s: 10000000
+  cutoff_in_s: 10000000
+  mem_limit_in_mb: 6000
+  import_from: nas.nasbench_201
+  import_benchmark: Cifar10ValidNasBench201Benchmark
+  is_surrogate: true
+  run_index: 777
+  for_test: {'run_index': [777, 888, 999]}
+
+Cifar10ValidNasBench201Benchmark_random_seed:
+  time_limit_in_s: 10000000
+  cutoff_in_s: 10000000
+  mem_limit_in_mb: 6000
+  import_from: nas.nasbench_201
+  import_benchmark: Cifar10ValidNasBench201Benchmark
+  is_surrogate: true
+  random_seed_name: "run_index"
+  random_seed_choice: [777, 888, 999]
+  for_test: {'run_index': [777, 888, 999]}
+
+# surrogate benchmarks - nas101
 
 NASCifar10ABenchmark:
   time_limit_in_s: 10000000
