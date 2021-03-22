@@ -40,6 +40,12 @@ def write_latex(result_df, output_file):
         'Cifar10ValidNasBench201Benchmark': r"\nbcifartv",
         'Cifar100NasBench201Benchmark': r"\nbcifarh",
         'ImageNetNasBench201Benchmark': r"\nbimage",
+        "ParamNetAdultOnTimeBenchmark": r"\paramadult",
+        "ParamNetHiggsOnTimeBenchmark": r"\paramhiggs",
+        "ParamNetLetterOnTimeBenchmark": r"\paramletter",
+        "ParamNetMnistOnTimeBenchmark": r"\parammnist",
+        "ParamNetOptdigitsOnTimeBenchmark": r"\paramoptdigits",
+        "ParamNetPokerOnTimeBenchmark": r"\parampoker",
     }
 
     with open(output_file, 'w') as fh:
