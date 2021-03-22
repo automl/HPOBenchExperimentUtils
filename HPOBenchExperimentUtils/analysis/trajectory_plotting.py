@@ -21,16 +21,18 @@ def read_trajectories(benchmark: str, input_dir: Path, train: bool=True, y_best:
 
     unique_optimizer = load_trajectories_as_df(
         input_dir=input_dir, which=f'train_{which}' if train else f'test_{which}')
-    optimizer_names = list(unique_optimizer.keys())
     if opt_list is None:
-        opt_list = optimizer_names
+        opt_list = list(unique_optimizer.keys())
     statistics_df = []
-    _log.critical("Found: " + ",".join(optimizer_names))
-    if len(optimizer_names) == 0:
+    _log.critical("Found: " + ",".join(list(unique_optimizer.keys())))
+    if len(unique_optimizer) == 0:
         raise ValueError("No files found")
-    for key in optimizer_names:
+    optimizer_names = []
+    for key in unique_optimizer.keys():
         if key not in opt_list:
             _log.info(f'Skip {key}')
+            continue
+        optimizer_names.append(key)
         trajectories = load_json_files(unique_optimizer[key])
         optimizer_df = df_per_optimizer(key, trajectories, y_best=y_best)
         statistics_df.append(get_statistics_df(optimizer_df))

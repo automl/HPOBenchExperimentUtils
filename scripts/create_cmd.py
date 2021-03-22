@@ -78,11 +78,19 @@ def main(args):
             
         if opt == "rs":
             # We only need this once since it works for all optimizers
-            cmd = "%s/evaluate_benchmark.py --output_dir %s/ --input_dir %s/ --benchmark %s " \
-                  "--agg median --what all" % (base, args.out_eval, args.out_run, benchmark)
+            cmd = f"{base}/evaluate_benchmark.py --output_dir {args.out_eval}/ --input_dir {args.out_run}/ --benchmark {benchmark} " \
+                  "--agg median --what all"
             eval_cmd.append(cmd)
             cmd += " --unvalidated"
             evalu_cmd.append(cmd)
+
+            # Do this only once
+            if benchmark == expset_dc[exp][-1]:
+                cmd = f"{base}/evaluate_benchmark.py --output_dir {args.out_eval}/ --input_dir {args.out_run}/ " \
+                      f"--agg median --rank {exp}"
+                eval_cmd.append(cmd)
+                cmd += " --unvalidated"
+                evalu_cmd.append(cmd)
 
             cmd = "%s/validate_benchmark.py start_scheduler --interface eno1 --recompute_all --benchmark %s " \
               "--output_dir %s/%s --run_id %s --worker_id 0" % (base, benchmark, args.out_run, benchmark, benchmark)

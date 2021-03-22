@@ -520,7 +520,7 @@ def unify_layout(ax, fontsize=15, legend_args=None, title=None):
 benchmark_families = {
     "NAS201": ["Cifar10ValidNasBench201Benchmark", "Cifar100NasBench201Benchmark",
                "ImageNetNasBench201Benchmark"],
-    "NAS101": ["NASCifar10ABenchmark", "NASCifar10BBenchmark", ], #"NASCifar10CBenchmark"],
+    "NAS101": ["NASCifar10ABenchmark", "NASCifar10BBenchmark", "NASCifar10CBenchmark"],
     "NASTAB": ["SliceLocalizationBenchmark", "ProteinStructureBenchmark",
                "NavalPropulsionBenchmark", "ParkinsonsTelemonitoringBenchmark", ],
     "NAS1SHOT1": ["NASBench1shot1SearchSpace1Benchmark", "NASBench1shot1SearchSpace2Benchmark",
