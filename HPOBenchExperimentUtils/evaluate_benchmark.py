@@ -1,12 +1,15 @@
 import argparse
 import logging
+import sys
 
 from HPOBenchExperimentUtils.utils.runner_utils import get_benchmark_names
 from HPOBenchExperimentUtils.analysis.trajectory_plotting import plot_trajectory
 from HPOBenchExperimentUtils.analysis.stats_generation import plot_fidels, plot_overhead, \
     plot_ecdf, plot_correlation, get_stats
 from HPOBenchExperimentUtils.analysis.table_generation import save_median_table
+from HPOBenchExperimentUtils.analysis.rank_plotting import plot_ranks
 from HPOBenchExperimentUtils import _log as _root_log
+from HPOBenchExperimentUtils.utils.plotting_utils import benchmark_families
 
 _root_log.setLevel(logging.DEBUG)
 _log = logging.getLogger(__name__)
@@ -18,9 +21,10 @@ if __name__ == "__main__":
 
     parser.add_argument('--output_dir', required=True, type=str)
     parser.add_argument('--input_dir', required=True, type=str)
-    parser.add_argument('--benchmark', choices=get_benchmark_names(), required=True, type=str)
+    parser.add_argument('--benchmark', choices=get_benchmark_names(), type=str, default=None)
     parser.add_argument('--what', choices=["all", "best_found", "over_time", "other",
                                            "ecdf", "correlation", "stats"], default="all")
+    parser.add_argument('--rank', choices=benchmark_families.keys(), default=None)
     parser.add_argument('--agg', choices=["mean", "median"], default="median")
     parser.add_argument('--unvalidated', action='store_true', default=False)
     parser.add_argument('--which', choices=["v1", "v2"], default="v1")
@@ -31,6 +35,15 @@ if __name__ == "__main__":
                                "dehb", "hpbandster_bohb_eta_3", "hpbandster_hb_eta_3",
                                #"mumbo",
                                ]
+
+    if args.rank is False:
+        assert args.benchmark is not None, f"If rank={args.rank}, then --benchmark must be set"
+    else:
+        _log.info("Only plotting ranks")
+        plot_ranks(**vars(args), benchmarks=benchmark_families[args.rank],
+                   opt_list=list_of_opt_to_consider)
+        sys.exit(1)
+
     if args.what in ("all", "best_found"):
         save_median_table(**vars(args), opt_list=list_of_opt_to_consider)
 
@@ -51,4 +64,3 @@ if __name__ == "__main__":
             _log.critical("Statistics will be plotted on unvalidated data")
         plot_fidels(**vars(args), opt_list=list_of_opt_to_consider)
         plot_overhead(**vars(args), opt_list=list_of_opt_to_consider)
-

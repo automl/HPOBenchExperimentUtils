@@ -1,3 +1,5 @@
+import matplotlib.pyplot as plt
+
 plot_dc = {
     "BNNOnBostonHousing": {
         # BOHB paper
@@ -499,4 +501,37 @@ marker_per_opt = {
     "dragonfly_default": "^",
     "dehb": "*",
     "autogluon": "o",
+}
+
+
+def unify_layout(ax, fontsize=15, legend_args=None, title=None):
+    if legend_args is None:
+        legend_args = {}
+    ax.legend(fontsize=fontsize, **legend_args)
+    ax.tick_params(axis="x", labelsize=fontsize)
+    ax.tick_params(axis="y", labelsize=fontsize)
+    ax.xaxis.get_label().set_fontsize(fontsize)
+    ax.yaxis.get_label().set_fontsize(fontsize)
+    if title is not None:
+        ax.set_title(title, fontsize=fontsize)
+    ax.grid(b=True, which="both", axis="both", alpha=0.5)
+
+
+benchmark_families = {
+    "NAS201": ["Cifar10ValidNasBench201Benchmark", "Cifar100NasBench201Benchmark",
+               "ImageNetNasBench201Benchmark"],
+    "NAS101": ["NASCifar10ABenchmark", "NASCifar10BBenchmark", "NASCifar10CBenchmark"],
+    "NASTAB": ["SliceLocalizationBenchmark", "ProteinStructureBenchmark",
+               "NavalPropulsionBenchmark", "ParkinsonsTelemonitoringBenchmark", ],
+    "NAS1SHOT1": ["NASBench1shot1SearchSpace1Benchmark", "NASBench1shot1SearchSpace2Benchmark",
+                  "NASBench1shot1SearchSpace3Benchmark", ],
+    "pybnn": ["BNNOnBostonHousing", "BNNOnProteinStructure", "BNNOnYearPrediction", ],
+    "rl": ["cartpolereduced"],
+    "learna": ["metalearna", "learna"],
+    "paramnetsteps": ["ParamNetAdultOnStepsBenchmark", "ParamNetHiggsOnStepsBenchmark",
+                      "ParamNetLetterOnStepsBenchmark", "ParamNetMnistOnStepsBenchmark",
+                      "ParamNetOptdigitsOnStepsBenchmark", "ParamNetPokerOnStepsBenchmark", ],
+    "paramnettime": ["ParamNetAdultOnTimeBenchmark", "ParamNetHiggsOnTimeBenchmark",
+                     "ParamNetLetterOnTimeBenchmark", "ParamNetMnistOnTimeBenchmark",
+                     "ParamNetOptdigitsOnTimeBenchmark", "ParamNetPokerOnTimeBenchmark", ],
 }

@@ -2,11 +2,11 @@ import logging
 from pathlib import Path
 from typing import Union, List
 
-from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc, color_per_opt
+from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc, color_per_opt, unify_layout
 from HPOBenchExperimentUtils import _log as _main_log
 from HPOBenchExperimentUtils.utils.validation_utils import load_json_files, load_trajectories_as_df,\
     get_statistics_df, df_per_optimizer
-from HPOBenchExperimentUtils.utils.runner_utils import get_optimizer_setting
+from HPOBenchExperimentUtils.utils.runner_utils import get_optimizer_setting, get_benchmark_settings
 
 import matplotlib.pyplot as plt
 
@@ -21,16 +21,18 @@ def read_trajectories(benchmark: str, input_dir: Path, train: bool=True, y_best:
 
     unique_optimizer = load_trajectories_as_df(
         input_dir=input_dir, which=f'train_{which}' if train else f'test_{which}')
-    optimizer_names = list(unique_optimizer.keys())
     if opt_list is None:
-        opt_list = optimizer_names
+        opt_list = list(unique_optimizer.keys())
     statistics_df = []
-    _log.critical("Found: " + ",".join(optimizer_names))
-    if len(optimizer_names) == 0:
+    _log.critical("Found: " + ",".join(list(unique_optimizer.keys())))
+    if len(unique_optimizer) == 0:
         raise ValueError("No files found")
-    for key in optimizer_names:
+    optimizer_names = []
+    for key in unique_optimizer.keys():
         if key not in opt_list:
             _log.info(f'Skip {key}')
+            continue
+        optimizer_names.append(key)
         trajectories = load_json_files(unique_optimizer[key])
         optimizer_df = df_per_optimizer(key, trajectories, y_best=y_best)
         statistics_df.append(get_statistics_df(optimizer_df))
@@ -49,6 +51,8 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
     output_dir.mkdir(exist_ok=True, parents=True)
 
     benchmark_spec = plot_dc.get(benchmark, {})
+    benchmark_settings = get_benchmark_settings(benchmark)
+
     y_best = benchmark_spec.get("ystar_valid", 0) if unvalidated \
         else benchmark_spec.get("ystar_test", 0)
 
@@ -97,7 +101,10 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
     yu = benchmark_spec.get("ylim_up", max_)
     xscale = benchmark_spec.get("xscale", "log")
     yscale = benchmark_spec.get("yscale", "log")
-    xlabel = benchmark_spec.get("xlabel", "Runtime in seconds")
+    if benchmark_settings["is_surrogate"] == True:
+        xlabel = benchmark_spec.get("xlabel", "Simulated runtime in seconds")
+    else:
+        xlabel = benchmark_spec.get("xlabel", "Runtime in seconds")
     test_str = 'Optimized' if unvalidated else 'Test'
     ylabel = f'{criterion.capitalize()} {test_str} {ylabel}'
 
@@ -108,10 +115,10 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
 
-    ax.legend()
     val_str = 'optimized' if unvalidated else 'validated'
-    ax.set_title(f'{benchmark}')
-    plt.grid(b=True, which="both", axis="both", alpha=0.5)
+
+    unify_layout(ax, title=f'{benchmark}')
+    plt.tight_layout()
     plt.savefig(Path(output_dir) / f'trajectory_{benchmark}_{val_str}_{criterion}_{which}.png')
     plt.close('all')
     return 1
