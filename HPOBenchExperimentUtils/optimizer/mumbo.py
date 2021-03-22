@@ -197,6 +197,7 @@ class MultiTaskMUMBO(SingleFidelityOptimizer):
         cost_acquisition = Cost(np.linspace(start=1. / n_fidelity_vals, stop=1.0, num=n_fidelity_vals))
         mumbo_acquisition = MUMBO(model, augmented_space, num_samples=self.mumbo_settings["num_mc_samples"],
                                   grid_size=self.mumbo_settings["grid_size"]) / cost_acquisition
+        mumbo_acquisition.numerator.source_idx = augmented_space.dimensionality - 1
         acquisition_optimizer = MultiSourceAcquisitionOptimizer(GradientAcquisitionOptimizer(augmented_space),
                                                                 space=augmented_space)
 
