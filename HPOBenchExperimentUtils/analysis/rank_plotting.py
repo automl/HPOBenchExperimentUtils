@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from typing import Union, List
 
-from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc, color_per_opt
+from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc, color_per_opt, unify_layout
 from HPOBenchExperimentUtils import _log as _main_log
 from HPOBenchExperimentUtils.utils.validation_utils import load_json_files, load_trajectories_as_df
 from HPOBenchExperimentUtils.utils.runner_utils import get_optimizer_setting, get_benchmark_settings
@@ -62,6 +62,9 @@ def plot_ranks(benchmarks: List[str], output_dir: Union[Path, str], input_dir: U
     output_dir = Path(output_dir)
     output_dir.mkdir(exist_ok=True, parents=True)
 
+    benchmark_spec = plot_dc.get(benchmarks[0], {})
+    benchmark_settings = get_benchmark_settings(benchmarks[0])
+
     all_trajectories = []
     horizon = []
     for b in benchmarks:
@@ -112,8 +115,7 @@ def plot_ranks(benchmarks: List[str], output_dir: Union[Path, str], input_dir: U
 
     # Step 3. Plot the average ranks over time.
     ######################################################################################
-    #figsize = (10, 5)
-    plt.figure()#figsize=figsize)
+    f, ax = plt.subplots(1, 1)
     for i, key in enumerate(opt_list):
         X_data = []
         y_data = []
@@ -126,15 +128,18 @@ def plot_ranks(benchmarks: List[str], output_dir: Union[Path, str], input_dir: U
         plt.plot(X_data, y_data, label=get_optimizer_setting(key).get("display_name", key),
                  c=color_per_opt.get(key, "k"),
                  linewidth=2)
-    plt.xlabel('time [min]', fontsize=15)
-    plt.ylabel('average rank', fontsize=15)
-    plt.legend(fontsize=15)
-    plt.xticks(fontsize=15)
-    plt.yticks(fontsize=15)
-    plt.ylim([0.9, len(opt_list)])
-    plt.xlim(10, horizon)
-    plt.xscale("log")
+    if benchmark_settings["is_surrogate"]:
+        plt.xlabel("Simulated runtime in seconds")
+    else:
+        plt.xlabel("Runtime in seconds")
+    ax.set_ylabel('Average rank')
+    ax.set_ylim([0.9, len(opt_list)])
+    ax.set_xlim(10, horizon)
+    ax.set_xscale(benchmark_spec.get("xscale", "log"))
+
+    unify_layout(ax, title=",".join(benchmarks))
     val_str = 'optimized' if unvalidated else 'validated'
+    plt.tight_layout()
     plt.savefig(Path(output_dir) / f'ranks_{".".join(benchmarks)}_{val_str}_{which}.png')
     plt.close('all')
     return 1

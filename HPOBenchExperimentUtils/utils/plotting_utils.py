@@ -1,3 +1,5 @@
+import matplotlib.pyplot as plt
+
 plot_dc = {
     "BNNOnBostonHousing": {
         # BOHB paper
@@ -500,3 +502,16 @@ marker_per_opt = {
     "dehb": "*",
     "autogluon": "o",
 }
+
+
+def unify_layout(ax, fontsize=15, legend_args=None, title=None):
+    if legend_args is None:
+        legend_args = {}
+    ax.legend(fontsize=fontsize, **legend_args)
+    ax.tick_params(axis="x", labelsize=fontsize)
+    ax.tick_params(axis="y", labelsize=fontsize)
+    ax.xaxis.get_label().set_fontsize(fontsize)
+    ax.yaxis.get_label().set_fontsize(fontsize)
+    if title is not None:
+        ax.set_title(title, fontsize=fontsize)
+    ax.grid(b=True, which="both", axis="both", alpha=0.5)

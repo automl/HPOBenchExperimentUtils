@@ -2,11 +2,11 @@ import logging
 from pathlib import Path
 from typing import Union, List
 
-from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc, color_per_opt
+from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc, color_per_opt, unify_layout
 from HPOBenchExperimentUtils import _log as _main_log
 from HPOBenchExperimentUtils.utils.validation_utils import load_json_files, load_trajectories_as_df,\
     get_statistics_df, df_per_optimizer
-from HPOBenchExperimentUtils.utils.runner_utils import get_optimizer_setting
+from HPOBenchExperimentUtils.utils.runner_utils import get_optimizer_setting, get_benchmark_settings
 
 import matplotlib.pyplot as plt
 
@@ -49,6 +49,8 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
     output_dir.mkdir(exist_ok=True, parents=True)
 
     benchmark_spec = plot_dc.get(benchmark, {})
+    benchmark_settings = get_benchmark_settings(benchmark)
+
     y_best = benchmark_spec.get("ystar_valid", 0) if unvalidated \
         else benchmark_spec.get("ystar_test", 0)
 
@@ -97,7 +99,10 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
     yu = benchmark_spec.get("ylim_up", max_)
     xscale = benchmark_spec.get("xscale", "log")
     yscale = benchmark_spec.get("yscale", "log")
-    xlabel = benchmark_spec.get("xlabel", "Runtime in seconds")
+    if benchmark_settings["is_surrogate"] == True:
+        xlabel = benchmark_spec.get("xlabel", "Simulated runtime in seconds")
+    else:
+        xlabel = benchmark_spec.get("xlabel", "Runtime in seconds")
     test_str = 'Optimized' if unvalidated else 'Test'
     ylabel = f'{criterion.capitalize()} {test_str} {ylabel}'
 
@@ -108,10 +113,10 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
 
-    ax.legend()
     val_str = 'optimized' if unvalidated else 'validated'
-    ax.set_title(f'{benchmark}')
-    plt.grid(b=True, which="both", axis="both", alpha=0.5)
+
+    unify_layout(ax, title=f'{benchmark}')
+    plt.tight_layout()
     plt.savefig(Path(output_dir) / f'trajectory_{benchmark}_{val_str}_{criterion}_{which}.png')
     plt.close('all')
     return 1
