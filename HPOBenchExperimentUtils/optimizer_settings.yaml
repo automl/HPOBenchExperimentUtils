@@ -83,6 +83,10 @@ smac_sf:
   optimizer: smac_sf
   display_name: "SMAC SF"
 
+smac_sf_latin:
+  optimizer: smac_sf_latin
+  display_name: "SMAC SF LATIN"
+
 smac_hb_eta_3:
   optimizer: smac_hb
   eta: 3

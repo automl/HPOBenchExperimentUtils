@@ -75,6 +75,7 @@ class OptimizerEnum(Enum):
     HPBANDSTER_HB = 'hpbandster_hyperband'
     HPBANDSTER_BOHB = 'hpbandster_bohb'
     SMAC_SF = "smac_sf"
+    SMAC_SF_LATIN = "smac_sf_latin"
     SMAC_HYPERBAND = 'smac_hyperband'
     SMAC_SUCCESSIVE_HALVING = 'smac_successive_halving'
     DRAGONFLY = 'dragonfly'
@@ -118,7 +119,7 @@ def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]) -> OptimizerEnum
             elif 'successive_halving' in optimizer or 'sh' in optimizer:
                 return OptimizerEnum.SMAC_SUCCESSIVE_HALVING
             elif "sf" in optimizer:
-                return OptimizerEnum.SMAC_SF
+                return OptimizerEnum.SMAC_SF_LATIN if "latin" in optimizer else OptimizerEnum.SMAC_SF
             else:
                 fail = True
 
@@ -176,6 +177,9 @@ def get_optimizer(optimizer_enum):
     elif optimizer_enum is OptimizerEnum.SMAC_SF:
         from HPOBenchExperimentUtils.optimizer.smac_optimizer import SMACOptimizerHPO
         optimizer = SMACOptimizerHPO
+    elif optimizer_enum is OptimizerEnum.SMAC_SF_LATIN:
+        from HPOBenchExperimentUtils.optimizer.smac_optimizer import SMACOptimizerHPO_Latin
+        optimizer = SMACOptimizerHPO_Latin
     elif optimizer_enum is OptimizerEnum.SMAC_SUCCESSIVE_HALVING:
         from HPOBenchExperimentUtils.optimizer.smac_optimizer import SMACOptimizerSuccessiveHalving
         optimizer = SMACOptimizerSuccessiveHalving

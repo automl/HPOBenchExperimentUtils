@@ -1,4 +1,13 @@
 ---
+bbobmixint:
+  time_limit_in_s: 342000
+  cutoff_in_s: 342000
+  mem_limit_in_mb: 6000
+  import_from: synthetic.bbob_benchmarks
+  import_benchmark: BBOBMixIntBenchmark
+  fake_fidelity: true
+
+
 # Run for 2h
 xgboostsub:
   time_limit_in_s: 7200

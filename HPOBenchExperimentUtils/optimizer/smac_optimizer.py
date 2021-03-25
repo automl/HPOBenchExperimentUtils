@@ -153,3 +153,11 @@ class SMACOptimizerHPO(SMACOptimizer):
             incumbent = smac.solver.incumbent
         end_time = time()
         _log.info(f'Finished Optimization after {int(end_time - start_time):d}s. Incumbent is {incumbent}')
+
+
+class SMACOptimizerHPO_Latin(SMACOptimizerHPO):
+    def _setupsmac(self, scenario, optimization_function_wrapper):
+        from smac.initial_design.latin_hypercube_design import LHDesign
+        smac = SMAC4HPO(scenario=scenario, rng=np.random.RandomState(self.rng),
+                        tae_runner=optimization_function_wrapper, initial_design=LHDesign)
+        return smac
