@@ -160,6 +160,15 @@ def run_benchmark(optimizer: str,
         sleep(PING_OPTIMIZER_IN_S)
     else:
         _log.debug('CALLING TERMINATE()')
+        try:
+            _log.info(f'Optimization has been finished.\n'
+                      f'Timelimit: {settings["time_limit_in_s"]} and is now: {benchmark.get_total_time_used()}\n'
+                      f'TAE limit: {settings["tae_limit"]} and is now: {benchmark.get_total_tae_used()}\n'
+                      f'Fuel limit: {settings["fuel_limit"]} and is now: {benchmark.get_total_fuel_used()}\n'
+                      f'Terminate Process after {time() - start_time}')
+        except FileNotFoundError:
+            pass
+
         process.terminate()
         _log.debug('PROCESS TERMINATED')
         _log.info(f'Optimization has been finished.\n'

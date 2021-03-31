@@ -323,9 +323,14 @@ class Bookkeeper:
             self.write_line_to_file(self.trajectory, record, mode='a')
 
     def __del__(self):
+        if self.lock_file.exists():
+            self.lock_file.unlink()
+
         if self.lock_dir.exists():
-            import shutil
-            shutil.rmtree(self.lock_dir)
+            is_empty = not any(Path('some/path/here').iterdir())
+            if is_empty:
+                import shutil
+                shutil.rmtree(self.lock_dir)
 
         self.benchmark.__del__()
 
