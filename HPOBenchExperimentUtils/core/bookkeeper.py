@@ -327,7 +327,7 @@ class Bookkeeper:
             self.lock_file.unlink()
 
         if self.lock_dir.exists():
-            is_empty = not any(Path('some/path/here').iterdir())
+            is_empty = not any(self.lock_dir.iterdir())
             if is_empty:
                 import shutil
                 shutil.rmtree(self.lock_dir)
