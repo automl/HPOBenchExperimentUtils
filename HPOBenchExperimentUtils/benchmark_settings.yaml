@@ -235,8 +235,8 @@ Cifar10ValidNasBench201Benchmark_fixed_seed_777:
   import_from: nas.nasbench_201
   import_benchmark: Cifar10ValidNasBench201Benchmark
   is_surrogate: true
-  run_index: 777
-  for_test: {'run_index': [777, 888, 999]}
+  data_seed: 777
+  for_test: {'data_seed': [777, 888, 999]}
 
 Cifar10ValidNasBench201Benchmark_random_seed:
   time_limit_in_s: 10000000
@@ -245,9 +245,9 @@ Cifar10ValidNasBench201Benchmark_random_seed:
   import_from: nas.nasbench_201
   import_benchmark: Cifar10ValidNasBench201Benchmark
   is_surrogate: true
-  random_seed_name: "run_index"
+  random_seed_name: "data_seed"
   random_seed_choice: [777, 888, 999]
-  for_test: {'run_index': [777, 888, 999]}
+  for_test: {'data_seed': [777, 888, 999]}
 
 # surrogate benchmarks - nas101
 
