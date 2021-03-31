@@ -76,7 +76,7 @@ fabolas_mumbo:
   update_interval: 1
   # MUMBO acquisition specific settings
   num_mc_samples: 10
-  grid_size: 500
+  grid_size: 10000
 
 # SMAC ##################################################################################################### #
 smac_sf:
