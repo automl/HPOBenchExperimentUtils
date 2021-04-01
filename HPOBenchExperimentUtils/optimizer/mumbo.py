@@ -146,7 +146,7 @@ class MultiTaskMUMBO(SingleFidelityOptimizer):
         # fidelity value, but that is wasteful for non-synthetic benchmarks, so we opt for uniformly distributing the
         # fidelity values across the sampled initial configurations. It is assumed that the number of unique fidelity
         # values is less than the number of sampled configurations.
-        n_init = self.init_samples_per_dim * self.emukit_space.dimensionality
+        n_init = self.init_samples_per_dim * len(self.original_space.get_hyperparameters())
         X_init = initial_design.get_samples(n_init)
         n_reps = n_init // self.info_sources.shape[0] + 1
         fmin, fmax = self.emukit_fidelity.bounds[0]
@@ -196,7 +196,10 @@ class MultiTaskMUMBO(SingleFidelityOptimizer):
         # Setup the acquisition function. Same as the MUMBO example code.
         cost_acquisition = Cost(np.linspace(start=1. / n_fidelity_vals, stop=1.0, num=n_fidelity_vals))
         mumbo_acquisition = MUMBO(model, augmented_space, num_samples=self.mumbo_settings["num_mc_samples"],
-                                  grid_size=self.mumbo_settings["grid_size"]) / cost_acquisition
+                                  grid_size=self.mumbo_settings["grid_size"] *
+                                            len(self.original_space.get_hyperparameters())) / \
+                            cost_acquisition
+        mumbo_acquisition.numerator.source_idx = augmented_space.dimensionality - 1
         acquisition_optimizer = MultiSourceAcquisitionOptimizer(GradientAcquisitionOptimizer(augmented_space),
                                                                 space=augmented_space)
 
