@@ -42,7 +42,7 @@ dragonfly_realtime:
 mumbo:
   optimizer: mumbo
   init_samples_per_dim: 10
-  num_fidelity_values: 10 # Continuous fidelity parameters are discretized according to this
+  num_fidelity_values: 5 # Continuous fidelity parameters are discretized according to this; Same value as max_stages
   initial_design: Latin # Two options: [Random, Latin]
   # GP Settings
   n_optimization_restarts: 5
