@@ -12,6 +12,18 @@ autogluon:
   searcher: "bayesopt"
   display_name: "autogluon"
 
+# DE ############################################################################################################### #
+de:
+  optimizer: de
+  # Options for strategy:
+  # ['rand1_bin', 'rand2_bin', 'rand2dir_bin', 'best1_bin', 'best2_bin', 'currenttobest1_bin', 'randtobest1_bin',
+  # 'rand1_exp', 'rand2_exp', 'rand2dir_exp', 'best1_exp', 'best2_exp', 'currenttobest1_exp', 'randtobest1_exp']
+  strategy: rand1_bin
+  pop_size: 40
+  mutation_factor: 0.5
+  crossover_prob: 0.5
+  display_name: "DE"
+
 # DEHB ############################################################################################################### #
 dehb:
   optimizer: dehb

@@ -79,6 +79,7 @@ class OptimizerEnum(Enum):
     SMAC_HYPERBAND = 'smac_hyperband'
     SMAC_SUCCESSIVE_HALVING = 'smac_successive_halving'
     DRAGONFLY = 'dragonfly'
+    DE = 'de'
     DEHB = 'dehb'
     FABOLAS = 'fabolas'
     MUMBO = 'mumbo'
@@ -129,6 +130,9 @@ def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]) -> OptimizerEnum
         elif optimizer == 'dehb':
             return OptimizerEnum.DEHB
 
+        elif optimizer == 'de':
+            return OptimizerEnum.DE
+
         elif 'fabolas' in optimizer:
             return OptimizerEnum.FABOLAS
 
@@ -164,7 +168,9 @@ def get_optimizer(optimizer_enum):
         optimizer = DragonflyOptimizer
     elif optimizer_enum is OptimizerEnum.DEHB:
         from HPOBenchExperimentUtils.optimizer.dehb_optimizer import DehbOptimizer
-        optimizer = DehbOptimizer
+    elif optimizer_enum is OptimizerEnum.DE:
+        from HPOBenchExperimentUtils.optimizer.de_optimizer import DEOptimizer
+        optimizer = DEOptimizer
     elif optimizer_enum is OptimizerEnum.FABOLAS:
         from HPOBenchExperimentUtils.optimizer.fabolas_optimizer import FabolasOptimizer
         optimizer = FabolasOptimizer
