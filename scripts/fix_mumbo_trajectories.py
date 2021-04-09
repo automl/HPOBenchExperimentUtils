@@ -12,14 +12,14 @@ def main(args):
         hporh_fl = rundir / "hpobench_runhistory.txt"
         hpotr_fl = rundir / "hpobench_trajectory_v1.txt"
         mumbotr_fl = rundir / "mumbo_trajectory.json"
-        newtr_fl = rundir / "hpobench_trajectory_v1.txt"
+        newtr_fl = rundir / "hpobench_trajectory_v3.txt"
 
         for fl in hporh_fl, hpotr_fl, mumbotr_fl:
             assert fl.is_file(), fl
 
         # 1) Read in all files. We need the runhistory and both trajectories
         hporh, hpotr, mumbotr = ([], [], [])
-        for f, a in zip((hporh_fl, hporh), (hpotr_fl, hpotr), (mumbotr_fl, mumbotr)):
+        for f, a in ((hporh_fl, hporh), (hpotr_fl, hpotr), (mumbotr_fl, mumbotr)):
             with open(f, "r") as fh:
                 a.extend([json.loads(line) for line in fh.readlines()])
 
@@ -62,9 +62,14 @@ def main(args):
                 final_traj.append(dc)
 
         # Now write the new trajectory
+        if args.dry:
+          print(final_traj)
+          continue
+        assert not newtr_fl.is_file()
         with open(newtr_fl, "w") as fh:
-            json.dump(final_traj, fh)
-            fh.write(os.linesep)
+            for entry in final_traj:
+                json.dump(entry, fh)
+                fh.write(os.linesep)
 
 
 if __name__ == "__main__":
@@ -73,6 +78,7 @@ if __name__ == "__main__":
     parser.add_argument('--exp', required=True, choices=get_benchmark_names())
     parser.add_argument('--out-run', default="./exp_outputs", type=str)
     parser.add_argument('--nrep', type=int, default=32)
+    parser.add_argument('--dry', action="store_true", default=False)
 
     args, unknown = parser.parse_known_args()
     main(args)

@@ -1,5 +1,6 @@
 try:
     import ujson as json
+    import json as json_backup
     print("Use ujson")
 except:
     import json
@@ -16,7 +17,8 @@ import numpy as np
 import pandas as pd
 
 from HPOBenchExperimentUtils.utils import VALIDATED_TRAJECTORY_V1_FILENAME, VALIDATED_TRAJECTORY_V2_FILENAME, \
-    TRAJECTORY_V1_FILENAME, TRAJECTORY_V2_FILENAME, RUNHISTORY_FILENAME, VALIDATED_RUNHISTORY_FILENAME
+    VALIDATED_TRAJECTORY_V3_FILENAME, TRAJECTORY_V1_FILENAME, TRAJECTORY_V2_FILENAME, TRAJECTORY_V3_FILENAME, \
+    RUNHISTORY_FILENAME, VALIDATED_RUNHISTORY_FILENAME
 
 _log = logging.getLogger(__name__)
 
@@ -50,7 +52,7 @@ def write_validated_trajectory(unvalidated_traj: List, validation_results: Dict,
             entry['cost_unvalidated'] = entry['cost']
             entry['cost'] = result_dict['cost']
 
-            entry['info']['fidelity_unvalidated'] = entry['info']['fidelity']
+            entry['info']['fidelity_unvalidated'] = entry['info'].get('fidelity', None)
             entry['info']['fidelity'] = result_dict['info']['fidelity']
 
             entry['fidelity_unvalidated'] = entry['fidelity']
@@ -67,8 +69,13 @@ def write_validated_trajectory(unvalidated_traj: List, validation_results: Dict,
     # Write back the validated trajectory
     if unvalidated_traj_path.name == TRAJECTORY_V1_FILENAME:
         name = VALIDATED_TRAJECTORY_V1_FILENAME
-    else:
+    elif unvalidated_traj_path.name == TRAJECTORY_V2_FILENAME:
         name = VALIDATED_TRAJECTORY_V2_FILENAME
+    elif unvalidated_traj_path.name == TRAJECTORY_V3_FILENAME:
+        name = VALIDATED_TRAJECTORY_V3_FILENAME
+    else:
+        _log.critical(f"Unknown trajectory filename {unvalidated_traj.name}")
+        raise ValueError()
 
     validated_trajectory_path = unvalidated_traj_path.parent / name
     with validated_trajectory_path.open('w') as fh:
@@ -93,7 +100,7 @@ def extract_configs_from_trajectories(trajectories: List) -> List:
     -------
         List
     """
-    """ Return a List of all unvalidated configurations from the collecetd trajectory files. """
+    """ Return a List of all unvalidated configurations from the collected trajectory files. """
     configurations = [run['configuration'] for trajectory in trajectories for run in trajectory[1:]]
     return configurations
 
@@ -118,7 +125,18 @@ def load_json_files(file_paths: List[Path]) -> List:
     data = []
     for file in file_paths:
         lines = read_lines(file)
-        file_content = [json.loads(line) for line in lines]
+        file_content = []
+        for line in lines:
+            try:
+                r = json.loads(line)
+            except:
+                try:
+                    r = json_backup.loads(line)
+                except:
+                    raise
+
+            file_content.append(r)
+        #file_content = [json.loads(line) for line in lines]
         data.append(file_content)
     dur = time.time() - start
     _log.info("Reading %d files took %f sec" % (len(file_paths), dur))
@@ -191,6 +209,12 @@ def load_trajectories_as_df(input_dir, which="test_v1"):
     unique_optimizer = defaultdict(lambda: [])
     for path in trajectories_paths:
         opt = path.parent.parent.name
+
+        if "test" in which:
+            if (path.parent / VALIDATED_TRAJECTORY_V3_FILENAME).is_file():
+                _log.critical(f"Change to {path.parent / VALIDATED_TRAJECTORY_V3_FILENAME}")
+                path = path.parent / VALIDATED_TRAJECTORY_V3_FILENAME
+
         unique_optimizer[opt].append(path)
     return unique_optimizer
 
