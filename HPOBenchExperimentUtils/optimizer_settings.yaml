@@ -51,7 +51,7 @@ mumbo:
   kernel: matern52  # Can be one of ['rbf', 'matern52']
   # MUMBO acquisition settings
   num_mc_samples: 10
-  grid_size: 500
+  grid_size: 10000
 
 # FABOLAS MTBO ####################################################################################################### #
 fabolas_mtbo:
