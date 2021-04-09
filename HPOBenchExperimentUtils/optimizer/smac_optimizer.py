@@ -9,13 +9,13 @@ from hpobench.abstract_benchmark import AbstractBenchmark
 from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 from smac.facade.smac_bohb_facade import BOHB4HPO
 from smac.facade.smac_hpo_facade import SMAC4HPO
+from smac.facade.smac_bo_facade import SMAC4BO
 from smac.intensification.hyperband import Hyperband
 from smac.intensification.successive_halving import SuccessiveHalving
 from smac.scenario.scenario import Scenario
 
 from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
 from HPOBenchExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
-from HPOBenchExperimentUtils.utils.optimizer_utils import get_number_ta_runs
 
 _log = logging.getLogger(__name__)
 
@@ -23,8 +23,8 @@ _log = logging.getLogger(__name__)
 class SMACOptimizer(SingleFidelityOptimizer):
     """
     This class offers an interface to the SMAC Optimizer. It runs on a given benchmark.
-    All benchmark and optimizer specific information are stored in the dictionaries benchmark_settings and
-    optimizer_settings.
+    All benchmark and optimizer specific information are stored in the dictionaries
+    benchmark_settings and optimizer_settings.
     The intensifier specifies which SMAC-Intensifier (HB or SH) is used.
     """
     def __init__(self, benchmark: Union[Bookkeeper, AbstractBenchmark, AbstractBenchmarkClient],
@@ -36,12 +36,20 @@ class SMACOptimizer(SingleFidelityOptimizer):
     def setup(self):
         pass
 
+    def get_scenario(self):
+        scenario_dict = {"run_obj": "quality",
+                         "cs": self.cs,
+                         "deterministic": "true",
+                         "limit_resources": False,
+                         "output_dir": str(self.output_dir)}
+
+        return Scenario(scenario_dict)
+
     def _setupsmac(self, scenario, optimization_function_wrapper):
         smac = BOHB4HPO(scenario=scenario,
                         rng=np.random.RandomState(self.rng),
                         tae_runner=optimization_function_wrapper,
                         intensifier=self.intensifier,
-                        # you can also change the intensifier to use like this!
                         intensifier_kwargs={'initial_budget': self.min_budget,
                                             'max_budget': self.max_budget,
                                             'eta': self.settings['eta'],
@@ -51,18 +59,6 @@ class SMACOptimizer(SingleFidelityOptimizer):
 
     def run(self):
         """ Start the optimization run with SMAC (HB or SH). """
-        # number_ta_runs = get_number_ta_runs(iterations=self.settings['num_iterations'],
-        #                                     min_budget=self.min_budget,
-        #                                     max_budget=self.max_budget,
-        #                                     eta=self.settings['eta'])
-
-        scenario_dict = {"run_obj": "quality",
-                         "cs": self.cs,
-                         "deterministic": "true",
-                         "limit_resources": False,
-                         "output_dir": str(self.output_dir)}
-
-        scenario = Scenario(scenario_dict)
 
         def optimization_function_wrapper(cfg, seed, instance, budget):
             """ Helper-function: simple wrapper to use the benchmark with smac"""
@@ -84,6 +80,7 @@ class SMACOptimizer(SingleFidelityOptimizer):
         if tmp > self.min_budget:
             self.min_budget = tmp
 
+        scenario = self.get_scenario()
         smac = self._setupsmac(scenario, optimization_function_wrapper)
 
         start_time = time()
@@ -92,28 +89,31 @@ class SMACOptimizer(SingleFidelityOptimizer):
         finally:
             incumbent = smac.solver.incumbent
         end_time = time()
-        _log.info(f'Finished Optimization after {int(end_time - start_time):d}s. Incumbent is {incumbent}')
+        _log.info(f'Finished Optimization after {int(end_time - start_time):d}s. '
+                  f'Incumbent is {incumbent}')
 
 
 class SMACOptimizerHyperband(SMACOptimizer):
     def __init__(self, benchmark: Union[Bookkeeper, AbstractBenchmark, AbstractBenchmarkClient],
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
-        super().__init__(benchmark=benchmark, settings=settings, intensifier=Hyperband,
-                         output_dir=output_dir, rng=rng)
+        super(SMACOptimizerHyperband, self).__init__(benchmark=benchmark, settings=settings,
+                                                     intensifier=Hyperband, output_dir=output_dir,
+                                                     rng=rng)
 
 
 class SMACOptimizerSuccessiveHalving(SMACOptimizer):
     def __init__(self, benchmark: Union[Bookkeeper, AbstractBenchmark, AbstractBenchmarkClient],
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
-        super().__init__(benchmark=benchmark, settings=settings, intensifier=SuccessiveHalving,
-                         output_dir=output_dir, rng=rng)
+        super(SMACOptimizerSuccessiveHalving, self).__init__(benchmark=benchmark, settings=settings,
+                                                             intensifier=SuccessiveHalving,
+                                                             output_dir=output_dir, rng=rng)
 
 
 class SMACOptimizerHPO(SMACOptimizer):
     def __init__(self, benchmark: Union[Bookkeeper, AbstractBenchmark, AbstractBenchmarkClient],
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
-        super().__init__(benchmark=benchmark, settings=settings, intensifier=None,
-                         output_dir=output_dir, rng=rng)
+        super(SMACOptimizerHPO, self).__init__(benchmark=benchmark, settings=settings,
+                                               intensifier=None, output_dir=output_dir, rng=rng)
 
     def _setupsmac(self, scenario, optimization_function_wrapper):
         smac = SMAC4HPO(scenario=scenario, rng=np.random.RandomState(self.rng),
@@ -121,19 +121,7 @@ class SMACOptimizerHPO(SMACOptimizer):
         return smac
 
     def run(self):
-        """ Start the optimization run with SMAC (HB or SH). """
-        # number_ta_runs = get_number_ta_runs(iterations=self.settings['num_iterations'],
-        #                                     min_budget=self.min_budget,
-        #                                     max_budget=self.max_budget,
-        #                                     eta=self.settings['eta'])
-
-        scenario_dict = {"run_obj": "quality",
-                         "cs": self.cs,
-                         "deterministic": "true",
-                         "limit_resources": False,
-                         "output_dir": str(self.output_dir)}
-
-        scenario = Scenario(scenario_dict)
+        """ Start the optimization run with SMAC. """
 
         def optimization_function_wrapper(cfg, seed):
             """ Helper-function: simple wrapper to use the benchmark with smac"""
@@ -144,6 +132,7 @@ class SMACOptimizerHPO(SMACOptimizer):
                                                             rng=seed)
             return result_dict['function_value']
 
+        scenario = self.get_scenario()
         smac = self._setupsmac(scenario, optimization_function_wrapper)
 
         start_time = time()
@@ -152,4 +141,16 @@ class SMACOptimizerHPO(SMACOptimizer):
         finally:
             incumbent = smac.solver.incumbent
         end_time = time()
-        _log.info(f'Finished Optimization after {int(end_time - start_time):d}s. Incumbent is {incumbent}')
+        _log.info(f'Finished Optimization after {int(end_time - start_time):d}s. '
+                  f'Incumbent is {incumbent}')
+
+
+class SMACOptimizerBO(SMACOptimizerHPO):
+    def __init__(self, benchmark: Union[Bookkeeper, AbstractBenchmark, AbstractBenchmarkClient],
+                 settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
+        super().__init__(benchmark=benchmark, settings=settings, output_dir=output_dir, rng=rng)
+
+    def _setupsmac(self, scenario, optimization_function_wrapper):
+        smac = SMAC4BO(scenario=scenario, rng=np.random.RandomState(self.rng),
+                       tae_runner=optimization_function_wrapper)
+        return smac

@@ -83,6 +83,10 @@ smac_sf:
   optimizer: smac_sf
   display_name: "SMAC SF"
 
+smac_bo:
+  optimizer: smac_bo
+  display_name: "SMAC BO"
+
 smac_hb_eta_3:
   optimizer: smac_hb
   eta: 3
@@ -108,6 +112,11 @@ smac_sh_eta_2:
   display_name: "SMAC-SH (eta2)"
 
 # HPBANDSTER BOHB #################################################################################################### #
+
+hpbandster_tpe:
+  optimizer: hpbandster_tpe
+  display_name: "BOHB TPE"
+
 hpbandster_bohb_eta_3:
   optimizer: hpbandster_bohb
   eta: 3

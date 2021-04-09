@@ -74,7 +74,7 @@ class HpBandSterBaseOptimizer(SingleFidelityOptimizer):
         # Allow at most max_stages stages
         tmp = self.max_budget
         for i in range(self.settings.get('max_stages', 10)):
-            tmp /= self.settings['eta']
+            tmp /= self.settings.get('eta', 3)
         if tmp > self.min_budget:
             self.min_budget = tmp
         
@@ -83,32 +83,18 @@ class HpBandSterBaseOptimizer(SingleFidelityOptimizer):
                                   host=ns_host,
                                   nameserver=ns_host,
                                   nameserver_port=ns_port,
-                                  eta=self.settings['eta'],
+                                  eta=self.settings.get('eta', 3),
                                   min_budget=self.min_budget,
                                   max_budget=self.max_budget,
                                   result_logger=result_logger)
 
         result = master.run(n_iterations=self.settings['num_iterations'])
-        with open(self.output_dir / 'results.pkl', 'wb') as fh:
-            pickle.dump(result, fh)
+        ## We don't want to generate additional data
+        #with open(self.output_dir / 'results.pkl', 'wb') as fh:
+        #    pickle.dump(result, fh)
 
         master.shutdown(shutdown_workers=True)
         ns.shutdown()
-
-        # Todo: We can recover the results from the master object.
-        # result = master.run(n_iterations=self.settings['num_iterations'])
-        # for iteration in master.warmstart_iteration:
-        #     iteration.fix_timestamps(master.time_ref)
-        # ws_data = [iteration.data for iteration in master.warmstart_iteration]
-        # result = hpres.Result([deepcopy(iteration.data) for iteration in master.iterations] + ws_data,
-        #                       master.config)
-
-        # if result is not None:
-        #     id2config = result.get_id2config_mapping()
-        #     incumbent = result.get_incumbent_id()
-        #     inc_value = result.get_runs_by_id(incumbent)[-1]['loss']
-        #     inc_cfg = id2config[incumbent]['config']
-        # _log.info(f'Inc Config:\n{inc_cfg}\n with Performance: {inc_value:.2f}')
 
 
 class HpBandSterBOHBOptimizer(HpBandSterBaseOptimizer):
@@ -123,6 +109,14 @@ class HpBandSterHyperBandOptimizer(HpBandSterBaseOptimizer):
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
         super(HpBandSterHyperBandOptimizer, self).__init__(benchmark=benchmark, intensifier=HyperBand,
                                                            settings=settings, output_dir=output_dir, rng=rng)
+
+
+class HpBandSterTPEOptimizer(HpBandSterBaseOptimizer):
+    def __init__(self, benchmark: Union[AbstractBenchmark, AbstractBenchmarkClient],
+                 settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
+        super(HpBandSterTPEOptimizer, self).__init__(benchmark=benchmark, intensifier=BOHB,
+                                                     settings=settings, output_dir=output_dir, rng=rng)
+        self.min_budget = self.max_budget
 
 
 class CustomWorker(Worker):

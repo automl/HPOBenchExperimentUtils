@@ -74,9 +74,11 @@ class OptimizerEnum(Enum):
 
     HPBANDSTER_HB = 'hpbandster_hyperband'
     HPBANDSTER_BOHB = 'hpbandster_bohb'
+    HPBANDSTER_TPE = 'hpbandster_tpe'
     SMAC_SF = "smac_sf"
-    SMAC_HYPERBAND = 'smac_hyperband'
-    SMAC_SUCCESSIVE_HALVING = 'smac_successive_halving'
+    SMAC_BO = "smac_bo"
+    SMAC_HYPERBAND = 'smac_hb'
+    SMAC_SUCCESSIVE_HALVING = 'smac_sh'
     DRAGONFLY = 'dragonfly'
     DEHB = 'dehb'
     FABOLAS = 'fabolas'
@@ -107,18 +109,22 @@ def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]) -> OptimizerEnum
         if 'hpbandster' in optimizer:
             if 'bohb' in optimizer:
                 return OptimizerEnum.HPBANDSTER_BOHB
-            elif 'hyperband' in optimizer or 'hb' in optimizer:
+            elif 'hb' in optimizer:
                 return OptimizerEnum.HPBANDSTER_HB
+            elif 'tpe' in optimizer:
+                return OptimizerEnum.HPBANDSTER_TPE
             else:
                 fail = True
 
         elif 'smac' in optimizer:
-            if 'hyperband' in optimizer or 'hb' in optimizer:
+            if 'hb' in optimizer:
                 return OptimizerEnum.SMAC_HYPERBAND
-            elif 'successive_halving' in optimizer or 'sh' in optimizer:
+            elif 'sh' in optimizer:
                 return OptimizerEnum.SMAC_SUCCESSIVE_HALVING
-            elif "sf" in optimizer:
+            elif 'sf' in optimizer:
                 return OptimizerEnum.SMAC_SF
+            elif 'bo' in optimizer:
+                return OptimizerEnum.SMAC_BO
             else:
                 fail = True
 
@@ -158,6 +164,9 @@ def get_optimizer(optimizer_enum):
     elif optimizer_enum is OptimizerEnum.HPBANDSTER_HB:
         from HPOBenchExperimentUtils.optimizer.bohb_optimizer import HpBandSterHyperBandOptimizer
         optimizer = HpBandSterHyperBandOptimizer
+    elif optimizer_enum is OptimizerEnum.HPBANDSTER_TPE:
+        from HPOBenchExperimentUtils.optimizer.bohb_optimizer import HpBandSterTPEOptimizer
+        optimizer = HpBandSterTPEOptimizer
     elif optimizer_enum is OptimizerEnum.DRAGONFLY:
         from HPOBenchExperimentUtils.optimizer.dragonfly_optimizer import DragonflyOptimizer
         optimizer = DragonflyOptimizer
@@ -176,6 +185,9 @@ def get_optimizer(optimizer_enum):
     elif optimizer_enum is OptimizerEnum.SMAC_SF:
         from HPOBenchExperimentUtils.optimizer.smac_optimizer import SMACOptimizerHPO
         optimizer = SMACOptimizerHPO
+    elif optimizer_enum is OptimizerEnum.SMAC_BO:
+        from HPOBenchExperimentUtils.optimizer.smac_optimizer import SMACOptimizerBO
+        optimizer = SMACOptimizerBO
     elif optimizer_enum is OptimizerEnum.SMAC_SUCCESSIVE_HALVING:
         from HPOBenchExperimentUtils.optimizer.smac_optimizer import SMACOptimizerSuccessiveHalving
         optimizer = SMACOptimizerSuccessiveHalving
