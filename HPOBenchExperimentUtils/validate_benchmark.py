@@ -8,7 +8,8 @@ from HPOBenchExperimentUtils import _log as _root_log
 from HPOBenchExperimentUtils.core.nameserver import start_nameserver
 from HPOBenchExperimentUtils.core.scheduler import Scheduler, Content
 from HPOBenchExperimentUtils.core.worker import Worker
-from HPOBenchExperimentUtils.utils import TRAJECTORY_V1_FILENAME, TRAJECTORY_V2_FILENAME, VALIDATED_RUNHISTORY_FILENAME
+from HPOBenchExperimentUtils.utils import TRAJECTORY_V1_FILENAME, TRAJECTORY_V2_FILENAME, \
+    TRAJECTORY_V3_FILENAME, VALIDATED_RUNHISTORY_FILENAME
 from HPOBenchExperimentUtils.utils.pyro_utils import nic_name_to_host
 from HPOBenchExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_benchmark_settings, \
     get_benchmark_names
@@ -43,7 +44,7 @@ def validate_benchmark(benchmark: str,
     all the trajectory files found recursively in the given output path.
     Then, all configurations are validated and written into a runhistory file.
 
-    We write intermediate results to file, so that if a run crashed, we dont have to start from scratch. We read in
+    We write intermediate results to file, so that if a run crashed, we don't have to start from scratch. We read in
     the previously validated runhistories also recursively starting from the defined output directory.
 
     Parameters
@@ -80,7 +81,7 @@ def validate_benchmark(benchmark: str,
         Random seed for the experiment. This seed is passed to the benchmark. By default 0.
 
     use_local : Optional[bool]
-        If you want to use the HPOBench benchamrks in a non-containerizd version (installed locally inside the
+        If you want to use the HPOBench benchmarks in a non-containerized version (installed locally inside the
         current python environment), you can set this parameter to True. This is not recommend.
 
     debug : Optional[bool]
@@ -102,8 +103,8 @@ def validate_benchmark(benchmark: str,
         Some benchmarks take special parameters for the initialization. For example, The XGBOostBenchmark takes as
         input a task_id. This task_id specifies the OpenML dataset to use.
 
-        Please take a look into the HPOBench Benchamarks to find out if the benchmark needs further parameter.
-        Note: Most of them dont need further parameter.
+        Please take a look into the HPOBench Benchmarks to find out if the benchmark needs further parameter.
+        Note: Most of them don't need further parameters.
     """
 
     _root_log.info(f'Start validating procedure on benchmark {benchmark}')
@@ -148,6 +149,7 @@ def validate_benchmark(benchmark: str,
     # Find the paths to the trajectory files
     trajectories_paths = list(output_dir.rglob(TRAJECTORY_V1_FILENAME))
     trajectories_paths += list(output_dir.rglob(TRAJECTORY_V2_FILENAME))
+    trajectories_paths += list(output_dir.rglob(TRAJECTORY_V3_FILENAME))
 
     # Load both trajectories: The larger-is-better-trajectory (v1) and the only-better-counts-trajectory
     trajectories = load_json_files(trajectories_paths)
@@ -278,7 +280,6 @@ def parse_args():
 
 
 if __name__ == "__main__":
-
     args, unknown = parse_args()
     benchmark_params = transform_unknown_params_to_dict(unknown)
     validate_benchmark(**vars(args), **benchmark_params)
