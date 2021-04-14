@@ -60,6 +60,7 @@ def keep_track(validate=False):
 
             # We can only compute the finish time after we obtain the result()
             finish_time = time()
+            self.total_time_for_call += (finish_time - start_time)
 
             if not np.isfinite(result_dict["function_value"]):
                 result_dict["function_value"] = MAXINT
@@ -70,7 +71,7 @@ def keep_track(validate=False):
             # In case of a surrogate benchmark also take the "surrogate" costs into account.
             total_time_used = time() - self.boot_time
             if self.is_surrogate:
-                total_time_used -= (finish_time - start_time)
+                total_time_used -= self.total_time_for_call
                 total_time_used += self.total_objective_costs
 
             # Time used for this configuration. The benchmark returns as cost the time of the function call +
@@ -141,6 +142,7 @@ class Bookkeeper:
 
         self.boot_time = time()
         self.total_objective_costs = 0
+        self.total_time_for_call = 0
 
         self.inc_budget = None
         self.inc_value = None
