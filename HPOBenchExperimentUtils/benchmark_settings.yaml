@@ -88,28 +88,12 @@ metalearna:
 
 # surrogate benchmarks - paramnet
 
-ParamNetAdultOnStepsBenchmark:
-  time_limit_in_s: 604800 # 7 days
-  cutoff_in_s: 604800
-  mem_limit_in_mb: 6000
-  import_from: surrogates.paramnet_benchmark
-  import_benchmark: ParamNetAdultOnStepsBenchmark
-  is_surrogate: true
-
 ParamNetAdultOnTimeBenchmark:
   time_limit_in_s: 604800
   cutoff_in_s: 604800
   mem_limit_in_mb: 6000
   import_from: surrogates.paramnet_benchmark
   import_benchmark: ParamNetAdultOnTimeBenchmark
-  is_surrogate: true
-
-ParamNetHiggsOnStepsBenchmark:
-  time_limit_in_s: 604800 # 7 days
-  cutoff_in_s: 604800
-  mem_limit_in_mb: 6000
-  import_from: surrogates.paramnet_benchmark
-  import_benchmark: ParamNetHiggsOnStepsBenchmark
   is_surrogate: true
 
 ParamNetHiggsOnTimeBenchmark:
@@ -120,28 +104,12 @@ ParamNetHiggsOnTimeBenchmark:
   import_benchmark: ParamNetHiggsOnTimeBenchmark
   is_surrogate: true
 
-ParamNetLetterOnStepsBenchmark:
-  time_limit_in_s: 604800 # 7 days
-  cutoff_in_s: 604800
-  mem_limit_in_mb: 6000
-  import_from: surrogates.paramnet_benchmark
-  import_benchmark: ParamNetLetterOnStepsBenchmark
-  is_surrogate: true
-
 ParamNetLetterOnTimeBenchmark:
   time_limit_in_s: 604800
   cutoff_in_s: 604800
   mem_limit_in_mb: 6000
   import_from: surrogates.paramnet_benchmark
   import_benchmark: ParamNetLetterOnTimeBenchmark
-  is_surrogate: true
-
-ParamNetMnistOnStepsBenchmark:
-  time_limit_in_s: 604800 # 7 days
-  cutoff_in_s: 604800
-  mem_limit_in_mb: 6000
-  import_from: surrogates.paramnet_benchmark
-  import_benchmark: ParamNetMnistOnStepsBenchmark
   is_surrogate: true
 
 ParamNetMnistOnTimeBenchmark:
@@ -152,14 +120,6 @@ ParamNetMnistOnTimeBenchmark:
   import_benchmark: ParamNetMnistOnTimeBenchmark
   is_surrogate: true
 
-ParamNetOptdigitsOnStepsBenchmark:
-  time_limit_in_s: 604800 # 7 days
-  cutoff_in_s: 604800
-  mem_limit_in_mb: 6000
-  import_from: surrogates.paramnet_benchmark
-  import_benchmark: ParamNetOptdigitsOnStepsBenchmark
-  is_surrogate: true
-
 ParamNetOptdigitsOnTimeBenchmark:
   time_limit_in_s: 604800
   cutoff_in_s: 604800
@@ -168,20 +128,60 @@ ParamNetOptdigitsOnTimeBenchmark:
   import_benchmark: ParamNetOptdigitsOnTimeBenchmark
   is_surrogate: true
 
-ParamNetPokerOnStepsBenchmark:
-  time_limit_in_s: 604800 # 7 days
-  cutoff_in_s: 604800
-  mem_limit_in_mb: 6000
-  import_from: surrogates.paramnet_benchmark
-  import_benchmark: ParamNetPokerOnStepsBenchmark
-  is_surrogate: true
-
 ParamNetPokerOnTimeBenchmark:
   time_limit_in_s: 604800
   cutoff_in_s: 604800
   mem_limit_in_mb: 6000
   import_from: surrogates.paramnet_benchmark
   import_benchmark: ParamNetPokerOnTimeBenchmark
+  is_surrogate: true
+
+ParamNetReducedAdultOnTimeBenchmark:
+  time_limit_in_s: 604800
+  cutoff_in_s: 604800
+  mem_limit_in_mb: 6000
+  import_from: surrogates.paramnet_benchmark
+  import_benchmark: ParamNetReducedAdultOnTimeBenchmark
+  is_surrogate: true
+
+ParamNetReducedHiggsOnTimeBenchmark:
+  time_limit_in_s: 604800
+  cutoff_in_s: 604800
+  mem_limit_in_mb: 6000
+  import_from: surrogates.paramnet_benchmark
+  import_benchmark: ParamNetReducedHiggsOnTimeBenchmark
+  is_surrogate: true
+
+ParamNetReducedLetterOnTimeBenchmark:
+  time_limit_in_s: 604800
+  cutoff_in_s: 604800
+  mem_limit_in_mb: 6000
+  import_from: surrogates.paramnet_benchmark
+  import_benchmark: ParamNetReducedALetterOnTimeBenchmark
+  is_surrogate: true
+
+ParamNetReducedMnistOnTimeBenchmark:
+  time_limit_in_s: 604800
+  cutoff_in_s: 604800
+  mem_limit_in_mb: 6000
+  import_from: surrogates.paramnet_benchmark
+  import_benchmark: ParamNetReducedMnistOnTimeBenchmark
+  is_surrogate: true
+
+ParamNetReducedOptdigitsOnTimeBenchmark:
+  time_limit_in_s: 604800
+  cutoff_in_s: 604800
+  mem_limit_in_mb: 6000
+  import_from: surrogates.paramnet_benchmark
+  import_benchmark: ParamNetReducedOptdigitsOnTimeBenchmark
+  is_surrogate: true
+
+ParamNetReducedPokerOnTimeBenchmark:
+  time_limit_in_s: 604800
+  cutoff_in_s: 604800
+  mem_limit_in_mb: 6000
+  import_from: surrogates.paramnet_benchmark
+  import_benchmark: ParamNetReducedPokerOnTimeBenchmark
   is_surrogate: true
 
 # benchmarks handling seeds

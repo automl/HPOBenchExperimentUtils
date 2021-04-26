@@ -69,7 +69,7 @@ class AutogluonOptimizer(SingleFidelityOptimizer):
         self.time_limit = self.benchmark.wall_clock_limit_in_s
         if self.benchmark.is_surrogate:
             # We limit this and cut the runhistory afterwards in case there are too many evaluations
-            self.time_limit = 342000 # 95h; was 60*60*24 before
+            self.time_limit = 342000 # 95h; was 60*60*24*4=96h before
 
         # Get default settings as set in the PR
         self.reduction_factor = self.settings["reduction_factor"]  # 3 by default
