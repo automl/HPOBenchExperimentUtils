@@ -14,12 +14,13 @@ expset_dc = {
     "pybnn": ["BNNOnBostonHousing", "BNNOnProteinStructure", "BNNOnYearPrediction", ],
     "rl": ["cartpolereduced"],
     "learna": ["metalearna", "learna"],
-    "paramnetsteps": ["ParamNetAdultOnStepsBenchmark", "ParamNetHiggsOnStepsBenchmark",
-                      "ParamNetLetterOnStepsBenchmark", "ParamNetMnistOnStepsBenchmark",
-                      "ParamNetOptdigitsOnStepsBenchmark", "ParamNetPokerOnStepsBenchmark", ],
     "paramnettime": ["ParamNetAdultOnTimeBenchmark", "ParamNetHiggsOnTimeBenchmark",
                      "ParamNetLetterOnTimeBenchmark", "ParamNetMnistOnTimeBenchmark",
                      "ParamNetOptdigitsOnTimeBenchmark", "ParamNetPokerOnTimeBenchmark", ],
+    "paramnettimered": [
+        "ParamNetReducedAdultOnTimeBenchmark", "ParamNetReducedHiggsOnTimeBenchmark",
+        "ParamNetReducedLetterOnTimeBenchmark", "ParamNetReducedMnistOnTimeBenchmark",
+        "ParamNetReducedOptdigitsOnTimeBenchmark", "ParamNetReducedPokerOnTimeBenchmark", ],
     "svm": ["svm", ],
     "xgboostsub": ["xgboostsub", ],
     "xgboostest": ["xgboostest", ],
@@ -51,7 +52,6 @@ def main(args):
         os.mkdir(args.out_cmd)
 
     val_fl = "%s/val_%s_%s_%d.cmd" % (args.out_cmd, exp, opt, nrep)
-    val_ind_fl = "%s/valind_%s_%s_%d.cmd" % (args.out_cmd, exp, opt, nrep)
     run_fl = "%s/run_%s_%s_%d.cmd" % (args.out_cmd, exp, opt, nrep)
     eval_fl = "%s/eval_%s.cmd" % (args.out_cmd, exp)
     evalu_fl = "%s/evalunv_%s.cmd" % (args.out_cmd, exp)

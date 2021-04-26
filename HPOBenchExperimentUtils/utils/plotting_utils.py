@@ -299,15 +299,6 @@ plot_dc = {
         "ystar_test": 1-0.941773513952891,
 
     },
-    "ParamNetAdultOnStepsBenchmark": {
-        "xlim_lo": 10**0,
-        "ylim_lo": 10**-3,
-        "ylim_up": 10**1,
-        "xscale": "log",
-        "yscale": "log",
-        "ystar_valid": 0,
-        "ystar_test": 0,
-    },
     "ParamNetAdultOnTimeBenchmark": {
         "xlim_lo": 10**1,
         "ylim_lo": 10**-3,
@@ -316,15 +307,6 @@ plot_dc = {
         "yscale": "log",
         # from stats json file March 9th
         "ystar_valid": 0.1437777783975557,
-        "ystar_test": 0,
-    },
-    "ParamNetHiggsOnStepsBenchmark": {
-        "xlim_lo": 10**2,
-        "ylim_lo": 10**-5,
-        "ylim_up": 10**-1,
-        "xscale": "log",
-        "yscale": "log",
-        "ystar_valid": 0,
         "ystar_test": 0,
     },
     "ParamNetHiggsOnTimeBenchmark": {
@@ -337,15 +319,6 @@ plot_dc = {
         "ystar_valid": 0.2739252715252642,
         "ystar_test": 0,
     },
-    "ParamNetLetterOnStepsBenchmark": {
-        "xlim_lo": 10**0,
-        "ylim_lo": 10**-3.5,
-        "ylim_up": 10**0,
-        "xscale": "log",
-        "yscale": "log",
-        "ystar_valid": 0,
-        "ystar_test": 0,
-    },
     "ParamNetLetterOnTimeBenchmark": {
         "xlim_lo": 10**0,
         "ylim_lo": 10**-3.5,
@@ -354,15 +327,6 @@ plot_dc = {
         "yscale": "log",
         # from stats json file March 9th
         "ystar_valid": 0.030800543060296292,
-        "ystar_test": 0,
-    },
-    "ParamNetMnistOnStepsBenchmark": {
-        "xlim_lo": 10**0,
-        "ylim_lo": 10**-4.5,
-        "ylim_up": 10**0,
-        "xscale": "log",
-        "yscale": "log",
-        "ystar_valid": 0,
         "ystar_test": 0,
     },
     "ParamNetMnistOnTimeBenchmark": {
@@ -375,15 +339,6 @@ plot_dc = {
         "ystar_valid": 0.014969998741149893,
         "ystar_test": 0,
     },
-    "ParamNetOptdigitsOnStepsBenchmark": {
-        "xlim_lo": 10**0,
-        "ylim_lo": 10**-3.5,
-        "ylim_up": 10**0,
-        "xscale": "log",
-        "yscale": "log",
-        "ystar_valid": 0,
-        "ystar_test": 0,
-    },
     "ParamNetOptdigitsOnTimeBenchmark": {
         "xlim_lo": 10**0,
         "ylim_lo": 10**-3.5,
@@ -394,15 +349,6 @@ plot_dc = {
         "ystar_valid": 0.011504424673266123,
         "ystar_test": 0,
    },
-   "ParamNetPokerOnStepsBenchmark": {
-        "xlim_lo": 10**1,
-        "ylim_lo": 10**-4,
-        "ylim_up": 10**0,
-        "xscale": "log",
-        "yscale": "log",
-        "ystar_valid": 0,
-        "ystar_test": 0,
-    },
     "ParamNetPokerOnTimeBenchmark": {
         "xlim_lo": 10**2,
         "ylim_lo": 10**-4,
@@ -411,6 +357,66 @@ plot_dc = {
         "yscale": "log",
         # from stats json file March 9th
         "ystar_valid": 0.00016679192417291545,
+        "ystar_test": 0,
+    },
+    "ParamNetReducedAdultOnTimeBenchmark": {
+        "xlim_lo": 10 ** 1,
+        "ylim_lo": 10 ** -3,
+        "ylim_up": 10 ** -1,
+        "xscale": "log",
+        "yscale": "log",
+        # from stats json file ?
+        "ystar_valid": 0,
+        "ystar_test": 0,
+    },
+    "ParamNetReducedHiggsOnTimeBenchmark": {
+        "xlim_lo": 10 ** 1,
+        "ylim_lo": 10 ** -3,
+        "ylim_up": 10 ** -1,
+        "xscale": "log",
+        "yscale": "log",
+        # from stats json file ?
+        "ystar_valid": 0,
+        "ystar_test": 0,
+    },
+    "ParamNetReducedLetterOnTimeBenchmark": {
+        "xlim_lo": 10 ** 0,
+        "ylim_lo": 10 ** -3.5,
+        "ylim_up": 10 ** 0,
+        "xscale": "log",
+        "yscale": "log",
+        # from stats json file ?
+        "ystar_valid": 0,
+        "ystar_test": 0,
+    },
+    "ParamNetReducedMnistOnTimeBenchmark": {
+        "xlim_lo": 10 ** 1,
+        "ylim_lo": 10 ** -4,
+        "ylim_up": 10 ** 0,
+        "xscale": "log",
+        "yscale": "log",
+        # from stats json file ?
+        "ystar_valid": 0,
+        "ystar_test": 0,
+    },
+    "ParamNetReducedOptdigitsOnTimeBenchmark": {
+        "xlim_lo": 10 ** 0,
+        "ylim_lo": 10 ** -3.5,
+        "ylim_up": 10 ** 0,
+        "xscale": "log",
+        "yscale": "log",
+        # from stats json file ?
+        "ystar_valid": 0,
+        "ystar_test": 0,
+    },
+    "ParamNetReducedPokerOnTimeBenchmark": {
+        "xlim_lo": 10 ** 2,
+        "ylim_lo": 10 ** -4,
+        "ylim_up": 10 ** 0,
+        "xscale": "log",
+        "yscale": "log",
+        # from stats json file ?
+        "ystar_valid": 0,
         "ystar_test": 0,
     },
     "NASCifar10ABenchmark_fixed_seed_0": {
@@ -528,10 +534,11 @@ benchmark_families = {
     "pybnn": ["BNNOnBostonHousing", "BNNOnProteinStructure", "BNNOnYearPrediction", ],
     "rl": ["cartpolereduced"],
     "learna": ["metalearna", "learna"],
-    "paramnetsteps": ["ParamNetAdultOnStepsBenchmark", "ParamNetHiggsOnStepsBenchmark",
-                      "ParamNetLetterOnStepsBenchmark", "ParamNetMnistOnStepsBenchmark",
-                      "ParamNetOptdigitsOnStepsBenchmark", "ParamNetPokerOnStepsBenchmark", ],
     "paramnettime": ["ParamNetAdultOnTimeBenchmark", "ParamNetHiggsOnTimeBenchmark",
                      "ParamNetLetterOnTimeBenchmark", "ParamNetMnistOnTimeBenchmark",
                      "ParamNetOptdigitsOnTimeBenchmark", "ParamNetPokerOnTimeBenchmark", ],
+    "paramnettimered": [
+        "ParamNetReducedAdultOnTimeBenchmark", "ParamNetReducedHiggsOnTimeBenchmark",
+        "ParamNetReducedLetterOnTimeBenchmark", "ParamNetReducedMnistOnTimeBenchmark",
+        "ParamNetReducedOptdigitsOnTimeBenchmark", "ParamNetReducedPokerOnTimeBenchmark", ],
 }
