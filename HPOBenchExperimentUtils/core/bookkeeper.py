@@ -189,6 +189,10 @@ class Bookkeeper:
 
             if "for_test" in send:
                 del send["for_test"]
+
+            for k in send:
+                if send[k] == "None": send[k] = None
+
             return self.benchmark.objective_function(configuration=configuration,
                                                      fidelity=fidelity,
                                                      **send)
@@ -218,6 +222,9 @@ class Bookkeeper:
                 for k in send["for_test"]:
                     send[k] = send["for_test"][k]
                 del send["for_test"]
+
+            for k in send:
+                if send[k] == "None": send[k] = None
 
             return self.benchmark.objective_function_test(configuration=configuration,
                                                           fidelity=fidelity,

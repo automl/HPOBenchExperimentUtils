@@ -203,8 +203,7 @@ NASCifar10ABenchmark_random_seed:
   import_from: nas.nasbench_101
   import_benchmark: NASCifar10ABenchmark
   is_surrogate: true
-  random_seed_name: "run_index"
-  random_seed_choice: [0, 1, 2]
+  run_index: None
   for_test: {'run_index': [0, 1, 2]}
 
 ProteinStructureBenchmark_fixed_seed_0:
@@ -274,6 +273,8 @@ NASCifar10CBenchmark:
   import_from: nas.nasbench_101
   import_benchmark: NASCifar10CBenchmark
   is_surrogate: true
+
+
 
 # surrogate benchmarks - nashpo
 
