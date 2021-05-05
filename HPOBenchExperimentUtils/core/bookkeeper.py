@@ -1,5 +1,6 @@
 import logging
 import os
+import shutil
 import copy
 from concurrent.futures import TimeoutError
 from functools import wraps
@@ -331,12 +332,14 @@ class Bookkeeper:
 
     def __del__(self):
         if self.lock_file.exists():
-            self.lock_file.unlink()
+            if self.lock_file.is_file():
+                self.lock_file.unlink()
+            if self.lock_file.is_dir():
+                shutil.rmtree(self.lock_file)
 
         if self.lock_dir.exists():
             is_empty = not any(self.lock_dir.iterdir())
             if is_empty:
-                import shutil
                 shutil.rmtree(self.lock_dir)
 
         self.benchmark.__del__()
