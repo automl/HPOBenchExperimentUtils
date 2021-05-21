@@ -39,7 +39,7 @@ opt_set = {
     "dragonfly": ["dragonfly_default", ],
     "fabolas": ["fabolas_mtbo", "fabolas_mumbo"],
     "mumbo": ["mumbo", ],
-    "sf": ["smac_bo", "hpbandster_tpe"]
+    "sf": ["smac_bo", "hpbandster_tpe", "de"],
 }
 
 
