@@ -7,7 +7,7 @@ from HPOBenchExperimentUtils.analysis.trajectory_plotting import plot_trajectory
 from HPOBenchExperimentUtils.analysis.stats_generation import plot_fidels, plot_overhead, \
     plot_ecdf, plot_correlation, get_stats
 from HPOBenchExperimentUtils.analysis.table_generation import save_median_table
-from HPOBenchExperimentUtils.analysis.rank_plotting import plot_ranks
+from HPOBenchExperimentUtils.analysis.rank_plotting import plot_ranks, plot_ecdf_per_family
 from HPOBenchExperimentUtils import _log as _root_log
 from HPOBenchExperimentUtils.utils.plotting_utils import benchmark_families
 
@@ -30,22 +30,53 @@ if __name__ == "__main__":
     parser.add_argument('--which', choices=["v1", "v2"], default="v1")
     args, unknown = parser.parse_known_args()
 
-    list_of_opt_to_consider = ["autogluon", "dragonfly_default", "randomsearch",
-                               "smac_sf", "smac_hb_eta_3",
-                               "dehb", "hpbandster_bohb_eta_3", "hpbandster_hb_eta_3",
-                               #"mumbo",
-                               ]
+    if args.unvalidated:
+        list_of_opt_to_consider = ["autogluon",
+                                   "dragonfly_default", 
+                                   "randomsearch",
+                                   "smac_sf", 
+                                   "smac_hb_eta_3",
+                                   "smac_bo",
+                                   "dehb", 
+                                   "hpbandster_bohb_eta_3",
+                                   "hpbandster_hb_eta_3",
+                                   "hpbandster_tpe",
+                                   #"mumbo",
+                                   ]
+    else:
+        list_of_opt_to_consider = ["autogluon",
+                                   "dragonfly_default", 
+                                   "randomsearch",
+                                   "smac_sf", 
+                                   "smac_hb_eta_3",
+                                   "smac_bo",
+                                   "dehb", 
+                                   "hpbandster_bohb_eta_3",
+                                   "hpbandster_hb_eta_3",
+                                   "hpbandster_tpe",
+                                   "mumbo",
+                                   ]
 
     if args.rank is None:
         assert args.benchmark is not None, f"If rank={args.rank}, then --benchmark must be set"
     else:
-        _log.info("Only plotting ranks")
+        _log.info("Only plotting metrics per family")
+        #if args.unvalidated is True:
+        #    plot_ecdf_per_family(**vars(args), benchmarks=benchmark_families[args.rank], familyname=args.rank,
+        #               opt_list=list_of_opt_to_consider)
+        #else:
+        #    _log.info("Skipping ECDF per family")
         plot_ranks(**vars(args), benchmarks=benchmark_families[args.rank], familyname=args.rank,
                    opt_list=list_of_opt_to_consider)
+        
         sys.exit(1)
 
-    if args.what in ("all", "best_found"):
-        save_median_table(**vars(args), opt_list=list_of_opt_to_consider)
+
+    if args.what in ("all", "best_found"):               
+        save_median_table(**vars(args), opt_list=list_of_opt_to_consider, thresh=0.01)
+        save_median_table(**vars(args), opt_list=list_of_opt_to_consider, thresh=0.1)
+        save_median_table(**vars(args), opt_list=list_of_opt_to_consider, thresh=0.5)
+        save_median_table(**vars(args), opt_list=list_of_opt_to_consider, thresh=1.0)
 
     if args.what in ("all", "over_time"):
         plot_trajectory(criterion=args.agg, **vars(args), opt_list=list_of_opt_to_consider)
