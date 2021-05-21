@@ -81,16 +81,16 @@ class DehbOptimizer(SingleFidelityOptimizer):
         # Set the number of iterations to a _very_ large integer but leave out some scope
         self.settings["iter"] = sys.maxsize >> 2
 
+        # Initializing DEHB object
         # Parameter space to be used by DE
         cs = self.benchmark.get_configuration_space()
         dimensions = len(cs.get_hyperparameters())
-
-        # Initializing DEHB object
         self.dehb = DEHB(cs=cs, dimensions=dimensions, f=f, strategy=self.settings["strategy"],
                          mutation_factor=self.settings["mutation_factor"],
                          crossover_prob=self.settings["crossover_prob"],
-                         eta=self.settings["eta"], min_budget=self.min_budget, max_budget=self.max_budget,
-                         generations=self.settings["gens"], async_strategy=self.settings["async_strategy"])
+                         eta=self.settings["eta"], min_budget=self.min_budget,
+                         max_budget=self.max_budget, generations=self.settings["gens"],
+                         async_strategy=self.settings["async_strategy"])
 
     def setup(self):
         pass
@@ -103,6 +103,48 @@ class DehbOptimizer(SingleFidelityOptimizer):
                                                    verbose=self.settings["verbose"],
                                                    debug=_log.level <= logging.DEBUG)
         except TypeError as e:
-            # The interface has changed for the DEHB optimizer. The new version has brackets instead of iterations.
+            # The interface has changed for the DEHB optimizer. The new version has brackets
+            # instead of iterations.
             traj, runtime, history = self.dehb.run(brackets=self.settings["iter"],
-                                                   verbose=self.settings["verbose"] or _log.level <= logging.DEBUG)
+                                                   verbose=self.settings["verbose"] or
+                                                           _log.level <= logging.DEBUG)
+
+
+class DeOptimizer(SingleFidelityOptimizer):
+
+    def __init__(self, benchmark: Union[Bookkeeper, AbstractBenchmark, AbstractBenchmarkClient],
+                 settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
+        super().__init__(benchmark, settings, output_dir, rng)
+
+        # Common objective function for DE & DEHB representing the benchmark
+        def f(config: Configuration, budget=None):
+            nonlocal self
+            assert budget is None
+            res = benchmark.objective_function(config,
+                                               fidelity={self.main_fidelity.name: self.max_budget},
+                                               **self.settings_for_sending,
+                                               )
+            return {"fitness": res['function_value'], "cost": res["cost"]}
+
+        self.settings["verbose"] = _log.level <= logging.INFO
+        # Set the number of iterations to a _very_ large integer but leave out some scope
+        self.settings["iter"] = sys.maxsize >> 2
+
+        # Initializing DE object
+        # Parameter space to be used by DE
+        cs = self.benchmark.get_configuration_space()
+        dimensions = len(cs.get_hyperparameters())
+        self.de = DE(cs=cs, dimensions=dimensions, f=f, pop_size=self.settings["pop_size"],
+                     mutation_factor=self.settings["mutation_factor"],
+                     crossover_prob=self.settings["crossover_prob"],
+                     strategy=self.settings["strategy"])
+
+    def setup(self):
+        pass
+
+    def run(self):
+        np.random.seed(self.rng)
+        # Running DE iterations
+        traj, runtime, history = self.de.run(generations=self.settings["iter"],
+                                             verbose=self.settings["verbose"] or
+                                                     _log.level <= logging.DEBUG)
