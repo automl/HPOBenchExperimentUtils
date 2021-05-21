@@ -45,6 +45,7 @@ def plot_fidels(benchmark: str, output_dir: Union[Path, str], input_dir: Union[P
         _log.info(f'Handling {opt}')
         if opt not in opt_list:
             _log.info(f'Skip {opt}')
+            continue
         if len(opt_rh_dc) == 0: continue
         other_stats_dc[opt] = defaultdict(list)
         rhs = load_json_files(opt_rh_dc[opt])
@@ -209,6 +210,7 @@ def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Un
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
     opt_rh_dc = load_trajectories_as_df(input_dir=input_dir,
                                         which="runhistory")
+    benchmark_spec = plot_dc.get(benchmark, {})
 
     conf_dc = defaultdict(dict)
     f_set = []
@@ -217,9 +219,10 @@ def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Un
         opt_list = list(opt_rh_dc.keys())
 
     for opt in opt_rh_dc:
-        if not ("smac" in opt
+        if not ("smac_hb" in opt
                 or "dehb" in opt
-                or "hpbands" in opt):
+                or "hpbands" in opt
+                ):
             _log.info(f'Neither smac, dehb nor hpband: {opt}')
             continue
         if opt not in opt_list:
@@ -248,6 +251,7 @@ def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Un
     # Start with computing correlations
     cors = {}
     for fi, f1 in enumerate(f_set):
+        cors[(f1, f1)] = (1, 0)
         for f2 in f_set[fi+1:]:
             a = []
             b = []
@@ -259,14 +263,31 @@ def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Un
             cors[(f1, f2)] = (c, len(a))
 
     # Create plot
+    styles = [
+    ('#99000d', "o", 2, 10, "-"),
+    ('#cb181d', "^", 2, 10, "-"),
+    ('#ef3b2c', "s", 2, 10, "-"),
+    ('#fb6a4a', "*", 2, 10, "-"),
+    ('#fc9272', "v", 2, 10, "-"),
+    ('#fcbba1', "p", 2, 10, "-"),
+    ('#fee5d9', "d", 2, 10, "-"),
+    ]
+
     plt.figure(figsize=[5, 5])
     a = plt.subplot(111)
     for fi, f in enumerate(f_set):
-        a.scatter(f_set[fi+1:], [cors[(f, f1)][0] for f1 in f_set[fi+1:]], label=f)
+        if len(f_set[fi:]) == 0: continue
+        c, m, lw, ms, ls = styles[fi]
+        a.plot(f_set[fi:], [cors[(f, f1)][0] for f1 in f_set[fi:]], label=f,
+               marker=m, linewidth=lw, linestyle=ls, markersize=ms, c=c)
+        #a.annotate("%d" % f, [f, 1.01], fontsize=15)
 
-    a.set_xlabel("fidelity")
+    a.set_xlabel("Fidelity value")
     a.set_ylabel("Spearman correlation coefficient")
-    unify_layout(a)
+    a.set_ylim(benchmark_spec.get("cylim", [-1, 1]))
+    print(a.get_ylim())
+    a.set_xscale("log")
+    unify_layout(a, legend_args={"title": "Fidelity value"})
     plt.tight_layout()
     plt.savefig(Path(output_dir) / f'correlation_{benchmark}.png')
 
@@ -274,13 +295,14 @@ def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Un
     df = defaultdict(list)
     for fi, f1 in enumerate(f_set[:-1]):
         for fj, f2 in enumerate(f_set):
-            if fj <= fi:
+            if fj < fi:
                 df[f1].append("-")
             else:
                 df[f1].append("%.3g (%d)" % (np.round(cors[f1, f2][0], 3), cors[f1, f2][1]))
     df = pd.DataFrame(df, index=f_set)
     with open(Path(output_dir) / f'correlation_table_{benchmark}.tex', 'w') as fh:
         latex = df.to_latex(index_names=False, index=True)
+        print(latex)
         fh.write(latex)
 
 

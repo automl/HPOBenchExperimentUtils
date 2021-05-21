@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from typing import Union, List
 
-from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc, color_per_opt, unify_layout
+from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc, color_per_opt, unify_layout, benchmark_dc
 from HPOBenchExperimentUtils import _log as _main_log
 from HPOBenchExperimentUtils.utils.validation_utils import load_json_files, load_trajectories_as_df
 from HPOBenchExperimentUtils.utils.runner_utils import get_optimizer_setting, get_benchmark_settings
@@ -67,15 +67,18 @@ def plot_ranks(benchmarks: List[str], familyname: str, output_dir: Union[Path, s
 
     all_trajectories = []
     horizon = []
+    x_lo = []
     for b in benchmarks:
         benchmark_settings = get_benchmark_settings(b)
         horizon.append(benchmark_settings['time_limit_in_s'])
+        x_lo.append(benchmark_spec.get("xlim_lo", 1))
         tr = read_trajectories(benchmark=b, input_dir=input_dir, train=unvalidated, which=which,
                                opt_list=opt_list)
         all_trajectories.append(tr)
     assert len(set(horizon)) == 1
     horizon = int(horizon[0])
     _log.info(f"Handling horizon: {horizon}sec")
+    x_lo = np.min(x_lo)
 
     # Step 2. Compute average ranks of the trajectories.
     #####################################################################################
@@ -83,12 +86,12 @@ def plot_ranks(benchmarks: List[str], familyname: str, output_dir: Union[Path, s
     n_tasks = len(benchmarks)
     paired = False
 
-    n_iter = 500
+    n_iter = 5000
     if paired:
         n_iter = all_trajectories[0][0].shape[1]
 
     for i in range(n_iter):
-        if i % 50 == 0: print("%d / %d" % (i, n_iter))
+        if i % 500 == 0: print("%d / %d" % (i, n_iter))
         if paired:
             pick = np.ones(len(opt_list), dtype=np.int) * i
         else:
@@ -136,13 +139,80 @@ def plot_ranks(benchmarks: List[str], familyname: str, output_dir: Union[Path, s
     else:
         plt.xlabel("Runtime in seconds")
     ax.set_ylabel(f"{criterion.capitalize()} rank")
+    
     ax.set_ylim([0.9, len(opt_list)+0.1])
-    ax.set_xlim(10, horizon)
+    ax.set_xlim([x_lo, horizon])
     ax.set_xscale(benchmark_spec.get("xscale", "log"))
 
-    unify_layout(ax, title=familyname)
+    unify_layout(ax, title=None, add_legend=False)
     val_str = 'optimized' if unvalidated else 'validated'
     plt.tight_layout()
     plt.savefig(Path(output_dir) / f'ranks_{familyname}_{val_str}_{which}.png')
     plt.close('all')
     return 1
+
+
+def plot_ecdf_per_family(benchmarks: List[str], familyname: str, output_dir: Union[Path, str], 
+                         input_dir: Union[Path, str], opt_list: Union[List[str], None] = None, **kwargs):
+    _log.info(f'Start plotting ECDFs for benchmark family {familyname}')
+
+    input_dir = Path(input_dir)
+    assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
+
+    output_dir = Path(output_dir)
+    output_dir.mkdir(exist_ok=True, parents=True)
+
+    benchmark_spec = plot_dc.get(benchmarks[0], {})
+    benchmark_settings = get_benchmark_settings(benchmarks[0])
+
+    def ecdf(x):
+        xs = np.sort(x)
+        ys = np.arange(1, len(xs) + 1) / float(len(xs))
+        return xs, ys
+
+    plt.figure(figsize=[5, 5])
+    a = plt.subplot(111)
+    max_ = -1
+    min_ = 1000
+    for benchmark, color in zip(benchmarks, ['#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00','#ffff33']):
+        tmp_input_dir = Path(input_dir) / benchmark
+        assert tmp_input_dir.is_dir(), f'Result folder doesn\"t exist: {tmp_input_dir}'
+
+        unique_optimizer = load_trajectories_as_df(
+            input_dir=tmp_input_dir, which=f'runhistory')
+        optimizer_names = list(unique_optimizer.keys())
+        if "randomsearch" not in optimizer_names:
+            raise ValueError("Results for randomsearch not found")
+
+        benchmark_spec = plot_dc.get(benchmark, {})
+        y_best = benchmark_spec.get("ystar_valid", 0)
+        
+        trs = load_json_files(unique_optimizer["randomsearch"])
+        values = []
+        for t in trs:
+            vals = [r["function_value"] for r in t[1:]]
+            values.extend(vals)
+        values = np.array(values) - y_best
+        x, y = ecdf(values)
+        max_ = max(max_, max(values))
+        min_ = min(min_, min(values))
+        plt.plot(x, y, c=color, linewidth=3, label=benchmark_dc[benchmark])
+
+
+    if y_best != 0:
+        plt.xlabel("Optimization Regret")
+    else:
+        plt.xlabel("Optimization objective value")
+    plt.ylabel("P(x < X)")
+    yscale = benchmark_spec.get("yscale", "log")
+    plt.xscale(yscale)
+    if max_ > 10**3:
+        plt.xlim([min_*0.9, 10**3])
+    #plt.ylim([-0.5, 1.05])
+    #yt = plt.yticks()
+    #a.set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
+    #a.set_yticklabels([0, 0.2, 0.4, 0.6, 0.8, 1.0])
+
+    unify_layout(a)
+    plt.tight_layout()
+    plt.savefig(Path(output_dir) / f'ecdf_random_{familyname}.png')

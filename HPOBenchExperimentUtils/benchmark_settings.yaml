@@ -86,6 +86,16 @@ metalearna:
   import_benchmark: MetaLearna
   is_surrogate: false
 
+# surrogate benchmarks - svm
+
+SurrogateSVMBenchmark:
+  time_limit_in_s: 604800
+  cutoff_in_s: 604800
+  mem_limit_in_mb: 6000
+  import_from: surrogates.svm_benchmark
+  import_benchmark: SurrogateSVMBenchmark
+  is_surrogate: true
+
 # surrogate benchmarks - paramnet
 
 ParamNetAdultOnTimeBenchmark:
@@ -157,7 +167,7 @@ ParamNetReducedLetterOnTimeBenchmark:
   cutoff_in_s: 604800
   mem_limit_in_mb: 6000
   import_from: surrogates.paramnet_benchmark
-  import_benchmark: ParamNetReducedALetterOnTimeBenchmark
+  import_benchmark: ParamNetReducedLetterOnTimeBenchmark
   is_surrogate: true
 
 ParamNetReducedMnistOnTimeBenchmark:

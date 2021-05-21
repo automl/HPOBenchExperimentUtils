@@ -6,6 +6,7 @@ plot_dc = {
         "xlim_lo": 10**2,
         "ylim_lo": 3,
         "ylim_up": 8,
+        "cylim": [0.1, 1.1],
         "xscale": "log",
         "yscale": "linear",
         # None yet
@@ -16,6 +17,7 @@ plot_dc = {
         "xlim_lo": 10**2,
         "ylim_lo": 3,
         "ylim_up": 5,
+        "cylim": [0.1, 1.1],
         "xscale": "log",
         "yscale": "linear",
         # None yet
@@ -26,6 +28,7 @@ plot_dc = {
         "xlim_lo": 10**2,
         "ylim_lo": 2,
         "ylim_up": 40,
+        "cylim": [0.1, 1.1],
         "xscale": "log",
         "yscale": "linear",
         # None yet
@@ -35,9 +38,10 @@ plot_dc = {
     "cartpolereduced": {
         "xlim_lo": 10**2,
         "ylim_lo": 10**2,
-        "ylim_up": 10**4,
+        "ylim_up": 10**3.5,
         "xscale": "log",
         "yscale": "log",
+        "cylim": [0.5, 1.1],
         # None yet
         "ystar_valid": 0,
         "ystar_test": 0,
@@ -159,9 +163,10 @@ plot_dc = {
         "ystar_test": 0.056824247042338016,
     },
     "NASCifar10ABenchmark": {
-        "xlim_lo": 10**1,
-        "ylim_lo": 10**-3.5,
+        "xlim_lo": 10**2,
+        "ylim_lo": 10**-2.6,
         "ylim_up": 10**-0,
+        "cylim": [-0.3, 1.1],
         "xscale": "log",
         "yscale": "log",
         # https://github.com/automl/nas_benchmarks/blob/master/tabular_benchmarks/nas_cifar10.py#L26
@@ -169,9 +174,10 @@ plot_dc = {
         "ystar_test": 0.056824247042338016,
     },
     "NASCifar10BBenchmark": {
-        "xlim_lo": 10**1,
-        "ylim_lo": 10**-3,
+        "xlim_lo": 10**2,
+        "ylim_lo": 10**-2.6,
         "ylim_up": 10**-0,
+        "cylim": [-0.3, 1.1],
         "xscale": "log",
         "yscale": "log",
         # https://github.com/automl/nas_benchmarks/blob/master/tabular_benchmarks/nas_cifar10.py#L26
@@ -179,9 +185,10 @@ plot_dc = {
         "ystar_test": 0.056824247042338016,
     },
     "NASCifar10CBenchmark": {
-        "xlim_lo": 10**1,
-        "ylim_lo": 10**-3,
+        "xlim_lo": 10**2,
+        "ylim_lo": 10**-2.6,
         "ylim_up": 10**-0,
+        "cylim": [-0.3, 1.1],
         "xscale": "log",
         "yscale": "log",
         # https://github.com/automl/nas_benchmarks/blob/master/tabular_benchmarks/nas_cifar10.py#L26
@@ -192,6 +199,7 @@ plot_dc = {
         "xlim_lo": 10**2,
         "ylim_lo": 10**-1,
         "ylim_up": 10**2,
+        "cylim": [0.2, 1.1],
         "xscale": "log",
         "yscale": "log",
         # from hpobench.benchmarks.nas.nasbench_201 import Cifar100NasBench201Benchmark
@@ -218,6 +226,7 @@ plot_dc = {
         "xlim_lo": 10**2,
         "ylim_lo": 10**-2,
         "ylim_up": 10**2,
+        "cylim": [0.2, 1.1],
         "xscale": "log",
         "yscale": "log",
         # from hpobench.benchmarks.nas.nasbench_201 import Cifar10ValidNasBench201Benchmark
@@ -244,6 +253,7 @@ plot_dc = {
         "xlim_lo": 10**2,
         "ylim_lo": 10**-1,
         "ylim_up": 10**2,
+        "cylim": [0.2, 1.1],
         "xscale": "log",
         "yscale": "log",
         # from hpobench.benchmarks.nas.nasbench_201 import ImageNetNasBench201Benchmark
@@ -268,7 +278,7 @@ plot_dc = {
     },
     "NASBench1shot1SearchSpace1Benchmark": {
         "xlim_lo": 10**2,
-        "ylim_lo": 10**-2,
+        "ylim_lo": 10**-4,
         "ylim_up": 10**0,
         "xscale": "log",
         "yscale": "log",
@@ -279,7 +289,7 @@ plot_dc = {
     },
     "NASBench1shot1SearchSpace2Benchmark": {
         "xlim_lo": 10**2,
-        "ylim_lo": 10**-2,
+        "ylim_lo": 10**-4,
         "ylim_up": 10**0,
         "xscale": "log",
         "yscale": "log",
@@ -290,7 +300,7 @@ plot_dc = {
     },
     "NASBench1shot1SearchSpace3Benchmark": {
         "xlim_lo": 10**2,
-        "ylim_lo": 10**-2,
+        "ylim_lo": 10**-4,
         "ylim_up": 10**0,
         "xscale": "log",
         "yscale": "log",
@@ -303,6 +313,7 @@ plot_dc = {
         "xlim_lo": 10**1,
         "ylim_lo": 10**-3,
         "ylim_up": 10**-1,
+        "cylim": [-0.6, 1.1],
         "xscale": "log",
         "yscale": "log",
         # from stats json file March 9th
@@ -313,6 +324,7 @@ plot_dc = {
         "xlim_lo": 10**1,
         "ylim_lo": 10**-3,
         "ylim_up": 10**-1,
+        "cylim": [-0.6, 1.1],
         "xscale": "log",
         "yscale": "log",
         # from stats json file March 9th
@@ -333,6 +345,7 @@ plot_dc = {
         "xlim_lo": 10**1,
         "ylim_lo": 10**-4,
         "ylim_up": 10**0,
+        "cylim": [-0.6, 1.1],
         "xscale": "log",
         "yscale": "log",
         # from stats json file March 9th
@@ -353,6 +366,7 @@ plot_dc = {
         "xlim_lo": 10**2,
         "ylim_lo": 10**-4,
         "ylim_up": 10**0,
+        "cylim": [-0.6, 1.1],
         "xscale": "log",
         "yscale": "log",
         # from stats json file March 9th
@@ -360,29 +374,32 @@ plot_dc = {
         "ystar_test": 0,
     },
     "ParamNetReducedAdultOnTimeBenchmark": {
-        "xlim_lo": 10 ** 1,
-        "ylim_lo": 10 ** -3,
-        "ylim_up": 10 ** -1,
+        #"xlim_lo": 10 ** 1,
+        #"ylim_lo": 10 ** -3,
+        #"ylim_up": 10 ** -1,
+        "cylim": [0.4, 1.1],
         "xscale": "log",
         "yscale": "log",
-        # from stats json file ?
-        "ystar_valid": 0,
+        # from stats json file Mar 18th
+        "ystar_valid": 0.14413888573646547,
         "ystar_test": 0,
     },
     "ParamNetReducedHiggsOnTimeBenchmark": {
-        "xlim_lo": 10 ** 1,
-        "ylim_lo": 10 ** -3,
-        "ylim_up": 10 ** -1,
+        #"xlim_lo": 10 ** 1,
+        #"ylim_lo": 10 ** -3,
+        #"ylim_up": 10 ** -1,
+        "cylim": [0.4, 1.1],
         "xscale": "log",
         "yscale": "log",
-        # from stats json file ?
-        "ystar_valid": 0,
+        # from stats json file Mar 18th
+        "ystar_valid": 0.2772739828301669,
         "ystar_test": 0,
     },
     "ParamNetReducedLetterOnTimeBenchmark": {
         "xlim_lo": 10 ** 0,
         "ylim_lo": 10 ** -3.5,
         "ylim_up": 10 ** 0,
+        "cylim": [0.4, 1.1],
         "xscale": "log",
         "yscale": "log",
         # from stats json file ?
@@ -393,30 +410,33 @@ plot_dc = {
         "xlim_lo": 10 ** 1,
         "ylim_lo": 10 ** -4,
         "ylim_up": 10 ** 0,
+        "cylim": [0.4, 1.1],
         "xscale": "log",
         "yscale": "log",
-        # from stats json file ?
-        "ystar_valid": 0,
+        # from stats json file Mar 18th
+        "ystar_valid": 0.015233332014481238,
         "ystar_test": 0,
     },
     "ParamNetReducedOptdigitsOnTimeBenchmark": {
         "xlim_lo": 10 ** 0,
         "ylim_lo": 10 ** -3.5,
         "ylim_up": 10 ** 0,
+        "cylim": [0.4, 1.1],
         "xscale": "log",
         "yscale": "log",
-        # from stats json file ?
-        "ystar_valid": 0,
+        # from stats json file Mar 18th
+        "ystar_valid": 0.013435238033940667,
         "ystar_test": 0,
     },
     "ParamNetReducedPokerOnTimeBenchmark": {
         "xlim_lo": 10 ** 2,
         "ylim_lo": 10 ** -4,
         "ylim_up": 10 ** 0,
+        "cylim": [0.4, 1.1],
         "xscale": "log",
         "yscale": "log",
-        # from stats json file ?
-        "ystar_valid": 0,
+        # from stats json file Mar 18th
+        "ystar_valid": 0.000288576907347371,
         "ystar_test": 0,
     },
     "NASCifar10ABenchmark_fixed_seed_0": {
@@ -481,28 +501,43 @@ plot_dc = {
     },
 }
 
-list_of_colors = ['#1b9e77', '#d95f02', '#7570b3', '#e7298a', '#66a61e', '#e6ab02', '#a6761d', '#666666']
+color_dc = {
+    "mint": '#1b9e77',
+    "orange": '#d95f02',
+    "purple": '#7570b3',
+    "pink": '#e7298a',
+    "green": '#66a61e',
+    "yellow": '#e6ab02',
+    "brown": '#a6761d',
+    "red": '#e41a1c',
+    "blue": '#377eb8',
+    "grey": '#999999',
+    }
 
 color_per_opt = {
-    "hpbandster_bohb_eta_3": list_of_colors[0],
-    "hpbandster_bohb_eta_2": list_of_colors[0],
-    "hpbandster_hb_eta_3": list_of_colors[7],
-    "smac_hb_eta_3": list_of_colors[1],
-    "smac_hb_eta_2": list_of_colors[1],
-    "smac_sf": list_of_colors[6],
-    "randomsearch": list_of_colors[2],
-    "dragonfly_default": list_of_colors[3],
-    "dehb": list_of_colors[4],
-    "autogluon": list_of_colors[5],
+    "hpbandster_bohb_eta_3": color_dc["green"],
+    "hpbandster_bohb_eta_2": color_dc["green"],
+    "hpbandster_tpe": color_dc["red"],
+    "hpbandster_hb_eta_3": color_dc["orange"],
+    "smac_hb_eta_3": color_dc["brown"],
+    "smac_hb_eta_2": color_dc["brown"],
+    "smac_sf": color_dc["purple"],
+    "smac_bo": color_dc["mint"],
+    "randomsearch": color_dc["blue"],
+    "dragonfly_default": color_dc["pink"],
+    "dehb": color_dc["grey"],
+    "autogluon": color_dc["yellow"],
 }
 
 marker_per_opt = {
     "hpbandster_bohb_eta_3": "o",
     "hpbandster_bohb_eta_2": "o",
     "hpbandster_hb_eta_3": "o",
+    "hpbandster_tpe": "o",
     "smac_hb_eta_3": "s",
     "smac_hb_eta_2": "s",
     "smac_sf": "s",
+    "smac_bo": "s",
     "randomsearch": "v",
     "dragonfly_default": "^",
     "dehb": "*",
@@ -510,10 +545,11 @@ marker_per_opt = {
 }
 
 
-def unify_layout(ax, fontsize=15, legend_args=None, title=None):
+def unify_layout(ax, fontsize=15, legend_args=None, title=None, add_legend=True):
     if legend_args is None:
         legend_args = {}
-    ax.legend(fontsize=fontsize, **legend_args)
+    if add_legend:
+        ax.legend(fontsize=fontsize, **legend_args)
     ax.tick_params(axis="x", labelsize=fontsize)
     ax.tick_params(axis="y", labelsize=fontsize)
     ax.xaxis.get_label().set_fontsize(fontsize)
@@ -541,4 +577,38 @@ benchmark_families = {
         "ParamNetReducedAdultOnTimeBenchmark", "ParamNetReducedHiggsOnTimeBenchmark",
         "ParamNetReducedLetterOnTimeBenchmark", "ParamNetReducedMnistOnTimeBenchmark",
         "ParamNetReducedOptdigitsOnTimeBenchmark", "ParamNetReducedPokerOnTimeBenchmark", ],
+}
+
+benchmark_dc = {
+    "Cifar10ValidNasBench201Benchmark": "NB201 - Cifar10",
+    "Cifar100NasBench201Benchmark":  "NB201 - Cifar100",
+    "ImageNetNasBench201Benchmark":  "NB201 - ImageNet",
+    "NASCifar10ABenchmark":  "NB101 - A",
+    "NASCifar10BBenchmark":  "NB101 - B",
+    "NASCifar10CBenchmark":  "NB101 - C",
+    "SliceLocalizationBenchmark": "NBHPO - Slice", 
+    "ProteinStructureBenchmark":  "NBHPO - Protein",
+    "NavalPropulsionBenchmark":  "NBHPO - Naval",
+    "ParkinsonsTelemonitoringBenchmark":  "NBHPO - Parkinsons",
+    "NASBench1shot1SearchSpace1Benchmark":  "NB1Shot1 - 1",
+    "NASBench1shot1SearchSpace2Benchmark":  "NB1Shot1 - 2",
+    "NASBench1shot1SearchSpace3Benchmark":  "NB1Shot1 - 3",
+    "BNNOnBostonHousing":  "BNN - Boston",
+    "BNNOnProteinStructure":  "BNN - Protein",
+    "BNNOnYearPrediction":  "BNN - Year",
+    "cartpolereduced":  "cartpole reduced",
+    "metalearna":  "metalearna",
+    "learna":  "learna",
+    "ParamNetAdultOnTimeBenchmark":   "Net - full - Adult",
+    "ParamNetHiggsOnTimeBenchmark":   "Net - full - Higgs",
+    "ParamNetLetterOnTimeBenchmark":  "Net - full - Letter",
+    "ParamNetMnistOnTimeBenchmark":   "Net - full - Mnist",
+    "ParamNetOptdigitsOnTimeBenchmark":  "Net - full - OptDigits",
+    "ParamNetPokerOnTimeBenchmark":   "Net - full - Poker",
+    "ParamNetReducedAdultOnTimeBenchmark":   "Net - Adult",
+    "ParamNetReducedHiggsOnTimeBenchmark":   "Net - Higgs",
+    "ParamNetReducedLetterOnTimeBenchmark":  "Net - Letter",
+    "ParamNetReducedMnistOnTimeBenchmark":   "Net - Mnist",
+    "ParamNetReducedOptdigitsOnTimeBenchmark":  "Net - OptDigits",
+    "ParamNetReducedPokerOnTimeBenchmark":   "Net - Poker",
 }

@@ -10,6 +10,7 @@ from HPOBenchExperimentUtils.utils.validation_utils import load_json_files, \
     load_trajectories_as_df, df_per_optimizer
 from HPOBenchExperimentUtils import  _log as _main_log
 from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc
+from HPOBenchExperimentUtils.utils.runner_utils import get_benchmark_settings
 
 _main_log.setLevel(logging.DEBUG)
 _log = logging.getLogger(__name__)
@@ -46,6 +47,9 @@ def write_latex(result_df, output_file):
         "ParamNetMnistOnTimeBenchmark": r"\parammnist",
         "ParamNetOptdigitsOnTimeBenchmark": r"\paramoptdigits",
         "ParamNetPokerOnTimeBenchmark": r"\parampoker",
+        "NASBench1shot1SearchSpace1Benchmark": r"\NASOSOA",
+        "NASBench1shot1SearchSpace2Benchmark": r"\NASOSOB",
+        "NASBench1shot1SearchSpace3Benchmark": r"\NASOSOC",
     }
 
     with open(output_file, 'w') as fh:
@@ -58,7 +62,10 @@ def write_latex(result_df, output_file):
 
 def save_median_table(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
                       unvalidated: bool = True, which: str = "v1",
-                      opt_list: Union[List[str], None] = None, **kwargs):
+                      opt_list: Union[List[str], None] = None, thresh=1, **kwargs):
+
+    assert 0 < thresh <= 1, f"thresh needs to be in [0, 1], but is {thresh}"
+
     _log.info(f'Start creating table of benchmark {benchmark}')
     input_dir = Path(input_dir) / benchmark
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
@@ -68,6 +75,10 @@ def save_median_table(benchmark: str, output_dir: Union[Path, str], input_dir: U
     benchmark_spec = plot_dc.get(benchmark, {})
     y_best_val = benchmark_spec.get("ystar_valid", 0)
     y_best_test = benchmark_spec.get("ystar_test", 0)
+    benchmark_settings = get_benchmark_settings(benchmark)
+    time_limit_in_s = benchmark_settings["time_limit_in_s"]
+    cut_time_step = thresh * time_limit_in_s
+    _log.info(f"Cut to {thresh} percent -> {time_limit_in_s} sec")
 
     keys = list(unique_optimizer.keys())
     if opt_list is None:
@@ -87,8 +98,14 @@ def save_median_table(benchmark: str, output_dir: Union[Path, str], input_dir: U
         unique_ids = np.unique(optimizer_df['id'])
         for unique_id in unique_ids:
             df = optimizer_df[optimizer_df['id'] == unique_id]
+            df2 = pd.DataFrame([[key, unique_id, 0, 0, np.inf, df["fidel_values"].max(), 0, 0, 1], ], columns=df.columns)
+            df = df.append(df2, ignore_index=True)
             df = df.sort_values(by='total_time_used')
+            df = df.drop(df[df["total_time_used"] > cut_time_step].index)
             last_inc = df.tail(1)
+            if len(last_inc) == 0:
+                _log.critical(f"{key} has not enough runs at timestep {cut_time_step}")
+
             result_df = result_df.append(last_inc)
 
     def q1(x):
@@ -122,14 +139,14 @@ def save_median_table(benchmark: str, output_dir: Union[Path, str], input_dir: U
     best_opt = opt_keys[result_df["function_values_median"].argmin()]
     best_opt_ls = [best_opt, ]
     best_val = np.array(result_df["function_values_lst"][best_opt])
-    _log.info("%s is the best optimizer" % best_opt)
+    _log.info(f"{best_opt} is the best optimizer; found {len(best_val)} runs")
 
     not_worse = []
     for opt in opt_keys:
         if opt == best_opt: continue
         opt_val = np.array(result_df["function_values_lst"][opt])
-        if not len(opt_val) == len(best_val) == 24:
-            print("There are not 24 repetitions")
+        if not len(opt_val) == len(best_val):
+            print(f"There are not {len(best_val)} but {len(opt_val)} repetitions for {opt}")
 
         if np.sum(best_val - opt_val) == 0:
             # Results are identical
@@ -173,6 +190,8 @@ def save_median_table(benchmark: str, output_dir: Union[Path, str], input_dir: U
     result_df = result_df[header]
 
     val_str = 'unvalidated' if unvalidated else 'validated'
-    output_file = Path(output_dir) / f'result_table_{benchmark}_{val_str}_{which}.tex'
+    if thresh < 1:
+        output_file = Path(output_dir) / f'result_table_{benchmark}_{val_str}_{which}_{int(thresh*100)}.tex'
+    else:
+        output_file = Path(output_dir) / f'result_table_{benchmark}_{val_str}_{which}.tex'
     write_latex(result_df=result_df, output_file=output_file)
-

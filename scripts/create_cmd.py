@@ -21,6 +21,7 @@ expset_dc = {
         "ParamNetReducedAdultOnTimeBenchmark", "ParamNetReducedHiggsOnTimeBenchmark",
         "ParamNetReducedLetterOnTimeBenchmark", "ParamNetReducedMnistOnTimeBenchmark",
         "ParamNetReducedOptdigitsOnTimeBenchmark", "ParamNetReducedPokerOnTimeBenchmark", ],
+    "svmsurrogate": ["SurrogateSVMBenchmark", ],
     "svm": ["svm", ],
     "xgboostsub": ["xgboostsub", ],
     "xgboostest": ["xgboostest", ],
@@ -61,7 +62,7 @@ def main(args):
     eval_cmd = []
     evalu_cmd = []
 
-    base = "python %s/HPOBenchExperimentUtils" % args.root
+    base = f"python {args.root}/HPOBenchExperimentUtils"
 
     for benchmark in expset_dc[exp]:
         for optimizer in opt_set[opt]:
