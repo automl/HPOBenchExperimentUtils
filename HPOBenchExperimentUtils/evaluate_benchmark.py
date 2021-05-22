@@ -82,9 +82,9 @@ if __name__ == "__main__":
 
     if args.what in ("all", "over_time"):
         plot_trajectory(criterion=args.agg, **vars(args), opt_list=list_of_opt_to_consider,
-                        what='total_time_used')
+                        whatobj='total_time_used')
         plot_trajectory(criterion=args.agg, **vars(args), opt_list=list_of_opt_to_consider,
-                        what='total_objective_costs')
+                        whatobj='total_objective_costs')
 
     if args.what in ("all", "ecdf"):
         plot_ecdf(**vars(args), opt_list=list_of_opt_to_consider)
