@@ -27,11 +27,21 @@ dehb:
   async_strategy: immediate
   display_name: "DEHB"
 
+de:
+  # From https://github.com/automl/DEHB/blob/tpami/dehb/examples/svm/run_de_svm.py
+  optimizer: de
+  pop_size: 20
+  mutation_factor: 0.5
+  crossover_prob: 0.5
+  strategy: rand1_bin
+  display_name: "DE"
+
 # DRAGONFLY DEFAULT ################################################################################################## #
 dragonfly_default:
   optimizer: dragonfly
   init_iter_per_dim: 10
   init_capital_frac: 0.1 # Ignored since 'init_iter_per_dim' is present
+  display_name: "Dragonfly"
 
 # DRAGONFLY REALTIME ################################################################################################# #
 dragonfly_realtime:

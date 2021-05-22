@@ -41,6 +41,7 @@ if __name__ == "__main__":
                                    "hpbandster_bohb_eta_3",
                                    "hpbandster_hb_eta_3",
                                    "hpbandster_tpe",
+                                   "de"
                                    #"mumbo",
                                    ]
     else:
@@ -54,7 +55,8 @@ if __name__ == "__main__":
                                    "hpbandster_bohb_eta_3",
                                    "hpbandster_hb_eta_3",
                                    "hpbandster_tpe",
-                                   "mumbo",
+                                   "de"
+                                   #"mumbo",
                                    ]
 
     if args.rank is None:
