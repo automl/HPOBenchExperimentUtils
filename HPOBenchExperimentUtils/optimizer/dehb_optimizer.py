@@ -124,7 +124,7 @@ class DeOptimizer(SingleFidelityOptimizer):
                                                fidelity={self.main_fidelity.name: self.max_budget},
                                                **self.settings_for_sending,
                                                )
-            return {"fitness": res['function_value'], "cost": res["cost"]}
+            return res['function_value'], res["cost"]
 
         self.settings["verbose"] = _log.level <= logging.INFO
         # Set the number of iterations to a _very_ large integer but leave out some scope
