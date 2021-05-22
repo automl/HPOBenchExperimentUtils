@@ -15,7 +15,8 @@ _log = logging.getLogger(__name__)
 
 
 def read_trajectories(benchmark: str, input_dir: Path, train: bool=True, y_best: float=0.0,
-                      which: str="v1", opt_list: Union[List[str], None] = None):
+                      which: str="v1", opt_list: Union[List[str], None] = None,
+                      what: str='total_time_used'):
     input_dir = Path(input_dir) / benchmark
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
 
@@ -35,13 +36,13 @@ def read_trajectories(benchmark: str, input_dir: Path, train: bool=True, y_best:
         optimizer_names.append(key)
         trajectories = load_json_files(unique_optimizer[key])
         optimizer_df = df_per_optimizer(key, trajectories, y_best=y_best)
-        statistics_df.append(get_statistics_df(optimizer_df))
+        statistics_df.append(get_statistics_df(optimizer_df, what=what))
     return optimizer_names, trajectories, statistics_df
 
 
 def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
                     criterion: str = 'mean', unvalidated: bool = True, which: str = "v1",
-                    opt_list: Union[List[str], None] = None,  **kwargs):
+                    opt_list: Union[List[str], None] = None, what: str='total_time_used', **kwargs):
     _log.info(f'Start plotting trajectories of benchmark {benchmark}')
 
     input_dir = Path(input_dir)
@@ -63,6 +64,7 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
         y_best=y_best,
         which=which,
         opt_list=opt_list,
+        what=what,
     )
     # start plotting the trajectories:
     f, ax = plt.subplots(1, 1)
@@ -88,25 +90,30 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
             min_ = min(min_, df['q25'].min())
             max_ = max(max_, df[criterion].max())
 
-    # TODO: This statement has no effect. Overwritten in line 82 without usage
-    if y_best != 0:
-        ylabel = "Regret"
-    else:
-        ylabel = "Loss"
     xl, xu = ax.get_xlim()
-
     xl = benchmark_spec.get("xlim_lo", 1)
     xu = benchmark_spec.get("xlim_up", xu)
     yl = benchmark_spec.get("ylim_lo", min_)
     yu = benchmark_spec.get("ylim_up", max_)
     xscale = benchmark_spec.get("xscale", "log")
     yscale = benchmark_spec.get("yscale", "log")
-    if benchmark_settings["is_surrogate"] == True:
+
+    val_str = 'optimized' if unvalidated else 'validated'
+    filename = Path(output_dir) / f'trajectory_{benchmark}_{val_str}_{criterion}_{which}.png'
+    if what == 'total_objective_costs':
+        xlabel = benchmark_spec.get("xlabel", "Used Objective cost")
+        filename = Path(output_dir) / \
+                   f'trajectory_objective_{benchmark}_{val_str}_{criterion}_{which}.png'
+    elif what == 'total_time_used' and benchmark_settings["is_surrogate"] == True:
         xlabel = benchmark_spec.get("xlabel", "Simulated runtime in seconds")
-    else:
+    elif what == 'total_time_used' and benchmark_settings["is_surrogate"] == False:
         xlabel = benchmark_spec.get("xlabel", "Runtime in seconds")
+    else:
+        xlabel = benchmark_spec.get("xlabel", "Cost")
+
     test_str = 'Optimized' if unvalidated else 'Test'
-    ylabel = f'{criterion.capitalize()} {test_str} {ylabel}'
+    lossname = "Loss" if y_best == 0 else "Regret"
+    ylabel = f'{criterion.capitalize()} {test_str} {lossname}'
 
     ax.set_xlim([xl, xu])
     ax.set_ylim([yl, yu])
@@ -115,10 +122,8 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
 
-    val_str = 'optimized' if unvalidated else 'validated'
-
     unify_layout(ax, title=f'{benchmark}')
     plt.tight_layout()
-    plt.savefig(Path(output_dir) / f'trajectory_{benchmark}_{val_str}_{criterion}_{which}.png')
+    plt.savefig(filename)
     plt.close('all')
     return 1

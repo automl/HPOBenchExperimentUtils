@@ -219,10 +219,10 @@ def load_trajectories_as_df(input_dir, which="test_v1"):
     return unique_optimizer
 
 
-def get_statistics_df(optimizer_df):
+def get_statistics_df(optimizer_df, what='total_time_used'):
     select_cols = ['mean', 'std', 'median', 'q25', 'q75', 'mean_inf', 'up', 'lo']
     # Dataframe for the learning curves per optimizer
-    piv = optimizer_df.pivot(index='total_time_used', columns='id', values='function_values')
+    piv = optimizer_df.pivot(index=what, columns='id', values='function_values')
 
     piv = piv.fillna(method='ffill')
     vali = -1

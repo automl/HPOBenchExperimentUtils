@@ -79,7 +79,10 @@ if __name__ == "__main__":
         save_median_table(**vars(args), opt_list=list_of_opt_to_consider, thresh=1.0)
 
     if args.what in ("all", "over_time"):
-        plot_trajectory(criterion=args.agg, **vars(args), opt_list=list_of_opt_to_consider)
+        plot_trajectory(criterion=args.agg, **vars(args), opt_list=list_of_opt_to_consider,
+                        what='total_time_used')
+        plot_trajectory(criterion=args.agg, **vars(args), opt_list=list_of_opt_to_consider,
+                        what='total_objective_costs')
 
     if args.what in ("all", "ecdf"):
         plot_ecdf(**vars(args), opt_list=list_of_opt_to_consider)
