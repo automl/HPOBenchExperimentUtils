@@ -106,5 +106,3 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     extract_trajectory(output_dir=Path(args.output_dir), debug=args.debug)
-
-

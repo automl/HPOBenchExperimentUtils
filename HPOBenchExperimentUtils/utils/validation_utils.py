@@ -221,6 +221,12 @@ def load_trajectories_as_df(input_dir, which="test_v1"):
 
 def get_statistics_df(optimizer_df, what='total_time_used'):
     select_cols = ['mean', 'std', 'median', 'q25', 'q75', 'mean_inf', 'up', 'lo']
+
+    # If there are 2 entries in a trajectory of a run with the same objective costs (for example 0) due
+    # then the pivot function does not work. Thus, delete duplicate entries from the table.
+    optimizer_df.sort_values(what, inplace=True)
+    optimizer_df.drop_duplicates(subset=['id', what], keep='last', inplace=True)
+
     # Dataframe for the learning curves per optimizer
     piv = optimizer_df.pivot(index=what, columns='id', values='function_values')
 
