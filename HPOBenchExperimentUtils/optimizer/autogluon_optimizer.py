@@ -10,8 +10,6 @@ import types
 try:
     import autogluon.core as ag
     from autogluon.core.scheduler.hyperband import _get_rung_levels
-    import autogluon.core.version as v
-    assert v.__version__ == "0.0.15b20201205"
 except:
     # We need to use this specific version since changes introduces later on fail when pickling the
     # objective function via dill. The changes were introduced here:
@@ -23,14 +21,6 @@ except:
     python3 -m pip install --upgrade "mxnet<2.0.0"
     python3 -m pip install autogluon==0.0.15b20201205
     """)
-
-try:
-    # Even if we use the correct version, we have to make sure that dill is not installed
-    import dill
-    raise ValueError("`dill` is installed, please remove it via:\npip uninstall dill")
-except ModuleNotFoundError:
-    pass
-
 
 from hpobench.abstract_benchmark import AbstractBenchmark
 from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
@@ -59,7 +49,7 @@ class AutogluonOptimizer(SingleFidelityOptimizer):
         self.done = False
 
         # Set up search space and rung_levels
-        self.ag_space = self._get_ag_space()
+        self.ag_space = self.get_ag_space(self.cs)
         if isinstance(self.main_fidelity, UniformFloatHyperparameter):
             # This would only be the case for dataset fraction as a fidelity and we don't run this
             # optimizer on these
@@ -69,7 +59,7 @@ class AutogluonOptimizer(SingleFidelityOptimizer):
         self.time_limit = self.benchmark.wall_clock_limit_in_s
         if self.benchmark.is_surrogate:
             # We limit this and cut the runhistory afterwards in case there are too many evaluations
-            self.time_limit = 342000 # 95h; was 60*60*24*4=96h before
+            self.time_limit = 342000  # 95h; was 60*60*24*4=96h before
 
         # Get default settings as set in the PR
         self.reduction_factor = self.settings["reduction_factor"]  # 3 by default
@@ -95,11 +85,6 @@ class AutogluonOptimizer(SingleFidelityOptimizer):
 
         self.rung_levels = self._get_rung_levels()
 
-        # Autogluon evaluates every configuration in its own subprocess and thus would
-        # terminate the container after evaluation. Here, we overwrite the shutdown method.
-        self.benchmark.benchmark._real_shutdown = self.benchmark.benchmark._shutdown
-        self.benchmark.benchmark._shutdown = types.MethodType(nothing, self.benchmark.benchmark)
-
     def setup(self):
         pass
 
@@ -111,9 +96,10 @@ class AutogluonOptimizer(SingleFidelityOptimizer):
         rung_levels = rung_levels + [self.max_budget]
         return rung_levels
 
-    def _get_ag_space(self):
+    @staticmethod
+    def get_ag_space(cs):
         d = dict()
-        for h in self.cs.get_hyperparameters():
+        for h in cs.get_hyperparameters():
             if isinstance(h, UniformFloatHyperparameter):
                 d[h.name] = ag.space.Real(lower=h.lower, upper=h.upper, log=h.log)
             elif isinstance(h, UniformIntegerHyperparameter):
@@ -131,34 +117,34 @@ class AutogluonOptimizer(SingleFidelityOptimizer):
                 raise ValueError("Cannot handle %s" % h.name)
         return d
 
+    @staticmethod
+    def _obj_fct(args, reporter):
+        # Build configuration
+        config = dict()
+        for h in args.cs.get_hyperparameters():
+            if isinstance(h, UniformIntegerHyperparameter):
+                config[h.name] = int(np.rint(args[h.name]))
+            elif isinstance(h, OrdinalHyperparameter):
+                config[h.name] = h.sequence[int(args[h.name])]
+            else:
+                config[h.name] = args[h.name]
+
+        # Iterate only over fidelities that are interesting to the optimizer
+        for epoch in args.valid_budgets:
+            fidelity = {args.main_fidelity.name: epoch}
+            res = args.benchmark.objective_function(config, fidelity=fidelity,
+                                                    **args.settings_for_sending)
+            # Autogluon maximizes, HPOBench returns something to be minimized
+            acc = -res['function_value']
+            eval_time = res['cost']
+            reporter(epoch=epoch,
+                     performance=acc,
+                     eval_time=eval_time,
+                     time_step=time.time(), **config)
+
     def make_benchmark(self):
-        def objective_function(args, reporter):
-            # Build configuration
-            config = dict()
-            for h in args.cs.get_hyperparameters():
-                if isinstance(h, UniformIntegerHyperparameter):
-                    config[h.name] = int(np.rint(args[h.name]))
-                elif isinstance(h, OrdinalHyperparameter):
-                    config[h.name] = h.sequence[int(args[h.name])]
-                else:
-                    config[h.name] = args[h.name]
-
-            # Iterate only over fidelities that are interesting to the optimizer
-            for epoch in args.valid_budgets:
-                fidelity = {args.main_fidelity.name: epoch}
-                res = self.benchmark.objective_function(config, fidelity=fidelity,
-                                                        **self.settings_for_sending)
-                # Autogluon maximizes, HPOBench returns something to be minimized
-                acc = -res['function_value']
-                eval_time = res['cost']
-                reporter(
-                    epoch=epoch,
-                    performance=acc,
-                    eval_time=eval_time,
-                    time_step=time.time(), **config)
-
         return ag.args(**self.ag_space, epochs=self.max_budget, valid_budgets=self.rung_levels,
-                       cs=self.cs, main_fidelity=self.main_fidelity)(objective_function)
+                       cs=self.cs, main_fidelity=self.main_fidelity)(self._obj_fct)
 
     def _fix_runhistory(self):
         # We change the timestamps in the runhistory post-hoc
@@ -233,9 +219,7 @@ class AutogluonOptimizer(SingleFidelityOptimizer):
         scheduler.join_jobs()
 
     def shutdown(self):
-        # Autogluon is done. Shutdown container
-        _log.critical("Stop container")
-        self.benchmark.benchmark._real_shutdown()
+        # Autogluon is done.
         self.done = True
         # Rewrite trajectory
         self._fix_runhistory()

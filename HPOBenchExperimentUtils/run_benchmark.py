@@ -76,6 +76,8 @@ def run_benchmark(optimizer: str,
     optimizer_settings = get_optimizer_setting(optimizer)
     benchmark_settings = get_benchmark_settings(benchmark)
     settings = dict(optimizer_settings, **benchmark_settings)
+    settings['benchmark_params'] = benchmark_params
+
     _log.debug(f'Settings loaded: {settings}')
 
     optimizer_enum = optimizer_str_to_enum(optimizer_settings['optimizer'])
@@ -107,45 +109,37 @@ def run_benchmark(optimizer: str,
         benchmark = benchmark_obj(rng=rng, container_source=container_source, **benchmark_params)
     _log.info(f'Benchmark successfully initialized.')
 
-    # Create a Process Manager to get access to the proxy variables. They represent the state of the optimization
-    # process.
-    manager = Manager()
+    from functools import partial
+    benchmark_partial = partial(benchmark_obj,
+                                rng=rng,
+                                container_source=container_source,
+                                socket_id=benchmark.socket_id,
+                                **benchmark_params)
 
-    # This variable count the time the benchmark was evaluated (in seconds).
-    # This is the cost of the objective function + the overhead. Use type double.
-    total_time_proxy = manager.Value('d', 0)
-    # total_time_proxy = Value('d', 0)
-
-    # We can also restrict how often a optimizer is allowed to execute the target algorithm. Encode it as type long.
-    total_tae_calls_proxy = manager.Value('l', 0)
-    # total_tae_calls_proxy = Value('l', 0)
-
-    # Or we can give an upper limit for amount of budget, the optimizer can use. One can think of it as fuel. Running a
-    # benchmark reduces the fuel by `budget`. Use type double.
-    total_fuel_used_proxy = manager.Value('d', 0)
-    # total_fuel_used_proxy = Value('d', 0)
-
-    benchmark = Bookkeeper(benchmark=benchmark,
-                           output_dir=output_dir,
-                           total_time_proxy=total_time_proxy,
-                           total_tae_calls_proxy=total_tae_calls_proxy,
-                           total_fuel_used_proxy=total_fuel_used_proxy,
-                           wall_clock_limit_in_s=settings['time_limit_in_s'],
-                           tae_limit=settings['tae_limit'],
-                           fuel_limit=settings['fuel_limit'],
-                           cutoff_limit_in_s=settings['cutoff_in_s'],
-                           is_surrogate=settings['is_surrogate'])
+    book_keeper = Bookkeeper(benchmark_partial=benchmark_partial,
+                             output_dir=output_dir,
+                             wall_clock_limit_in_s=settings['time_limit_in_s'],
+                             tae_limit=settings['tae_limit'],
+                             fuel_limit=settings['fuel_limit'],
+                             cutoff_limit_in_s=settings['cutoff_in_s'],
+                             is_surrogate=settings['is_surrogate'])
 
     _log.info(f'BookKeeper initialized. Additional benchmark parameters {benchmark_params}')
 
+    resource_file, lock_dir, resource_lock_file = \
+        book_keeper.resource_file, book_keeper.lock_dir, book_keeper.resource_lock_file
+
+    resources = Bookkeeper.load_resource_file(resource_file, lock_dir, resource_lock_file)
+
     optimizer = get_optimizer(optimizer_enum)
-    optimizer = optimizer(benchmark=benchmark,
+    optimizer = optimizer(benchmark=book_keeper,
                           settings=settings,
                           output_dir=output_dir,
                           rng=rng)
     _log.info(f'Optimizer initialized. Start optimization process.')
 
     start_time = time()
+
     # Currently no optimizer uses the setup function, but we still call it to enable future optimizer implementations to
     # have a setup function.
     optimizer.setup()
@@ -153,28 +147,21 @@ def run_benchmark(optimizer: str,
     process = Process(target=optimizer.run, args=(), kwargs=dict())
     process.start()
 
-    while not total_time_exceeds_limit(benchmark.get_total_time_used(), settings['time_limit_in_s'], start_time) \
-            and not tae_exceeds_limit(benchmark.get_total_tae_used(), settings['tae_limit']) \
-            and not used_fuel_exceeds_limit(benchmark.get_total_fuel_used(), settings['fuel_limit']) \
+    while not total_time_exceeds_limit(resources['total_time_proxy'], settings['time_limit_in_s'], start_time) \
+            and not tae_exceeds_limit(resources['total_tae_calls_proxy'], settings['tae_limit']) \
+            and not used_fuel_exceeds_limit(resources['total_fuel_used_proxy'], settings['fuel_limit']) \
             and process.is_alive():
         sleep(PING_OPTIMIZER_IN_S)
+        resources = Bookkeeper.load_resource_file(resource_file, lock_dir, resource_lock_file)
+
     else:
         _log.debug('CALLING TERMINATE()')
-        try:
-            _log.info(f'Optimization has been finished.\n'
-                      f'Timelimit: {settings["time_limit_in_s"]} and is now: {benchmark.get_total_time_used()}\n'
-                      f'TAE limit: {settings["tae_limit"]} and is now: {benchmark.get_total_tae_used()}\n'
-                      f'Fuel limit: {settings["fuel_limit"]} and is now: {benchmark.get_total_fuel_used()}\n'
-                      f'Terminate Process after {time() - start_time}')
-        except FileNotFoundError:
-            pass
-
         process.terminate()
         _log.debug('PROCESS TERMINATED')
         _log.info(f'Optimization has been finished.\n'
-                  f'Timelimit: {settings["time_limit_in_s"]} and is now: {benchmark.get_total_time_used()}\n'
-                  f'TAE limit: {settings["tae_limit"]} and is now: {benchmark.get_total_tae_used()}\n'
-                  f'Fuel limit: {settings["fuel_limit"]} and is now: {benchmark.get_total_fuel_used()}\n'
+                  f'Timelimit: {settings["time_limit_in_s"]} and is now: {resources["total_time_proxy"]}\n'
+                  f'TAE limit: {settings["tae_limit"]} and is now: {resources["total_tae_calls_proxy"]}\n'
+                  f'Fuel limit: {settings["fuel_limit"]} and is now: {resources["total_fuel_used_proxy"]}\n'
                   f'Terminate Process after {time() - start_time}')
 
     optimizer.shutdown()
@@ -183,6 +170,8 @@ def run_benchmark(optimizer: str,
     extract_trajectory(output_dir=output_dir, debug=debug)
 
     _log.info(f'Run Benchmark - Finished.')
+    benchmark._shutdown()
+    book_keeper.final_shutdown()
 
 
 if __name__ == "__main__":

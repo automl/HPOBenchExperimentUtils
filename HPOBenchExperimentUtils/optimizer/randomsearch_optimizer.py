@@ -55,8 +55,12 @@ class RandomSearchOptimizer(SingleFidelityOptimizer):
                 **self.settings_for_sending,
             )
             results.append((configuration, result))
+            resources = self.benchmark.load_resource_file(self.benchmark.resource_file,
+                                                          self.benchmark.lock_dir,
+                                                          self.benchmark.resource_lock_file)
+
             _log.info(f'Config [{num_configs:6d}] - Result: {result["function_value"]:.4f} - '
-                      f'Time Used: {self.benchmark.get_total_time_used()}|'
+                      f'Time Used: {resources["total_time_proxy"]:2.f}|'
                       f'{self.benchmark.wall_clock_limit_in_s}')
             num_configs += 1
 

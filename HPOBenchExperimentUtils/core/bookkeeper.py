@@ -1,3 +1,5 @@
+import json
+
 import logging
 import os
 import shutil
@@ -10,8 +12,6 @@ from typing import Union, List, Dict, Any
 
 import ConfigSpace as CS
 import numpy as np
-from hpobench.abstract_benchmark import AbstractBenchmark
-from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 from pebble import concurrent
 from oslo_concurrency import lockutils
 
@@ -37,9 +37,6 @@ def keep_track(validate=False):
         def wrapped(self, configuration: Union[np.ndarray, List, CS.Configuration, Dict],
                     fidelity: Union[CS.Configuration, Dict, None] = None,
                     rng: Union[np.random.RandomState, int, None] = None, **kwargs):
-
-            self.increase_total_tae_used(1)
-
             start_time = time()
             result_dict = function(self, configuration, fidelity, rng, **kwargs)
 
@@ -50,8 +47,11 @@ def keep_track(validate=False):
             except TimeoutError:
                 # TODO: Fidelity is a dict here. How to extract the value? What to do if it is None?
                 f = _safe_cast_config(fidelity) or None
-                self.increase_total_fuel_used(list(f.values())[0] or 0)
-                self.increase_total_time_used(self.cutoff_limit_in_s)
+
+                self.add_and_write_resource(total_time_delta=self.cutoff_limit_in_s,
+                                            total_tae_calls_delta=1,
+                                            total_fuel_used_delta=list(f.values())[0] or 0,
+                                            total_objective_costs_delta=self.cutoff_limit_in_s)
 
                 record = Record(function_value=MAXINT,
                                 cost=self.cutoff_limit_in_s,
@@ -65,57 +65,58 @@ def keep_track(validate=False):
             if not np.isfinite(result_dict["function_value"]):
                 result_dict["function_value"] = MAXINT
 
-            self.total_objective_costs += result_dict['cost']
-
-            # Measure the total time since the start up. This is the budget which is used by the optimization procedure.
-            # In case of a surrogate benchmark also take the "surrogate" costs into account.
-            total_time_used = time() - self.boot_time
-            if self.is_surrogate:
-                total_time_used -= (finish_time - start_time)
-                total_time_used += self.total_objective_costs
-
-            # Time used for this configuration. The benchmark returns as cost the time of the function call +
-            # the cost of the configuration. If the benchmark is a surrogate, the cost field includes the costs for the
-            # function call, as well as surrogate costs. Thus, it is sufficient to use the costs returned by the
-            # benchmark.
-            time_for_evaluation = result_dict['cost']
-
             # if the fidelity is none: load it from the result dictionary.
             fidelity = _safe_cast_config(fidelity or result_dict['info']['fidelity'])
             configuration = _safe_cast_config(configuration)
 
-            # Note: We update the proxy variable after checking the conditions here.
-            #       This is because, we want to make sure, that this process is not be killed from outside
-            #       before it was able to write the current result into the result file.
-            if not total_time_exceeds_limit(total_time_used, self.wall_clock_limit_in_s, time()) \
-                and not used_fuel_exceeds_limit(self.get_total_fuel_used(), self.fuel_limit) \
-                and not tae_exceeds_limit(self.get_total_tae_used(), self.tae_limit) \
-                    and not time_per_config_exceeds_limit(time_for_evaluation, self.cutoff_limit_in_s):
+            resource_lock = lockutils.lock(name=self.resource_lock_file, external=True, do_log=False,
+                                           lock_path=str(self.lock_dir), delay=0.01)
+            with resource_lock:
+                resources = self._load_resource_file_without_lock(self.resource_file)
 
-                record = Record(start_time=start_time,
-                                finish_time=finish_time,
-                                function_value=result_dict['function_value'],
-                                fidelity=fidelity,
-                                cost=result_dict['cost'],
-                                configuration=configuration,
-                                info=result_dict['info'],
-                                function_call=self.get_total_tae_used(),
-                                total_time_used=total_time_used,
-                                total_objective_costs=self.total_objective_costs,
-                                total_fuel_used=self.get_total_fuel_used())
+                total_objective_costs = resources['total_objective_costs'] + result_dict['cost']
 
-                record = record.get_dictionary()
+                # Measure the total time since the start up. This is the budget which is used by the optimization
+                # procedure. In case of a surrogate benchmark also take the "surrogate" costs into account.
+                total_time_used = time() - resources['start_time']
+                if self.is_surrogate:
+                    total_time_used -= (finish_time - start_time)
+                    total_time_used += total_objective_costs
 
-                log_file = self.log_file if not validate else self.validate_log_file
-                self.write_line_to_file(log_file, record)
+                # Time used for this configuration. The benchmark returns as cost the time of the function call +
+                # the cost of the configuration. If the benchmark is a surrogate, the cost field includes the costs
+                # for the function call, as well as surrogate costs. Thus, it is sufficient to use the costs returned
+                # by the benchmark.
+                time_for_evaluation = result_dict['cost']
+                resources['total_fuel_used_proxy'] += list(fidelity.values())[0] or 0
+                resources['total_time_proxy'] = total_time_used
+                resources['total_objective_costs'] += result_dict['cost']
+                resources['total_tae_calls_proxy'] += 1
 
-                if not validate:
-                    self.calculate_incumbent(record)
-            else:
-                logger.info('We have reached a time limit. We do not write the current record into the trajectory.')
+                # Note: We update the proxy variable after checking the conditions here.
+                #       This is because, we want to make sure, that this process is not be killed from outside
+                #       before it was able to write the current result into the result file.
+                if not total_time_exceeds_limit(resources['total_time_proxy'], self.wall_clock_limit_in_s, time()) \
+                    and not used_fuel_exceeds_limit(resources['total_fuel_used_proxy'], self.fuel_limit) \
+                    and not tae_exceeds_limit(resources['total_tae_calls_proxy'], self.tae_limit) \
+                        and not time_per_config_exceeds_limit(time_for_evaluation, self.cutoff_limit_in_s):
 
-            self.set_total_time_used(total_time_used)
-            self.increase_total_fuel_used(list(fidelity.values())[0] or 0)
+                    record = Record(start_time=start_time,
+                                    finish_time=finish_time,
+                                    function_value=result_dict['function_value'],
+                                    fidelity=fidelity,
+                                    cost=result_dict['cost'],
+                                    configuration=configuration,
+                                    info=result_dict['info'],
+                                    function_call=resources['total_tae_calls_proxy'],
+                                    total_time_used=total_time_used,
+                                    total_objective_costs=resources['total_objective_costs'],
+                                    total_fuel_used=resources['total_fuel_used_proxy'])
+                    record = record.get_dictionary()
+
+                    self.write_line_to_file(self.log_file if not validate else self.validate_log_file, record)
+
+                self._write_resource_file_without_lock(self.resource_file, **resources)
 
             return result_dict
         return wrapped
@@ -123,11 +124,9 @@ def keep_track(validate=False):
 
 
 class Bookkeeper:
-    def __init__(self, benchmark: Union[AbstractBenchmark, AbstractBenchmarkClient],
+    def __init__(self,
+                 benchmark_partial: Any,
                  output_dir: Path,
-                 total_time_proxy: Any,
-                 total_tae_calls_proxy: Any,
-                 total_fuel_used_proxy: Any,
                  wall_clock_limit_in_s: Union[int, float, None],
                  tae_limit: Union[int, None],
                  fuel_limit: Union[int, float, None],
@@ -135,47 +134,36 @@ class Bookkeeper:
                  is_surrogate: bool,
                  validate: bool = False):
 
-        self.benchmark = benchmark
+        self.benchmark_partial = benchmark_partial
         self.log_file = output_dir / RUNHISTORY_FILENAME
         self.trajectory = output_dir / TRAJECTORY_V1_FILENAME
         self.validate_log_file = output_dir / VALIDATED_RUNHISTORY_FILENAME
-
-        self.boot_time = time()
-        self.total_objective_costs = 0
-
-        self.inc_budget = None
-        self.inc_value = None
-
-        # This variable is a shared variable. A proxy to check from outside. It represents the time already used
-        # by this benchmark. It also takes into account if the benchmark is a surrogate.
-        self.total_time_proxy = total_time_proxy
-
-        # Same as total time proxy, but counts the total used budget
-        self.total_fuel_used_proxy = total_fuel_used_proxy
-
-        # Sums up the number of target algorithm executions.
-        self.total_tae_calls_proxy = total_tae_calls_proxy
+        self.resource_file = output_dir / 'used_resources.json'
 
         self.lock_dir = output_dir / 'lock_dir'
         self.lock_dir.mkdir(parents=True, exist_ok=True)
-        self.lock_file = self.lock_dir / 'attribute_lock'
+        self.resource_lock_file = 'resource_lock'
 
         self.wall_clock_limit_in_s = wall_clock_limit_in_s
         self.tae_limit = tae_limit
         self.fuel_limit = fuel_limit
         self.cutoff_limit_in_s = cutoff_limit_in_s
         self.is_surrogate = is_surrogate
+        self.validate = validate
 
-        if not validate:
-            self.write_line_to_file(self.log_file, {'boot_time': self.boot_time}, mode='w')
-            self.write_line_to_file(self.trajectory, {'boot_time': self.boot_time}, mode='w')
-        else:
-            if self.validate_log_file.exists():
-                logger.warning(f'The validation log file already exists. The results will be appended.')
-            self.write_line_to_file(self.validate_log_file, {'boot_time': self.boot_time}, mode='a+')
+        # This means that this is the first time a book keeper is started. Write the boot time into the runhist + traj.
+        if not self.resource_file.exists():
+            resources = Bookkeeper.load_resource_file(self.resource_file, self.lock_dir, self.resource_lock_file)
+            if not validate:
+                self.write_line_to_file(self.log_file, {'boot_time': resources['start_time']}, mode='w')
+                self.write_line_to_file(self.trajectory, {'boot_time': resources['start_time']}, mode='w')
+            else:
+                if self.validate_log_file.exists():
+                    logger.warning(f'The validation log file already exists. The results will be appended.')
+                self.write_line_to_file(self.validate_log_file, {'boot_time': resources['start_time']}, mode='a+')
 
     @keep_track(validate=False)
-    def objective_function(self, configuration: Union[np.ndarray, List, CS.Configuration, Dict],
+    def objective_function(self, configuration: Union[CS.Configuration, Dict],
                            fidelity: Union[CS.Configuration, Dict, None] = None,
                            rng: Union[np.random.RandomState, int, None] = None, **kwargs) -> Dict:
         @concurrent.process(timeout=self.cutoff_limit_in_s)
@@ -192,11 +180,14 @@ class Bookkeeper:
                 del send["for_test"]
 
             for k in send:
-                if send[k] == "None": send[k] = None
+                if send[k] == "None":
+                    send[k] = None
 
-            return self.benchmark.objective_function(configuration=configuration,
-                                                     fidelity=fidelity,
-                                                     **send)
+            benchmark = self.benchmark_partial()
+            result_dict = benchmark.objective_function(configuration=configuration,
+                                                       fidelity=fidelity,
+                                                       **send)
+            return result_dict
 
         result_dict = __objective_function(configuration=configuration,
                                            fidelity=fidelity,
@@ -205,7 +196,7 @@ class Bookkeeper:
         return result_dict
 
     @keep_track(validate=True)
-    def objective_function_test(self, configuration: Union[np.ndarray, List, CS.Configuration, Dict],
+    def objective_function_test(self, configuration: Union[CS.Configuration, Dict],
                                 fidelity: Union[CS.Configuration, Dict, None] = None,
                                 rng: Union[np.random.RandomState, int, None] = None, **kwargs) -> Dict:
 
@@ -227,9 +218,11 @@ class Bookkeeper:
             for k in send:
                 if send[k] == "None": send[k] = None
 
-            return self.benchmark.objective_function_test(configuration=configuration,
-                                                          fidelity=fidelity,
-                                                          **send)
+            benchmark = self.benchmark_partial()
+            result_dict = benchmark.objective_function_test(configuration=configuration,
+                                                            fidelity=fidelity,
+                                                            **send)
+            return result_dict
 
         result_dict = __objective_function_test(configuration=configuration,
                                                 fidelity=fidelity,
@@ -238,111 +231,91 @@ class Bookkeeper:
         return result_dict
 
     def get_configuration_space(self, seed: Union[int, None] = None) -> CS.ConfigurationSpace:
-        return self.benchmark.get_configuration_space(seed)
+        benchmark = self.benchmark_partial()
+        cs = benchmark.get_configuration_space(seed)
+        return cs
 
     def get_fidelity_space(self, seed: Union[int, None] = None) -> CS.ConfigurationSpace:
-        return self.benchmark.get_fidelity_space(seed)
+        benchmark = self.benchmark_partial()
+        fs = benchmark.get_fidelity_space(seed)
+        return fs
 
     def get_meta_information(self) -> Dict:
-        return self.benchmark.get_meta_information()
+        benchmark = self.benchmark_partial()
+        meta = benchmark.get_meta_information()
+        return meta
 
-    def get_total_time_used(self):
-        lock = lockutils.lock(name='attribute_lock', external=True, do_log=False,
-                              lock_path=f'{self.lock_file}', delay=0.3)
-        with lock:
-            value = self.total_time_proxy.value
-        return value
+    @staticmethod
+    def _load_resource_file_without_lock(resource_file):
+        if not resource_file.exists():
+            resources = dict(total_time_proxy=0.0,
+                        total_tae_calls_proxy=0,
+                        total_fuel_used_proxy=0.0,
+                        total_objective_costs=0.0,
+                        start_time=time())
+            Bookkeeper._write_resource_file_without_lock(resource_file, **resources)
+            logger.debug('Created Resource File.')
+            return resources
 
-    def get_total_tae_used(self):
-        lock = lockutils.lock(name='attribute_lock', external=True, do_log=False,
-                              lock_path=f'{self.lock_file}', delay=0.3)
-        with lock:
-            value = self.total_tae_calls_proxy.value
-        return value
+        with resource_file.open('r') as fh:
+            return json.load(fh)
 
-    def get_total_fuel_used(self):
-        lock = lockutils.lock(name='attribute_lock', external=True, do_log=False,
-                              lock_path=f'{self.lock_file}', delay=0.3)
-        with lock:
-            value = self.total_fuel_used_proxy.value
-        return value
+    @staticmethod
+    def _write_resource_file_without_lock(resource_file,
+                                          total_time_proxy, total_tae_calls_proxy,
+                                          total_fuel_used_proxy, total_objective_costs,
+                                          start_time):
+        resources = dict(total_time_proxy=total_time_proxy,
+                         total_tae_calls_proxy=total_tae_calls_proxy,
+                         total_fuel_used_proxy=total_fuel_used_proxy,
+                         total_objective_costs=total_objective_costs,
+                         start_time=start_time)
 
-    def set_total_time_used(self, total_time_used: float):
-        lock = lockutils.lock(name='attribute_lock', external=True, do_log=False,
-                              lock_path=f'{self.lock_file}', delay=0.3)
-        with lock:
-            self.total_time_proxy.value = total_time_used
+        with resource_file.open('w') as fp:
+            json.dump(obj=resources, fp=fp)
 
-    def set_total_tae_used(self, total_tae_used: float):
-        lock = lockutils.lock(name='attribute_lock', external=True, do_log=False,
-                              lock_path=f'{self.lock_file}', delay=0.3)
-        with lock:
-            self.total_tae_calls_proxy.value = total_tae_used
+    @staticmethod
+    def load_resource_file(resource_file, lock_dir, resource_lock_file):
+        resource_lock = lockutils.lock(name=resource_lock_file, external=True, do_log=False,
+                                       lock_path=str(lock_dir), delay=0.01)
+        with resource_lock:
+            resources = Bookkeeper._load_resource_file_without_lock(resource_file)
 
-    def set_total_fuel_used(self, total_fuel_used_proxy: float):
-        lock = lockutils.lock(name='attribute_lock', external=True, do_log=False,
-                              lock_path=f'{self.lock_file}', delay=0.3)
-        with lock:
-            self.total_fuel_used_proxy.value = total_fuel_used_proxy
+        return resources
 
-    def increase_total_time_used(self, total_time_used_delta: float):
-        lock = lockutils.lock(name='attribute_lock', external=True, do_log=False,
-                              lock_path=f'{self.lock_file}', delay=0.3)
-        with lock:
-            self.total_time_proxy.value = self.total_time_proxy.value + total_time_used_delta
+    def add_and_write_resource(self, total_time_delta=0, total_tae_calls_delta=0,
+                               total_fuel_used_delta=0, total_objective_costs_delta=0):
 
-    def increase_total_tae_used(self, total_tae_used: float):
-        lock = lockutils.lock(name='attribute_lock', external=True, do_log=False,
-                              lock_path=f'{self.lock_file}', delay=0.3)
-        with lock:
-            self.total_tae_calls_proxy.value = self.total_tae_calls_proxy.value + total_tae_used
-
-    def increase_total_fuel_used(self, total_fuel_used_proxy: float):
-        lock = lockutils.lock(name='attribute_lock', external=True, do_log=False,
-                              lock_path=f'{self.lock_file}', delay=0.3)
-        with lock:
-            self.total_fuel_used_proxy.value = self.total_fuel_used_proxy.value + total_fuel_used_proxy
+        resource_lock = lockutils.lock(name=self.resource_lock_file, external=True, do_log=False,
+                                       lock_path=str(self.lock_dir), delay=0.01)
+        with resource_lock:
+            old_resources = self._load_resource_file_without_lock(self.resource_file)
+            resources = dict(total_time_proxy=total_time_delta + old_resources['total_time_proxy'],
+                             total_tae_calls_proxy=total_tae_calls_delta + old_resources['total_tae_calls_proxy'],
+                             total_fuel_used_proxy=total_fuel_used_delta + old_resources['total_fuel_used_proxy'],
+                             total_objective_costs=total_objective_costs_delta + old_resources['total_objective_costs'],
+                             start_time=old_resources['start_time'])
+            with self.resource_file.open('w') as fp:
+                json.dump(obj=resources, fp=fp)
 
     @staticmethod
     def write_line_to_file(file, dict_to_store, mode='a+'):
         write_line_to_file(file, dict_to_store, mode)
 
-    def calculate_incumbent(self, record: Dict):
-        """
-        Given a new record (challenging configuration), compare it to the current incumbent.
-        If the challenger is either on a higher budget or on the same budget but with a better performance, make the
-        challenger the new incumbent.
-
-        If the challenger is better, then append it to the trajectory.
-
-        Parameters
-        ----------
-        record : Dict
-        """
-        # If any progress has made, Bigger is better, etc.
-        fidelity = list(record['fidelity'].values())[0]
-
-        if self.inc_value is None \
-            or (abs(fidelity - self.inc_budget) <= 1e-8 and ((self.inc_value - record['function_value']) > 1e-8)) \
-            or (fidelity - self.inc_budget) > 1e-8:
-
-            self.inc_value = record['function_value']
-            self.inc_budget = fidelity
-            self.write_line_to_file(self.trajectory, record, mode='a')
-
-    def __del__(self):
-        if self.lock_file.exists():
-            if self.lock_file.is_file():
-                self.lock_file.unlink()
-            if self.lock_file.is_dir():
-                shutil.rmtree(self.lock_file)
+    def final_shutdown(self):
+        if (self.lock_dir / self.resource_lock_file).exists():
+            (self.lock_dir / self.resource_lock_file).unlink()
 
         if self.lock_dir.exists():
             is_empty = not any(self.lock_dir.iterdir())
             if is_empty:
                 shutil.rmtree(self.lock_dir)
 
-        self.benchmark.__del__()
+    def __del__(self):
+        if self.lock_dir.exists():
+            is_empty = not any(self.lock_dir.iterdir())
+            if is_empty:
+                shutil.rmtree(self.lock_dir)
 
 
 def total_time_exceeds_limit(total_time_proxy, time_limit_in_s, start_time):
