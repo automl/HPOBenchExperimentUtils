@@ -6,6 +6,7 @@ from typing import Dict, Union
 import shutil
 import time
 import types
+import functools
 
 try:
     import autogluon.core as ag
@@ -19,7 +20,7 @@ except:
     python3 -m pip install --upgrade pip
     python3 -m pip install --upgrade setuptools
     python3 -m pip install --upgrade "mxnet<2.0.0"
-    python3 -m pip install autogluon==0.0.15b20201205
+    python3 -m pip install autogluon
     """)
 
 from hpobench.abstract_benchmark import AbstractBenchmark
@@ -34,6 +35,36 @@ _log = logging.getLogger(__name__)
 
 def nothing(self):
     print("Do not stop container")
+
+
+def decorate_func(f):
+    def _decorate_func(*args, **kwargs):
+        return f(*args, **kwargs)
+    return _decorate_func
+
+def _obj_fct(args, reporter):
+    # Build configuration
+    config = dict()
+    for h in args.cs.get_hyperparameters():
+        if isinstance(h, UniformIntegerHyperparameter):
+            config[h.name] = int(np.rint(args[h.name]))
+        elif isinstance(h, OrdinalHyperparameter):
+            config[h.name] = h.sequence[int(args[h.name])]
+        else:
+            config[h.name] = args[h.name]
+
+    # Iterate only over fidelities that are interesting to the optimizer
+    for epoch in args.valid_budgets:
+        fidelity = {args.main_fidelity.name: epoch}
+        res = args.benchmark.objective_function(config, fidelity=fidelity,
+                                                **args.settings_for_sending)
+        # Autogluon maximizes, HPOBench returns something to be minimized
+        acc = -res['function_value']
+        eval_time = res['cost']
+        reporter(epoch=epoch,
+                 performance=acc,
+                 eval_time=eval_time,
+                 time_step=time.time(), **config)
 
 
 class AutogluonOptimizer(SingleFidelityOptimizer):
@@ -117,34 +148,9 @@ class AutogluonOptimizer(SingleFidelityOptimizer):
                 raise ValueError("Cannot handle %s" % h.name)
         return d
 
-    @staticmethod
-    def _obj_fct(args, reporter):
-        # Build configuration
-        config = dict()
-        for h in args.cs.get_hyperparameters():
-            if isinstance(h, UniformIntegerHyperparameter):
-                config[h.name] = int(np.rint(args[h.name]))
-            elif isinstance(h, OrdinalHyperparameter):
-                config[h.name] = h.sequence[int(args[h.name])]
-            else:
-                config[h.name] = args[h.name]
-
-        # Iterate only over fidelities that are interesting to the optimizer
-        for epoch in args.valid_budgets:
-            fidelity = {args.main_fidelity.name: epoch}
-            res = args.benchmark.objective_function(config, fidelity=fidelity,
-                                                    **args.settings_for_sending)
-            # Autogluon maximizes, HPOBench returns something to be minimized
-            acc = -res['function_value']
-            eval_time = res['cost']
-            reporter(epoch=epoch,
-                     performance=acc,
-                     eval_time=eval_time,
-                     time_step=time.time(), **config)
-
     def make_benchmark(self):
         return ag.args(**self.ag_space, epochs=self.max_budget, valid_budgets=self.rung_levels,
-                       cs=self.cs, main_fidelity=self.main_fidelity)(self._obj_fct)
+                       cs=self.cs, main_fidelity=self.main_fidelity)(_obj_fct)
 
     def _fix_runhistory(self):
         # We change the timestamps in the runhistory post-hoc
