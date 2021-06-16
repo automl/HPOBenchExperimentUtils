@@ -1,7 +1,6 @@
 import json
 
 import logging
-import os
 import shutil
 import copy
 from concurrent.futures import TimeoutError
@@ -306,10 +305,7 @@ class Bookkeeper:
         if (self.lock_dir / self.resource_lock_file).exists():
             (self.lock_dir / self.resource_lock_file).unlink()
 
-        if self.lock_dir.exists():
-            is_empty = not any(self.lock_dir.iterdir())
-            if is_empty:
-                shutil.rmtree(self.lock_dir)
+        self.__del__()
 
     def __del__(self):
         if self.lock_dir.exists():

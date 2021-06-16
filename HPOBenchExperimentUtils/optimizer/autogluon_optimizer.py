@@ -5,8 +5,6 @@ from pathlib import Path
 from typing import Dict, Union
 import shutil
 import time
-import types
-import functools
 
 try:
     import autogluon.core as ag
@@ -149,8 +147,13 @@ class AutogluonOptimizer(SingleFidelityOptimizer):
         return d
 
     def make_benchmark(self):
-        return ag.args(**self.ag_space, epochs=self.max_budget, valid_budgets=self.rung_levels,
-                       cs=self.cs, main_fidelity=self.main_fidelity)(_obj_fct)
+        return ag.args(**self.ag_space,
+                       benchmark=self.benchmark,
+                       settings_for_sending=self.settings_for_sending,
+                       epochs=self.max_budget,
+                       valid_budgets=self.rung_levels,
+                       cs=self.cs,
+                       main_fidelity=self.main_fidelity)(_obj_fct)
 
     def _fix_runhistory(self):
         # We change the timestamps in the runhistory post-hoc

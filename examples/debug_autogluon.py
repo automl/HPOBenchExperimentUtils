@@ -2,12 +2,14 @@ from pathlib import Path
 from HPOBenchExperimentUtils.run_benchmark import run_benchmark
 
 benchmark = 'ParamNetPokerOnTimeBenchmark'
-output_dir = Path('./NASCifar10ABenchmark')
+output_dir = Path('./DEBUG_Autogluon/')
 rng = 1
 
 # optimizer = 'randomsearch'
 optimizer = 'autogluon'
-res_folder = Path(f'./DEBUG_Autogluon/ParamNetPokerOnTimeBenchmark/{optimizer}/run-1')
+# optimizer = 'smac_hb_eta_3'
+
+res_folder = output_dir / f'{benchmark}/{optimizer}/run-{rng}'
 
 if res_folder.exists():
     import shutil

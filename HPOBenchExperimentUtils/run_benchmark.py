@@ -109,45 +109,31 @@ def run_benchmark(optimizer: str,
         benchmark = benchmark_obj(rng=rng, container_source=container_source, **benchmark_params)
     _log.info(f'Benchmark successfully initialized.')
 
-    from functools import partial
-    benchmark_partial = partial(benchmark_obj,
-                                rng=rng,
-                                container_source=container_source,
-                                socket_id=benchmark.socket_id,
-                                **benchmark_params)
-
-    book_keeper = Bookkeeper(benchmark_partial=benchmark_partial,
-                             output_dir=output_dir,
-                             wall_clock_limit_in_s=settings['time_limit_in_s'],
-                             tae_limit=settings['tae_limit'],
-                             fuel_limit=settings['fuel_limit'],
-                             cutoff_limit_in_s=settings['cutoff_in_s'],
-                             is_surrogate=settings['is_surrogate'])
-
-    _log.info(f'BookKeeper initialized. Additional benchmark parameters {benchmark_params}')
-
-    resource_file, lock_dir, resource_lock_file = \
-        book_keeper.resource_file, book_keeper.lock_dir, book_keeper.resource_lock_file
-
-    resources = Bookkeeper.load_resource_file(resource_file, lock_dir, resource_lock_file)
-
-    optimizer = get_optimizer(optimizer_enum)
-    optimizer = optimizer(benchmark=book_keeper,
-                          settings=settings,
-                          output_dir=output_dir,
-                          rng=rng)
-    _log.info(f'Optimizer initialized. Start optimization process.')
-
     start_time = time()
 
-    # Currently no optimizer uses the setup function, but we still call it to enable future optimizer implementations to
-    # have a setup function.
-    optimizer.setup()
+    process = Process(target=subprocess_run, args=(),
+                      kwargs=dict(settings=settings, use_local=use_local, socket_id=benchmark.socket_id, rng=rng,
+                                  optimizer_enum=optimizer_enum, output_dir=output_dir))
+    process.run()
 
-    process = Process(target=optimizer.run, args=(), kwargs=dict())
-    process.start()
+    resource_file = output_dir / 'used_resources.json'
+    lock_dir = output_dir / 'lock_dir'
+    resource_lock_file = 'resource_lock'
 
-    while not total_time_exceeds_limit(resources['total_time_proxy'], settings['time_limit_in_s'], start_time) \
+    time_waited = 0
+    while not resource_file.exists():
+        if (round(time_waited, 2) % 2) == 0:
+            _log.info('Wait for bookkeeper to come alive')
+        sleep(0.1)
+        time_waited += 0.1
+
+        if time_waited > 10:
+            raise TimeoutError('Cannot find the resource file. Something seems to be broken.')
+
+    _log.info('Bookkeeper initizalized. Start Timer.')
+    resources = Bookkeeper.load_resource_file(resource_file, lock_dir, resource_lock_file)
+
+    while not total_time_exceeds_limit(resources['total_time_proxy'], settings['time_limit_in_s'], resources['start_time']) \
             and not tae_exceeds_limit(resources['total_tae_calls_proxy'], settings['tae_limit']) \
             and not used_fuel_exceeds_limit(resources['total_fuel_used_proxy'], settings['fuel_limit']) \
             and process.is_alive():
@@ -164,14 +150,61 @@ def run_benchmark(optimizer: str,
                   f'Fuel limit: {settings["fuel_limit"]} and is now: {resources["total_fuel_used_proxy"]}\n'
                   f'Terminate Process after {time() - start_time}')
 
-    optimizer.shutdown()
-
     _log.info(f'Extract the trajectories')
     extract_trajectory(output_dir=output_dir, debug=debug)
 
     _log.info(f'Run Benchmark - Finished.')
     benchmark._shutdown()
-    book_keeper.final_shutdown()
+
+
+def subprocess_run(settings, use_local, socket_id, rng, optimizer_enum, output_dir):
+    _log.info(f'Subprocess called with params: setting:{settings}\n'
+              f'use_local:{use_local}\nsocket_id{socket_id}\nrng:{rng}\noutput_dir:{output_dir}')
+
+    from hpobench import config_file
+    container_source = config_file.container_source
+
+    benchmark_obj = load_benchmark(benchmark_name=settings['import_benchmark'],
+                                   import_from=settings['import_from'],
+                                   use_local=use_local)
+
+    from functools import partial
+    benchmark_partial = partial(benchmark_obj,
+                                rng=rng,
+                                container_source=container_source,
+                                socket_id=socket_id,
+                                **settings['benchmark_params'])
+
+    book_keeper = Bookkeeper(benchmark_partial=benchmark_partial,
+                             output_dir=output_dir,
+                             wall_clock_limit_in_s=settings['time_limit_in_s'],
+                             tae_limit=settings['tae_limit'],
+                             fuel_limit=settings['fuel_limit'],
+                             cutoff_limit_in_s=settings['cutoff_in_s'],
+                             is_surrogate=settings['is_surrogate'])
+
+    _log.info(f'Bookkeeper initialized. Additional benchmark parameters {settings["benchmark_params"]}')
+
+    optimizer = get_optimizer(optimizer_enum)
+    optimizer = optimizer(benchmark=book_keeper,
+                          settings=settings,
+                          output_dir=output_dir,
+                          rng=rng)
+    _log.info(f'Optimizer initialized. Start optimization process.')
+
+    # Currently no optimizer uses the setup function, but we still call it to enable future optimizer
+    # implementations to have a setup function.
+    optimizer.setup()
+    optimizer.run()
+
+    _log.info('Shutdown the Optimizer and the book keeper. ')
+    try:
+        optimizer.shutdown()
+        book_keeper.final_shutdown()
+    except Exception:
+        # TODO: Test this here. But in case it crashes, ignore the error so that the trajectory extraction
+        #       in the main process doesn't fail.
+        pass
 
 
 if __name__ == "__main__":
