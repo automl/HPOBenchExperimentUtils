@@ -234,6 +234,8 @@ if __name__ == "__main__":
                                                  'unified interface')
 
     parser.add_argument('--output_dir', required=True, type=str)
+    parser.add_argument('--resource_file_dir', required=False, type=str,
+                        help='We track the currently used resources in a file. By default, this is the tmp directory.')
     parser.add_argument('--optimizer', choices=get_optimizer_settings_names(), required=True, type=str)
     parser.add_argument('--benchmark', choices=get_benchmark_names(), required=True, type=str)
     parser.add_argument('--rng', required=False, default=0, type=int)
