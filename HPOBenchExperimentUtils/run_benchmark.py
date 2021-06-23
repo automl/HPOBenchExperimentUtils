@@ -28,6 +28,7 @@ def run_benchmark(optimizer: str,
                   benchmark: str,
                   output_dir: Union[Path, str],
                   rng: int,
+                  resource_file_dir: Union[Path, str, None] = None,
                   use_local: Union[bool, None] = False,
                   debug: bool = False,
                   **benchmark_params: Dict):
@@ -52,6 +53,9 @@ def run_benchmark(optimizer: str,
     output_dir : str, Path
         Directory where the optimizer stores its results. In this directory a result directory will be created
         with the format <optimizer_name>_run_<rng>.
+    resource_file_dir : str, Path, None
+        We keep track of the used resources by writing them into a resource file. This parameter specifies where to
+        store this resource file. By default, this directory is set to the TEMP directory.
     rng : int, None
         Random seed for the experiment. Also changes the output directory. By default 0.
     use_local : bool, None
@@ -72,6 +76,8 @@ def run_benchmark(optimizer: str,
         _log.setLevel(level=logging.DEBUG)
         from hpobench.util.container_utils import enable_container_debug
         enable_container_debug()
+
+    from hpobench import config_file
 
     optimizer_settings = get_optimizer_setting(optimizer)
     benchmark_settings = get_benchmark_settings(benchmark)
@@ -94,7 +100,18 @@ def run_benchmark(optimizer: str,
         raise ValueError("Outputdir %s already exists, pass" % output_dir)
     output_dir.mkdir(exist_ok=True, parents=True)  # TODO!
 
-    _log.debug(f'Output dir: {output_dir}')
+    resource_file_dir = resource_file_dir \
+        if resource_file_dir is not None else os.environ.get('TMPDIR', '/tmp/')
+    resource_file_dir = Path(resource_file_dir)
+    if not resource_file_dir.exists():
+        raise NotADirectoryError('The directory for the resource file does not exist. Please create it.'
+                                 f'Given directory was: {resource_file_dir}')
+
+    resource_file_dir = resource_file_dir / dname / optimizer / f'run-{rng}'
+    resource_file_dir = resource_file_dir.expanduser().absolute()
+    resource_file_dir.mkdir(exist_ok=True, parents=True)
+
+    _log.debug(f'Output dir: {output_dir}. Resource file is in: {resource_file_dir}')
 
     # Load and instantiate the benchmark
     benchmark_obj = load_benchmark(benchmark_name=settings['import_benchmark'],
@@ -104,7 +121,6 @@ def run_benchmark(optimizer: str,
     if use_local:
         benchmark = benchmark_obj(rng=rng, **benchmark_params)
     else:
-        from hpobench import config_file
         container_source = config_file.container_source
         benchmark = benchmark_obj(rng=rng, container_source=container_source, **benchmark_params)
     _log.info(f'Benchmark successfully initialized.')
@@ -113,10 +129,11 @@ def run_benchmark(optimizer: str,
 
     process = Process(target=subprocess_run, args=(),
                       kwargs=dict(settings=settings, use_local=use_local, socket_id=benchmark.socket_id, rng=rng,
-                                  optimizer_enum=optimizer_enum, output_dir=output_dir))
+                                  optimizer_enum=optimizer_enum, output_dir=output_dir,
+                                  resource_file_dir=resource_file_dir))
     process.run()
 
-    resource_file = output_dir / 'used_resources.json'
+    resource_file = resource_file_dir / 'used_resources.json'
     lock_dir = output_dir / 'lock_dir'
     resource_lock_file = 'resource_lock'
 
@@ -157,7 +174,7 @@ def run_benchmark(optimizer: str,
     benchmark._shutdown()
 
 
-def subprocess_run(settings, use_local, socket_id, rng, optimizer_enum, output_dir):
+def subprocess_run(settings, use_local, socket_id, rng, optimizer_enum, output_dir, resource_file_dir):
     _log.info(f'Subprocess called with params: setting:{settings}\n'
               f'use_local:{use_local}\nsocket_id{socket_id}\nrng:{rng}\noutput_dir:{output_dir}')
 
@@ -177,6 +194,7 @@ def subprocess_run(settings, use_local, socket_id, rng, optimizer_enum, output_d
 
     book_keeper = Bookkeeper(benchmark_partial=benchmark_partial,
                              output_dir=output_dir,
+                             resource_file_dir=resource_file_dir,
                              wall_clock_limit_in_s=settings['time_limit_in_s'],
                              tae_limit=settings['tae_limit'],
                              fuel_limit=settings['fuel_limit'],
@@ -201,10 +219,11 @@ def subprocess_run(settings, use_local, socket_id, rng, optimizer_enum, output_d
     try:
         optimizer.shutdown()
         book_keeper.final_shutdown()
-    except Exception:
+    except Exception as e:
         # TODO: Test this here. But in case it crashes, ignore the error so that the trajectory extraction
         #       in the main process doesn't fail.
-        pass
+        _log.info('During the shutdown procedure, an error was raised')
+        _log.exception(e)
 
 
 if __name__ == "__main__":

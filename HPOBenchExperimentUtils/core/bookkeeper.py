@@ -33,7 +33,7 @@ def _safe_cast_config(configuration):
 def keep_track(validate=False):
     def wrapper(function):
         @wraps(function)
-        def wrapped(self, configuration: Union[np.ndarray, List, CS.Configuration, Dict],
+        def wrapped(self, configuration: Union[CS.Configuration, Dict],
                     fidelity: Union[CS.Configuration, Dict, None] = None,
                     rng: Union[np.random.RandomState, int, None] = None, **kwargs):
             start_time = time()
@@ -114,6 +114,8 @@ def keep_track(validate=False):
                     record = record.get_dictionary()
 
                     self.write_line_to_file(self.log_file if not validate else self.validate_log_file, record)
+                else:
+                    logger.info('We have reached a time limit. We do not write the current record into the trajectory.')
 
                 self._write_resource_file_without_lock(self.resource_file, **resources)
 
@@ -126,6 +128,7 @@ class Bookkeeper:
     def __init__(self,
                  benchmark_partial: Any,
                  output_dir: Path,
+                 resource_file_dir: Path,
                  wall_clock_limit_in_s: Union[int, float, None],
                  tae_limit: Union[int, None],
                  fuel_limit: Union[int, float, None],
@@ -137,7 +140,7 @@ class Bookkeeper:
         self.log_file = output_dir / RUNHISTORY_FILENAME
         self.trajectory = output_dir / TRAJECTORY_V1_FILENAME
         self.validate_log_file = output_dir / VALIDATED_RUNHISTORY_FILENAME
-        self.resource_file = output_dir / 'used_resources.json'
+        self.resource_file = resource_file_dir / 'used_resources.json'
 
         self.lock_dir = output_dir / 'lock_dir'
         self.lock_dir.mkdir(parents=True, exist_ok=True)
