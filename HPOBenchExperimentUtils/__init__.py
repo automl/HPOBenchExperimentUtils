@@ -20,3 +20,10 @@ try:
     _log.debug('IMPORTED AUTOGLUON')
 except ModuleNotFoundError:
     pass
+
+try:
+    import ray
+    from ray import tune as tune
+    _log.debug('IMPORTED RAY')
+except ModuleNotFoundError:
+    pass

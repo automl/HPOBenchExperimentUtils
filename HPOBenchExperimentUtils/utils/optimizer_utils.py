@@ -86,6 +86,7 @@ class OptimizerEnum(Enum):
     MUMBO = 'mumbo'
     PURE_RANDOMSEARCH = 'randomsearch'
     AUTOGLUON = 'autogluon'
+    RAY_HYPEROPT = 'ray_hyperopt_hb'
 
 
 def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]) -> OptimizerEnum:
@@ -150,6 +151,9 @@ def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]) -> OptimizerEnum
         elif optimizer == 'randomsearch':
             return OptimizerEnum.PURE_RANDOMSEARCH
 
+        elif optimizer == 'ray_hyperopt_hb':
+            return OptimizerEnum.RAY_HYPEROPT
+
         else:
             fail = True
     else:
@@ -204,7 +208,9 @@ def get_optimizer(optimizer_enum):
     elif optimizer_enum is OptimizerEnum.PURE_RANDOMSEARCH:
         from HPOBenchExperimentUtils.optimizer.randomsearch_optimizer import RandomSearchOptimizer
         optimizer = RandomSearchOptimizer
-
+    elif optimizer_enum is OptimizerEnum.RAY_HYPEROPT:
+        from HPOBenchExperimentUtils.optimizer.ray_optimizer import RayHyperoptOptimizer
+        optimizer = RayHyperoptOptimizer
     else:
         raise ValueError(f'Unknown optimizer: {optimizer_enum}')
     return optimizer

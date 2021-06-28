@@ -1,4 +1,10 @@
 ---
+# RAY with HB + Hyperopt ############################################################################################# #
+ray_hyperopt_hb:
+  optimizer: ray_hyperopt_hb
+  display_name: "ray_hyperopt_hb"
+  reduction_factor: 3
+
 # PURE RANDOMSEARCH################################################################################################### #
 randomsearch:
   optimizer: randomsearch

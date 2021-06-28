@@ -1,4 +1,6 @@
 import logging
+import os
+
 from multiprocessing import Process, Value, Manager
 from pathlib import Path
 from time import time, sleep
@@ -127,11 +129,12 @@ def run_benchmark(optimizer: str,
 
     start_time = time()
 
-    process = Process(target=subprocess_run, args=(),
+    process = Process(target=subprocess_run,
+                      args=(),
                       kwargs=dict(settings=settings, use_local=use_local, socket_id=benchmark.socket_id, rng=rng,
                                   optimizer_enum=optimizer_enum, output_dir=output_dir,
                                   resource_file_dir=resource_file_dir))
-    process.run()
+    process.start()
 
     resource_file = resource_file_dir / 'used_resources.json'
     lock_dir = output_dir / 'lock_dir'
@@ -159,7 +162,11 @@ def run_benchmark(optimizer: str,
 
     else:
         _log.debug('CALLING TERMINATE()')
-        process.terminate()
+        try:
+            process.terminate()
+        except AttributeError as e:
+            _log.warning(e)
+
         _log.debug('PROCESS TERMINATED')
         _log.info(f'Optimization has been finished.\n'
                   f'Timelimit: {settings["time_limit_in_s"]} and is now: {resources["total_time_proxy"]}\n'
