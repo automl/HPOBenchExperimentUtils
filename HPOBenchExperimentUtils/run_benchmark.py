@@ -5,6 +5,7 @@ from multiprocessing import Process, Value, Manager
 from pathlib import Path
 from time import time, sleep
 from typing import Union, Dict
+from tempfile import NamedTemporaryFile
 
 try:
     from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
@@ -109,7 +110,7 @@ def run_benchmark(optimizer: str,
         raise NotADirectoryError('The directory for the resource file does not exist. Please create it.'
                                  f'Given directory was: {resource_file_dir}')
 
-    resource_file_dir = resource_file_dir / dname / optimizer / f'run-{rng}'
+    resource_file_dir = resource_file_dir / NamedTemporaryFile().name
     resource_file_dir = resource_file_dir.expanduser().absolute()
     resource_file_dir.mkdir(exist_ok=True, parents=True)
 
