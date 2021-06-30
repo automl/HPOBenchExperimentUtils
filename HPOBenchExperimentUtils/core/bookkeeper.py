@@ -58,6 +58,7 @@ class Bookkeeper:
                    configuration: Union[CS.Configuration, Dict],
                    fidelity: Union[CS.Configuration, Dict, None] = None,
                    validate=False,
+                   rng: Union[np.random.RandomState, int, None] = None,
                    **kwargs: Dict) -> Dict:
 
         start_time = time()
@@ -71,7 +72,8 @@ class Bookkeeper:
 
         try:
             # Throw an time error if the function evaluation takes more time than the specified cutoff value.
-            result_dict = future_result().result()
+            result_dict = future_result(configuration=configuration, fidelity=fidelity, rng=rng, **kwargs)
+            result_dict = result_dict.result()
         except TimeoutError:
             cutoff = self.resource_manager.limits.cutoff_limit_in_s
 
@@ -170,15 +172,12 @@ class Bookkeeper:
                                                        **benchmark_settings_for_sending)
             return result_dict
 
-        result_dict = self.keep_track(future_result=partial(__objective_function,
-                                                            configuration=configuration,
-                                                            fidelity=fidelity,
-                                                            rng=rng,
-                                                            **kwargs),
+        result_dict = self.keep_track(future_result=__objective_function,
                                       random_config_id=configuration_id,
                                       configuration=configuration,
                                       fidelity=fidelity,
                                       validate=False,
+                                      rng=rng,
                                       **kwargs)
 
         return result_dict
@@ -197,15 +196,14 @@ class Bookkeeper:
                                                             **benchmark_settings_for_sending)
             return result_dict
 
-        result_dict = self.keep_track(future_result=partial(__objective_function,
-                                                            configuration=configuration,
-                                                            fidelity=fidelity,
-                                                            rng=rng,
-                                                            **kwargs),
+        result_dict = self.keep_track(future_result=__objective_function,
                                       random_config_id=configuration_id,
                                       configuration=configuration,
                                       fidelity=fidelity,
-                                      validate=True)
+                                      validate=True,
+                                      rng=rng,
+                                      **kwargs)
+
 
         return result_dict
 
