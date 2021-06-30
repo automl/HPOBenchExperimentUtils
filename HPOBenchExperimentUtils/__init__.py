@@ -21,10 +21,3 @@ try:
     _log.debug('Autogluon succesfully imported')
 except ModuleNotFoundError:
     pass
-
-try:
-    import ray
-    from ray import tune as tune
-    _log.debug('Ray succesfully imported')
-except ModuleNotFoundError:
-    pass
