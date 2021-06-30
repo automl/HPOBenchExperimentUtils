@@ -10,8 +10,6 @@ from HPOBenchExperimentUtils.optimizer.base_optimizer import SingleFidelityOptim
 from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
 from HPOBenchExperimentUtils.utils.utils import get_mandatory_optimizer_setting, standard_rng_init
 import HPOBenchExperimentUtils.utils.emukit_utils as emukit_utils
-from hpobench.abstract_benchmark import AbstractBenchmark
-from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 
 import ConfigSpace as cs
 
@@ -45,7 +43,7 @@ _fidelity_parameter_names = ["subsample", "dataset_fraction"]
 
 # noinspection PyPep8Naming
 class FabolasOptimizer(SingleFidelityOptimizer):
-    def __init__(self, benchmark: Union[Bookkeeper, AbstractBenchmark, AbstractBenchmarkClient],
+    def __init__(self, benchmark: Bookkeeper,
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
 
         super().__init__(benchmark, settings, output_dir, rng)
@@ -101,12 +99,14 @@ class FabolasOptimizer(SingleFidelityOptimizer):
 
             yvals, costs = [], []
             for i in range(inp.shape[0]):
+                run_id = SingleFidelityOptimizer._id_generator()
                 x, s = inp[i, :-1], inp[i, -1]
                 _log.debug("Calling objective function with configuration %s and fidelity index %s." % (x, s))
                 config = cs.Configuration(self.original_space, values=self.to_cs(x))
                 fidelity = self.fidelity_emukit_to_cs(s)
                 _log.debug("Generated configuration %s, fidelity %s" % (config, fidelity))
-                res = benchmark.objective_function(config, fidelity=fidelity,
+                res = benchmark.objective_function(configuration=config, fidelity=fidelity,
+                                                   configuration_id=run_id,
                                                    **self.settings_for_sending)
                 y, c = res["function_value"], res["cost"]
                 yvals.append(y)

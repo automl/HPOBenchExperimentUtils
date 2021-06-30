@@ -21,12 +21,11 @@ except:
     python3 -m pip install autogluon
     """)
 
-from hpobench.abstract_benchmark import AbstractBenchmark
-from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter,\
     UniformIntegerHyperparameter, CategoricalHyperparameter, OrdinalHyperparameter
 
 from HPOBenchExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
+from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
 
 _log = logging.getLogger(__name__)
 
@@ -40,7 +39,10 @@ def decorate_func(f):
         return f(*args, **kwargs)
     return _decorate_func
 
+
 def _obj_fct(args, reporter):
+    run_id = SingleFidelityOptimizer._id_generator()
+
     # Build configuration
     config = dict()
     for h in args.cs.get_hyperparameters():
@@ -54,7 +56,7 @@ def _obj_fct(args, reporter):
     # Iterate only over fidelities that are interesting to the optimizer
     for epoch in args.valid_budgets:
         fidelity = {args.main_fidelity.name: epoch}
-        res = args.benchmark.objective_function(config, fidelity=fidelity,
+        res = args.benchmark.objective_function(configuration=config, configuration_id=run_id, fidelity=fidelity,
                                                 **args.settings_for_sending)
         # Autogluon maximizes, HPOBench returns something to be minimized
         acc = -res['function_value']
@@ -70,7 +72,7 @@ class AutogluonOptimizer(SingleFidelityOptimizer):
     This class implements the HNAS optimization algorithm implemented in autogluon as described here
     https://github.com/awslabs/autogluon/pull/797
     """
-    def __init__(self, benchmark: Union[AbstractBenchmark, AbstractBenchmarkClient],
+    def __init__(self, benchmark: Bookkeeper,
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
         super().__init__(benchmark, settings, output_dir, rng)
         # Setup can be done here or in run()
@@ -85,7 +87,7 @@ class AutogluonOptimizer(SingleFidelityOptimizer):
             raise ValueError("This optimizer doesn't handle float fidelities")
 
         # Get time limit, so we know how long we should run the optimization
-        self.time_limit = self.benchmark.wall_clock_limit_in_s
+        self.time_limit = self.benchmark.resource_manager.limits.time_limit_in_s
         if self.benchmark.is_surrogate:
             # We limit this and cut the runhistory afterwards in case there are too many evaluations
             self.time_limit = 342000  # 95h; was 60*60*24*4=96h before
@@ -159,9 +161,8 @@ class AutogluonOptimizer(SingleFidelityOptimizer):
         # We change the timestamps in the runhistory post-hoc
         if not self.done:
             raise ValueError("Optimization not yet finished")
-        dest = Path.joinpath(self.benchmark.log_file.parent,
-                             self.benchmark.log_file.name + ".ORIGINAL")
-        shutil.move(self.benchmark.log_file, dest)
+        dest = self.benchmark.run_history.parent / self.benchmark.run_history.name + ".ORIGINAL"
+        shutil.move(self.benchmark.run_history, dest)
 
         last_stamp = None
         total_time_used = 0
@@ -171,7 +172,7 @@ class AutogluonOptimizer(SingleFidelityOptimizer):
             for line in fh:
                 record = json.loads(line)
                 if "boot_time" in record:
-                    self.benchmark.write_line_to_file(file=self.benchmark.log_file,
+                    self.benchmark.write_line_to_file(file=self.benchmark.run_history,
                                                       dict_to_store=record)
                     start = record["boot_time"]
                     last_stamp = start
@@ -183,8 +184,9 @@ class AutogluonOptimizer(SingleFidelityOptimizer):
                 function_call += 1
 
                 # Check whether any of these exceeds limit
-                if self.benchmark.tae_limit and (function_call > self.benchmark.tae_limit) or \
-                    total_time_used > self.benchmark.wall_clock_limit_in_s:
+                if self.benchmark.resource_manager.limits.tae_limit \
+                        and (function_call > self.benchmark.resource_manager.limits.tae_limit) \
+                        or total_time_used > self.benchmark.resource_manager.limits.time_limit_in_s:
                     _log.critical("Used resources exceed limit, stop fixing runhistory")
                     break
 
@@ -192,7 +194,7 @@ class AutogluonOptimizer(SingleFidelityOptimizer):
                 record['function_call'] = function_call
                 record['total_time_used'] = total_time_used
                 record['total_objective_costs'] = total_objective_costs
-                self.benchmark.write_line_to_file(file=self.benchmark.log_file,
+                self.benchmark.write_line_to_file(file=self.benchmark.run_history,
                                                   dict_to_store=record)
 
     def run(self):
@@ -203,7 +205,7 @@ class AutogluonOptimizer(SingleFidelityOptimizer):
                                                               'num_gpus': self.num_gpus},
                                                     # Autogluon runs until it either reaches num_trials or time_out
                                                     # This is None for most benchmarks
-                                                    num_trials=self.benchmark.tae_limit,
+                                                    num_trials=self.benchmark.resource_manager.limits.tae_limit,
                                                     time_out=self.time_limit,
                                                     reward_attr='performance',
                                                     time_attr='epoch',

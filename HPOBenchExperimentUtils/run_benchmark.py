@@ -14,14 +14,16 @@ except:
     sys.path.append(os.path.expandvars('$HPOEXPUTIL_PATH'))
 
 from HPOBenchExperimentUtils import _log as _root_log
-from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper, total_time_exceeds_limit, used_fuel_exceeds_limit, \
-    tae_exceeds_limit
+from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
+from HPOBenchExperimentUtils.core.data_objects import ResourceObject, LimitObject
 from HPOBenchExperimentUtils.extract_trajectory import extract_trajectory
-from HPOBenchExperimentUtils.utils import PING_OPTIMIZER_IN_S
+from HPOBenchExperimentUtils.utils import PING_OPTIMIZER_IN_S, RESOURCE_FILENAME
 from HPOBenchExperimentUtils.utils.optimizer_utils import get_optimizer, optimizer_str_to_enum
 from HPOBenchExperimentUtils.utils.runner_utils import transform_unknown_params_to_dict, get_benchmark_settings, \
     load_benchmark, get_benchmark_names, get_optimizer_settings_names, \
     get_optimizer_setting
+
+from HPOBenchExperimentUtils.resource_manager import FileBasedResourceManager
 
 _root_log.setLevel(logging.INFO)
 _log = logging.getLogger(__name__)
@@ -101,11 +103,12 @@ def run_benchmark(optimizer: str,
     output_dir = output_dir.absolute()
     if output_dir.is_dir():
         raise ValueError("Outputdir %s already exists, pass" % output_dir)
-    output_dir.mkdir(exist_ok=True, parents=True)  # TODO!
+    output_dir.mkdir(exist_ok=True, parents=True)
 
-    resource_file_dir = resource_file_dir \
-        if resource_file_dir is not None else os.environ.get('TMPDIR', '/tmp/')
+    if resource_file_dir is None:
+        resource_file_dir = os.environ.get('TMPDIR', '/tmp/')
     resource_file_dir = Path(resource_file_dir)
+
     if not resource_file_dir.exists():
         raise NotADirectoryError('The directory for the resource file does not exist. Please create it.'
                                  f'Given directory was: {resource_file_dir}')
@@ -114,9 +117,19 @@ def run_benchmark(optimizer: str,
     resource_file_dir = resource_file_dir.expanduser().absolute()
     resource_file_dir.mkdir(exist_ok=True, parents=True)
 
+    # noinspection PyTypeChecker
+    limits = LimitObject(time_limit_in_s=settings['time_limit_in_s'],
+                         tae_limit=settings['tae_limit'],
+                         fuel_limit=settings['fuel_limit'],
+                         cutoff_limit_in_s=settings['cutoff_in_s'])
+
+    resource_manager = FileBasedResourceManager(output_dir=output_dir,
+                                                resource_file=resource_file_dir / RESOURCE_FILENAME,
+                                                limits=limits)
     _log.debug(f'Output dir: {output_dir}. Resource file is in: {resource_file_dir}')
 
     # Load and instantiate the benchmark
+    # noinspection PyTypeChecker
     benchmark_obj = load_benchmark(benchmark_name=settings['import_benchmark'],
                                    import_from=settings['import_from'],
                                    use_local=use_local)
@@ -137,12 +150,8 @@ def run_benchmark(optimizer: str,
                                   resource_file_dir=resource_file_dir))
     process.start()
 
-    resource_file = resource_file_dir / 'used_resources.json'
-    lock_dir = output_dir / 'lock_dir'
-    resource_lock_file = 'resource_lock'
-
     time_waited = 0
-    while not resource_file.exists():
+    while not resource_manager.has_started():
         if (round(time_waited, 2) % 2) == 0:
             _log.info('Wait for bookkeeper to come alive')
         sleep(0.1)
@@ -152,14 +161,14 @@ def run_benchmark(optimizer: str,
             raise TimeoutError('Cannot find the resource file. Something seems to be broken.')
 
     _log.info('Bookkeeper initizalized. Start Timer.')
-    resources = Bookkeeper.load_resource_file(resource_file, lock_dir, resource_lock_file)
+    resources = resource_manager.get_used_resources()
 
-    while not total_time_exceeds_limit(resources['total_time_proxy'], settings['time_limit_in_s'], resources['start_time']) \
-            and not tae_exceeds_limit(resources['total_tae_calls_proxy'], settings['tae_limit']) \
-            and not used_fuel_exceeds_limit(resources['total_fuel_used_proxy'], settings['fuel_limit']) \
+    while not resource_manager.total_time_exceeds_limit(resources.total_time_used_in_s, resources.start_time) \
+            and not resource_manager.tae_exceeds_limit(resources.total_tae_calls) \
+            and not resource_manager.used_fuel_exceeds_limit(resources.total_fuel_used) \
             and process.is_alive():
         sleep(PING_OPTIMIZER_IN_S)
-        resources = Bookkeeper.load_resource_file(resource_file, lock_dir, resource_lock_file)
+        resources = resource_manager.get_used_resources()
 
     else:
         _log.debug('CALLING TERMINATE()')
@@ -170,9 +179,9 @@ def run_benchmark(optimizer: str,
 
         _log.debug('PROCESS TERMINATED')
         _log.info(f'Optimization has been finished.\n'
-                  f'Timelimit: {settings["time_limit_in_s"]} and is now: {resources["total_time_proxy"]}\n'
-                  f'TAE limit: {settings["tae_limit"]} and is now: {resources["total_tae_calls_proxy"]}\n'
-                  f'Fuel limit: {settings["fuel_limit"]} and is now: {resources["total_fuel_used_proxy"]}\n'
+                  f'Timelimit: {limits.time_limit_in_s} and is now: {resources.total_time_used_in_s}\n'
+                  f'TAE limit: {limits.tae_limit} and is now: {resources.total_tae_calls}\n'
+                  f'Fuel limit: {limits.fuel_limit} and is now: {resources.total_fuel_used}\n'
                   f'Terminate Process after {time() - start_time}')
 
     _log.info(f'Extract the trajectories')
@@ -182,7 +191,14 @@ def run_benchmark(optimizer: str,
     benchmark._shutdown()
 
 
-def subprocess_run(settings, use_local, socket_id, rng, optimizer_enum, output_dir, resource_file_dir):
+def subprocess_run(settings: Dict,
+                   use_local: bool,
+                   socket_id: str,
+                   rng: int,
+                   optimizer_enum,
+                   output_dir: Path,
+                   resource_file_dir: Path) -> None:
+
     _log.info(f'Subprocess called with params: setting:{settings}\n'
               f'use_local:{use_local}\nsocket_id{socket_id}\nrng:{rng}\noutput_dir:{output_dir}')
 
@@ -200,15 +216,17 @@ def subprocess_run(settings, use_local, socket_id, rng, optimizer_enum, output_d
                                 socket_id=socket_id,
                                 **settings['benchmark_params'])
 
+    resource_manager = FileBasedResourceManager(output_dir=output_dir,
+                                                resource_file=resource_file_dir / RESOURCE_FILENAME,
+                                                limits=LimitObject(time_limit_in_s=settings['time_limit_in_s'],
+                                                                   tae_limit=settings['tae_limit'],
+                                                                   fuel_limit=settings['fuel_limit'],
+                                                                   cutoff_limit_in_s=settings['cutoff_in_s']))
+
     book_keeper = Bookkeeper(benchmark_partial=benchmark_partial,
                              output_dir=output_dir,
-                             resource_file_dir=resource_file_dir,
-                             wall_clock_limit_in_s=settings['time_limit_in_s'],
-                             tae_limit=settings['tae_limit'],
-                             fuel_limit=settings['fuel_limit'],
-                             cutoff_limit_in_s=settings['cutoff_in_s'],
+                             resource_manager=resource_manager,
                              is_surrogate=settings['is_surrogate'])
-
     _log.info(f'Bookkeeper initialized. Additional benchmark parameters {settings["benchmark_params"]}')
 
     optimizer = get_optimizer(optimizer_enum)
@@ -226,11 +244,10 @@ def subprocess_run(settings, use_local, socket_id, rng, optimizer_enum, output_d
     _log.info('Shutdown the Optimizer and the book keeper. ')
     try:
         optimizer.shutdown()
-        book_keeper.final_shutdown()
+        book_keeper.shutdown()
     except Exception as e:
-        # TODO: Test this here. But in case it crashes, ignore the error so that the trajectory extraction
-        #       in the main process doesn't fail.
-        _log.info('During the shutdown procedure, an error was raised')
+        _log.info('During the shutdown procedure, an error was raised. '
+                  'We ignore it since we kill this subprocess anyway')
         _log.exception(e)
 
 

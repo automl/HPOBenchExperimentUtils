@@ -5,9 +5,7 @@ from ray import tune as tune
 from ray.tune.schedulers import AsyncHyperBandScheduler
 
 from HPOBenchExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
-
-from hpobench.abstract_benchmark import AbstractBenchmark
-from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
+from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
 
 from typing import Union, Dict, Any
 from pathlib import Path
@@ -27,7 +25,7 @@ class RayBaseOptimizer(SingleFidelityOptimizer):
 
     """
 
-    def __init__(self, benchmark: Union[AbstractBenchmark, AbstractBenchmarkClient],
+    def __init__(self, benchmark: Bookkeeper,
                  search_algorithm: Any,
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
         super().__init__(benchmark, settings, output_dir, rng)
@@ -50,8 +48,11 @@ class RayBaseOptimizer(SingleFidelityOptimizer):
     @staticmethod
     def __training_function(config, benchmark, main_fidelity_name, valid_budgets, configspace: ConfigurationSpace):
 
+        from HPOBenchExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
         from ConfigSpace.hyperparameters import IntegerHyperparameter, FloatHyperparameter, CategoricalHyperparameter, \
             OrdinalHyperparameter
+
+        run_id = SingleFidelityOptimizer._id_generator()
 
         # Cast the configuration into the correct form
         new_config = {}
@@ -72,7 +73,9 @@ class RayBaseOptimizer(SingleFidelityOptimizer):
         config = new_config
 
         for budget in valid_budgets:
-            result_dict = benchmark.objective_function(config, fidelity={main_fidelity_name: budget})
+            result_dict = benchmark.objective_function(configuration=config,
+                                                       configuration_id=run_id,
+                                                       fidelity={main_fidelity_name: budget})
             tune.report(function_value=result_dict['function_value'], fidelity=budget)
 
     def setup(self):
@@ -103,7 +106,7 @@ class RayBaseOptimizer(SingleFidelityOptimizer):
 
 
 class RayHyperoptOptimizer(RayBaseOptimizer):
-    def __init__(self, benchmark: Union[AbstractBenchmark, AbstractBenchmarkClient],
+    def __init__(self, benchmark: Bookkeeper,
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
         from ray.tune.suggest.hyperopt import HyperOptSearch
 
