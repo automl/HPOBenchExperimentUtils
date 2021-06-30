@@ -15,7 +15,7 @@ from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 from pebble import concurrent
 from oslo_concurrency import lockutils
 
-from HPOBenchExperimentUtils.core.record import Record
+from HPOBenchExperimentUtils.core.data_objects import Record
 from HPOBenchExperimentUtils.utils import MAXINT, RUNHISTORY_FILENAME, TRAJECTORY_V1_FILENAME, \
     VALIDATED_RUNHISTORY_FILENAME
 from HPOBenchExperimentUtils.utils.io import write_line_to_file
