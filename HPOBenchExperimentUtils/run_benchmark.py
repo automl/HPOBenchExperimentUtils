@@ -129,6 +129,7 @@ def run_benchmark(optimizer: str,
     _log.debug(f'Output dir: {output_dir}. Resource file is in: {resource_file_dir}')
 
     # Load and instantiate the benchmark
+    # noinspection PyTypeChecker
     benchmark_obj = load_benchmark(benchmark_name=settings['import_benchmark'],
                                    import_from=settings['import_from'],
                                    use_local=use_local)
