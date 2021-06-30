@@ -80,7 +80,8 @@ class Bookkeeper:
                                                      # TODO: when a time out occurs, add the maximal fuel usage or the
                                                      #       one from the fidelity? (if none: max fuel)
                                                      fuel_used_delta=used_fuel,
-                                                     objective_costs_delta=cutoff)
+                                                     objective_costs_delta=cutoff,
+                                                     time_used_for_objective_call_delta=time() - start_time)
 
             record = Record(function_value=MAXINT,
                             cost=self.resource_manager.limits.cutoff_limit_in_s,
@@ -100,12 +101,15 @@ class Bookkeeper:
         with self.resource_manager.get_lock():
             resources = self.resource_manager.get_used_resources_without_lock()
             total_objective_costs = resources.total_objective_costs + result_dict['cost']
+            total_time_used_for_objective_calls_in_s = resources.total_time_used_for_objective_calls_in_s
+            total_time_used_for_objective_calls_in_s += (finish_time - start_time)
 
-            # Measure the total time since the start up. This is the budget which is used by the optimization
-            # procedure. In case of a surrogate benchmark also take the "surrogate" costs into account.
+            # Measure the total time since the start up.
+            # `Total_time_used` is the total time needed for the optimization procedure.
+            # In case it is a surrogate, we don't want to include the time that was required to evaluate the surrogate
             total_time_used = time() - resources.start_time
             if self.is_surrogate:
-                total_time_used -= (finish_time - start_time)
+                total_time_used -= total_time_used_for_objective_calls_in_s
                 total_time_used += total_objective_costs
 
             # Time used for this configuration. The benchmark returns as cost the time of the function call +
@@ -114,8 +118,9 @@ class Bookkeeper:
             # by the benchmark.
             resources.total_fuel_used += used_fuel
             resources.total_time_used_in_s = total_time_used
-            resources.total_objective_costs += result_dict['cost']
+            resources.total_objective_costs = total_objective_costs
             resources.total_tae_calls += 1
+            resources.total_time_used_for_objective_calls_in_s = total_time_used_for_objective_calls_in_s
 
             # Note: We update the proxy variable after checking the conditions here.
             #       This is because, we want to make sure, that this process is not be killed from outside

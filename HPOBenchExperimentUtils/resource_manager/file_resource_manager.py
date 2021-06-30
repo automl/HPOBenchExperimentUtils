@@ -68,7 +68,8 @@ class FileBasedResourceManager(BaseResourceManager):
                            time_used_delta: Union[int, float, None] = 0,
                            tae_calls_delta: Union[int, None] = 0,
                            fuel_used_delta: Union[int, float, None] = 0,
-                           objective_costs_delta: Union[int, float, None] = 0) -> None:
+                           objective_costs_delta: Union[int, float, None] = 0,
+                           time_used_for_objective_call_delta: Union[int, float, None] = 0) -> None:
         resource_lock = self.get_lock()
         with resource_lock:
             self.increase_resources_without_lock(time_used_delta,
@@ -80,10 +81,13 @@ class FileBasedResourceManager(BaseResourceManager):
                                         time_used_delta: Union[int, float, None] = 0,
                                         tae_calls_delta: Union[int, None] = 0,
                                         fuel_used_delta: Union[int, float, None] = 0,
-                                        objective_costs_delta: Union[int, float, None] = 0) -> None:
+                                        objective_costs_delta: Union[int, float, None] = 0,
+                                        time_used_for_objective_call_delta: Union[int, float, None] = 0) -> None:
 
         current_resources = self.get_used_resources_without_lock()
-        current_resources.add_delta(time_used_delta, tae_calls_delta, fuel_used_delta, objective_costs_delta)
+        current_resources.add_delta(time_used_delta=time_used_delta, tae_calls_delta=tae_calls_delta,
+                                    fuel_used_delta=fuel_used_delta, objective_costs_delta=objective_costs_delta,
+                                    time_used_for_objective_call_delta=time_used_for_objective_call_delta)
         self.set_resources_without_lock(current_resources)
 
     def get_lock(self):

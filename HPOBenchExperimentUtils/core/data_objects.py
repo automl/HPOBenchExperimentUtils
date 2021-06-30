@@ -82,6 +82,7 @@ class ResourceObject(BaseObject):
             'total_tae_calls',
             'total_fuel_used',
             'total_objective_costs',
+            'total_time_used_for_objective_calls_in_s',
             'start_time']
 
     def __init__(self,
@@ -89,12 +90,14 @@ class ResourceObject(BaseObject):
                  total_tae_calls,
                  total_fuel_used,
                  total_objective_costs,
+                 total_time_used_for_objective_calls_in_s,
                  start_time
                  ):
         self.total_time_used_in_s = total_time_used_in_s
         self.total_tae_calls = total_tae_calls
         self.total_fuel_used = total_fuel_used
         self.total_objective_costs = total_objective_costs
+        self.total_time_used_for_objective_calls_in_s = total_time_used_for_objective_calls_in_s
         self.start_time = start_time
 
     def get_dictionary(self):
@@ -102,13 +105,15 @@ class ResourceObject(BaseObject):
                 'total_tae_calls': self.total_tae_calls,
                 'total_fuel_used': self.total_fuel_used,
                 'total_objective_costs': self.total_objective_costs,
+                'total_time_used_for_objective_calls_in_s': self.total_time_used_for_objective_calls_in_s,
                 'start_time': self.start_time}
 
     def add_delta(self,
-                  time_used_delta: Union[int, float, None] = 0,
-                  tae_calls_delta: Union[int, None] = 0,
-                  fuel_used_delta: Union[int, float, None] = 0,
-                  objective_costs_delta: Union[int, float, None] = 0) -> None:
+                  time_used_delta: Union[int, float, None] = None,
+                  tae_calls_delta: Union[int, None] = None,
+                  fuel_used_delta: Union[int, float, None] = None,
+                  objective_costs_delta: Union[int, float, None] = None,
+                  time_used_for_objective_call_delta: Union[int, float, None] = None) -> None:
 
         if time_used_delta is not None:
             if self.total_time_used_in_s is None:
@@ -129,3 +134,8 @@ class ResourceObject(BaseObject):
             if self.total_objective_costs is None:
                 self.total_objective_costs = 0
             self.total_objective_costs += objective_costs_delta
+
+        if time_used_for_objective_call_delta is not None:
+            if self.total_time_used_for_objective_calls_in_s is None:
+                self.total_time_used_for_objective_calls_in_s = 0
+            self.total_time_used_for_objective_calls_in_s += objective_costs_delta

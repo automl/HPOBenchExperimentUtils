@@ -56,14 +56,16 @@ class BaseResourceManager:
                            time_used_delta: Union[int, float, None] = 0,
                            tae_calls_delta: Union[int, None] = 0,
                            fuel_used_delta: Union[int, float, None] = 0,
-                           objective_costs_delta: Union[int, float, None] = 0) -> None:
+                           objective_costs_delta: Union[int, float, None] = 0,
+                           time_used_for_objective_call_delta: Union[int, float, None] = 0) -> None:
         raise NotImplementedError()
 
     def increase_resources_without_lock(self,
                                         time_used_delta: Union[int, float, None] = 0,
                                         tae_calls_delta: Union[int, None] = 0,
                                         fuel_used_delta: Union[int, float, None] = 0,
-                                        objective_costs_delta: Union[int, float, None] = 0) -> None:
+                                        objective_costs_delta: Union[int, float, None] = 0,
+                                        time_used_for_objective_call_delta: Union[int, float, None] = 0) -> None:
         raise NotImplementedError()
 
     def get_lock(self):
@@ -90,6 +92,7 @@ class BaseResourceManager:
                                            total_tae_calls=0,
                                            total_fuel_used=0.0,
                                            total_objective_costs=0.0,
+                                           total_time_used_for_objective_calls_in_s=0.0,
                                            start_time=time())
         return default_resources
 
