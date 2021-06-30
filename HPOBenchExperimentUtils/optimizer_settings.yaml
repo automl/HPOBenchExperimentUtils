@@ -1,8 +1,18 @@
 ---
-# RAY with HB + Hyperopt ############################################################################################# #
+# RAY with HB ######################################################################################################## #
 ray_hyperopt_hb:
   optimizer: ray_hyperopt_hb
   display_name: "ray_hyperopt_hb"
+  reduction_factor: 3
+
+ray_bayesopt_hb:
+  optimizer: ray_bayesopt_hb
+  display_name: "ray_bayesopt_hb"
+  reduction_factor: 3
+
+ray_optuna_hb:
+  optimizer: ray_optuna_hb
+  display_name: "ray_optuna_hb"
   reduction_factor: 3
 
 # PURE RANDOMSEARCH################################################################################################### #
@@ -10,7 +20,7 @@ randomsearch:
   optimizer: randomsearch
   display_name: "random search"
 
-# Autogluon HNAS ############################################################################################################ #
+# Autogluon HNAS ##################################################################################################### #
 autogluon:
   optimizer: autogluon
   reduction_factor: 3

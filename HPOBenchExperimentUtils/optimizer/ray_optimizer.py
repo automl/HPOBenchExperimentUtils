@@ -3,6 +3,8 @@ from ConfigSpace import ConfigurationSpace
 from ray.tune.utils.log import Verbosity
 from ray import tune as tune
 from ray.tune.schedulers import AsyncHyperBandScheduler
+from ray.tune.suggest import ConcurrencyLimiter
+import ray
 
 from HPOBenchExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
 from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
@@ -19,10 +21,23 @@ class RayBaseOptimizer(SingleFidelityOptimizer):
     A base class for ray optimizer. Ray implements several optimizer, e.g. the hyperopt optimizer.
     We use Hyperband as scheduler.
 
-    To install ray:
-    pip install <path to the HPOBenchExperimentUtils>[ray]
+    To install only ray without a optimizer:
+    pip install <path to the HPOBenchExperimentUtils>[ray_base]
 
+    For Hyperopt:
+    pip install <path to the HPOBenchExperimentUtils>[ray_base,ray_hyperopt]
 
+    For Bayesopt:
+    pip install <path to the HPOBenchExperimentUtils>[ray_base,ray_bayesopt]
+
+    For Optuna:
+    pip install <path to the HPOBenchExperimentUtils>[ray_base,ray_optuna]
+
+    IMPORTANT:
+    ==========
+    Disable the default logging of ray. (Especially for the surrogate benchmarks.)
+    Set the env variable `TUNE_DISABLE_AUTO_CALLBACK_LOGGERS` to 1
+    (os.environ['TUNE_DISABLE_AUTO_CALLBACK_LOGGERS'] = 1)
     """
 
     def __init__(self, benchmark: Bookkeeper,
@@ -34,11 +49,16 @@ class RayBaseOptimizer(SingleFidelityOptimizer):
         self.cs_ray = configspace_to_ray_cs(self.benchmark.get_configuration_space(rng))
 
         self.run_id = f'Ray_optimization_{search_algorithm}_seed_{self.rng}'
+
+        # Limit the number of parallel runs
+        search_algorithm = ConcurrencyLimiter(search_algorithm, max_concurrent=1)
         self.search_algorithm = search_algorithm
         self.scheduler = AsyncHyperBandScheduler(max_t=self.max_budget,
                                                  grace_period=self.min_budget,
                                                  reduction_factor=settings['reduction_factor'],
                                                  time_attr='fidelity',
+                                                 # metric='function_value',
+                                                 # mode='min',
                                                  brackets=1,
                                                  )
         self.valid_budgets = [self.max_budget] + [budget for (budget, _) in self.scheduler._brackets[0]._rungs]
@@ -83,6 +103,9 @@ class RayBaseOptimizer(SingleFidelityOptimizer):
 
     def run(self):
         """ Execute the optimization run. Return the path where the results are stored. """
+        ray.init(local_mode=True,
+                 log_to_driver=False,
+                 include_dashboard=False)
 
         tune.run(partial(self.__training_function,
                          benchmark=self.benchmark,
@@ -116,6 +139,32 @@ class RayHyperoptOptimizer(RayBaseOptimizer):
                                                    search_algorithm=search_algorithm,
                                                    settings=settings,
                                                    output_dir=output_dir, rng=rng)
+
+
+class RayBayesOptOptimizer(RayBaseOptimizer):
+    def __init__(self, benchmark: Bookkeeper,
+                 settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
+        from ray.tune.suggest.bayesopt import BayesOptSearch
+
+        search_algorithm = BayesOptSearch()
+
+        super(RayBayesOptOptimizer, self).__init__(benchmark=benchmark,
+                                                   search_algorithm=search_algorithm,
+                                                   settings=settings,
+                                                   output_dir=output_dir, rng=rng)
+
+
+class RayOptunaOptimizer(RayBaseOptimizer):
+    def __init__(self, benchmark: Bookkeeper,
+                 settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
+        from ray.tune.suggest.optuna import OptunaSearch
+
+        search_algorithm = OptunaSearch()
+
+        super(RayOptunaOptimizer, self).__init__(benchmark=benchmark,
+                                                 search_algorithm=search_algorithm,
+                                                 settings=settings,
+                                                 output_dir=output_dir, rng=rng)
 
 
 def configspace_to_ray_cs(cs: ConfigurationSpace):
