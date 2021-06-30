@@ -87,7 +87,7 @@ class AutogluonOptimizer(SingleFidelityOptimizer):
             raise ValueError("This optimizer doesn't handle float fidelities")
 
         # Get time limit, so we know how long we should run the optimization
-        self.time_limit = self.benchmark.wall_clock_limit_in_s
+        self.time_limit = self.benchmark.resource_manager.limits.time_limit_in_s
         if self.benchmark.is_surrogate:
             # We limit this and cut the runhistory afterwards in case there are too many evaluations
             self.time_limit = 342000  # 95h; was 60*60*24*4=96h before
@@ -161,9 +161,8 @@ class AutogluonOptimizer(SingleFidelityOptimizer):
         # We change the timestamps in the runhistory post-hoc
         if not self.done:
             raise ValueError("Optimization not yet finished")
-        dest = Path.joinpath(self.benchmark.log_file.parent,
-                             self.benchmark.log_file.name + ".ORIGINAL")
-        shutil.move(self.benchmark.log_file, dest)
+        dest = self.benchmark.run_history.parent / self.benchmark.run_history.name + ".ORIGINAL"
+        shutil.move(self.benchmark.run_history, dest)
 
         last_stamp = None
         total_time_used = 0
@@ -173,7 +172,7 @@ class AutogluonOptimizer(SingleFidelityOptimizer):
             for line in fh:
                 record = json.loads(line)
                 if "boot_time" in record:
-                    self.benchmark.write_line_to_file(file=self.benchmark.log_file,
+                    self.benchmark.write_line_to_file(file=self.benchmark.run_history,
                                                       dict_to_store=record)
                     start = record["boot_time"]
                     last_stamp = start
@@ -185,8 +184,9 @@ class AutogluonOptimizer(SingleFidelityOptimizer):
                 function_call += 1
 
                 # Check whether any of these exceeds limit
-                if self.benchmark.tae_limit and (function_call > self.benchmark.tae_limit) or \
-                    total_time_used > self.benchmark.wall_clock_limit_in_s:
+                if self.benchmark.resource_manager.limits.tae_limit \
+                        and (function_call > self.benchmark.resource_manager.limits.tae_limit) \
+                        or total_time_used > self.benchmark.resource_manager.limits.time_limit_in_s:
                     _log.critical("Used resources exceed limit, stop fixing runhistory")
                     break
 
@@ -194,7 +194,7 @@ class AutogluonOptimizer(SingleFidelityOptimizer):
                 record['function_call'] = function_call
                 record['total_time_used'] = total_time_used
                 record['total_objective_costs'] = total_objective_costs
-                self.benchmark.write_line_to_file(file=self.benchmark.log_file,
+                self.benchmark.write_line_to_file(file=self.benchmark.run_history,
                                                   dict_to_store=record)
 
     def run(self):

@@ -7,8 +7,6 @@ from HPOBenchExperimentUtils.optimizer.base_optimizer import SingleFidelityOptim
 from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
 import HPOBenchExperimentUtils.utils.emukit_utils as emukit_utils
 from HPOBenchExperimentUtils.utils.utils import get_mandatory_optimizer_setting, standard_rng_init
-from hpobench.abstract_benchmark import AbstractBenchmark
-from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 
 import ConfigSpace as cs
 from emukit.core import ParameterSpace, InformationSourceParameter
@@ -33,7 +31,7 @@ initial_designs = {
 # Refer MUMBO paper: https://arxiv.org/pdf/2006.12093.pdf
 # noinspection PyPep8Naming
 class MultiTaskMUMBO(SingleFidelityOptimizer):
-    def __init__(self, benchmark: Union[Bookkeeper, AbstractBenchmark, AbstractBenchmarkClient],
+    def __init__(self, benchmark: Bookkeeper,
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
 
         super().__init__(benchmark, settings, output_dir, rng)
@@ -96,11 +94,13 @@ class MultiTaskMUMBO(SingleFidelityOptimizer):
                 x = np.expand_dims(x, axis=0)
             results = []
             for i in range(x.shape[0]):
+                run_id = SingleFidelityOptimizer._id_generator()
+
                 _log.debug("Extracted configuration: %s" % str(x[i, :-1]))
                 _log.debug("Extracted fidelity value: %s" % str(self.info_sources[int(x[i, -1])]))
                 fidelity = self.fidelity_emukit_to_cs(int(x[i, -1]))
                 config = cs.Configuration(self.original_space, values=self.to_cs(x[i, :-1]))
-                res = benchmark.objective_function(config, fidelity=fidelity,
+                res = benchmark.objective_function(configuration_id=run_id, configuration=config, fidelity=fidelity,
                                                    **self.settings_for_sending)
                 _log.debug("Benchmark evaluation results: %s" % str(res))
                 results.append([res["function_value"]])

@@ -1,11 +1,3 @@
-try:
-    import ujson as json
-    import json as json_backup
-    print("Use ujson")
-except:
-    import json
-    print("Using json. Installing ujson could provide speedup")
-
 import logging
 import os
 from collections import defaultdict
@@ -21,6 +13,14 @@ from HPOBenchExperimentUtils.utils import VALIDATED_TRAJECTORY_V1_FILENAME, VALI
     RUNHISTORY_FILENAME, VALIDATED_RUNHISTORY_FILENAME
 
 _log = logging.getLogger(__name__)
+
+try:
+    import ujson as json
+    import json as json_backup
+    _log.debug("Use ujson")
+except:
+    import json
+    _log.debug("Using json. Installing ujson could provide speedup")
 
 
 def write_validated_trajectory(unvalidated_traj: List, validation_results: Dict, unvalidated_traj_path: Path):

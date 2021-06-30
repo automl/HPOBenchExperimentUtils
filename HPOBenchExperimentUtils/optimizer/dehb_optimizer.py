@@ -40,8 +40,6 @@ import ConfigSpace as CS
 
 from HPOBenchExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
 from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
-from hpobench.abstract_benchmark import AbstractBenchmark
-from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 
 from dehb.optimizers import DE, DEHB
 from ConfigSpace import UniformFloatHyperparameter, Configuration
@@ -50,7 +48,7 @@ _log = logging.getLogger(__name__)
 
 
 class DehbOptimizer(SingleFidelityOptimizer):
-    def __init__(self, benchmark: Union[Bookkeeper, AbstractBenchmark, AbstractBenchmarkClient],
+    def __init__(self, benchmark: Bookkeeper,
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
         super().__init__(benchmark, settings, output_dir, rng)
 
@@ -59,6 +57,7 @@ class DehbOptimizer(SingleFidelityOptimizer):
 
         # Common objective function for DE & DEHB representing the benchmark
         def f(config: Configuration, budget=None):
+            run_id = SingleFidelityOptimizer._id_generator()
             nonlocal self
             if budget is not None:
                 if isinstance(self.main_fidelity, CS.hyperparameters.UniformIntegerHyperparameter) \
@@ -68,12 +67,13 @@ class DehbOptimizer(SingleFidelityOptimizer):
                 else:
                     budget = float(budget)
             
-                res = benchmark.objective_function(config,
+                res = benchmark.objective_function(configuration=config,
+                                                   configuration_id=run_id,
                                                    fidelity={self.main_fidelity.name: budget},
                                                    **self.settings_for_sending,
                                                    )
             else:
-                res = benchmark.objective_function(config)
+                res = benchmark.objective_function(configuration=config, configuration_id=run_id)
             fitness, cost = res['function_value'], res['cost']
             return fitness, cost
 
@@ -112,15 +112,18 @@ class DehbOptimizer(SingleFidelityOptimizer):
 
 class DeOptimizer(SingleFidelityOptimizer):
 
-    def __init__(self, benchmark: Union[Bookkeeper, AbstractBenchmark, AbstractBenchmarkClient],
+    def __init__(self, benchmark: Bookkeeper,
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
         super().__init__(benchmark, settings, output_dir, rng)
 
         # Common objective function for DE & DEHB representing the benchmark
         def f(config: Configuration, budget=None):
+            run_id = SingleFidelityOptimizer._id_generator()
+
             nonlocal self
             assert budget is None
-            res = benchmark.objective_function(config,
+            res = benchmark.objective_function(configuration=config,
+                                               configuration_id=run_id,
                                                fidelity={self.main_fidelity.name: self.max_budget},
                                                **self.settings_for_sending,
                                                )
@@ -146,5 +149,4 @@ class DeOptimizer(SingleFidelityOptimizer):
         np.random.seed(self.rng)
         # Running DE iterations
         traj, runtime, history = self.de.run(generations=self.settings["iter"],
-                                             verbose=self.settings["verbose"] or
-                                                     _log.level <= logging.DEBUG)
+                                             verbose=self.settings["verbose"] or _log.level <= logging.DEBUG)
