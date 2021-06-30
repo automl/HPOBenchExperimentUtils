@@ -16,7 +16,8 @@ from HPOBenchExperimentUtils.validate_benchmark import validate_benchmark  # noq
 # We were able to trace it back to some interaction between dill and cloudpickle (used in the distributed package).
 # Importing autogluon here seems to fix the error.
 try:
-    import autogluon.core as ag
+    # import autogluon.core as ag
+    from HPOBenchExperimentUtils.optimizer.autogluon_optimizer import _obj_fct
     _log.debug('Autogluon succesfully imported')
 except ModuleNotFoundError:
     pass
