@@ -60,7 +60,7 @@ def run_benchmark(optimizer: str,
         with the format <optimizer_name>_run_<rng>.
     resource_file_dir : str, Path, None
         We keep track of the used resources by writing them into a resource file. This parameter specifies where to
-        store this resource file. By default, this directory is set to the TEMP directory.
+        store this resource file. By default, this directory is set to $TMPDIR or /tmp/.
     rng : int, None
         Random seed for the experiment. Also changes the output directory. By default 0.
     use_local : bool, None

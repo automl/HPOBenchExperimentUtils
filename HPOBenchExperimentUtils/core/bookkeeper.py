@@ -64,7 +64,7 @@ class Bookkeeper:
         used_fuel = self.__extract_fuel_from_fidelity(fidelity, **kwargs)
 
         try:
-            # Throw an time error if the function evaluation takes more time than the specified cutoff value.
+            # Throw a time error if the function evaluation takes more time than the specified cutoff value.
             result_dict = future_result(configuration=configuration, fidelity=fidelity, rng=rng, **kwargs)
             result_dict = result_dict.result()
         except TimeoutError:
@@ -72,8 +72,6 @@ class Bookkeeper:
 
             self.resource_manager.increase_resources(time_used_delta=cutoff,
                                                      tae_calls_delta=1,
-                                                     # TODO: when a time out occurs, add the maximal fuel usage or the
-                                                     #       one from the fidelity? (if none: max fuel)
                                                      fuel_used_delta=used_fuel,
                                                      objective_costs_delta=cutoff,
                                                      time_used_for_objective_call_delta=time() - start_time)

@@ -9,17 +9,14 @@ import time
 try:
     import autogluon.core as ag
     from autogluon.core.scheduler.hyperband import _get_rung_levels
+    import autogluon.core.version as v
+    assert v.__version__ == "0.2.0"
 except:
-    # We need to use this specific version since changes introduces later on fail when pickling the
-    # objective function via dill. The changes were introduced here:
-    # https://github.com/awslabs/autogluon/commit/21483d9b9c3b7c5da935e27c46f2a52e0471bf54
-    raise ValueError("""
-    Autogluon is not installed or the wrong version is installed, please run:\n
-    python3 -m pip install --upgrade pip
-    python3 -m pip install --upgrade setuptools
-    python3 -m pip install --upgrade "mxnet<2.0.0"
-    python3 -m pip install autogluon
-    """)
+    raise ValueError("""Autogluon is not installed or the wrong version is installed, please run:\n
+                        python3 -m pip install --upgrade pip
+                        python3 -m pip install --upgrade setuptools
+                        python3 -m pip install --upgrade "mxnet<2.0.0"
+                        python3 -m pip install autogluon==0.2.0""")
 
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter,\
     UniformIntegerHyperparameter, CategoricalHyperparameter, OrdinalHyperparameter
@@ -77,7 +74,6 @@ class AutogluonOptimizer(SingleFidelityOptimizer):
         super().__init__(benchmark, settings, output_dir, rng)
         # Setup can be done here or in run()
         _log.info('Successfully initialized')
-        self.done = False
 
         # Set up search space and rung_levels
         self.ag_space = self.get_ag_space(self.cs)
@@ -157,46 +153,6 @@ class AutogluonOptimizer(SingleFidelityOptimizer):
                        cs=self.cs,
                        main_fidelity=self.main_fidelity)(_obj_fct)
 
-    def _fix_runhistory(self):
-        # We change the timestamps in the runhistory post-hoc
-        if not self.done:
-            raise ValueError("Optimization not yet finished")
-        dest = self.benchmark.run_history.parent / self.benchmark.run_history.name + ".ORIGINAL"
-        shutil.move(self.benchmark.run_history, dest)
-
-        last_stamp = None
-        total_time_used = 0
-        total_objective_costs = 0
-        function_call = 0
-        with open(dest, "r") as fh:
-            for line in fh:
-                record = json.loads(line)
-                if "boot_time" in record:
-                    self.benchmark.write_line_to_file(file=self.benchmark.run_history,
-                                                      dict_to_store=record)
-                    start = record["boot_time"]
-                    last_stamp = start
-                    continue
-                total_time_used += (record["start_time"] - last_stamp)
-                total_time_used += record["cost"]
-                total_objective_costs += record["cost"]
-                last_stamp = record["finish_time"]
-                function_call += 1
-
-                # Check whether any of these exceeds limit
-                if self.benchmark.resource_manager.limits.tae_limit \
-                        and (function_call > self.benchmark.resource_manager.limits.tae_limit) \
-                        or total_time_used > self.benchmark.resource_manager.limits.time_limit_in_s:
-                    _log.critical("Used resources exceed limit, stop fixing runhistory")
-                    break
-
-                # Overwrite values in record
-                record['function_call'] = function_call
-                record['total_time_used'] = total_time_used
-                record['total_objective_costs'] = total_objective_costs
-                self.benchmark.write_line_to_file(file=self.benchmark.run_history,
-                                                  dict_to_store=record)
-
     def run(self):
         """ Execute the optimization run. Return the path where the results are stored. """
         callback = None
@@ -228,10 +184,3 @@ class AutogluonOptimizer(SingleFidelityOptimizer):
             (scheduler.terminator.rung_levels, self.rung_levels[:-1])
         scheduler.run()
         scheduler.join_jobs()
-
-    def shutdown(self):
-        # Autogluon is done.
-        self.done = True
-        # Rewrite trajectory
-        self._fix_runhistory()
-        _log.info("Suceeded rewriting trajectory")
