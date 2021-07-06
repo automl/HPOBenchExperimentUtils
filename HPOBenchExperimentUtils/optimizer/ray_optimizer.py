@@ -1,4 +1,6 @@
 import ConfigSpace as CS
+import os
+
 from ConfigSpace import ConfigurationSpace
 from ray.tune.utils.log import Verbosity
 from ray import tune as tune
@@ -107,6 +109,8 @@ class RayBaseOptimizer(SingleFidelityOptimizer):
                  log_to_driver=False,
                  include_dashboard=False)
 
+        tmp_dir = os.environ.get('TMPDIR', '/tmp/')
+
         tune.run(partial(self.__training_function,
                          benchmark=self.benchmark,
                          main_fidelity_name=self.main_fidelity.name,
@@ -122,7 +126,7 @@ class RayBaseOptimizer(SingleFidelityOptimizer):
                  search_alg=self.search_algorithm,
                  scheduler=self.scheduler,
                  resources_per_trial={"cpu": 1, "gpu": 0},
-                 local_dir=str(self.output_dir),
+                 local_dir=tmp_dir,
                  # Set this to a very large number, so that this process runs is not bounded by the number of samples.
                  num_samples=10000000,
                  )
@@ -172,13 +176,26 @@ def configspace_to_ray_cs(cs: ConfigurationSpace):
     for hp_name in cs:
         hp = cs.get_hyperparameter(hp_name)
         ray_hp = None
+        import numpy as np
 
         if isinstance(hp, CS.UniformFloatHyperparameter):
-            ray_hp = tune.uniform(hp.lower, hp.upper)
+            if hp.log:
+                ray_hp = tune.loguniform(hp.lower, hp.upper, base=np.e)
+            else:
+                ray_hp = tune.uniform(hp.lower, hp.upper)
+
         elif isinstance(hp, CS.UniformIntegerHyperparameter):
-            ray_hp = tune.quniform(hp.lower, hp.upper, 1.0)
+            if hp.log:
+                ray_hp = tune.qloguniform(hp.lower, hp.upper, q=1.0, base=np.e)
+            else:
+                ray_hp = tune.quniform(hp.lower, hp.upper, q=1.0)
+
         elif isinstance(hp, CS.CategoricalHyperparameter):
             ray_hp = tune.choice(hp.choices)
+
+        elif isinstance(hp, CS.OrdinalHyperparameter):
+            ray_hp = tune.choice(hp.sequence)
+
         ray_cs[hp.name] = ray_hp
     return ray_cs
 
