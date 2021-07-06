@@ -1,0 +1,6 @@
+{
+    "ray_base": ["ray[tune]>=1.4.0", "ray[default]"],
+    "ray_bayesopt": ["bayesian-optimization"],
+    "ray_hyperopt": ["hyperopt"],
+    "ray_optuna": ["optuna"]
+}
