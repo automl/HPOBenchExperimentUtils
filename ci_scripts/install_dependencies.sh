@@ -21,10 +21,9 @@ then
     install_packages="${install_packages}dehb,"
     git clone https://github.com/automl/DEHB.git
     cd DEHB
-    export PYTHONPATH=$PWD:$PYTHONPATH
+    echo "PYTHONPATH=$PWD:$PYTHONPATH" >> $GITHUB_ENV
     git checkout b8dcba7b38bf6e7fc8ce3e84ea567b66132e0eb5
     cd ..
-    echo $PYTHONPATH
 
 # elif [[ "$OPTIMIZER" == "dragonfly_default" ]];
 # then
