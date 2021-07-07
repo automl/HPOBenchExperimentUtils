@@ -2,7 +2,7 @@
 
 install_packages=""
 
-echo "Install tools for ${optimizer}"
+echo "Install tools for ${OPTIMIZER}"
 
 # Install HPOBench
 git clone https://github.com/automl/HPOBench.git
