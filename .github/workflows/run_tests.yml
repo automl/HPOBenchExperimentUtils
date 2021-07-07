@@ -67,4 +67,6 @@ jobs:
         python -m pip install --upgrade pip
         chmod +x ./ci_scripts/install_dependencies.sh && source ./ci_scripts/install_dependencies.sh
     - name: Run Tests
-      run: chmod +x ./ci_scripts/run_optimizer.sh && source ./ci_scripts/run_optimizer.sh
+      run: |
+        echo $PYTHONPATH
+        chmod +x ./ci_scripts/run_optimizer.sh && source ./ci_scripts/run_optimizer.sh
