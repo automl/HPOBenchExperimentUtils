@@ -32,4 +32,3 @@ make -C builddir && \
 sudo make -C builddir install
 
 cd ..
-pip install .[singulaity]
