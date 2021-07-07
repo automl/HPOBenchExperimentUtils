@@ -12,11 +12,11 @@ try:
     import autogluon.core.version as v
     assert v.__version__ == "0.2.0"
 except:
-    raise ValueError("""Autogluon is not installed or the wrong version is installed, please run:\n
-                        python3 -m pip install --upgrade pip
-                        python3 -m pip install --upgrade setuptools
-                        python3 -m pip install --upgrade "mxnet<2.0.0"
-                        python3 -m pip install autogluon==0.2.0""")
+    raise ModuleNotFoundError("""Autogluon is not installed or the wrong version is installed, please run:\n
+                                 python3 -m pip install --upgrade pip
+                                 python3 -m pip install --upgrade setuptools
+                                 python3 -m pip install --upgrade "mxnet<2.0.0"
+                                 python3 -m pip install autogluon==0.2.0""")
 
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter,\
     UniformIntegerHyperparameter, CategoricalHyperparameter, OrdinalHyperparameter
