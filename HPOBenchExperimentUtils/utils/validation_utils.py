@@ -220,7 +220,12 @@ def load_trajectories_as_df(input_dir, which="test_v1"):
 
 
 def get_statistics_df(optimizer_df, what='total_time_used'):
-    select_cols = ['mean', 'std', 'median', 'q25', 'q75', 'mean_inf', 'up', 'lo']
+
+    # If there are 2 entries in a trajectory of a run with the same objective costs (for example 0) due
+    # then the pivot function does not work. Thus, delete duplicate entries from the table.
+    optimizer_df.sort_values(what, inplace=True)
+    optimizer_df.drop_duplicates(subset=['id', what], keep='last', inplace=True)
+
     # Dataframe for the learning curves per optimizer
     piv = optimizer_df.pivot(index=what, columns='id', values='function_values')
 
@@ -228,24 +233,26 @@ def get_statistics_df(optimizer_df, what='total_time_used'):
     vali = -1
     for c in piv.columns:
         vali = max(vali, piv[c].first_valid_index())
+
+    stats = pd.DataFrame()
+
     piv = piv.loc[vali:]
 
-    piv['mean'] = piv.mean(axis=1)
-    piv['std'] = piv.std(axis=1)
+    stats['mean'] = piv.mean(axis=1)
+    stats['std'] = piv.std(axis=1).fillna(0)
 
-    piv['median'] = piv.median(axis=1)
-    piv['q25'] = piv.quantile(0.25, axis=1)
-    piv['q75'] = piv.quantile(0.75, axis=1)
+    stats['median'] = piv.median(axis=1)
+    stats['q25'] = piv.quantile(0.25, axis=1)
+    stats['q75'] = piv.quantile(0.75, axis=1)
 
-    piv['lo'] = piv.min(axis=1)
-    piv['up'] = piv.max(axis=1)
+    stats['lo'] = piv.min(axis=1)
+    stats['up'] = piv.max(axis=1)
 
-    piv['mean_inf'] = np.minimum.accumulate(piv['mean'])
-    piv['lo'] = np.minimum.accumulate(piv['lo'])
-    piv['up'] = np.minimum.accumulate(piv['up'])
+    stats['mean_inf'] = np.minimum.accumulate(stats['mean'])
+    stats['lo'] = np.minimum.accumulate(stats['lo'])
+    stats['up'] = np.minimum.accumulate(stats['up'])
 
-    piv = piv[select_cols]
-    return piv
+    return stats
 
 
 def df_per_optimizer(key, unvalidated_trajectories, y_best: float=0):
