@@ -371,4 +371,13 @@ NASBench1shot1SearchSpace3Benchmark:
   import_from: nas.nasbench_1shot1
   import_benchmark: NASBench1shot1SearchSpace3Benchmark
   is_surrogate: true
+
+# For CI (Github actions), we want to test a short benchmark
+OptimizerTestBenchmark:
+  time_limit_in_s: 1000
+  cutoff_in_s: 1000
+  mem_limit_in_mb: 6000
+  import_from: surrogates.paramnet_benchmark
+  import_benchmark: ParamNetReducedPokerOnTimeBenchmark
+  is_surrogate: true
 ...
