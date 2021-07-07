@@ -23,7 +23,9 @@ then
     cd DEHB
     git checkout b8dcba7b38bf6e7fc8ce3e84ea567b66132e0eb5
     cd ..
+    export PYTHONPATH=~/DEHB:$PYTHONPATH
     export PYTHONPATH=$PWD/DEHB:$PYTHONPATH
+    echo $PYTHONPATH
 
 # elif [[ "$OPTIMIZER" == "dragonfly_default" ]];
 # then
