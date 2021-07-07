@@ -30,7 +30,7 @@ then
 
 elif [[ "$OPTIMIZER" == "hpbandster_bohb_eta_3" ]];
 then
-    install_packages="${install_packages}hpband,"
+    install_packages="${install_packages}hpbandster,"
 
 elif [[ "$OPTIMIZER" == "ray_hyperopt_hb" ]];
 then
