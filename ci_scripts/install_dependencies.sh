@@ -7,7 +7,7 @@ echo "Install tools for ${OPTIMIZER}"
 # Install HPOBench
 git clone https://github.com/automl/HPOBench.git
 cd HPOBench
-git checkout AddStartupAddConnectClient  # TODO: PM after merge in the HPOBench use the dev branch.
+git checkout development
 pip install "."
 cd ..
 
@@ -25,8 +25,9 @@ then
     git checkout b8dcba7b38bf6e7fc8ce3e84ea567b66132e0eb5
     cd ..
 
-# elif [[ "$OPTIMIZER" == "dragonfly_default" ]];
-# then
+ elif [[ "$OPTIMIZER" == "dragonfly_default" ]];
+ then
+    install_packages="${install_packages}dragonfly,"
 
 elif [[ "$OPTIMIZER" == "hpbandster_bohb_eta_3" ]];
 then

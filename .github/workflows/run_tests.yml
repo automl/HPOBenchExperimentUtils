@@ -17,10 +17,10 @@ jobs:
             DISPLAY_NAME: "Optimizer dehb - Py 3.7 - Singularity 3.6"
             SINGULARITY_VERSION: "3.6"
             OPTIMIZER: "dehb"
-#          - python-version: 3.7
-#            DISPLAY_NAME: "Optimizer dragonfly_default - Py 3.7 - Singularity 3.6"
-#            SINGULARITY_VERSION: "3.6"
-#            OPTIMIZER: "dragonfly_default"
+          - python-version: 3.7
+            DISPLAY_NAME: "Optimizer dragonfly_default - Py 3.7 - Singularity 3.6"
+            SINGULARITY_VERSION: "3.6"
+            OPTIMIZER: "dragonfly_default"
           - python-version: 3.7
             DISPLAY_NAME: "Optimizer hpbandster_bohb_eta_3 - Py 3.7 - Singularity 3.6"
             SINGULARITY_VERSION: "3.6"
