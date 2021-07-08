@@ -7,8 +7,8 @@ import ConfigSpace as CS
 from hpbandster.core import result as hpres, nameserver as hpns
 from hpbandster.core.worker import Worker
 from hpbandster.optimizers import BOHB, HyperBand, RandomSearch, H2BO
-from hpobench.abstract_benchmark import AbstractBenchmark
-from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
+
+from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
 
 from HPOBenchExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
 from HPOBenchExperimentUtils.utils.optimizer_utils import get_main_fidelity
@@ -22,7 +22,7 @@ class HpBandSterBaseOptimizer(SingleFidelityOptimizer):
     All benchmark and optimizer specific information are stored in the dictionaries benchmark_settings and
     optimizer_settings.
     """
-    def __init__(self, benchmark: Union[AbstractBenchmark, AbstractBenchmarkClient],
+    def __init__(self, benchmark: Bookkeeper,
                  intensifier: Union[Type[BOHB], Type[HyperBand], Type[H2BO], Type[RandomSearch]],
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
         super().__init__(benchmark, settings, output_dir, rng)
@@ -98,21 +98,21 @@ class HpBandSterBaseOptimizer(SingleFidelityOptimizer):
 
 
 class HpBandSterBOHBOptimizer(HpBandSterBaseOptimizer):
-    def __init__(self, benchmark: Union[AbstractBenchmark, AbstractBenchmarkClient],
+    def __init__(self, benchmark: Bookkeeper,
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
         super(HpBandSterBOHBOptimizer, self).__init__(benchmark=benchmark, intensifier=BOHB, settings=settings,
                                                       output_dir=output_dir, rng=rng)
 
 
 class HpBandSterHyperBandOptimizer(HpBandSterBaseOptimizer):
-    def __init__(self, benchmark: Union[AbstractBenchmark, AbstractBenchmarkClient],
+    def __init__(self, benchmark: Bookkeeper,
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
         super(HpBandSterHyperBandOptimizer, self).__init__(benchmark=benchmark, intensifier=HyperBand,
                                                            settings=settings, output_dir=output_dir, rng=rng)
 
 
 class HpBandSterTPEOptimizer(HpBandSterBaseOptimizer):
-    def __init__(self, benchmark: Union[AbstractBenchmark, AbstractBenchmarkClient],
+    def __init__(self, benchmark: Bookkeeper,
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
         super(HpBandSterTPEOptimizer, self).__init__(benchmark=benchmark, intensifier=BOHB,
                                                      settings=settings, output_dir=output_dir, rng=rng)
@@ -121,7 +121,7 @@ class HpBandSterTPEOptimizer(HpBandSterBaseOptimizer):
 
 class CustomWorker(Worker):
     """ A generic worker for optimizing with BOHB. """
-    def __init__(self, benchmark: AbstractBenchmark,
+    def __init__(self, benchmark: Bookkeeper,
                  main_fidelity: CS.Configuration,
                  settings: Dict,
                  settings_for_sending: Dict, *args, **kwargs):
@@ -137,6 +137,8 @@ class CustomWorker(Worker):
     def compute(self, config: Dict, budget: Any, **kwargs) -> Dict:
         """Here happens the work in the optimization step. """
 
+        run_id = SingleFidelityOptimizer._id_generator()
+
         if isinstance(self.main_fidelity, CS.hyperparameters.UniformIntegerHyperparameter) \
                 or isinstance(self.main_fidelity, CS.hyperparameters.NormalIntegerHyperparameter) \
                 or isinstance(self.main_fidelity.default_value, int):
@@ -144,6 +146,7 @@ class CustomWorker(Worker):
         fidelity = {self.main_fidelity.name: budget}
 
         result_dict = self.benchmark.objective_function(configuration=config,
+                                                        configuration_id=run_id,
                                                         fidelity=fidelity,
                                                         **self.settings_for_sending)
         return {'loss': result_dict['function_value'],

@@ -48,16 +48,21 @@ class RandomSearchOptimizer(SingleFidelityOptimizer):
             # Randomly sample a configuration
             _log.debug(f"Iteration: [{num_configs + 1}] Start sampling configurations")
             configuration = cs.sample_configuration()
+            configuration_id = self._id_generator()
+
             # Always sample highest budget/fidelity
-            result = self.benchmark.objective_function(
-                configuration, rng=self.rng,
-                fidelity={self.main_fidelity.name: self.max_budget},
-                **self.settings_for_sending,
-            )
+            result = self.benchmark.objective_function(configuration=configuration,
+                                                       configuration_id=configuration_id,
+                                                       fidelity={self.main_fidelity.name: self.max_budget},
+                                                       rng=self.rng,
+                                                       **self.settings_for_sending,
+                                                       )
             results.append((configuration, result))
+            resources = self.benchmark.resource_manager.get_used_resources()
+
             _log.info(f'Config [{num_configs:6d}] - Result: {result["function_value"]:.4f} - '
-                      f'Time Used: {self.benchmark.get_total_time_used()}|'
-                      f'{self.benchmark.wall_clock_limit_in_s}')
+                      f'Time Used: {resources.total_time_used_in_s:.2f}|'
+                      f'{self.benchmark.resource_manager.limits.time_limit_in_s}')
             num_configs += 1
 
             # From time to time we do some bookkeeping and store the incumbent ourselves

@@ -4,7 +4,7 @@ randomsearch:
   optimizer: randomsearch
   display_name: "random search"
 
-# Autogluon HNAS ############################################################################################################ #
+# Autogluon HNAS ##################################################################################################### #
 autogluon:
   optimizer: autogluon
   reduction_factor: 3

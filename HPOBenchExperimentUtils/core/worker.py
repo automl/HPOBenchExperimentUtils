@@ -15,7 +15,7 @@ from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 from HPOBenchExperimentUtils.core import WORKER_WAIT_FOR_SCHEDULER_TO_START_IN_S, \
     WORKER_WAIT_FOR_NAMESERVER_TO_START_IN_S
 from HPOBenchExperimentUtils.core.daemon_object import DaemonObject
-from HPOBenchExperimentUtils.core.record import Record
+from HPOBenchExperimentUtils.core.data_objects import Record
 from HPOBenchExperimentUtils.utils.runner_utils import load_benchmark, get_benchmark_names, \
     transform_unknown_params_to_dict, get_benchmark_settings
 

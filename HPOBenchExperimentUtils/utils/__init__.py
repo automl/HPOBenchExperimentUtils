@@ -16,3 +16,5 @@ VALIDATED_RUNHISTORY_FILENAME = 'hpobench_runhistory_validation.txt'
 VALIDATED_TRAJECTORY_V1_FILENAME = 'hpobench_trajectory_validated_v1.txt'
 VALIDATED_TRAJECTORY_V2_FILENAME = 'hpobench_trajectory_validated_v2.txt'
 VALIDATED_TRAJECTORY_V3_FILENAME = 'hpobench_trajectory_validated_v3.txt'
+
+RESOURCE_FILENAME = 'hpobench_used_resources.json'

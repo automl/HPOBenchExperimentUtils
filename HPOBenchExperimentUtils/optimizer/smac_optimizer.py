@@ -5,8 +5,7 @@ from typing import Union, Dict, Type
 
 import ConfigSpace as CS
 import numpy as np
-from hpobench.abstract_benchmark import AbstractBenchmark
-from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
+
 from smac.facade.smac_bohb_facade import BOHB4HPO
 from smac.facade.smac_hpo_facade import SMAC4HPO
 from smac.facade.smac_bo_facade import SMAC4BO
@@ -27,7 +26,7 @@ class SMACOptimizer(SingleFidelityOptimizer):
     benchmark_settings and optimizer_settings.
     The intensifier specifies which SMAC-Intensifier (HB or SH) is used.
     """
-    def __init__(self, benchmark: Union[Bookkeeper, AbstractBenchmark, AbstractBenchmarkClient],
+    def __init__(self, benchmark: Bookkeeper,
                  intensifier: Union[Type[Hyperband], Type[SuccessiveHalving], None],
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
         self.intensifier = intensifier
@@ -62,12 +61,15 @@ class SMACOptimizer(SingleFidelityOptimizer):
 
         def optimization_function_wrapper(cfg, seed, instance, budget):
             """ Helper-function: simple wrapper to use the benchmark with smac"""
+            run_id = SingleFidelityOptimizer._id_generator()
+
             if isinstance(self.main_fidelity, CS.hyperparameters.UniformIntegerHyperparameter) \
                     or isinstance(self.main_fidelity, CS.hyperparameters.NormalIntegerHyperparameter) \
                     or isinstance(self.main_fidelity.default_value, int):
                 budget = int(budget)
             fidelity = {self.main_fidelity.name: budget}
             result_dict = self.benchmark.objective_function(configuration=cfg,
+                                                            configuration_id=run_id,
                                                             fidelity=fidelity,
                                                             **self.settings_for_sending,
                                                             rng=seed)
@@ -94,7 +96,7 @@ class SMACOptimizer(SingleFidelityOptimizer):
 
 
 class SMACOptimizerHyperband(SMACOptimizer):
-    def __init__(self, benchmark: Union[Bookkeeper, AbstractBenchmark, AbstractBenchmarkClient],
+    def __init__(self, benchmark: Bookkeeper,
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
         super(SMACOptimizerHyperband, self).__init__(benchmark=benchmark, settings=settings,
                                                      intensifier=Hyperband, output_dir=output_dir,
@@ -102,7 +104,7 @@ class SMACOptimizerHyperband(SMACOptimizer):
 
 
 class SMACOptimizerSuccessiveHalving(SMACOptimizer):
-    def __init__(self, benchmark: Union[Bookkeeper, AbstractBenchmark, AbstractBenchmarkClient],
+    def __init__(self, benchmark: Bookkeeper,
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
         super(SMACOptimizerSuccessiveHalving, self).__init__(benchmark=benchmark, settings=settings,
                                                              intensifier=SuccessiveHalving,
@@ -110,7 +112,7 @@ class SMACOptimizerSuccessiveHalving(SMACOptimizer):
 
 
 class SMACOptimizerHPO(SMACOptimizer):
-    def __init__(self, benchmark: Union[Bookkeeper, AbstractBenchmark, AbstractBenchmarkClient],
+    def __init__(self, benchmark: Bookkeeper,
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
         super(SMACOptimizerHPO, self).__init__(benchmark=benchmark, settings=settings,
                                                intensifier=None, output_dir=output_dir, rng=rng)
@@ -125,8 +127,11 @@ class SMACOptimizerHPO(SMACOptimizer):
 
         def optimization_function_wrapper(cfg, seed):
             """ Helper-function: simple wrapper to use the benchmark with smac"""
+            run_id = SingleFidelityOptimizer._id_generator()
+
             fidelity = {self.main_fidelity.name: self.max_budget}
             result_dict = self.benchmark.objective_function(configuration=cfg,
+                                                            configuration_id=run_id,
                                                             fidelity=fidelity,
                                                             **self.settings_for_sending,
                                                             rng=seed)
@@ -146,7 +151,7 @@ class SMACOptimizerHPO(SMACOptimizer):
 
 
 class SMACOptimizerBO(SMACOptimizerHPO):
-    def __init__(self, benchmark: Union[Bookkeeper, AbstractBenchmark, AbstractBenchmarkClient],
+    def __init__(self, benchmark: Bookkeeper,
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
         super().__init__(benchmark=benchmark, settings=settings, output_dir=output_dir, rng=rng)
 
