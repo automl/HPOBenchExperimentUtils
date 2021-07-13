@@ -1,5 +1,19 @@
 ---
 # RAY with HB ######################################################################################################## #
+
+ray_hyperopt_no_fidelity:
+  optimizer: ray_hyperopt_no_fidelity
+  display_name: "ray hyperopt w/ fidelities"
+
+ray_randomsearch:
+  optimizer: ray_randomsearch
+  display_name: "ray randomsearch"
+
+ray_bohb:
+  optimizer: ray_bohb
+  display_name: "ray TPE and HB"
+  reduction_factor: 3
+
 ray_hyperopt_hb:
   optimizer: ray_hyperopt_hb
   display_name: "ray_hyperopt_hb"
