@@ -1,9 +1,14 @@
 ---
-# RAY with HB ######################################################################################################## #
+# OPTUNA ############################################################################################################# #
+optuna_tpe_hb:
+  optimizer: optuna_tpe_hb
+  reduction_factor: 3
+  display_name: "optuna tpe hb"
 
+# RAY with HB ######################################################################################################## #
 ray_hyperopt_no_fidelity:
   optimizer: ray_hyperopt_no_fidelity
-  display_name: "ray hyperopt w/ fidelities"
+  display_name: "ray hyperopt w/o fidelities"
 
 ray_randomsearch:
   optimizer: ray_randomsearch

@@ -35,6 +35,7 @@ class OptimizerEnum(Enum):
     RAY_HYPEROPT_NO_FIDELITY = 'ray_hyperopt_no_fidelity'
     RAY_RANDOMSEARCH = 'ray_randomsearch'
     RAY_BOHB = 'ray_bohb'
+    OPTUNA_TPE_HB = 'optuna_tpe_hb'
 
 
 def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]) -> OptimizerEnum:
@@ -112,6 +113,9 @@ def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]) -> OptimizerEnum
         elif optimizer == 'ray_bohb':
             return OptimizerEnum.RAY_BOHB
 
+        elif optimizer == 'optuna_tpe_hb':
+            return OptimizerEnum.OPTUNA_TPE_HB
+
         else:
             fail = True
     else:
@@ -175,7 +179,6 @@ def get_optimizer(optimizer_enum):
     elif optimizer_enum is OptimizerEnum.RAY_OPTUNA_HB:
         from HPOBenchExperimentUtils.optimizer.ray_optimizer import RayHBOptunaOptimizer
         optimizer = RayHBOptunaOptimizer
-
     elif optimizer_enum is OptimizerEnum.RAY_HYPEROPT_NO_FIDELITY:
         from HPOBenchExperimentUtils.optimizer.ray_optimizer import RayHyperoptWithoutFidelityOptimizer
         optimizer = RayHyperoptWithoutFidelityOptimizer
@@ -185,6 +188,9 @@ def get_optimizer(optimizer_enum):
     elif optimizer_enum is OptimizerEnum.RAY_BOHB:
         from HPOBenchExperimentUtils.optimizer.ray_optimizer import RayBOHBOptimizer
         optimizer = RayBOHBOptimizer
+    elif optimizer_enum is OptimizerEnum.OPTUNA_TPE_HB:
+        from HPOBenchExperimentUtils.optimizer.optuna_optimizer import OptunaTPEHyperbandOptimizer
+        optimizer = OptunaTPEHyperbandOptimizer
 
     else:
         raise ValueError(f'Unknown optimizer: {optimizer_enum}')
