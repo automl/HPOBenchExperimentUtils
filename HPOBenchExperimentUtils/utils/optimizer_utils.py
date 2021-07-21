@@ -36,6 +36,9 @@ class OptimizerEnum(Enum):
     RAY_RANDOMSEARCH = 'ray_randomsearch'
     RAY_BOHB = 'ray_bohb'
     OPTUNA_TPE_HB = 'optuna_tpe_hb'
+    OPTUNA_CMAES_HB = 'optuna_cmaes_hb'
+    OPTUNA_RANDOMSEARCH = 'optuna_randomsearch'
+    OPTUNA_TPE_MEDIAN = 'optuna_tpe_median'
 
 
 def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]) -> OptimizerEnum:
@@ -115,6 +118,12 @@ def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]) -> OptimizerEnum
 
         elif optimizer == 'optuna_tpe_hb':
             return OptimizerEnum.OPTUNA_TPE_HB
+        elif optimizer == 'optuna_cmaes_hb':
+            return OptimizerEnum.OPTUNA_CMAES_HB
+        elif optimizer == 'optuna_randomsearch':
+            return OptimizerEnum.OPTUNA_RANDOMSEARCH
+        elif optimizer == 'optuna_tpe_median':
+            return OptimizerEnum.OPTUNA_TPE_MEDIAN
 
         else:
             fail = True
@@ -191,7 +200,15 @@ def get_optimizer(optimizer_enum):
     elif optimizer_enum is OptimizerEnum.OPTUNA_TPE_HB:
         from HPOBenchExperimentUtils.optimizer.optuna_optimizer import OptunaTPEHyperbandOptimizer
         optimizer = OptunaTPEHyperbandOptimizer
-
+    elif optimizer_enum is OptimizerEnum.OPTUNA_CMAES_HB:
+        from HPOBenchExperimentUtils.optimizer.optuna_optimizer import OptunaCMAESHyperBandOptimizer
+        optimizer = OptunaCMAESHyperBandOptimizer
+    elif optimizer_enum is OptimizerEnum.OPTUNA_RANDOMSEARCH:
+        from HPOBenchExperimentUtils.optimizer.optuna_optimizer import OptunaRandomSearchOptimizer
+        optimizer = OptunaRandomSearchOptimizer
+    elif optimizer_enum is OptimizerEnum.OPTUNA_TPE_MEDIAN:
+        from HPOBenchExperimentUtils.optimizer.optuna_optimizer import OptunaTPEMedianStoppingOptimizer
+        optimizer = OptunaTPEMedianStoppingOptimizer
     else:
         raise ValueError(f'Unknown optimizer: {optimizer_enum}')
     return optimizer

@@ -5,6 +5,21 @@ optuna_tpe_hb:
   reduction_factor: 3
   display_name: "optuna tpe hb"
 
+optuna_cmaes_hb:
+  optimizer: optuna_cmaes_hb
+  reduction_factor: 3
+  display_name: "optuna cma-es hb"
+
+optuna_randomsearch:
+  optimizer: optuna_randomsearch
+  reduction_factor: 3
+  display_name: "optuna random search"
+
+optuna_tpe_median:
+  optimizer: optuna_tpe_median
+  reduction_factor: 3
+  display_name: "optuna tpe median stopping rule"
+
 # RAY with HB ######################################################################################################## #
 ray_hyperopt_no_fidelity:
   optimizer: ray_hyperopt_no_fidelity
