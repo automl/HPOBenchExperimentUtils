@@ -1,12 +1,11 @@
-from typing import List
+from typing import List, Optional
 import numpy as np
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-
-def create_trajectory(runhistory: List, bigger_is_better: bool, main_fidelity: str = None):
+def create_trajectory(runhistory: List, bigger_is_better: bool, main_fidelity: Optional[str] = None):
 
     trajectory = []
 

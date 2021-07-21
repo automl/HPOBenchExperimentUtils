@@ -17,7 +17,8 @@ _root_log.setLevel(level=logging.INFO)
 _log = logging.getLogger(__name__)
 
 
-def extract_trajectory(output_dir: Union[Path, str], debug: Union[bool, None] = False):
+def extract_trajectory(output_dir: Union[Path, str], debug: Union[bool, None] = False,
+                       main_fidelity: Union[str, None] = None):
     """
     We want to create a trajectory from the results of the previous optimization run.
     This method collects all runhistories which are in a certain output directory. Note that we search recursively
@@ -55,6 +56,11 @@ def extract_trajectory(output_dir: Union[Path, str], debug: Union[bool, None] = 
 
     debug: bool, None
         Enables the debug message logging.
+
+    main_fidelity: str, None
+        Some benchmarks have multiple fidelities. But this trajectory extraction does currently only support benchmarks
+        with a single fidelity. Thus, we need to specify a `main_fidelity` to extract the correct value.
+        It is obligatory to specify this parameter only if multiple fidelities are present in the runhistory.
     """
 
     _log.info('Start extracting the trajectories')
@@ -78,11 +84,11 @@ def extract_trajectory(output_dir: Union[Path, str], debug: Union[bool, None] = 
 
     for i_rh, (runhistory, runhistory_path) in enumerate(zip(runhistories, runhistory_paths)):
 
-        trajectory = create_trajectory(runhistory, bigger_is_better=True)
+        trajectory = create_trajectory(runhistory, bigger_is_better=True, main_fidelity=main_fidelity)
         # print_traj(trajectory)
         write_list_of_dicts_to_file(runhistory_path.parent / TRAJECTORY_V1_FILENAME, trajectory)
 
-        trajectory = create_trajectory(runhistory, bigger_is_better=False)
+        trajectory = create_trajectory(runhistory, bigger_is_better=False, main_fidelity=main_fidelity)
         # print_traj(trajectory)
         write_list_of_dicts_to_file(runhistory_path.parent / TRAJECTORY_V2_FILENAME, trajectory)
 

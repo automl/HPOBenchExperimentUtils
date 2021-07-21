@@ -185,7 +185,7 @@ def run_benchmark(optimizer: str,
                   f'Terminate Process after {time() - start_time}')
 
     _log.info(f'Extract the trajectories')
-    extract_trajectory(output_dir=output_dir, debug=debug)
+    extract_trajectory(output_dir=output_dir, debug=debug, main_fidelity=settings.get('main_fidelity', None))
 
     _log.info(f'Run Benchmark - Finished.')
     benchmark._shutdown()
