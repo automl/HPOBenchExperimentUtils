@@ -374,8 +374,8 @@ NASBench1shot1SearchSpace3Benchmark:
 
 # For CI (Github actions), we want to test a short benchmark
 OptimizerTestBenchmark:
-  time_limit_in_s: 1000
-  cutoff_in_s: 1000
+  time_limit_in_s: 10000
+  cutoff_in_s: 10000
   mem_limit_in_mb: 6000
   import_from: surrogates.paramnet_benchmark
   import_benchmark: ParamNetReducedPokerOnTimeBenchmark
