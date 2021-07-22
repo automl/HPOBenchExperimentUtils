@@ -221,7 +221,8 @@ def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Un
     for opt in opt_rh_dc:
         if not ("smac_hb" in opt
                 or "dehb" in opt
-                or "hpbands" in opt
+                or "hpbandster_bohb" in opt 
+                or "hpbandster_hb" in opt
                 ):
             _log.info(f'Neither smac, dehb nor hpband: {opt}')
             continue

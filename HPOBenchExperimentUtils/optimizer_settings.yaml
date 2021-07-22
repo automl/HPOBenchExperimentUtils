@@ -2,7 +2,7 @@
 # PURE RANDOMSEARCH################################################################################################### #
 randomsearch:
   optimizer: randomsearch
-  display_name: "random search"
+  display_name: "RS" #random search"
 
 # Autogluon HNAS ##################################################################################################### #
 autogluon:
@@ -10,7 +10,7 @@ autogluon:
   reduction_factor: 3
   scheduler: "hyperband_promotion"
   searcher: "bayesopt"
-  display_name: "autogluon"
+  display_name: "MoBster"
 
 # DEHB ############################################################################################################### #
 dehb:
@@ -41,7 +41,7 @@ dragonfly_default:
   optimizer: dragonfly
   init_iter_per_dim: 10
   init_capital_frac: 0.1 # Ignored since 'init_iter_per_dim' is present
-  display_name: "Dragonfly"
+  display_name: "Dragonfly" #DF"
 
 # DRAGONFLY REALTIME ################################################################################################# #
 dragonfly_realtime:
@@ -91,11 +91,11 @@ fabolas_mumbo:
 # SMAC ##################################################################################################### #
 smac_sf:
   optimizer: smac_sf
-  display_name: "SMAC SF"
+  display_name: "SMAC (RF)"
 
 smac_bo:
   optimizer: smac_bo
-  display_name: "SMAC BO"
+  display_name: "SMAC (GP)"
 
 smac_hb_eta_3:
   optimizer: smac_hb
@@ -125,7 +125,7 @@ smac_sh_eta_2:
 
 hpbandster_tpe:
   optimizer: hpbandster_tpe
-  display_name: "BOHB TPE"
+  display_name: "BO (KDE)"
 
 hpbandster_bohb_eta_3:
   optimizer: hpbandster_bohb

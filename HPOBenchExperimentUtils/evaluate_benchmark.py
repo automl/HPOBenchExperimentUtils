@@ -16,6 +16,19 @@ _log = logging.getLogger(__name__)
 
 
 if __name__ == "__main__":
+    opt_list = dict()
+    opt_list["rs"] = ["randomsearch", ]
+    opt_list["sf"] = opt_list["rs"] + ["smac_bo", "smac_sf", "hpbandster_tpe", "de"]
+    opt_list["hbs"] = opt_list["rs"] + ["hpbandster_hb_eta_3", "smac_hb_eta_3", "hpbandster_bohb_eta_3", "dehb"]
+    opt_list["mf"] = opt_list["hbs"] + ["dragonfly_default", "autogluon"]
+    opt_list["all"] = opt_list["rs"] + opt_list["sf"][1:] + opt_list["mf"][1:]
+    
+    opt_list["base"] = opt_list["rs"] + ["hpbandster_hb_eta_3"]
+    opt_list["smacs"] = opt_list["base"] + ["smac_sf", "smac_hb_eta_3"]
+    opt_list["bohbs"] = opt_list["base"] + ["hpbandster_bohb_eta_3", "hpbandster_tpe"]
+    opt_list["dehbs"] = opt_list["base"] + ["de", "dehb"]
+    opt_list["smacpaper"] = ["dragonfly_default", "smac_sf", "smac_hb_eta_3", "randomsearch", "hpbandster_hb_eta_3"]
+
     parser = argparse.ArgumentParser(prog='HPOBench Wrapper - Plotting tool',
                                      description='Plot the trajectories')
 
@@ -28,36 +41,10 @@ if __name__ == "__main__":
     parser.add_argument('--agg', choices=["mean", "median"], default="median")
     parser.add_argument('--unvalidated', action='store_true', default=False)
     parser.add_argument('--which', choices=["v1", "v2"], default="v1")
+    parser.add_argument('--opts', choices=opt_list.keys(), default="all")
     args, unknown = parser.parse_known_args()
 
-    if args.unvalidated:
-        list_of_opt_to_consider = ["autogluon",
-                                   "dragonfly_default", 
-                                   "randomsearch",
-                                   "smac_sf", 
-                                   "smac_hb_eta_3",
-                                   "smac_bo",
-                                   "dehb", 
-                                   "hpbandster_bohb_eta_3",
-                                   "hpbandster_hb_eta_3",
-                                   "hpbandster_tpe",
-                                   "de"
-                                   #"mumbo",
-                                   ]
-    else:
-        list_of_opt_to_consider = ["autogluon",
-                                   "dragonfly_default", 
-                                   "randomsearch",
-                                   "smac_sf", 
-                                   "smac_hb_eta_3",
-                                   "smac_bo",
-                                   "dehb", 
-                                   "hpbandster_bohb_eta_3",
-                                   "hpbandster_hb_eta_3",
-                                   "hpbandster_tpe",
-                                   "de"
-                                   #"mumbo",
-                                   ]
+    list_of_opt_to_consider = opt_list[args.opts]
 
     if args.rank is None:
         assert args.benchmark is not None, f"If rank={args.rank}, then --benchmark must be set"
