@@ -33,11 +33,11 @@ elif [[ "$OPTIMIZER" == "hpbandster_bohb_eta_3" ]];
 then
     install_packages="${install_packages}hpbandster,"
 
-elif [[ "$OPTIMIZER" == "ray_hyperopt_hb" ]];
+elif [[ "$OPTIMIZER" == "ray_hyperopt_asha" ]];
 then
     install_packages="${install_packages}ray_base,ray_hyperopt,"
 
-elif [[ "$OPTIMIZER" == "ray_bayesopt_hb" ]];
+elif [[ "$OPTIMIZER" == "ray_bayesopt_asha" ]];
 then
     install_packages="${install_packages}ray_base,ray_bayesopt,"
 
