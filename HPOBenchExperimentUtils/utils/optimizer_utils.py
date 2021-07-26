@@ -29,14 +29,12 @@ class OptimizerEnum(Enum):
     MUMBO = 'mumbo'
     PURE_RANDOMSEARCH = 'randomsearch'
     AUTOGLUON = 'autogluon'
-    RAY_HYPEROPT_HB = 'ray_hyperopt_hb'
-    RAY_BAYESOPT_HB = 'ray_bayesopt_hb'
-    RAY_OPTUNA_HB = 'ray_optuna_hb'
-    RAY_HYPEROPT_NO_FIDELITY = 'ray_hyperopt_no_fidelity'
+    RAY_HYPEROPT_ASHA = 'ray_hyperopt_asha'
+    RAY_BAYESOPT_ASHA = 'ray_bayesopt_asha'
+    RAY_HYPEROPT_NO_FIDELITY = 'ray_hyperopt'
     RAY_RANDOMSEARCH = 'ray_randomsearch'
-    RAY_BOHB = 'ray_bohb'
-    OPTUNA_TPE_HB = 'optuna_tpe_hb'
-    OPTUNA_CMAES_HB = 'optuna_cmaes_hb'
+    OPTUNA_TPE_ASHA = 'optuna_tpe_asha'
+    OPTUNA_CMAES_ASHA = 'optuna_cmaes_asha'
     OPTUNA_RANDOMSEARCH = 'optuna_randomsearch'
     OPTUNA_TPE_MEDIAN = 'optuna_tpe_median'
 
@@ -103,23 +101,19 @@ def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]) -> OptimizerEnum
         elif optimizer == 'randomsearch':
             return OptimizerEnum.PURE_RANDOMSEARCH
 
-        elif optimizer == 'ray_hyperopt_hb':
-            return OptimizerEnum.RAY_HYPEROPT_HB
-        elif optimizer == 'ray_bayesopt_hb':
-            return OptimizerEnum.RAY_BAYESOPT_HB
-        elif optimizer == 'ray_optuna_hb':
-            return OptimizerEnum.RAY_OPTUNA_HB
-        elif optimizer == 'ray_hyperopt_no_fidelity':
+        elif optimizer == 'ray_hyperopt_asha':
+            return OptimizerEnum.RAY_HYPEROPT_ASHA
+        elif optimizer == 'ray_bayesopt_asha':
+            return OptimizerEnum.RAY_BAYESOPT_ASHA
+        elif optimizer == 'ray_hyperopt':
             return OptimizerEnum.RAY_HYPEROPT_NO_FIDELITY
         elif optimizer == 'ray_randomsearch':
             return OptimizerEnum.RAY_RANDOMSEARCH
-        elif optimizer == 'ray_bohb':
-            return OptimizerEnum.RAY_BOHB
 
-        elif optimizer == 'optuna_tpe_hb':
-            return OptimizerEnum.OPTUNA_TPE_HB
-        elif optimizer == 'optuna_cmaes_hb':
-            return OptimizerEnum.OPTUNA_CMAES_HB
+        elif optimizer == 'optuna_tpe_asha':
+            return OptimizerEnum.OPTUNA_TPE_ASHA
+        elif optimizer == 'optuna_cmaes_asha':
+            return OptimizerEnum.OPTUNA_CMAES_ASHA
         elif optimizer == 'optuna_randomsearch':
             return OptimizerEnum.OPTUNA_RANDOMSEARCH
         elif optimizer == 'optuna_tpe_median':
@@ -179,28 +173,22 @@ def get_optimizer(optimizer_enum):
     elif optimizer_enum is OptimizerEnum.PURE_RANDOMSEARCH:
         from HPOBenchExperimentUtils.optimizer.randomsearch_optimizer import RandomSearchOptimizer
         optimizer = RandomSearchOptimizer
-    elif optimizer_enum is OptimizerEnum.RAY_HYPEROPT_HB:
+    elif optimizer_enum is OptimizerEnum.RAY_HYPEROPT_ASHA:
         from HPOBenchExperimentUtils.optimizer.ray_optimizer import RayHBHyperoptOptimizer
         optimizer = RayHBHyperoptOptimizer
-    elif optimizer_enum is OptimizerEnum.RAY_BAYESOPT_HB:
+    elif optimizer_enum is OptimizerEnum.RAY_BAYESOPT_ASHA:
         from HPOBenchExperimentUtils.optimizer.ray_optimizer import RayHBBayesOptOptimizer
         optimizer = RayHBBayesOptOptimizer
-    elif optimizer_enum is OptimizerEnum.RAY_OPTUNA_HB:
-        from HPOBenchExperimentUtils.optimizer.ray_optimizer import RayHBOptunaOptimizer
-        optimizer = RayHBOptunaOptimizer
     elif optimizer_enum is OptimizerEnum.RAY_HYPEROPT_NO_FIDELITY:
         from HPOBenchExperimentUtils.optimizer.ray_optimizer import RayHyperoptWithoutFidelityOptimizer
         optimizer = RayHyperoptWithoutFidelityOptimizer
     elif optimizer_enum is OptimizerEnum.RAY_RANDOMSEARCH:
         from HPOBenchExperimentUtils.optimizer.ray_optimizer import RayRandomSearchOptimizer
         optimizer = RayRandomSearchOptimizer
-    elif optimizer_enum is OptimizerEnum.RAY_BOHB:
-        from HPOBenchExperimentUtils.optimizer.ray_optimizer import RayBOHBOptimizer
-        optimizer = RayBOHBOptimizer
-    elif optimizer_enum is OptimizerEnum.OPTUNA_TPE_HB:
+    elif optimizer_enum is OptimizerEnum.OPTUNA_TPE_ASHA:
         from HPOBenchExperimentUtils.optimizer.optuna_optimizer import OptunaTPEHyperbandOptimizer
         optimizer = OptunaTPEHyperbandOptimizer
-    elif optimizer_enum is OptimizerEnum.OPTUNA_CMAES_HB:
+    elif optimizer_enum is OptimizerEnum.OPTUNA_CMAES_ASHA:
         from HPOBenchExperimentUtils.optimizer.optuna_optimizer import OptunaCMAESHyperBandOptimizer
         optimizer = OptunaCMAESHyperBandOptimizer
     elif optimizer_enum is OptimizerEnum.OPTUNA_RANDOMSEARCH:

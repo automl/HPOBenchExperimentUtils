@@ -155,7 +155,9 @@ class OptunaCMAESHyperBandOptimizer(OptunaHyperbandBaseOptimizer):
 
         self.sampler = CmaEsSampler(seed=rng)
 
-        logger.warning('The CMA-ES Sampler only supports benchmarks without categorical hyperparameter.')
+        if any((isinstance(hp, CS.OrdinalHyperparameter) for hp in self.cs.get_hyperparameters())):
+            logger.exception(f'Configuration Space with categorical hyperparameter: {self.cs}')
+            raise ValueError('The CMA-ES Sampler only supports benchmarks without categorical hyperparameter.')
 
 
 class OptunaTPEMedianStoppingOptimizer(OptunaHyperbandBaseOptimizer):

@@ -72,57 +72,6 @@ class RayBaseOptimizer(SingleFidelityOptimizer):
             tune.report(function_value=result_dict['function_value'], fidelity=budget)
 
 
-
-class RayBOHBOptimizer(RayBaseOptimizer):
-    def __init__(self,
-                 benchmark: Bookkeeper,
-                 settings: Dict,
-                 output_dir: Path,
-                 rng: Union[int, None] = 0):
-
-        from ray.tune.suggest.bohb import TuneBOHB
-        search_algorithm = TuneBOHB(max_concurrent=1)
-        super(RayBOHBOptimizer, self).__init__(benchmark, search_algorithm, settings, output_dir, rng)
-
-    def run(self):
-        self._setup_ray()
-
-        scheduler = AsyncHyperBandScheduler(max_t=self.max_budget,
-                                            grace_period=self.min_budget,
-                                            reduction_factor=self.settings['reduction_factor'],
-                                            time_attr='fidelity',
-                                            brackets=1)
-
-        self.valid_budgets = [self.max_budget] + [budget for (budget, _) in scheduler._brackets[0]._rungs]
-        self.valid_budgets = list(set(self.valid_budgets))
-        self.valid_budgets.sort()
-
-        from ray.tune.schedulers.hb_bohb import HyperBandForBOHB
-        self.scheduler = HyperBandForBOHB(max_t=self.max_budget,
-                                          reduction_factor=self.settings['reduction_factor'],
-                                          time_attr='fidelity')
-
-        tmp_dir = os.environ.get('TMPDIR', '/tmp/')
-
-        tune.run(partial(self._training_function,
-                         benchmark=self.benchmark,
-                         main_fidelity_name=self.main_fidelity.name,
-                         valid_budgets=self.valid_budgets,
-                         configspace=self.cs),
-                 metric='function_value',
-                 mode='min',
-
-                 # stop=lambda trial_id, results: False,
-                 verbose=Verbosity.V1_EXPERIMENT,
-                 config=self.cs_ray,
-                 search_alg=self.search_algorithm,
-                 scheduler=self.scheduler,   #  ray.tune.schedulers.FIFOScheduler(),  # FiFO is default scheduler
-                 resources_per_trial={"cpu": 1, "gpu": 0},
-                 local_dir=tmp_dir,
-                 # Set this to a very large number, so that this process runs is not bounded by the number of samples.
-                 num_samples=100000000000)
-
-
 class RayOptimizerWithoutFidelity(RayBaseOptimizer):
     def __init__(self,
                  benchmark: Bookkeeper,
@@ -279,20 +228,6 @@ class RayHBBayesOptOptimizer(RayHBBaseOptimizer):
                                                      output_dir=output_dir, rng=rng)
 
 
-class RayHBOptunaOptimizer(RayHBBaseOptimizer):
-    def __init__(self, benchmark: Bookkeeper,
-                 settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
-        from ray.tune.suggest.optuna import OptunaSearch
-
-        search_algorithm = OptunaSearch()
-
-        super(RayHBOptunaOptimizer, self).__init__(benchmark=benchmark,
-                                                   search_algorithm=search_algorithm,
-                                                   settings=settings,
-                                                   output_dir=output_dir, rng=rng)
-
-
-
 def configspace_to_ray_cs(cs: ConfigurationSpace):
     ray_cs = {}
     for hp_name in cs:
@@ -343,8 +278,8 @@ def fix_config_data_types(configuration: Dict, configuration_space: CS.Configura
     return config
 
 
-__all__ = [RayHyperoptWithoutFidelityOptimizer, RayRandomSearchOptimizer, RayBOHBOptimizer,
-           RayHBOptunaOptimizer, RayHBBayesOptOptimizer, RayHBHyperoptOptimizer]
+__all__ = [RayHyperoptWithoutFidelityOptimizer, RayRandomSearchOptimizer,
+           RayHBBayesOptOptimizer, RayHBHyperoptOptimizer]
 
 #
 # if __name__ == '__main__':
