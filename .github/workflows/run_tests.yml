@@ -26,17 +26,17 @@ jobs:
             SINGULARITY_VERSION: "3.6"
             OPTIMIZER: "hpbandster_bohb_eta_3"
           - python-version: 3.7
-            DISPLAY_NAME: "Optimizer ray_hyperopt_hb - Py 3.7 - Singularity 3.6"
+            DISPLAY_NAME: "Optimizer ray_hyperopt_asha - Py 3.7 - Singularity 3.6"
             SINGULARITY_VERSION: "3.6"
-            OPTIMIZER: "ray_hyperopt_hb"
+            OPTIMIZER: "ray_hyperopt_asha"
           - python-version: 3.7
-            DISPLAY_NAME: "Optimizer ray_bayesopt_hb - Py 3.7 - Singularity 3.6"
+            DISPLAY_NAME: "Optimizer ray_bayesopt_asha - Py 3.7 - Singularity 3.6"
             SINGULARITY_VERSION: "3.6"
-            OPTIMIZER: "ray_bayesopt_hb"
+            OPTIMIZER: "ray_bayesopt_asha"
           - python-version: 3.7
-            DISPLAY_NAME: "Optimizer ray_optuna_hb - Py 3.7 - Singularity 3.6"
+            DISPLAY_NAME: "Optimizer optuna_tpe_asha - Py 3.7 - Singularity 3.6"
             SINGULARITY_VERSION: "3.6"
-            OPTIMIZER: "ray_optuna_hb"
+            OPTIMIZER: "optuna_tpe_asha"
           - python-version: 3.7
             DISPLAY_NAME: "Optimizer smac_hb_eta_3 - Py 3.7 - Singularity 3.6"
             SINGULARITY_VERSION: "3.6"
