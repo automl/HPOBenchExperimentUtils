@@ -33,6 +33,7 @@
 
     cd HPOBenchExperimentUtils
     pip install -r requirements.txt
+    cd ..
 
 #### Installing HPOBench
 
@@ -40,7 +41,6 @@
     pip install -r requirements.txt
     pip install .
     cd ..
-    ...
 
 #### Installing Optimizers
 
