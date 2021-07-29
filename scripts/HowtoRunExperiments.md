@@ -26,7 +26,12 @@
     conda create -n hpobench_37
     conda install python=3.7
 
-#### Install SMAC
+#### Installing Optimizers
+
+```diff
+-TODO: Update this with the respective pip install cmds
+```
+
     conda install gxx_linux-64 gcc_linux-64 swig   
     pip install smac[all]
 
@@ -51,8 +56,12 @@
 
 ### 4) Edit startup.sh
 
+ Edit startup script, s.t.
+   1) PYTHONPATH points to the correct DEHB location
+   2) it loads the correct Conda environment
+
     nano HPOBenchExperimentUtils/scripts/startup.sh 
-    # edit PYTHONPATH to point to correct DEHB location
+    
 
 ### 5) Create cmd files, e.g.
 
@@ -92,37 +101,52 @@ Rule of thumbs for surrogate experiments
 
 Rule of thumbs for other experiments: They will take exactly as long as described in [here](https://github.com/automl/HPOBenchExperimentUtils/blob/master/HPOBenchExperimentUtils/benchmark_settings.yaml)
 
+If the experiments run, mark them in the spreadsheet as `or` (optimization run)
+
 ### 7) Some sanity checks
 
 Once a couple of experiments are done, here are some sanity checks
 
 #### Check whether all runs completed
 
-**How**: v1 is always written, v2 only if the run is completed correctly. If there are different numbers of file, figure out which runs does not have *v2*
+Each run will write some output and trajectories. v1 is always written, v2 only if the run is completed correctly. If there are different numbers of file, figure out which runs does not have *v2*
 
     ls  exp_outputs/ParamNetReducedOp*/smac_*/run-*/*v2* | wc -l
     ls  exp_outputs/ParamNetReducedOp*/smac_*/run-*/*v1* | wc -l
+    
+If for one experiment and all optimizers you have enough runs, mark them in the spreadsheet as `od` (optimization done)
 
-##### Why 1: mem-outs
+#### Reasons for missing runs
+
+###### Reason 1: mem-outs
+
+Grep for `oom` in the sgeout logs since the cluster might have killed your jobs.
 
     grep oom sgeout/run_paramnettime_smac*
 
-Sometimes 12GB are just not enough. In this case there is nothing you can do. But, please note if this happened.
+Sometimes 12GB are just not enough. In this case there is nothing you can do. 
 
-##### Why 2: The optimizer is just too slow to run within 4 days. In this case check the last line of the runhistory in this folder. 
+if this happened, add a note to the spreadsheet.
+
+###### Reason 2: The optimizer is too slow to run within 4 days.
+
+Check the last line of the runhistory in this folder. 
 
     tail -n 1 exp_outputs/ParamNetReducedOp*/smac_bo/run-4/hpobench_runhistory.txt 
     head -n 1 exp_outputs/ParamNetReducedOp*/smac_bo/run-4/hpobench_runhistory.txt 
 
-The value of total_time_used tells you how much of the given budget the experiment used (=simulated runtime)
-If you subtract boot_time from finish_time you get the actual runtime for that job. In this case there is nothing you can do. But, please note if this happened.
+The value of `total_time_used` tells you how much of the given budget the experiment used (=simulated runtime)
+If you subtract `boot_time` from `finish_time` you get the actual runtime for that job. In this case there is nothing you can do. 
 
-##### Why 3: Other reasons
-Also check a few other runs from that optimizer on that benchmark to see whether one run looks suspicious. Please rerun these.
+If this happened, add a note to the spreadsheet.
 
-##### Fix 1: If the reasons are unclear, here's what you can do: Remove the directory of that run, e.g. run-23, and run the whole batch job again. The experiments are written s.t. only jobs for which the output file does not exist run.
+###### Reason 3: Other reasons
+If none of the above applies, check respective log of the missing run. If all runs of one optimizer are missing this is most likely because the optimizer does not run on this benchmark. If there are only a few runs missing, please rerun these (see fix1)
 
-##### Fix 2: If there reasons are slow optimizers or memouts, here's what you can do:
+#### Potential fixes
+
+  1) If the reasons are unclear, here's what you can do: Remove the directory of that run, e.g. run-23, and run the whole batch job again. The experiments are written s.t. only jobs for which the output file does not exist run.
+  2) If there reasons are slow optimizers or memouts, here's what you can do:
 
     python HPOBenchExperimentUtils/extract_trajectory.py --output_dir exp_outputs/ParamNetReducedMnist*/dragonfly_*/ --debug
 
@@ -139,5 +163,3 @@ To get the *.tex table:
     for i in plots_tab/result_table_*_v1.tex; do head -n 5 $i | tail -n 1; done
 
 Also at least once open the *stats* file for each experiment and scan it for suspicious outliers.
-
-### 9) Finally, mark the experiment as completed and continue
