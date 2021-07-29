@@ -26,8 +26,37 @@
     conda create -n hpobench_37
     conda activate hpobench_37
     conda install python=3.7
+
+
+#### Installing HPOBench
     
+    pip install -e "HPOBench/."
+    
+Create the Hpobenchrc file and adapt it. To create it, simply import hpobench
+
+    python -c "import hpobench; print(hpobench.__version__)"
+    vim ~/.config/hpobench/.hpobenchrc
+    
+I have changed the container_dir, data_dir to point to the workspace. 
+Now, it looks like that:
+
+    cache_dir: /home/muelleph/.cache/hpobench
+    container_dir: /work/dlclarge2/muelleph-HPOBENCH/DataDir/Container
+    container_source: oras://gitlab.tf.uni-freiburg.de:5050/muelleph/hpobench-registry
+    data_dir: /work/dlclarge2/muelleph-HPOBENCH/DataDir/Data
+    pyro_connect_max_wait: 400
+    socket_dir: /tmp/hpobench_socket_XYZ/
+    verbosity: 0
+    version: 0.0.8
+
+**IMPORTANT NOTE**: PLEASE CHANGE THE SOCKET_DIR to something which does not exist. We run into problems when all of us use the same socket dir!!
+ 
 #### Installing HPOBenchExperimentUtils    
+
+   
+**Note:** To install the package while using the local files, use `the -e` (editable) flag. You can then modify your code as you like. Also, you don't have to reinstall after making a change. 
+    
+    pip install -e "HPOBenchExperimentUtils/."
 
 **Note:** I usually don't install this repo, because I like to edit scripts for plotting and defining experiments.
 
@@ -35,34 +64,30 @@
     pip install -r requirements.txt
     cd ..
 
-#### Installing HPOBench
 
-    cd HPOBench
-    pip install -r requirements.txt
-    pip install .
-    cd ..
-
-#### Installing Optimizers
-
-```diff
--TODO: Update this with the respective pip install cmds
-```
-
+#### Install the Optimizers
+##### Installing all Optimizers at once
+    
+    pip install -e "HPOBenchExperimentUtils/.[autogluon,dehb,dragonfly,hpbandster,optuna,smac]"
+    
+    
+##### Install SMAC
+    
     pip install smac[all]
 
-#### Install DEHB
+##### Install DEHB
     cd DEHB
     pip install -r requirements.txt 
     cd ..
 
-#### Install HPBandSter
+##### Install HPBandSter
     pip install hpbandster
 
-#### Install Dragonfly
+##### Install Dragonfly
     pip install dragonfly-opt -v
 
-#### Install AutoGluon
-    TBD
+##### Install AutoGluon
+    pip install setuptools mxnet<2.0.0 autogluon==0.2.0
 
 ### 4) Edit startup.sh
 
@@ -86,9 +111,9 @@ We will first create cmd files and then submit them as batch jobs to the cluster
 Then created the files, e.g. 
 
     EXP=NAS201
-    for OPT in rs dehb hpband smac autogluon dragonfly sf
+    for OPT in rs dehb hpband smac autogluon dragonfly sf optuna ray
     do
-        python create_cmd.py --opt $OPT --nrep 32 --exp $EXP
+        python ./scripts/create_cmd.py --opt $OPT --nrep 32 --exp $EXP
     done
 
 This will create many \*.cmd files. Each line of each script needs to be run on the cluster.
@@ -97,6 +122,20 @@ This will create many \*.cmd files. Each line of each script needs to be run on 
   * evalunv_* creates plots on the optimized performance
   * val_* would validate all trajectories and compute the test trajectory (not needed)
   * eval_* creates plots on the test performance (not needed)
+
+To specify the result_dir and the validation directory, use:
+
+    EXP=NAS201
+    root=/Path/to/HPOBenchExperimentUtils/scripts
+    out-run=/Path/to/RunResults (defaults to ./exp_outputs)
+    out-eval=/Path/to/EvaluationResults (defaults to ./plots)
+    out-cmds=/Path/to/CMD-files/ (defaults to .)
+    
+    for OPT in rs dehb hpband smac autogluon dragonfly sf optuna ray
+    do
+        python ./HPOBenchExperimentUtils/create_cmd.py --opt $OPT --nrep 32 --exp $EXP \
+            --out-run $out_run --out-eval $out_eval --out-cmd $out_cmd --root $root;
+    done
 
 ### 6) Run experiments
 
