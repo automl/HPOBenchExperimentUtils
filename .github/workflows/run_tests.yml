@@ -34,9 +34,9 @@ jobs:
             SINGULARITY_VERSION: "3.6"
             OPTIMIZER: "ray_bayesopt_asha"
           - python-version: 3.7
-            DISPLAY_NAME: "Optimizer optuna_tpe_asha - Py 3.7 - Singularity 3.6"
+            DISPLAY_NAME: "Optimizer optuna_tpe_hb - Py 3.7 - Singularity 3.6"
             SINGULARITY_VERSION: "3.6"
-            OPTIMIZER: "optuna_tpe_asha"
+            OPTIMIZER: "optuna_tpe_hb"
           - python-version: 3.7
             DISPLAY_NAME: "Optimizer smac_hb_eta_3 - Py 3.7 - Singularity 3.6"
             SINGULARITY_VERSION: "3.6"

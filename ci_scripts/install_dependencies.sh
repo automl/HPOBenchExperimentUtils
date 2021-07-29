@@ -41,7 +41,7 @@ elif [[ "$OPTIMIZER" == "ray_bayesopt_asha" ]];
 then
     install_packages="${install_packages}ray_base,ray_bayesopt,"
 
-elif [[ "$OPTIMIZER" == "optuna_tpe_asha" ]];
+elif [[ "$OPTIMIZER" == "optuna_tpe_hb" ]];
 then
     install_packages="${install_packages}optuna,"
 
