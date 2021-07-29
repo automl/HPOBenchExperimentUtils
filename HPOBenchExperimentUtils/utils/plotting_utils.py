@@ -380,7 +380,7 @@ plot_dc = {
         "cylim": [0.4, 1.1],
         "xscale": "log",
         "yscale": "log",
-        # from stats json file Mar 18th
+        # from stats json file Mar 25th
         "ystar_valid": 0.14413888573646547,
         "ystar_test": 0,
     },
@@ -391,7 +391,7 @@ plot_dc = {
         "cylim": [0.4, 1.1],
         "xscale": "log",
         "yscale": "log",
-        # from stats json file Mar 18th
+        # from stats json file Mar 25th
         "ystar_valid": 0.2772739828301669,
         "ystar_test": 0,
     },
@@ -402,8 +402,8 @@ plot_dc = {
         "cylim": [0.4, 1.1],
         "xscale": "log",
         "yscale": "log",
-        # from stats json file ?
-        "ystar_valid": 0,
+        # from stats json file Mar 25th
+        "ystar_valid": 0.03344640258559809,
         "ystar_test": 0,
     },
     "ParamNetReducedMnistOnTimeBenchmark": {
@@ -413,8 +413,8 @@ plot_dc = {
         "cylim": [0.4, 1.1],
         "xscale": "log",
         "yscale": "log",
-        # from stats json file Mar 18th
-        "ystar_valid": 0.015233332014481238,
+        # from stats json file Mar 25th
+        "ystar_valid": 0.015160002479553214,
         "ystar_test": 0,
     },
     "ParamNetReducedOptdigitsOnTimeBenchmark": {
@@ -424,7 +424,7 @@ plot_dc = {
         "cylim": [0.4, 1.1],
         "xscale": "log",
         "yscale": "log",
-        # from stats json file Mar 18th
+        # from stats json file Mar 25th
         "ystar_valid": 0.013435238033940667,
         "ystar_test": 0,
     },
@@ -435,8 +435,8 @@ plot_dc = {
         "cylim": [0.4, 1.1],
         "xscale": "log",
         "yscale": "log",
-        # from stats json file Mar 18th
-        "ystar_valid": 0.000288576907347371,
+        # from stats json file Mar 25th
+        "ystar_valid": 0.00026607234795810174,
         "ystar_test": 0,
     },
     "NASCifar10ABenchmark_fixed_seed_0": {
@@ -568,7 +568,7 @@ marker_per_opt = {
 }
 
 
-def unify_layout(ax, fontsize=15, legend_args=None, title=None, add_legend=True):
+def unify_layout(ax, fontsize=20, legend_args=None, title=None, add_legend=True):
     if legend_args is None:
         legend_args = {}
     if add_legend:

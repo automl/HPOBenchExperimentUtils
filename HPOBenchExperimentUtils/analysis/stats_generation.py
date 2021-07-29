@@ -205,7 +205,7 @@ def plot_ecdf(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pat
 
 def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
                      opt_list: Union[List[str], None] = None, **kwargs):
-    _log.info(f'Start plotting corralations for benchmark {benchmark}')
+    _log.info(f'Start plotting correlations for benchmark {benchmark}')
     input_dir = Path(input_dir) / benchmark
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
     opt_rh_dc = load_trajectories_as_df(input_dir=input_dir,
@@ -221,7 +221,8 @@ def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Un
     for opt in opt_rh_dc:
         if not ("smac_hb" in opt
                 or "dehb" in opt
-                or "hpbands" in opt
+                or "hpbandster_bohb" in opt 
+                or "hpbandster_hb" in opt
                 ):
             _log.info(f'Neither smac, dehb nor hpband: {opt}')
             continue
@@ -285,7 +286,6 @@ def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Un
     a.set_xlabel("Fidelity value")
     a.set_ylabel("Spearman correlation coefficient")
     a.set_ylim(benchmark_spec.get("cylim", [-1, 1]))
-    print(a.get_ylim())
     a.set_xscale("log")
     unify_layout(a, legend_args={"title": "Fidelity value"})
     plt.tight_layout()

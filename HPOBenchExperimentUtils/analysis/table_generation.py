@@ -16,7 +16,7 @@ _main_log.setLevel(logging.DEBUG)
 _log = logging.getLogger(__name__)
 
 
-def write_latex(result_df, output_file):
+def write_latex(result_df, output_file, col_list):
     replace_dc = {
         '\\{': "{",
         "\\}": "}",
@@ -41,19 +41,19 @@ def write_latex(result_df, output_file):
         'Cifar10ValidNasBench201Benchmark': r"\nbcifartv",
         'Cifar100NasBench201Benchmark': r"\nbcifarh",
         'ImageNetNasBench201Benchmark': r"\nbimage",
-        "ParamNetAdultOnTimeBenchmark": r"\paramadult",
-        "ParamNetHiggsOnTimeBenchmark": r"\paramhiggs",
-        "ParamNetLetterOnTimeBenchmark": r"\paramletter",
-        "ParamNetMnistOnTimeBenchmark": r"\parammnist",
-        "ParamNetOptdigitsOnTimeBenchmark": r"\paramoptdigits",
-        "ParamNetPokerOnTimeBenchmark": r"\parampoker",
+        "SurrogateSVMBenchmark": r"\nsvmsurro",
+        "ParamNetReducedAdultOnTimeBenchmark": r"\paramadult",
+        "ParamNetReducedHiggsOnTimeBenchmark": r"\paramhiggs",
+        "ParamNetReducedLetterOnTimeBenchmark": r"\paramletter",
+        "ParamNetReducedMnistOnTimeBenchmark": r"\parammnist",
+        "ParamNetReducedOptdigitsOnTimeBenchmark": r"\paramoptdigits",
+        "ParamNetReducedPokerOnTimeBenchmark": r"\parampoker",
         "NASBench1shot1SearchSpace1Benchmark": r"\NASOSOA",
         "NASBench1shot1SearchSpace2Benchmark": r"\NASOSOB",
         "NASBench1shot1SearchSpace3Benchmark": r"\NASOSOC",
     }
-
     with open(output_file, 'w') as fh:
-        latex = result_df.to_latex(index_names=False, index=False)
+        latex = result_df.to_latex(index_names=False, index=False, columns=["benchmark"] + col_list)
         for i in replace_dc:
             latex = latex.replace(i, replace_dc[i])
         print(latex)
@@ -84,8 +84,8 @@ def save_median_table(benchmark: str, output_dir: Union[Path, str], input_dir: U
     if opt_list is None:
         opt_list = keys
     result_df = pd.DataFrame()
-    for key in keys:
-        if key not in opt_list:
+    for key in opt_list:
+        if key not in keys:
             _log.info(f'Skip {key}')
             continue
         trajectories = load_json_files(unique_optimizer[key])
@@ -194,4 +194,4 @@ def save_median_table(benchmark: str, output_dir: Union[Path, str], input_dir: U
         output_file = Path(output_dir) / f'result_table_{benchmark}_{val_str}_{which}_{int(thresh*100)}.tex'
     else:
         output_file = Path(output_dir) / f'result_table_{benchmark}_{val_str}_{which}.tex'
-    write_latex(result_df=result_df, output_file=output_file)
+    write_latex(result_df=result_df, output_file=output_file, col_list=opt_list)
