@@ -512,6 +512,9 @@ color_dc = {
     "red": '#e41a1c',
     "blue": '#377eb8',
     "grey": '#999999',
+    "light_blue": '#a6cee3',
+    "light_brown": '#fdbf6f',
+    "light_purple": '#cab2d6',
     }
 
 color_per_opt = {
@@ -527,6 +530,16 @@ color_per_opt = {
     "dragonfly_default": color_dc["pink"],
     "dehb": color_dc["grey"],
     "autogluon": color_dc["yellow"],
+    "ray_bayesopt_hb": color_dc["purple"],
+    "ray_hyperopt_hb": color_dc["light_blue"],
+    "ray_optuna_hb": color_dc["red"],
+    "ray_hyperopt_no_fidelity": color_dc['blue'],
+    "ray_randomsearch": color_dc['light_brown'],
+    "ray_bohb": color_dc['light_purple'],
+    'optuna_tpe_hb': color_dc['light_brown'],
+    'optuna_cmaes_hb': color_dc['purple'],
+    'optuna_randomsearch': color_dc['light_blue'],
+    'optuna_tpe_median': color_dc['yellow'],
 }
 
 marker_per_opt = {
@@ -542,6 +555,16 @@ marker_per_opt = {
     "dragonfly_default": "^",
     "dehb": "*",
     "autogluon": "o",
+    "ray_bayesopt_hb": "x",
+    "ray_hyperopt_hb": "x",
+    "ray_optuna_hb": "x",
+    "ray_hyperopt_no_fidelity": "x",
+    "ray_randomsearch": "x",
+    "ray_bohb": "x",
+    'optuna_tpe_hb': "X",
+    'optuna_cmaes_hb': "X",
+    'optuna_randomsearch': "X",
+    'optuna_tpe_median': "X",
 }
 
 

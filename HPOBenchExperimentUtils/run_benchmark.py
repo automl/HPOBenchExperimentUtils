@@ -113,7 +113,7 @@ def run_benchmark(optimizer: str,
         raise NotADirectoryError('The directory for the resource file does not exist. Please create it.'
                                  f'Given directory was: {resource_file_dir}')
 
-    resource_file_dir = resource_file_dir / NamedTemporaryFile().name
+    resource_file_dir = Path(NamedTemporaryFile(dir=resource_file_dir).name)
     resource_file_dir = resource_file_dir.expanduser().absolute()
     resource_file_dir.mkdir(exist_ok=True, parents=True)
 
@@ -185,7 +185,7 @@ def run_benchmark(optimizer: str,
                   f'Terminate Process after {time() - start_time}')
 
     _log.info(f'Extract the trajectories')
-    extract_trajectory(output_dir=output_dir, debug=debug)
+    extract_trajectory(output_dir=output_dir, debug=debug, main_fidelity=settings.get('main_fidelity', None))
 
     _log.info(f'Run Benchmark - Finished.')
     benchmark._shutdown()

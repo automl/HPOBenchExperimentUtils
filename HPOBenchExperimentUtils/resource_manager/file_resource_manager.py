@@ -42,7 +42,8 @@ class FileBasedResourceManager(BaseResourceManager):
         if not self.resource_file.exists():
             default_resources = self.get_default_resources()
             self.set_resources_without_lock(default_resources)
-            logger.info('Could not find resource file. Create a new one with the default resources.')
+            logger.info('Could not find resource file. Create a new one with the default resources here: '
+                        f'{self.resource_file}.')
             return default_resources
 
         with self.resource_file.open('r') as fh:
