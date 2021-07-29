@@ -24,7 +24,22 @@
 ### 3) Create Python Env
 
     conda create -n hpobench_37
+    conda activate hpobench_37
     conda install python=3.7
+    
+#### Installing HPOBenchExperimentUtils    
+
+**Note:** I usually don't install this repo, because I like to edit scripts for plotting and defining experiments.
+
+    cd HPOBenchExperimentUtils
+    pip install -r requirements.txt
+
+#### Installing HPOBench
+
+    cd HPOBench
+    pip install -r requirements.txt
+    pip install .
+    ...
 
 #### Installing Optimizers
 
@@ -48,11 +63,6 @@
 
 #### Install AutoGluon
     TBD
-
-#### Install HPOBench
-    cd HPOBench
-    pip install -r requirements.txt
-    pip install .
 
 ### 4) Edit startup.sh
 
