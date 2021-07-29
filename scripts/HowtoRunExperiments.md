@@ -76,6 +76,10 @@
 
 ### 5) Create cmd files, e.g.
 
+**note** from now on all commands should be exectued from within this repo (at least I haven't tried running them somwhere else), i.e. 
+
+    cd HPOBenchExperimentUtils
+
 First, have a look at this [spreadsheet](https://docs.google.com/spreadsheets/d/1SYFAsL7bm9WhSHwdmdpxK4S7M8ASoAfl4TEA8AtrV4E/edit#gid=1492359258). Then pick an experiment that has not yet been run. There you can also see how much memory your experiment needs. If your experiment is not yet listed, please create a new row/column.
 
 We will first create cmd files and then submit them as batch jobs to the cluster. Please look at `scripts/create_cmd.py`; It is easier to read than to explain, if not ask me.
