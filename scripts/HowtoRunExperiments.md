@@ -48,7 +48,6 @@
 -TODO: Update this with the respective pip install cmds
 ```
 
-    conda install gxx_linux-64 gcc_linux-64 swig   
     pip install smac[all]
 
 #### Install DEHB
