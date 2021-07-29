@@ -127,8 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-/.idea/
-/experiments/
 
-# Local scripts directory
-local_scripts
+# Custom stuff
+/.idea/
+experiments/
+test/
+local_scripts/
