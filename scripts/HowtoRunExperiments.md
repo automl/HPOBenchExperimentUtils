@@ -66,28 +66,8 @@ Now, it looks like that:
 
 
 #### Install the Optimizers
-##### Installing all Optimizers at once
     
     pip install -e "HPOBenchExperimentUtils/.[autogluon,dehb,dragonfly,hpbandster,optuna,smac]"
-    
-    
-##### Install SMAC
-    
-    pip install smac[all]
-
-##### Install DEHB
-    cd DEHB
-    pip install -r requirements.txt 
-    cd ..
-
-##### Install HPBandSter
-    pip install hpbandster
-
-##### Install Dragonfly
-    pip install dragonfly-opt -v
-
-##### Install AutoGluon
-    pip install setuptools mxnet<2.0.0 autogluon==0.2.0
 
 ### 4) Edit startup.sh
 
@@ -168,6 +148,7 @@ Each run will write some output and trajectories. v1 is always written, v2 only 
     ls  exp_outputs/ParamNetReducedOp*/smac_*/run-*/*v1* | wc -l
     
 If for one experiment and all optimizers you have enough runs, mark them in the spreadsheet as `od` (optimization done)
+Finally, check which optimizers produced extra files. You only need `hpobench_runhistory.txt, hpobench_trajectory_v1.txt, hpobench_trajectory_v2.txt`, other files, such as `own_trajectory.json` (random search), `run-*` (smac) can and **should** be deleted to free space.
 
 #### Reasons for missing runs
 
