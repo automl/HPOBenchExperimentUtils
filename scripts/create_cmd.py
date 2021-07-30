@@ -2,7 +2,6 @@ import argparse
 import os
 from hpobench.util.openml_data_manager import get_openmlcc18_taskids
 
-
 expset_dc = {
     "NAS201": ["Cifar10ValidNasBench201Benchmark", "Cifar100NasBench201Benchmark",
                "ImageNetNasBench201Benchmark"],
@@ -25,7 +24,7 @@ expset_dc = {
     "svm": ["svm", ],
     "xgboostsub": ["xgboostsub", ],
     "xgboostest": ["xgboostest", ],
-    "seeds": ["NASCifar10ABenchmark_fixed_seed_0", "NASCifar10ABenchmark_random_seed", 
+    "seeds": ["NASCifar10ABenchmark_fixed_seed_0", "NASCifar10ABenchmark_random_seed",
               "ProteinStructureBenchmark_fixed_seed_0", "ProteinStructureBenchmark_random_seed",
               "Cifar10ValidNasBench201Benchmark_fixed_seed_777", "Cifar10ValidNasBench201Benchmark_random_seed", ],
 }
@@ -40,6 +39,8 @@ opt_set = {
     "fabolas": ["fabolas_mtbo", "fabolas_mumbo"],
     "mumbo": ["mumbo", ],
     "sf": ["smac_bo", "hpbandster_tpe", "de"],
+    "optuna": ["optuna_tpe_hb", "optuna_cmaes_hb", "optuna_tpe_median"],
+    "ray": ["ray_hyperopt", "ray_randomsearch", "ray_hyperopt_asha"],
 }
 
 
@@ -66,7 +67,7 @@ def main(args):
 
     for benchmark in expset_dc[exp]:
         for optimizer in opt_set[opt]:
-            for seed in range(1, nrep+1):
+            for seed in range(1, nrep + 1):
                 if benchmark in ["svm", "xgboostsub", "xgboostest"]:
                     for tid in get_openmlcc18_taskids():
                         cmd = "%s/run_benchmark.py --output_dir %s --optimizer %s --benchmark %s" \
@@ -77,7 +78,7 @@ def main(args):
                     cmd = "%s/run_benchmark.py --output_dir %s --optimizer %s --benchmark %s " \
                           "--rng %s" % (base, args.out_run, optimizer, benchmark, seed)
                     run_cmd.append(cmd)
-            
+
         if opt == "rs":
             # We only need this once since it works for all optimizers
             cmd = f"{base}/evaluate_benchmark.py --output_dir {args.out_eval}/ --input_dir {args.out_run}/ --benchmark {benchmark} " \
@@ -95,11 +96,12 @@ def main(args):
                 evalu_cmd.append(cmd)
 
             cmd = "%s/validate_benchmark.py start_scheduler --interface eno1 --recompute_all --benchmark %s " \
-              "--output_dir %s/%s --run_id %s --worker_id 0" % (base, benchmark, args.out_run, benchmark, benchmark)
+                  "--output_dir %s/%s --run_id %s --worker_id 0" % (base, benchmark, args.out_run, benchmark, benchmark)
             val_cmd.append(cmd)
             for i in range(nworker):
                 cmd = "sleep 360; %s/validate_benchmark.py start_worker --interface eno1 --benchmark %s " \
-                      "--output_dir %s/%s --run_id %s --worker_id %d" % (base, benchmark, args.out_run, benchmark, benchmark, i+1)
+                      "--output_dir %s/%s --run_id %s --worker_id %d" % (
+                      base, benchmark, args.out_run, benchmark, benchmark, i + 1)
                 val_cmd.append(cmd)
 
     for c, f in [[run_cmd, run_fl], [eval_cmd, eval_fl],
@@ -128,9 +130,9 @@ if __name__ == "__main__":
     parser.add_argument('--nrep', default=10, type=int)
     parser.add_argument('--out-run', default="./exp_outputs", type=str)
     parser.add_argument('--out-eval', default="./plots", type=str)
-    parser.add_argument('--out-cmd', default="./", type=str)
-    parser.add_argument('--root', default="./")
+    parser.add_argument('--out-cmd', default=".", type=str)
+    parser.add_argument('--root', default=".")
     parser.add_argument('--nworker', default=50)
-    
+
     args, unknown = parser.parse_known_args()
     main(args)
