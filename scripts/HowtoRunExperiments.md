@@ -67,7 +67,7 @@ Now, it looks like that:
 
 #### Install the Optimizers
     
-    pip install -e "HPOBenchExperimentUtils/.[autogluon,dehb,dragonfly,hpbandster,optuna,smac]"
+    pip install -e "HPOBenchExperimentUtils/.[autogluon,dehb,dragonfly,hpbandster,optuna,smac,ray_base,ray_hyperopt,ray_bayesopt]"
 
 ### 4) Edit startup.sh
 
