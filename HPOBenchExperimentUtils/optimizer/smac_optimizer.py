@@ -6,7 +6,7 @@ from typing import Union, Dict, Type
 import ConfigSpace as CS
 import numpy as np
 
-from smac.facade.smac_bohb_facade import BOHB4HPO
+from smac.facade.smac_mf_facade import SMAC4MF
 from smac.facade.smac_hpo_facade import SMAC4HPO
 from smac.facade.smac_bo_facade import SMAC4BO
 from smac.intensification.hyperband import Hyperband
@@ -45,15 +45,15 @@ class SMACOptimizer(SingleFidelityOptimizer):
         return Scenario(scenario_dict)
 
     def _setupsmac(self, scenario, optimization_function_wrapper):
-        smac = BOHB4HPO(scenario=scenario,
-                        rng=np.random.RandomState(self.rng),
-                        tae_runner=optimization_function_wrapper,
-                        intensifier=self.intensifier,
-                        intensifier_kwargs={'initial_budget': self.min_budget,
-                                            'max_budget': self.max_budget,
-                                            'eta': self.settings['eta'],
-                                            }
-                        )
+        smac = SMAC4MF(scenario=scenario,
+                       rng=np.random.RandomState(self.rng),
+                       tae_runner=optimization_function_wrapper,
+                       intensifier=self.intensifier,
+                       intensifier_kwargs={'initial_budget': self.min_budget,
+                                           'max_budget': self.max_budget,
+                                           'eta': self.settings['eta'],
+                                           }
+                       )
         return smac
 
     def run(self):
