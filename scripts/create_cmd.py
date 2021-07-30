@@ -40,7 +40,7 @@ opt_set = {
     "mumbo": ["mumbo", ],
     "sf": ["smac_bo", "hpbandster_tpe", "de"],
     "optuna": ["optuna_tpe_hb", "optuna_cmaes_hb", "optuna_tpe_median"],
-    "ray": ["ray_hyperopt", "ray_randomsearch", "ray_hyperopt_asha", "ray_bayesopt_asha"],
+    "ray": ["ray_hyperopt", "ray_randomsearch", "ray_hyperopt_asha"],
 }
 
 
