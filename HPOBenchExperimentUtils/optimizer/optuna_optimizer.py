@@ -1,4 +1,5 @@
 import logging
+import numpy as np
 from functools import partial
 from pathlib import Path
 from typing import Union, Dict, List
@@ -77,23 +78,16 @@ class OptunaRandomSearchOptimizer(OptunaBaseOptimizer):
         return result_dict['function_value']
 
 
-class OptunaHyperbandBaseOptimizer(OptunaBaseOptimizer):
+class OptunaBudgetBaseOptimizer(OptunaBaseOptimizer):
     def __init__(self,
                  benchmark: Bookkeeper,
                  settings: Dict,
                  output_dir: Path,
                  rng: Union[int, None] = 0):
-        super(OptunaHyperbandBaseOptimizer, self).__init__(benchmark, settings, output_dir, rng)
+        super(OptunaBudgetBaseOptimizer, self).__init__(benchmark, settings, output_dir, rng)
         assert 'reduction_factor' in settings
-        reduction_factor = settings['reduction_factor']
-        self.pruner = HyperbandPruner(min_resource=self.min_budget,
-                                      max_resource=self.max_budget,
-                                      reduction_factor=reduction_factor)
-
-        # noinspection PyTypeChecker
-        self.pruner._try_initialization(study=None)
-        # self.trials_per_budget = self.pruner._trial_allocation_budgets
-        self.valid_budgets = [self.min_budget * reduction_factor ** i for i in range(self.pruner._n_brackets)]
+        self.pruner = None
+        self.valid_budgets = None
 
     def run(self):
         sampler_class = self.sampler.__class__.__name__ or "None"
@@ -113,7 +107,6 @@ class OptunaHyperbandBaseOptimizer(OptunaBaseOptimizer):
                                     configspace=self.cs),
                        timeout=None, n_trials=None)  # Run the optimization without a limitation
 
-
     @staticmethod
     def objective(trial: Trial, benchmark: Bookkeeper, main_fidelity_name: str, valid_budgets: List,
                   configspace: ConfigurationSpace):
@@ -132,6 +125,24 @@ class OptunaHyperbandBaseOptimizer(OptunaBaseOptimizer):
 
         assert result_dict is not None
         return result_dict['function_value']
+
+
+class OptunaHyperbandBaseOptimizer(OptunaBudgetBaseOptimizer):
+    def __init__(self,
+                 benchmark: Bookkeeper,
+                 settings: Dict,
+                 output_dir: Path,
+                 rng: Union[int, None] = 0):
+        super(OptunaHyperbandBaseOptimizer, self).__init__(benchmark, settings, output_dir, rng)
+        reduction_factor = settings['reduction_factor']
+        self.pruner = HyperbandPruner(min_resource=self.min_budget,
+                                      max_resource=self.max_budget,
+                                      reduction_factor=reduction_factor)
+
+        # noinspection PyTypeChecker
+        self.pruner._try_initialization(study=None)
+        # self.trials_per_budget = self.pruner._trial_allocation_budgets
+        self.valid_budgets = [self.min_budget * reduction_factor ** i for i in range(self.pruner._n_brackets)]
 
 
 class OptunaTPEHyperbandOptimizer(OptunaHyperbandBaseOptimizer):
@@ -160,16 +171,20 @@ class OptunaCMAESHyperBandOptimizer(OptunaHyperbandBaseOptimizer):
             raise ValueError('The CMA-ES Sampler only supports benchmarks without categorical hyperparameter.')
 
 
-class OptunaTPEMedianStoppingOptimizer(OptunaHyperbandBaseOptimizer):
+class OptunaTPEMedianStoppingOptimizer(OptunaBudgetBaseOptimizer):
     def __init__(self,
                  benchmark: Bookkeeper,
                  settings: Dict,
                  output_dir: Path,
                  rng: Union[int, None] = 0):
         super(OptunaTPEMedianStoppingOptimizer, self).__init__(benchmark, settings, output_dir, rng)
+        reduction_factor = settings['reduction_factor']
 
         self.sampler = TPESampler(seed=rng)
         self.pruner = MedianPruner()
+
+        sh_iters = precompute_sh_iters(self.min_budget, self.max_budget, reduction_factor)
+        self.valid_budgets = precompute_budgets(self.max_budget, reduction_factor, sh_iters)
 
 
 def sample_config_from_optuna(trial: Trial, cs: CS.ConfigurationSpace):
@@ -202,7 +217,19 @@ def sample_config_from_optuna(trial: Trial, cs: CS.ConfigurationSpace):
     return config
 
 
+def precompute_sh_iters(min_budget: Union[int, float], max_budget: Union[int, float], eta: Union[int, float]) -> int:
+    max_SH_iter = -int(np.log(min_budget / max_budget) / np.log(eta)) + 1
+    return max_SH_iter
+
+
+def precompute_budgets(max_budget, eta, max_SH_iter):
+    s0 = -np.linspace(start=max_SH_iter - 1,  stop=0, num=max_SH_iter)
+    budgets = max_budget * np.power(eta, s0)
+    return budgets
+
+
 __all__ = [OptunaRandomSearchOptimizer,
            OptunaCMAESHyperBandOptimizer,
            OptunaTPEHyperbandOptimizer,
+           OptunaTPEMedianStoppingOptimizer,
            sample_config_from_optuna]
