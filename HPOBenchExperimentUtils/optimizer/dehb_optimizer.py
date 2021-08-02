@@ -34,7 +34,6 @@ from pathlib import Path
 from typing import Union, Dict
 import sys
 import numpy as np
-import json
 import ConfigSpace as CS
 
 
@@ -42,7 +41,7 @@ from HPOBenchExperimentUtils.optimizer.base_optimizer import SingleFidelityOptim
 from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
 
 from dehb.optimizers import DE, DEHB
-from ConfigSpace import UniformFloatHyperparameter, Configuration
+from ConfigSpace import Configuration
 
 _log = logging.getLogger(__name__)
 
@@ -75,7 +74,7 @@ class DehbOptimizer(SingleFidelityOptimizer):
             else:
                 res = benchmark.objective_function(configuration=config, configuration_id=run_id)
             fitness, cost = res['function_value'], res['cost']
-            return fitness, cost
+            return {'fitness': float(fitness), 'cost': float(cost)}
 
         self.settings["verbose"] = _log.level <= logging.INFO
         # Set the number of iterations to a _very_ large integer but leave out some scope
@@ -90,7 +89,7 @@ class DehbOptimizer(SingleFidelityOptimizer):
                          crossover_prob=self.settings["crossover_prob"],
                          eta=self.settings["eta"], min_budget=self.min_budget,
                          max_budget=self.max_budget, generations=self.settings["gens"],
-                         async_strategy=self.settings["async_strategy"])
+                         async_strategy=self.settings["async_strategy"], n_workers=1)
 
     def setup(self):
         pass
@@ -127,7 +126,8 @@ class DeOptimizer(SingleFidelityOptimizer):
                                                fidelity={self.main_fidelity.name: self.max_budget},
                                                **self.settings_for_sending,
                                                )
-            return res['function_value'], res["cost"]
+            fitness, cost = res['function_value'], res['cost']
+            return {'fitness': float(fitness), 'cost': float(cost)}
 
         self.settings["verbose"] = _log.level <= logging.INFO
         # Set the number of iterations to a _very_ large integer but leave out some scope
