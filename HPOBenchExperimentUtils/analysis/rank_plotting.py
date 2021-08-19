@@ -52,7 +52,7 @@ def read_trajectories(benchmark: str, input_dir: Path, train: bool=True,
 
 
 def plot_ranks(benchmarks: List[str], familyname: str, output_dir: Union[Path, str], 
-               input_dir: Union[Path, str], criterion: str = 'mean', unvalidated: bool = True, 
+               input_dir: Union[Path, str], opts: str, criterion: str = 'mean', unvalidated: bool = True,
                which: str = "v1", opt_list: Union[List[str], None] = None,  **kwargs):
     _log.info(f'Start plotting ranks of benchmarks {benchmarks}')
 
@@ -147,7 +147,7 @@ def plot_ranks(benchmarks: List[str], familyname: str, output_dir: Union[Path, s
     unify_layout(ax, title=None, add_legend=False)
     val_str = 'optimized' if unvalidated else 'validated'
     plt.tight_layout()
-    plt.savefig(Path(output_dir) / f'ranks_{familyname}_{val_str}_{which}.png')
+    plt.savefig(Path(output_dir) / f'ranks_{familyname}_{val_str}_{which}_{opts}.png')
     plt.close('all')
     return 1
 
