@@ -67,7 +67,7 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
         what=whatobj,
     )
     # start plotting the trajectories:
-    f, ax = plt.subplots(1, 1, figsize=(20, 20))
+    f, ax = plt.subplots(1, 1, figsize=(12, 12))
     min_ = 100000
     max_ = -1
     for key, df in zip(optimizer_names, statistics_df):
