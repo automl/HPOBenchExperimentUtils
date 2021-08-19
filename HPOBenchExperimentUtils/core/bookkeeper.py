@@ -30,7 +30,8 @@ class Bookkeeper:
                  benchmark_partial: Any,
                  resource_manager: FileBasedResourceManager,
                  output_dir: Path,
-                 is_surrogate: bool):
+                 is_surrogate: bool,
+                 validate: bool = False):
 
         self.benchmark_partial = benchmark_partial
         self.resource_manager = resource_manager
@@ -44,6 +45,10 @@ class Bookkeeper:
 
         self.run_history = output_dir / RUNHISTORY_FILENAME
         self.validated_run_history = output_dir / VALIDATED_RUNHISTORY_FILENAME
+        with self.resource_manager.get_lock():
+            boot_time = self.resource_manager.get_used_resources_without_lock().start_time
+            self.write_line_to_file(file=self.run_history if not validate else self.validated_run_history,
+                                    dict_to_store={'boot_time': boot_time})
 
     def keep_track(self,
                    future_result,

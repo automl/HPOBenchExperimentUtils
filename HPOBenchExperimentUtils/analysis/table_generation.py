@@ -60,7 +60,7 @@ def write_latex(result_df, output_file, col_list):
         fh.write(latex)
 
 
-def save_median_table(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
+def save_median_table(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str], opts: str,
                       unvalidated: bool = True, which: str = "v1",
                       opt_list: Union[List[str], None] = None, thresh=1, **kwargs):
 
@@ -103,7 +103,7 @@ def save_median_table(benchmark: str, output_dir: Union[Path, str], input_dir: U
             df = df.sort_values(by='total_time_used')
             df = df.drop(df[df["total_time_used"] > cut_time_step].index)
             last_inc = df.tail(1)
-            if len(last_inc) == 0:
+            if len(last_inc) <= 1:
                 _log.critical(f"{key} has not enough runs at timestep {cut_time_step}")
 
             result_df = result_df.append(last_inc)
@@ -146,7 +146,7 @@ def save_median_table(benchmark: str, output_dir: Union[Path, str], input_dir: U
         if opt == best_opt: continue
         opt_val = np.array(result_df["function_values_lst"][opt])
         if not len(opt_val) == len(best_val):
-            print(f"There are not {len(best_val)} but {len(opt_val)} repetitions for {opt}")
+            _log.warning(f"There are not {len(best_val)} but {len(opt_val)} repetitions for {opt}")
 
         if np.sum(best_val - opt_val) == 0:
             # Results are identical
@@ -191,7 +191,7 @@ def save_median_table(benchmark: str, output_dir: Union[Path, str], input_dir: U
 
     val_str = 'unvalidated' if unvalidated else 'validated'
     if thresh < 1:
-        output_file = Path(output_dir) / f'result_table_{benchmark}_{val_str}_{which}_{int(thresh*100)}.tex'
+        output_file = Path(output_dir) / f'result_table_{benchmark}_{val_str}_{which}_{int(thresh*100)}_{opts}.tex'
     else:
-        output_file = Path(output_dir) / f'result_table_{benchmark}_{val_str}_{which}.tex'
+        output_file = Path(output_dir) / f'result_table_{benchmark}_{val_str}_{which}_{opts}.tex'
     write_latex(result_df=result_df, output_file=output_file, col_list=opt_list)

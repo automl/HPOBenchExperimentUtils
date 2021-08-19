@@ -20,7 +20,7 @@ _main_log.setLevel(logging.DEBUG)
 _log = logging.getLogger(__name__)
 
 
-def plot_fidels(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
+def plot_fidels(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str], opts: str,
                 opt_list: Union[List[str], None]=None, **kwargs):
     _log.info(f'Plotting evaluated fidelities of benchmark {benchmark}')
     input_dir = Path(input_dir) / benchmark
@@ -84,16 +84,16 @@ def plot_fidels(benchmark: str, output_dir: Union[Path, str], input_dir: Union[P
         ax_old = ax
         del rhs, df, sub
 
-    with open(Path(output_dir) / f'stats1_{benchmark}.json', "w") as fh:
+    with open(Path(output_dir) / f'stats1_{benchmark}_{opts}.json', "w") as fh:
         json.dump(other_stats_dc, fh, indent=4, sort_keys=True)
 
     plt.ylabel("Fidelity")
     plt.tight_layout()
-    plt.savefig(Path(output_dir) / f'fidel_{benchmark}.png')
+    plt.savefig(Path(output_dir) / f'fidel_{benchmark}_{opts}.png')
     plt.close('all')
 
 
-def plot_overhead(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
+def plot_overhead(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str], opts: str,
                   opt_list: Union[List[str], None]=None, **kwargs):
     _log.info(f'Start plotting overhead of benchmark {benchmark}')
     input_dir = Path(input_dir) / benchmark
@@ -146,11 +146,11 @@ def plot_overhead(benchmark: str, output_dir: Union[Path, str], input_dir: Union
 
     unify_layout(a)
     plt.tight_layout()
-    plt.savefig(Path(output_dir) / f'overhead_{benchmark}.png')
+    plt.savefig(Path(output_dir) / f'overhead_{benchmark}_{opts}.png')
     plt.close('all')
 
 
-def plot_ecdf(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
+def plot_ecdf(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str], opts: str,
               opt_list: Union[List[str], None] = None, **kwargs):
     _log.info(f'Start plotting ECDFs for benchmark {benchmark}')
     input_dir = Path(input_dir) / benchmark
@@ -200,10 +200,10 @@ def plot_ecdf(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pat
     unify_layout(a)
     plt.tight_layout()
     plt.grid(b=True, which="both", axis="both", alpha=0.5)
-    plt.savefig(Path(output_dir) / f'ecdf_{benchmark}.png')
+    plt.savefig(Path(output_dir) / f'ecdf_{benchmark}_{opts}.png')
 
 
-def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
+def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str], opts: str,
                      opt_list: Union[List[str], None] = None, **kwargs):
     _log.info(f'Start plotting correlations for benchmark {benchmark}')
     input_dir = Path(input_dir) / benchmark
@@ -300,13 +300,13 @@ def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Un
             else:
                 df[f1].append("%.3g (%d)" % (np.round(cors[f1, f2][0], 3), cors[f1, f2][1]))
     df = pd.DataFrame(df, index=f_set)
-    with open(Path(output_dir) / f'correlation_table_{benchmark}.tex', 'w') as fh:
+    with open(Path(output_dir) / f'correlation_table_{benchmark}_{opts}.tex', 'w') as fh:
         latex = df.to_latex(index_names=False, index=True)
         print(latex)
         fh.write(latex)
 
 
-def get_stats(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
+def get_stats(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str], opts: str,
               opt_list: Union[List[str], None] = None, **kwargs):
     _log.info(f'Start plotting corralations for benchmark {benchmark}')
     input_dir = Path(input_dir) / benchmark
@@ -337,21 +337,27 @@ def get_stats(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pat
                 lines = fh.readlines()
             rh = [json.loads(line) for line in lines]
 
-            fids = np.array([list(e["fidelity"].values())[0] for e in rh[1:]])
-            vals = np.array([e["function_value"] for e in rh[1:]])
+            # Some runhistories may have a boot-time entry while other dont.
+            if 'boot_time' in rh[0]:
+                boot_time = rh[0]["boot_time"]
+                rh = rh[1:]
+            else:
+                boot_time = rh[0]['start_time']
+
+            fids = np.array([list(e["fidelity"].values())[0] for e in rh])
+            vals = np.array([e["function_value"] for e in rh])
             high_fid = max(fids)
             lowest = np.min(vals[fids == high_fid])
             stats["lowest_val"] = min(stats["lowest_val"], lowest)
 
-            boot_time = rh[0]["boot_time"]
             sim_wc_time = rh[-1]["total_time_used"]
             diff_wc_time = benchmark_settings["time_limit_in_s"] - sim_wc_time
-            n_calls = len(rh)-1
+            n_calls = len(rh)
             act_wc_time = rh[-1]["finish_time"] - boot_time
             stats[opt]["sim_wc_time"].append(sim_wc_time)
             stats[opt]["diff_wc_time"].append(diff_wc_time)
             stats[opt]["n_calls"].append(n_calls)
             stats[opt]["act_wc_time"].append(act_wc_time)
 
-    with open(Path(output_dir) / f'stats2_{benchmark}.json', 'w') as fh:
+    with open(Path(output_dir) / f'stats2_{benchmark}_{opts}.json', 'w') as fh:
         json.dump(stats, fh, indent=4, sort_keys=True)

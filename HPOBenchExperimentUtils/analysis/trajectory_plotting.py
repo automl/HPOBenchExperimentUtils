@@ -40,7 +40,7 @@ def read_trajectories(benchmark: str, input_dir: Path, train: bool=True, y_best:
     return optimizer_names, trajectories, statistics_df
 
 
-def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
+def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str], opts: str,
                     criterion: str = 'mean', unvalidated: bool = True, which: str = "v1",
                     opt_list: Union[List[str], None] = None, whatobj: str='total_time_used', **kwargs):
     _log.info(f'Start plotting trajectories of benchmark {benchmark}')
@@ -67,7 +67,7 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
         what=whatobj,
     )
     # start plotting the trajectories:
-    f, ax = plt.subplots(1, 1)
+    f, ax = plt.subplots(1, 1, figsize=(12, 12))
     min_ = 100000
     max_ = -1
     for key, df in zip(optimizer_names, statistics_df):
@@ -99,11 +99,11 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
     yscale = benchmark_spec.get("yscale", "log")
 
     val_str = 'optimized' if unvalidated else 'validated'
-    filename = Path(output_dir) / f'trajectory_{benchmark}_{val_str}_{criterion}_{which}.png'
+    filename = Path(output_dir) / f'trajectory_{benchmark}_{val_str}_{criterion}_{which}_{opts}.png'
     if whatobj == 'total_objective_costs':
         xlabel = benchmark_spec.get("xlabel", "Used Objective cost")
         filename = Path(output_dir) / \
-                   f'trajectory_objective_{benchmark}_{val_str}_{criterion}_{which}.png'
+                   f'trajectory_objective_{benchmark}_{val_str}_{criterion}_{which}_{opts}.png'
     elif whatobj == 'total_time_used' and benchmark_settings["is_surrogate"] == True:
         xlabel = benchmark_spec.get("xlabel", "Simulated runtime in seconds")
     elif whatobj == 'total_time_used' and benchmark_settings["is_surrogate"] == False:

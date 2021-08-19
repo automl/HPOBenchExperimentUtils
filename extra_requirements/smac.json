@@ -1,3 +1,3 @@
 {
-    "smac": ["smac==0.14.0","scikit-optimize","emcee>=3.0.0"]
+    "smac": ["smac==1.0.1","scikit-optimize","emcee>=3.0.0"]
 }

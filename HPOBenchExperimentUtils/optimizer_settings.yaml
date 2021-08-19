@@ -6,7 +6,7 @@ optuna_tpe_hb:
   display_name: "optuna tpe hb"
 
 optuna_cmaes_hb:
-  optimizer: optuna_cmaes_asha
+  optimizer: optuna_cmaes_hb
   reduction_factor: 3
   display_name: "optuna cma-es hb"
 

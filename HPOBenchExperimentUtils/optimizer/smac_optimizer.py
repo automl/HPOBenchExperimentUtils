@@ -8,7 +8,7 @@ import numpy as np
 
 from smac.facade.smac_mf_facade import SMAC4MF
 from smac.facade.smac_hpo_facade import SMAC4HPO
-from smac.facade.smac_bo_facade import SMAC4BO
+from smac.facade.smac_bb_facade import SMAC4BB
 from smac.intensification.hyperband import Hyperband
 from smac.intensification.successive_halving import SuccessiveHalving
 from smac.scenario.scenario import Scenario
@@ -156,6 +156,6 @@ class SMACOptimizerBO(SMACOptimizerHPO):
         super().__init__(benchmark=benchmark, settings=settings, output_dir=output_dir, rng=rng)
 
     def _setupsmac(self, scenario, optimization_function_wrapper):
-        smac = SMAC4BO(scenario=scenario, rng=np.random.RandomState(self.rng),
+        smac = SMAC4BB(scenario=scenario, rng=np.random.RandomState(self.rng),
                        tae_runner=optimization_function_wrapper)
         return smac

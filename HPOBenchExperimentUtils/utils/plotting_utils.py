@@ -518,28 +518,31 @@ color_dc = {
     }
 
 color_per_opt = {
-    "hpbandster_bohb_eta_3": color_dc["green"],
-    "hpbandster_bohb_eta_2": color_dc["green"],
-    "hpbandster_tpe": color_dc["red"],
-    "hpbandster_hb_eta_3": color_dc["orange"],
-    "smac_hb_eta_3": color_dc["brown"],
-    "smac_hb_eta_2": color_dc["brown"],
-    "smac_sf": color_dc["purple"],
-    "smac_bo": color_dc["mint"],
     "randomsearch": color_dc["blue"],
-    "dragonfly_default": color_dc["pink"],
-    "dehb": color_dc["grey"],
-    "autogluon": color_dc["yellow"],
-    "ray_bayesopt_hb": color_dc["purple"],
-    "ray_hyperopt_hb": color_dc["light_blue"],
-    "ray_optuna_hb": color_dc["red"],
-    "ray_hyperopt_no_fidelity": color_dc['blue'],
-    "ray_randomsearch": color_dc['light_brown'],
-    "ray_bohb": color_dc['light_purple'],
-    'optuna_tpe_hb': color_dc['light_brown'],
-    'optuna_cmaes_hb': color_dc['purple'],
-    'optuna_randomsearch': color_dc['light_blue'],
-    'optuna_tpe_median': color_dc['yellow'],
+
+    "hpbandster_bohb_eta_3": "darkgreen",
+    "hpbandster_bohb_eta_2": "darkgreen",
+    "hpbandster_tpe": "lime",
+    "hpbandster_hb_eta_3": "greenyellow",
+
+    "smac_hb_eta_3": "deeppink",
+    "smac_hb_eta_2": "deeppink",
+    "smac_sf": color_dc["purple"],
+    "smac_bo": "magenta",
+
+    "dragonfly_default": "pink",
+    "dehb": "cyan",
+    "de": "darkcyan",
+
+    "autogluon": "yellow",
+
+    "ray_hyperopt_asha": "saddlebrown",
+    "ray_randomsearch": "chocolate",
+    "ray_hyperopt": "sandybrown",
+
+    'optuna_cmaes_hb': "lightcoral",
+    'optuna_tpe_hb': "red",
+    'optuna_tpe_median': "darkred",
 }
 
 marker_per_opt = {

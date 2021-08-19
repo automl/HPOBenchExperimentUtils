@@ -30,6 +30,15 @@ class OptunaBaseOptimizer(SingleFidelityOptimizer):
         self.sampler = None
         self.pruner = None
 
+        if isinstance(self.main_fidelity, CS.hyperparameters.FloatHyperparameter):
+            self.main_fidelity_type = float
+        elif isinstance(self.main_fidelity, CS.hyperparameters.IntegerHyperparameter):
+            self.main_fidelity_type = int
+        elif isinstance(self.main_fidelity, CS.CategoricalHyperparameter):
+            self.main_fidelity_type = type(self.main_fidelity.default_value)
+        else:
+            self.main_fidelity_type = type(self.main_fidelity.default_value)
+
     def setup(self):
         pass
 
@@ -61,18 +70,20 @@ class OptunaRandomSearchOptimizer(OptunaBaseOptimizer):
         study.optimize(func=partial(self.objective,
                                     benchmark=self.benchmark,
                                     main_fidelity_name=self.main_fidelity.name,
+                                    main_fidelity_type=self.main_fidelity_type,
                                     max_budget=self.max_budget,
                                     configspace=self.cs),
                        timeout=None, n_trials=None)  # Run the optimization without a limitation
 
     @staticmethod
-    def objective(trial: Trial, benchmark: Bookkeeper, main_fidelity_name: str, max_budget: Union[int, float],
-                  configspace: ConfigurationSpace):
+    def objective(trial: Trial, benchmark: Bookkeeper, main_fidelity_name: str, main_fidelity_type,
+                  max_budget: Union[int, float], configspace: ConfigurationSpace):
 
         configuration = sample_config_from_optuna(trial, configspace)
 
         run_id = SingleFidelityOptimizer._id_generator()
-        result_dict = benchmark.objective_function(run_id, configuration, {main_fidelity_name: max_budget})
+        result_dict = benchmark.objective_function(run_id, configuration,
+                                                   {main_fidelity_name: main_fidelity_type(max_budget)})
 
         trial.report(result_dict['function_value'], step=max_budget)
         return result_dict['function_value']
@@ -103,13 +114,14 @@ class OptunaBudgetBaseOptimizer(OptunaBaseOptimizer):
         study.optimize(func=partial(self.objective,
                                     benchmark=self.benchmark,
                                     main_fidelity_name=self.main_fidelity.name,
+                                    main_fidelity_type=self.main_fidelity_type,
                                     valid_budgets=self.valid_budgets,
                                     configspace=self.cs),
                        timeout=None, n_trials=None)  # Run the optimization without a limitation
 
     @staticmethod
-    def objective(trial: Trial, benchmark: Bookkeeper, main_fidelity_name: str, valid_budgets: List,
-                  configspace: ConfigurationSpace):
+    def objective(trial: Trial, benchmark: Bookkeeper, main_fidelity_name: str, main_fidelity_type,
+                  valid_budgets: List, configspace: ConfigurationSpace):
 
         configuration = sample_config_from_optuna(trial, configspace)
 
@@ -117,7 +129,8 @@ class OptunaBudgetBaseOptimizer(OptunaBaseOptimizer):
 
         result_dict = None
         for budget in valid_budgets:
-            result_dict = benchmark.objective_function(run_id, configuration, {main_fidelity_name: budget})
+            result_dict = benchmark.objective_function(run_id, configuration,
+                                                       {main_fidelity_name: main_fidelity_type(budget)})
             trial.report(result_dict['function_value'], step=budget)
 
             if trial.should_prune():
