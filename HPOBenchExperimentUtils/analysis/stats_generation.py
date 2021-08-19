@@ -337,16 +337,22 @@ def get_stats(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pat
                 lines = fh.readlines()
             rh = [json.loads(line) for line in lines]
 
-            fids = np.array([list(e["fidelity"].values())[0] for e in rh[1:]])
-            vals = np.array([e["function_value"] for e in rh[1:]])
+            # Some runhistories may have a boot-time entry while other dont.
+            if 'boot_time' in rh[0]:
+                boot_time = rh[0]["boot_time"]
+                rh = rh[1:]
+            else:
+                boot_time = rh[0]['start_time']
+
+            fids = np.array([list(e["fidelity"].values())[0] for e in rh])
+            vals = np.array([e["function_value"] for e in rh])
             high_fid = max(fids)
             lowest = np.min(vals[fids == high_fid])
             stats["lowest_val"] = min(stats["lowest_val"], lowest)
 
-            boot_time = rh[0]["boot_time"]
             sim_wc_time = rh[-1]["total_time_used"]
             diff_wc_time = benchmark_settings["time_limit_in_s"] - sim_wc_time
-            n_calls = len(rh)-1
+            n_calls = len(rh)
             act_wc_time = rh[-1]["finish_time"] - boot_time
             stats[opt]["sim_wc_time"].append(sim_wc_time)
             stats[opt]["diff_wc_time"].append(diff_wc_time)
