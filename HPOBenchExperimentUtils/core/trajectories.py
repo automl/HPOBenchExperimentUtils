@@ -41,7 +41,7 @@ def create_trajectory(runhistory: List, bigger_is_better: bool, main_fidelity: O
 
     for i_record, record in enumerate(runhistory):
 
-        if i_record == 0:
+        if i_record == 0 and 'boot_time' in record:
             trajectory.append(record)
             continue
 
