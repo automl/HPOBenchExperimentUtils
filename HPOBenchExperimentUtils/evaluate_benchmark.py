@@ -77,8 +77,8 @@ if __name__ == "__main__":
     opt_list["bohbs"] = opt_list["base"] + ["hpbandster_bohb_eta_3", "hpbandster_tpe"]
     opt_list["dehbs"] = opt_list["base"] + ["de", "dehb"]
     # opt_list["smacpaper"] = ["dragonfly_default", "smac_sf", "smac_hb_eta_3", "randomsearch", "hpbandster_hb_eta_3"]
-    opt_list['paper'] = ['randomsearch', 'smac_bo', 'smac_sf', 'smac_hb_eta_3', 'hpbandster_hb_eta_3',
-                         'hpbandster_bohb_eta_3', 'dehb', 'de', 'autogluon', 'ray_hyperopt_asha', 'optuna_tpe_median']
+    opt_list['paper'] = ['randomsearch', 'smac_bo', 'smac_sf', 'hpbandster_hb_eta_3', 'smac_hb_eta_3',
+                         'hpbandster_bohb_eta_3', 'dehb', 'dragonfly_default', 'autogluon', 'ray_hyperopt_asha', 'optuna_tpe_median']
 
     parser = argparse.ArgumentParser(prog='HPOBench Wrapper - Plotting tool',
                                      description='Plot the trajectories')

@@ -336,11 +336,14 @@ def get_stats(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pat
             "diff_wc_time": [],
             "n_calls": [],
             "act_wc_time": [],
+            "run_id": []
         }
         for fl in opt_rh_dc[opt]:
             with open(fl, "r") as fh:
                 lines = fh.readlines()
             rh = [json.loads(line) for line in lines]
+
+            run_id = int(fl.parent.name.lstrip('run-'))
 
             # Some runhistories may have a boot-time entry while other dont.
             if 'boot_time' in rh[0]:
@@ -363,14 +366,17 @@ def get_stats(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pat
             stats[opt]["diff_wc_time"].append(diff_wc_time)
             stats[opt]["n_calls"].append(n_calls)
             stats[opt]["act_wc_time"].append(act_wc_time)
+            stats[opt]['run_id'].append(run_id)
 
     Path(output_dir).mkdir(exist_ok=True, parents=True)
 
-    new_dict = {}
+    dfs = []
+    keys = []
     for opt in stats.keys():
-        for metric in stats[opt].keys():
-            new_dict[(opt, metric)] = stats[opt][metric]
-    df = pd.DataFrame(new_dict)
+        keys.append(opt)
+        dfs.append(pd.DataFrame(stats[opt]).set_index('run_id'))
+    df = pd.concat(dfs, axis=1, keys=keys)
+    df = df.sort_index()
     df.to_csv(Path(output_dir) / f'stats2_{benchmark}_{opts}.csv')
 
     stats = {'lowest_val': lowest_val, **stats}

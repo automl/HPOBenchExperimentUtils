@@ -198,4 +198,7 @@ def save_median_table(benchmark: str, output_dir: Union[Path, str], input_dir: U
     else:
         output_file = Path(output_dir) / f'result_table_{benchmark}_{val_str}_{which}_{opts}.tex'
 
-    write_latex(result_df=result_df, output_file=output_file, col_list=[opt for opt in opt_list if opt in result_df.columns])
+    not_available = [opt for opt in opt_list if opt not in result_df.columns]
+    for col in not_available:
+        result_df[col] = -1
+    write_latex(result_df=result_df, output_file=output_file, col_list=opt_list)

@@ -31,16 +31,18 @@ expset_dc = {
 
 opt_set = {
     "rs": ["randomsearch", ],
-    "dehb": ["dehb", ],
-    "hpband": ["hpbandster_bohb_eta_3", "hpbandster_hb_eta_3"],
-    "smac": ["smac_hb_eta_3", "smac_sf"],
+    "dehb": ["dehb", "de"],
+    "hpband": ["hpbandster_bohb_eta_3", "hpbandster_hb_eta_3", "hpbandster_tpe"],
+    "smac": ["smac_hb_eta_3", "smac_sf", "smac_bo"],
     "autogluon": ["autogluon", ],
     "dragonfly": ["dragonfly_default", ],
     "fabolas": ["fabolas_mtbo", "fabolas_mumbo"],
     "mumbo": ["mumbo", ],
-    "sf": ["smac_bo", "hpbandster_tpe", "de"],
-    "optuna": ["optuna_tpe_hb", "optuna_cmaes_hb", "optuna_tpe_median"],
-    "ray": ["ray_hyperopt", "ray_randomsearch", "ray_hyperopt_asha"],
+    # "sf": [],
+    "optuna": ["optuna_tpe_hb", "optuna_cmaes_hb", ],
+    "optuna_tpe_median": ["optuna_tpe_median", ],
+    "ray": ["ray_hyperopt", "ray_randomsearch", ],
+    "ray_hyperopt_asha": ["ray_hyperopt_asha", ],
 }
 
 
