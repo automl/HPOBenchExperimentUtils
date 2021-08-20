@@ -1,5 +1,6 @@
 nn_10101:
   bench_args:
+    model: nn
     task_id: 10101
   cutoff_in_s: 31734.0
   import_benchmark: TabularBenchmark
@@ -10,6 +11,7 @@ nn_10101:
   time_limit_in_s: 31734.0
 nn_146818:
   bench_args:
+    model: nn
     task_id: 146818
   cutoff_in_s: 19659.0
   import_benchmark: TabularBenchmark
@@ -20,6 +22,7 @@ nn_146818:
   time_limit_in_s: 19659.0
 nn_146821:
   bench_args:
+    model: nn
     task_id: 146821
   cutoff_in_s: 51127.0
   import_benchmark: TabularBenchmark
@@ -30,6 +33,7 @@ nn_146821:
   time_limit_in_s: 51127.0
 nn_31:
   bench_args:
+    model: nn
     task_id: 31
   cutoff_in_s: 32009.0
   import_benchmark: TabularBenchmark
@@ -40,6 +44,7 @@ nn_31:
   time_limit_in_s: 32009.0
 nn_3917:
   bench_args:
+    model: nn
     task_id: 3917
   cutoff_in_s: 88413.0
   import_benchmark: TabularBenchmark
@@ -50,6 +55,7 @@ nn_3917:
   time_limit_in_s: 88413.0
 nn_53:
   bench_args:
+    model: nn
     task_id: 53
   cutoff_in_s: 29040.0
   import_benchmark: TabularBenchmark

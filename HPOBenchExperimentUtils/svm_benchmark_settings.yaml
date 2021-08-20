@@ -1,5 +1,6 @@
 svm_10101:
   bench_args:
+    model: svm
     task_id: 10101
   cutoff_in_s: 11.0
   import_benchmark: TabularBenchmark
@@ -10,6 +11,7 @@ svm_10101:
   time_limit_in_s: 11.0
 svm_12:
   bench_args:
+    model: svm
     task_id: 12
   cutoff_in_s: 240.0
   import_benchmark: TabularBenchmark
@@ -20,6 +22,7 @@ svm_12:
   time_limit_in_s: 240.0
 svm_146195:
   bench_args:
+    model: svm
     task_id: 146195
   cutoff_in_s: 1337443.0
   import_benchmark: TabularBenchmark
@@ -30,6 +33,7 @@ svm_146195:
   time_limit_in_s: 1337443.0
 svm_146212:
   bench_args:
+    model: svm
     task_id: 146212
   cutoff_in_s: 42737.0
   import_benchmark: TabularBenchmark
@@ -40,6 +44,7 @@ svm_146212:
   time_limit_in_s: 42737.0
 svm_146606:
   bench_args:
+    model: svm
     task_id: 146606
   cutoff_in_s: 1569619.0
   import_benchmark: TabularBenchmark
@@ -50,6 +55,7 @@ svm_146606:
   time_limit_in_s: 1569619.0
 svm_146818:
   bench_args:
+    model: svm
     task_id: 146818
   cutoff_in_s: 15.0
   import_benchmark: TabularBenchmark
@@ -60,6 +66,7 @@ svm_146818:
   time_limit_in_s: 15.0
 svm_146821:
   bench_args:
+    model: svm
     task_id: 146821
   cutoff_in_s: 74.0
   import_benchmark: TabularBenchmark
@@ -70,6 +77,7 @@ svm_146821:
   time_limit_in_s: 74.0
 svm_146822:
   bench_args:
+    model: svm
     task_id: 146822
   cutoff_in_s: 125.0
   import_benchmark: TabularBenchmark
@@ -80,6 +88,7 @@ svm_146822:
   time_limit_in_s: 125.0
 svm_14965:
   bench_args:
+    model: svm
     task_id: 14965
   cutoff_in_s: 69099.0
   import_benchmark: TabularBenchmark
@@ -90,6 +99,7 @@ svm_14965:
   time_limit_in_s: 69099.0
 svm_167119:
   bench_args:
+    model: svm
     task_id: 167119
   cutoff_in_s: 54530.0
   import_benchmark: TabularBenchmark
@@ -100,6 +110,7 @@ svm_167119:
   time_limit_in_s: 54530.0
 svm_167120:
   bench_args:
+    model: svm
     task_id: 167120
   cutoff_in_s: 1062679.0
   import_benchmark: TabularBenchmark
@@ -110,6 +121,7 @@ svm_167120:
   time_limit_in_s: 1062679.0
 svm_168329:
   bench_args:
+    model: svm
     task_id: 168329
   cutoff_in_s: 246227.0
   import_benchmark: TabularBenchmark
@@ -120,6 +132,7 @@ svm_168329:
   time_limit_in_s: 246227.0
 svm_168330:
   bench_args:
+    model: svm
     task_id: 168330
   cutoff_in_s: 2543596.0
   import_benchmark: TabularBenchmark
@@ -130,6 +143,7 @@ svm_168330:
   time_limit_in_s: 2543596.0
 svm_168331:
   bench_args:
+    model: svm
     task_id: 168331
   cutoff_in_s: 1917776.0
   import_benchmark: TabularBenchmark
@@ -140,6 +154,7 @@ svm_168331:
   time_limit_in_s: 1917776.0
 svm_168335:
   bench_args:
+    model: svm
     task_id: 168335
   cutoff_in_s: 1633199.0
   import_benchmark: TabularBenchmark
@@ -150,6 +165,7 @@ svm_168335:
   time_limit_in_s: 1633199.0
 svm_168868:
   bench_args:
+    model: svm
     task_id: 168868
   cutoff_in_s: 718155.0
   import_benchmark: TabularBenchmark
@@ -160,6 +176,7 @@ svm_168868:
   time_limit_in_s: 718155.0
 svm_168908:
   bench_args:
+    model: svm
     task_id: 168908
   cutoff_in_s: 25861.0
   import_benchmark: TabularBenchmark
@@ -170,6 +187,7 @@ svm_168908:
   time_limit_in_s: 25861.0
 svm_168909:
   bench_args:
+    model: svm
     task_id: 168909
   cutoff_in_s: 157575.0
   import_benchmark: TabularBenchmark
@@ -180,6 +198,7 @@ svm_168909:
   time_limit_in_s: 157575.0
 svm_168910:
   bench_args:
+    model: svm
     task_id: 168910
   cutoff_in_s: 47573.0
   import_benchmark: TabularBenchmark
@@ -190,6 +209,7 @@ svm_168910:
   time_limit_in_s: 47573.0
 svm_168911:
   bench_args:
+    model: svm
     task_id: 168911
   cutoff_in_s: 428.0
   import_benchmark: TabularBenchmark
@@ -200,6 +220,7 @@ svm_168911:
   time_limit_in_s: 428.0
 svm_168912:
   bench_args:
+    model: svm
     task_id: 168912
   cutoff_in_s: 513.0
   import_benchmark: TabularBenchmark
@@ -210,6 +231,7 @@ svm_168912:
   time_limit_in_s: 513.0
 svm_3:
   bench_args:
+    model: svm
     task_id: 3
   cutoff_in_s: 252.0
   import_benchmark: TabularBenchmark
@@ -220,6 +242,7 @@ svm_3:
   time_limit_in_s: 252.0
 svm_31:
   bench_args:
+    model: svm
     task_id: 31
   cutoff_in_s: 31.0
   import_benchmark: TabularBenchmark
@@ -230,6 +253,7 @@ svm_31:
   time_limit_in_s: 31.0
 svm_3917:
   bench_args:
+    model: svm
     task_id: 3917
   cutoff_in_s: 62.0
   import_benchmark: TabularBenchmark
@@ -240,6 +264,7 @@ svm_3917:
   time_limit_in_s: 62.0
 svm_53:
   bench_args:
+    model: svm
     task_id: 53
   cutoff_in_s: 23.0
   import_benchmark: TabularBenchmark
@@ -250,6 +275,7 @@ svm_53:
   time_limit_in_s: 23.0
 svm_7592:
   bench_args:
+    model: svm
     task_id: 7592
   cutoff_in_s: 369874.0
   import_benchmark: TabularBenchmark
@@ -260,6 +286,7 @@ svm_7592:
   time_limit_in_s: 369874.0
 svm_9952:
   bench_args:
+    model: svm
     task_id: 9952
   cutoff_in_s: 403.0
   import_benchmark: TabularBenchmark
@@ -270,6 +297,7 @@ svm_9952:
   time_limit_in_s: 403.0
 svm_9977:
   bench_args:
+    model: svm
     task_id: 9977
   cutoff_in_s: 254885.0
   import_benchmark: TabularBenchmark
@@ -280,6 +308,7 @@ svm_9977:
   time_limit_in_s: 254885.0
 svm_9981:
   bench_args:
+    model: svm
     task_id: 9981
   cutoff_in_s: 180.0
   import_benchmark: TabularBenchmark
