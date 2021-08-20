@@ -154,6 +154,8 @@ def plot_ecdf(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pat
               opt_list: Union[List[str], None] = None, **kwargs):
     _log.info(f'Start plotting ECDFs for benchmark {benchmark}')
     input_dir = Path(input_dir) / benchmark
+    Path(output_dir).mkdir(exist_ok=True, parents=True)
+
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
     opt_rh_dc = load_trajectories_as_df(input_dir=input_dir,
                                         which="runhistory")
@@ -207,6 +209,8 @@ def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Un
                      opt_list: Union[List[str], None] = None, **kwargs):
     _log.info(f'Start plotting correlations for benchmark {benchmark}')
     input_dir = Path(input_dir) / benchmark
+    Path(output_dir).mkdir(exist_ok=True, parents=True)
+
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
     opt_rh_dc = load_trajectories_as_df(input_dir=input_dir,
                                         which="runhistory")
@@ -359,6 +363,8 @@ def get_stats(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pat
             stats[opt]["diff_wc_time"].append(diff_wc_time)
             stats[opt]["n_calls"].append(n_calls)
             stats[opt]["act_wc_time"].append(act_wc_time)
+
+    Path(output_dir).mkdir(exist_ok=True, parents=True)
 
     new_dict = {}
     for opt in stats.keys():

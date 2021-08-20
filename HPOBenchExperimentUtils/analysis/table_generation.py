@@ -147,6 +147,7 @@ def save_median_table(benchmark: str, output_dir: Union[Path, str], input_dir: U
         opt_val = np.array(result_df["function_values_lst"][opt])
         if not len(opt_val) == len(best_val):
             _log.warning(f"There are not {len(best_val)} but {len(opt_val)} repetitions for {opt}")
+            continue
 
         if np.sum(best_val - opt_val) == 0:
             # Results are identical
@@ -190,8 +191,11 @@ def save_median_table(benchmark: str, output_dir: Union[Path, str], input_dir: U
     result_df = result_df[header]
 
     val_str = 'unvalidated' if unvalidated else 'validated'
+    output_dir = Path(output_dir)
+    output_dir.mkdir(exist_ok=True, parents=True)
     if thresh < 1:
         output_file = Path(output_dir) / f'result_table_{benchmark}_{val_str}_{which}_{int(thresh*100)}_{opts}.tex'
     else:
         output_file = Path(output_dir) / f'result_table_{benchmark}_{val_str}_{which}_{opts}.tex'
-    write_latex(result_df=result_df, output_file=output_file, col_list=opt_list)
+
+    write_latex(result_df=result_df, output_file=output_file, col_list=[opt for opt in opt_list if opt in result_df.columns])
