@@ -16,8 +16,8 @@ all_task_ids_by_in_mem_size = [
 ]
 
 ntasks_done = dict(
-    svm=29,
-    lr=29,
+    svm=15,
+    lr=15,
     rf=15,
     xgb=15,
     nn=4
