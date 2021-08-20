@@ -15,7 +15,7 @@ _root_log.setLevel(logging.DEBUG)
 _log = logging.getLogger(__name__)
 
 
-def main(args, opt_list):
+def main(args, opt_list, get_stats_flag: bool = True):
     list_of_opt_to_consider = opt_list[args.opts]
     if args.rank is None:
         assert args.benchmark is not None, f"If rank={args.rank}, then --benchmark must be set"
@@ -49,7 +49,7 @@ def main(args, opt_list):
     if args.what in ("all", "correlation"):
         plot_correlation(**vars(args), opt_list=list_of_opt_to_consider)
 
-    if args.what in ("all", "stats"):
+    if args.what in ("all", "stats") and get_stats_flag:
         get_stats(**vars(args), opt_list=list_of_opt_to_consider)
 
     if args.what in ("all", "other"):
@@ -96,7 +96,6 @@ if __name__ == "__main__":
     if args.opts == 'all':
         for opt in opt_list.keys():
             args.opts = opt
-            main(args, opt_list)
-
+            main(args, opt_list, get_stats_flag=(opt == 'all'))
     else:
         main(args, opt_list)
