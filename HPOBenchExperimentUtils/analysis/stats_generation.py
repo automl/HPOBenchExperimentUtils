@@ -369,12 +369,16 @@ def get_stats(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pat
             stats[opt]['run_id'].append(run_id)
 
     Path(output_dir).mkdir(exist_ok=True, parents=True)
-
+    missing = []
     dfs = []
     keys = []
     for opt in stats.keys():
         keys.append(opt)
-        dfs.append(pd.DataFrame(stats[opt]).set_index('run_id'))
+        df = pd.DataFrame(stats[opt]).set_index('run_id')
+        dfs.append(df)
+        missing_runs = np.setdiff1d(np.arange(1, 33), df.index.values)
+        for run in missing_runs:
+            missing.append([benchmark, opt, int(run)])
     df = pd.concat(dfs, axis=1, keys=keys)
     df = df.sort_index()
     df.to_csv(Path(output_dir) / f'stats2_{benchmark}_{opts}.csv')
@@ -382,3 +386,6 @@ def get_stats(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pat
     stats = {'lowest_val': lowest_val, **stats}
     with open(Path(output_dir) / f'stats2_{benchmark}_{opts}.json', 'w') as fh:
         json.dump(stats, fh, indent=4, sort_keys=True)
+
+    with open(Path(output_dir) / f'stats_missing_{benchmark}_{opts}.json', 'w') as fh:
+        json.dump(missing, fh, indent=4, sort_keys=True)
