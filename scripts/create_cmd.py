@@ -55,22 +55,22 @@ expset_dc = {
     ],
     "tabular_lr": [
         "{}_{}".format(x[0], x[1]) for x in itertools.product(
-            *[["svm"], all_task_ids_by_in_mem_size[:ntasks_done["lr"]]]
+            *[["lr"], all_task_ids_by_in_mem_size[:ntasks_done["lr"]]]
         )
     ],
     "tabular_nn": [
         "{}_{}".format(x[0], x[1]) for x in itertools.product(
-            *[["svm"], all_task_ids_by_in_mem_size[:ntasks_done["nn"]]]
+            *[["nn"], all_task_ids_by_in_mem_size[:ntasks_done["nn"]]]
         )
     ],
     "tabular_xgb": [
         "{}_{}".format(x[0], x[1]) for x in itertools.product(
-            *[["svm"], all_task_ids_by_in_mem_size[:ntasks_done["xgb"]]]
+            *[["xgb"], all_task_ids_by_in_mem_size[:ntasks_done["xgb"]]]
         )
     ],
     "tabular_rf": [
         "{}_{}".format(x[0], x[1]) for x in itertools.product(
-            *[["svm"], all_task_ids_by_in_mem_size[:ntasks_done["rf"]]]
+            *[["rf"], all_task_ids_by_in_mem_size[:ntasks_done["rf"]]]
         )
     ],
 }
