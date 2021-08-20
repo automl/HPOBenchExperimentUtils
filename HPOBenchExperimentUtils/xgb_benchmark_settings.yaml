@@ -3,7 +3,7 @@ xgb_10101:
     task_id: 10101
   cutoff_in_s: 418.0
   import_benchmark: XGBoostBenchmarkMF
-  import_from: ml_mmfb.xgb_benchmark
+  import_from: ml.xgb_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -13,7 +13,7 @@ xgb_12:
     task_id: 12
   cutoff_in_s: 50303.0
   import_benchmark: XGBoostBenchmarkMF
-  import_from: ml_mmfb.xgb_benchmark
+  import_from: ml.xgb_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -23,7 +23,7 @@ xgb_146212:
     task_id: 146212
   cutoff_in_s: 84168.0
   import_benchmark: XGBoostBenchmarkMF
-  import_from: ml_mmfb.xgb_benchmark
+  import_from: ml.xgb_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -33,7 +33,7 @@ xgb_146606:
     task_id: 146606
   cutoff_in_s: 405996.0
   import_benchmark: XGBoostBenchmarkMF
-  import_from: ml_mmfb.xgb_benchmark
+  import_from: ml.xgb_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -43,7 +43,7 @@ xgb_146818:
     task_id: 146818
   cutoff_in_s: 729.0
   import_benchmark: XGBoostBenchmarkMF
-  import_from: ml_mmfb.xgb_benchmark
+  import_from: ml.xgb_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -53,7 +53,7 @@ xgb_146821:
     task_id: 146821
   cutoff_in_s: 3473.0
   import_benchmark: XGBoostBenchmarkMF
-  import_from: ml_mmfb.xgb_benchmark
+  import_from: ml.xgb_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -63,7 +63,7 @@ xgb_146822:
     task_id: 146822
   cutoff_in_s: 7328.0
   import_benchmark: XGBoostBenchmarkMF
-  import_from: ml_mmfb.xgb_benchmark
+  import_from: ml.xgb_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -73,7 +73,7 @@ xgb_14965:
     task_id: 14965
   cutoff_in_s: 115099.0
   import_benchmark: XGBoostBenchmarkMF
-  import_from: ml_mmfb.xgb_benchmark
+  import_from: ml.xgb_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -83,7 +83,7 @@ xgb_167119:
     task_id: 167119
   cutoff_in_s: 85345.0
   import_benchmark: XGBoostBenchmarkMF
-  import_from: ml_mmfb.xgb_benchmark
+  import_from: ml.xgb_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -93,7 +93,7 @@ xgb_167120:
     task_id: 167120
   cutoff_in_s: 320684.0
   import_benchmark: XGBoostBenchmarkMF
-  import_from: ml_mmfb.xgb_benchmark
+  import_from: ml.xgb_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -103,7 +103,7 @@ xgb_168911:
     task_id: 168911
   cutoff_in_s: 18752.0
   import_benchmark: XGBoostBenchmarkMF
-  import_from: ml_mmfb.xgb_benchmark
+  import_from: ml.xgb_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -113,7 +113,7 @@ xgb_168912:
     task_id: 168912
   cutoff_in_s: 4883.0
   import_benchmark: XGBoostBenchmarkMF
-  import_from: ml_mmfb.xgb_benchmark
+  import_from: ml.xgb_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -123,7 +123,7 @@ xgb_3:
     task_id: 3
   cutoff_in_s: 5303.0
   import_benchmark: XGBoostBenchmarkMF
-  import_from: ml_mmfb.xgb_benchmark
+  import_from: ml.xgb_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -133,7 +133,7 @@ xgb_31:
     task_id: 31
   cutoff_in_s: 1598.0
   import_benchmark: XGBoostBenchmarkMF
-  import_from: ml_mmfb.xgb_benchmark
+  import_from: ml.xgb_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -143,7 +143,7 @@ xgb_3917:
     task_id: 3917
   cutoff_in_s: 2159.0
   import_benchmark: XGBoostBenchmarkMF
-  import_from: ml_mmfb.xgb_benchmark
+  import_from: ml.xgb_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -153,7 +153,7 @@ xgb_53:
     task_id: 53
   cutoff_in_s: 1869.0
   import_benchmark: XGBoostBenchmarkMF
-  import_from: ml_mmfb.xgb_benchmark
+  import_from: ml.xgb_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -163,7 +163,7 @@ xgb_9952:
     task_id: 9952
   cutoff_in_s: 3588.0
   import_benchmark: XGBoostBenchmarkMF
-  import_from: ml_mmfb.xgb_benchmark
+  import_from: ml.xgb_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -173,7 +173,7 @@ xgb_9981:
     task_id: 9981
   cutoff_in_s: 113329.0
   import_benchmark: XGBoostBenchmarkMF
-  import_from: ml_mmfb.xgb_benchmark
+  import_from: ml.xgb_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000

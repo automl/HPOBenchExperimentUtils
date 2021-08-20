@@ -3,7 +3,7 @@ rf_10101:
     task_id: 10101
   cutoff_in_s: 500.0
   import_benchmark: RandomForestBenchmarkMF
-  import_from: ml_mmfb.rf_benchmark
+  import_from: ml.rf_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -13,7 +13,7 @@ rf_12:
     task_id: 12
   cutoff_in_s: 4562.0
   import_benchmark: RandomForestBenchmarkMF
-  import_from: ml_mmfb.rf_benchmark
+  import_from: ml.rf_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -23,7 +23,7 @@ rf_146212:
     task_id: 146212
   cutoff_in_s: 8064.0
   import_benchmark: RandomForestBenchmarkMF
-  import_from: ml_mmfb.rf_benchmark
+  import_from: ml.rf_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -33,7 +33,7 @@ rf_146818:
     task_id: 146818
   cutoff_in_s: 531.0
   import_benchmark: RandomForestBenchmarkMF
-  import_from: ml_mmfb.rf_benchmark
+  import_from: ml.rf_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -43,7 +43,7 @@ rf_146821:
     task_id: 146821
   cutoff_in_s: 565.0
   import_benchmark: RandomForestBenchmarkMF
-  import_from: ml_mmfb.rf_benchmark
+  import_from: ml.rf_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -53,7 +53,7 @@ rf_146822:
     task_id: 146822
   cutoff_in_s: 1177.0
   import_benchmark: RandomForestBenchmarkMF
-  import_from: ml_mmfb.rf_benchmark
+  import_from: ml.rf_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -63,7 +63,7 @@ rf_14965:
     task_id: 14965
   cutoff_in_s: 13985.0
   import_benchmark: RandomForestBenchmarkMF
-  import_from: ml_mmfb.rf_benchmark
+  import_from: ml.rf_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -73,7 +73,7 @@ rf_167119:
     task_id: 167119
   cutoff_in_s: 5485.0
   import_benchmark: RandomForestBenchmarkMF
-  import_from: ml_mmfb.rf_benchmark
+  import_from: ml.rf_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -83,7 +83,7 @@ rf_167120:
     task_id: 167120
   cutoff_in_s: 93386.0
   import_benchmark: RandomForestBenchmarkMF
-  import_from: ml_mmfb.rf_benchmark
+  import_from: ml.rf_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -93,7 +93,7 @@ rf_168911:
     task_id: 168911
   cutoff_in_s: 1758.0
   import_benchmark: RandomForestBenchmarkMF
-  import_from: ml_mmfb.rf_benchmark
+  import_from: ml.rf_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -103,7 +103,7 @@ rf_168912:
     task_id: 168912
   cutoff_in_s: 2661.0
   import_benchmark: RandomForestBenchmarkMF
-  import_from: ml_mmfb.rf_benchmark
+  import_from: ml.rf_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -113,7 +113,7 @@ rf_3:
     task_id: 3
   cutoff_in_s: 813.0
   import_benchmark: RandomForestBenchmarkMF
-  import_from: ml_mmfb.rf_benchmark
+  import_from: ml.rf_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -123,7 +123,7 @@ rf_31:
     task_id: 31
   cutoff_in_s: 588.0
   import_benchmark: RandomForestBenchmarkMF
-  import_from: ml_mmfb.rf_benchmark
+  import_from: ml.rf_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -133,7 +133,7 @@ rf_3917:
     task_id: 3917
   cutoff_in_s: 868.0
   import_benchmark: RandomForestBenchmarkMF
-  import_from: ml_mmfb.rf_benchmark
+  import_from: ml.rf_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -143,7 +143,7 @@ rf_53:
     task_id: 53
   cutoff_in_s: 635.0
   import_benchmark: RandomForestBenchmarkMF
-  import_from: ml_mmfb.rf_benchmark
+  import_from: ml.rf_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -153,7 +153,7 @@ rf_9952:
     task_id: 9952
   cutoff_in_s: 1776.0
   import_benchmark: RandomForestBenchmarkMF
-  import_from: ml_mmfb.rf_benchmark
+  import_from: ml.rf_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
@@ -163,7 +163,7 @@ rf_9981:
     task_id: 9981
   cutoff_in_s: 958.0
   import_benchmark: RandomForestBenchmarkMF
-  import_from: ml_mmfb.rf_benchmark
+  import_from: ml.rf_benchmark
   is_surrogate: true
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
