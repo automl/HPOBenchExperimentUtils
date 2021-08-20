@@ -16,11 +16,11 @@ all_task_ids_by_in_mem_size = [
 ]
 
 ntasks_done = dict(
-    svm=15,
-    lr=15,
-    rf=15,
-    xgb=15,
-    nn=4
+    svm=30,
+    lr=30,
+    rf=30,
+    xgb=30,
+    nn=30
 )
 
 expset_dc = {
