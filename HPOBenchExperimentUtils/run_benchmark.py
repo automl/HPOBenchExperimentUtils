@@ -88,7 +88,7 @@ def run_benchmark(optimizer: str,
     benchmark_settings = get_benchmark_settings(benchmark)
     if "bench_args" in benchmark_settings:
         benchmark_params["task_id"] = int(benchmark_settings["bench_args"]["task_id"])
-        benchmark_params["model"] = int(benchmark_settings["bench_args"]["model"])
+        benchmark_params["model"] = benchmark_settings["bench_args"]["model"]
     settings = dict(optimizer_settings, **benchmark_settings)
     settings['benchmark_params'] = benchmark_params
 
