@@ -517,33 +517,67 @@ color_dc = {
     "light_purple": '#cab2d6',
     }
 
+# color_per_opt = {
+#     "randomsearch": color_dc["blue"],
+#
+#     "hpbandster_bohb_eta_3": "darkgreen",
+#     "hpbandster_bohb_eta_2": "darkgreen",
+#     "hpbandster_tpe": "limegreen",
+#     "hpbandster_hb_eta_3": "lightseagreen",
+#
+#     "smac_hb_eta_3": "deeppink",
+#     "smac_hb_eta_2": "deeppink",
+#     "smac_sf": color_dc["purple"],
+#     "smac_bo": "magenta",
+#
+#     "dragonfly_default": "pink",
+#
+#     "dehb": "cyan",
+#     "de": "darkcyan",
+#
+#     "autogluon": "black",
+#
+#     "ray_hyperopt_asha": "saddlebrown",
+#     "ray_randomsearch": "chocolate",
+#     "ray_hyperopt": "sandybrown",
+#
+#     'optuna_cmaes_hb': "lightcoral",
+#     'optuna_tpe_hb': "red",
+#     'optuna_tpe_median': "darkred",
+# }
+
 color_per_opt = {
-    "randomsearch": color_dc["blue"],
+    "randomsearch": 'cornflowerblue',  # light blue
 
-    "hpbandster_bohb_eta_3": "darkgreen",
-    "hpbandster_bohb_eta_2": "darkgreen",
-    "hpbandster_tpe": "lime",
-    "hpbandster_hb_eta_3": "greenyellow",
+    "hpbandster_bohb_eta_3": '#33a02c', # "darkgreen",
+    "hpbandster_hb_eta_3": '#b2df8a',  # "light green",
+    #
+    "hpbandster_bohb_eta_2": '#33a02c',  # "darkgreen",
+    "hpbandster_tpe": "darkgreen",
 
-    "smac_hb_eta_3": "deeppink",
-    "smac_hb_eta_2": "deeppink",
-    "smac_sf": color_dc["purple"],
-    "smac_bo": "magenta",
+    "smac_hb_eta_3": '#fb9a99',  # "light coral",
+    "smac_hb_eta_2": '#fb9a99',  # "light coral",
+    "smac_sf": '#e31a1c',  # red
+    "smac_bo": "#fdbf6f",  # light orange
 
-    "dragonfly_default": "pink",
-    "dehb": "cyan",
-    "de": "darkcyan",
+    "dragonfly_default": "#ff7f00",  # dark orange
 
-    "autogluon": "yellow",
+    "dehb": "black",
+    #
+    "de": "dimgray",
 
-    "ray_hyperopt_asha": "saddlebrown",
-    "ray_randomsearch": "chocolate",
-    "ray_hyperopt": "sandybrown",
+    "autogluon": "#6a3d9a",  # dark purple
 
-    'optuna_cmaes_hb': "lightcoral",
-    'optuna_tpe_hb': "red",
-    'optuna_tpe_median': "darkred",
+    "ray_hyperopt_asha": "#b15928",  # brown
+    "ray_randomsearch": '#1f78b4',  # dark blue
+    "ray_hyperopt": "saddlebrown",
+
+    'optuna_cmaes_hb': "lightseagreen",
+    'optuna_tpe_hb': "blueviolet",
+    'optuna_tpe_median': "slateblue",  # medium purple
 }
+
+
 
 marker_per_opt = {
     "hpbandster_bohb_eta_3": "o",
@@ -595,7 +629,8 @@ benchmark_families = {
                   "NASBench1shot1SearchSpace3Benchmark", ],
     "pybnn": ["BNNOnBostonHousing", "BNNOnProteinStructure", "BNNOnYearPrediction", ],
     "rl": ["cartpolereduced"],
-    "learna": ["metalearna", "learna"],
+    "learna": [# "metalearna",
+               "learna"],
     "paramnettime": ["ParamNetAdultOnTimeBenchmark", "ParamNetHiggsOnTimeBenchmark",
                      "ParamNetLetterOnTimeBenchmark", "ParamNetMnistOnTimeBenchmark",
                      "ParamNetOptdigitsOnTimeBenchmark", "ParamNetPokerOnTimeBenchmark", ],
@@ -638,3 +673,55 @@ benchmark_dc = {
     "ParamNetReducedOptdigitsOnTimeBenchmark":  "Net - OptDigits",
     "ParamNetReducedPokerOnTimeBenchmark":   "Net - Poker",
 }
+
+"""
+opts = ['rs', 'sf', 'hbs' ,'mf', 'all' ,'base', 'bohbs', 'dehbs' ,'paper']
+fams = ['NAS201', 'NAS101', 'NASTAB', 'NAS1SHOT1', 'pybnn', 'rl', 'learna', 'paramnettimered']
+str_fmt = 'python /work/dlclarge2/muelleph-HPOBENCH/HPOBenchExperimentUtils/HPOBenchExperimentUtils/evaluate_benchmark.py' \
+          ' --output_dir /work/dlclarge2/muelleph-HPOBENCH/ResultDir/plotsRank/{fam} ' \
+          '--input_dir /work/dlclarge2/muelleph-HPOBENCH/ResultDir/exp_outputs/ ' \
+          '--agg median --rank {fam} --unvalidated --opts {opt}'
+cmds = []
+for opt in opts:
+    for fam in fams:
+        cmds.append(str_fmt.format(**dict(fam=fam, opt=opt)))
+
+for cmd in cmds:
+    print(cmd)
+
+
+strings = ["ProteinStructureBenchmark ray_hyperopt_asha 1",
+"ProteinStructureBenchmark ray_hyperopt_asha 2",
+"ProteinStructureBenchmark ray_hyperopt_asha 3",
+"ProteinStructureBenchmark ray_hyperopt_asha 4",
+"ProteinStructureBenchmark ray_hyperopt_asha 5",
+"ProteinStructureBenchmark ray_hyperopt_asha 6",
+"ProteinStructureBenchmark ray_hyperopt_asha 7",
+"ProteinStructureBenchmark ray_hyperopt_asha 8",
+"ProteinStructureBenchmark ray_hyperopt_asha 9",
+"ProteinStructureBenchmark ray_hyperopt_asha 10",
+"ProteinStructureBenchmark ray_hyperopt_asha 11",
+"ProteinStructureBenchmark ray_hyperopt_asha 12",
+"ProteinStructureBenchmark ray_hyperopt_asha 13",
+"SliceLocalizationBenchmark ray_hyperopt_asha 30",
+"SliceLocalizationBenchmark ray_hyperopt_asha 31",
+"SliceLocalizationBenchmark ray_hyperopt_asha 32",
+"ParamNetReducedOptdigitsOnTimeBenchmark ray_hyperopt_asha 24",
+"ParamNetReducedOptdigitsOnTimeBenchmark ray_hyperopt_asha 25",
+"ParamNetReducedOptdigitsOnTimeBenchmark ray_hyperopt_asha 26",
+"ParamNetReducedOptdigitsOnTimeBenchmark ray_hyperopt_asha 27",
+"ParamNetReducedOptdigitsOnTimeBenchmark ray_hyperopt_asha 28",
+"ParamNetReducedOptdigitsOnTimeBenchmark ray_hyperopt_asha 29",
+"ParamNetReducedOptdigitsOnTimeBenchmark ray_hyperopt_asha 30",
+"ParamNetReducedOptdigitsOnTimeBenchmark ray_hyperopt_asha 31",
+"ParamNetReducedOptdigitsOnTimeBenchmark ray_hyperopt_asha 32",
+]
+
+str_stmt = 'python /work/dlclarge2/muelleph-HPOBENCH/HPOBenchExperimentUtils/HPOBenchExperimentUtils/run_benchmark.py ' \
+           '--output_dir /work/dlclarge2/muelleph-HPOBENCH/ResultDir/exp_outputs ' \
+           '--optimizer {opt} --benchmark {benchmark} --rng {rng}'
+
+for s in strings:
+    benchmark, opt, rng = s.split()
+    print(str_stmt.format(**dict(benchmark=benchmark, opt=opt, rng=rng)))
+"""

@@ -29,7 +29,7 @@ def main(args, opt_list, get_stats_flag: bool = True):
         plot_ranks(**vars(args), benchmarks=benchmark_families[args.rank], familyname=args.rank,
                    opt_list=list_of_opt_to_consider)
 
-        sys.exit(1)
+        return
 
     if args.what in ("all", "best_found"):
         save_median_table(**vars(args), opt_list=list_of_opt_to_consider, thresh=0.01)
@@ -63,22 +63,23 @@ if __name__ == "__main__":
     opt_list = dict()
     opt_list["rs"] = ["randomsearch", "ray_randomsearch"]
     opt_list["sf"] = opt_list["rs"] + ["hpbandster_tpe", "de", "ray_hyperopt",
-                                       # "smac_bo", "smac_sf",
+                                       "smac_bo", "smac_sf",
                                        ]  # otpuna + ray ohne mf
     opt_list["hbs"] = opt_list["rs"] + ["hpbandster_hb_eta_3", "hpbandster_bohb_eta_3", "dehb",
-                                        # "smac_hb_eta_3",
+                                        "smac_hb_eta_3",
                                         ]
     opt_list["mf"] = opt_list["hbs"] + ["dragonfly_default", "autogluon", "optuna_tpe_hb", "optuna_tpe_median",
                                         "optuna_cmaes_hb", "ray_hyperopt_asha"]  # optuan + ray mit mf
     opt_list["all"] = opt_list["rs"] + opt_list["sf"][2:] + opt_list["mf"][2:]
-    
+
     opt_list["base"] = opt_list["rs"] + ["hpbandster_hb_eta_3"]
-    # opt_list["smacs"] = opt_list["base"] + ["smac_sf", "smac_hb_eta_3"]
+    opt_list["smacs"] = opt_list["base"] + ["smac_sf", "smac_hb_eta_3"]
     opt_list["bohbs"] = opt_list["base"] + ["hpbandster_bohb_eta_3", "hpbandster_tpe"]
     opt_list["dehbs"] = opt_list["base"] + ["de", "dehb"]
-    # opt_list["smacpaper"] = ["dragonfly_default", "smac_sf", "smac_hb_eta_3", "randomsearch", "hpbandster_hb_eta_3"]
+    opt_list["smacpaper"] = ["dragonfly_default", "smac_sf", "smac_hb_eta_3", "randomsearch", "hpbandster_hb_eta_3"]
     opt_list['paper'] = ['randomsearch', 'smac_bo', 'smac_sf', 'hpbandster_hb_eta_3', 'smac_hb_eta_3',
-                         'hpbandster_bohb_eta_3', 'dehb', 'dragonfly_default', 'autogluon', 'ray_hyperopt_asha', 'optuna_tpe_median']
+                         'hpbandster_bohb_eta_3', 'dehb', 'dragonfly_default', 'autogluon', 'ray_hyperopt_asha',
+                         'optuna_tpe_median']
 
     parser = argparse.ArgumentParser(prog='HPOBench Wrapper - Plotting tool',
                                      description='Plot the trajectories')

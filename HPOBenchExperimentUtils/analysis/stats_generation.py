@@ -330,7 +330,9 @@ def get_stats(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pat
         if opt not in opt_list:
             _log.info(f'skip {opt}')
             continue
-        if len(opt_rh_dc[opt]) == 0: continue
+        if len(opt_rh_dc[opt]) == 0:
+            _log.info(f'skip: {opt} due to missing data')
+            continue
         stats[opt] = {
             "sim_wc_time": [],
             "diff_wc_time": [],
@@ -372,7 +374,7 @@ def get_stats(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pat
     missing = []
     dfs = []
     keys = []
-    for opt in stats.keys():
+    for opt in opt_list:
         keys.append(opt)
         df = pd.DataFrame(stats[opt]).set_index('run_id')
         dfs.append(df)

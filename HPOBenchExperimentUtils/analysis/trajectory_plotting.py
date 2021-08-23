@@ -122,8 +122,23 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
 
-    unify_layout(ax, title=f'{benchmark}')
+    unify_layout(ax, title=f'{benchmark}', add_legend=False)
     plt.tight_layout()
     plt.savefig(filename)
+
+    def export_legend(ax, filename: Path):
+        fig2 = plt.figure()
+        ax2 = fig2.add_subplot()
+        ax2.axis('off')
+        legend = ax2.legend(*ax.get_legend_handles_labels(), frameon=False, loc='lower center', ncol=5, )
+        fig = legend.figure
+        fig.canvas.draw()
+        bbox = legend.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
+        fig.savefig(filename, dpi="figure", bbox_inches=bbox)
+
+    legend_file = filename.parent / (filename.name.rstrip('.png') + '_legend.png')
+    export_legend(ax, legend_file)
+
     plt.close('all')
+
     return 1
