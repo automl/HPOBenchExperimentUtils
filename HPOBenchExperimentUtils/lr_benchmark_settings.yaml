@@ -20,6 +20,17 @@ lr_12:
   main_fidelity: iter
   mem_limit_in_mb: 6000
   time_limit_in_s: 5423.0
+lr_146195:
+  bench_args:
+    model: lr
+    task_id: 146195
+  cutoff_in_s: 66846.0
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 66846.0
 lr_146212:
   bench_args:
     model: lr
@@ -130,6 +141,72 @@ lr_168330:
   main_fidelity: iter
   mem_limit_in_mb: 6000
   time_limit_in_s: 64284.0
+lr_168331:
+  bench_args:
+    model: lr
+    task_id: 168331
+  cutoff_in_s: 198162.0
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 198162.0
+lr_168335:
+  bench_args:
+    model: lr
+    task_id: 168335
+  cutoff_in_s: 29915.0
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 29915.0
+lr_168868:
+  bench_args:
+    model: lr
+    task_id: 168868
+  cutoff_in_s: 27399.0
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 27399.0
+lr_168908:
+  bench_args:
+    model: lr
+    task_id: 168908
+  cutoff_in_s: 11217.0
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 11217.0
+lr_168909:
+  bench_args:
+    model: lr
+    task_id: 168909
+  cutoff_in_s: 120138.0
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 120138.0
+lr_168910:
+  bench_args:
+    model: lr
+    task_id: 168910
+  cutoff_in_s: 61230.0
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 61230.0
 lr_168911:
   bench_args:
     model: lr

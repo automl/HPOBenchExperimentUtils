@@ -20,6 +20,17 @@ svm_12:
   main_fidelity: subsample
   mem_limit_in_mb: 6000
   time_limit_in_s: 240.0
+svm_146195:
+  bench_args:
+    model: svm
+    task_id: 146195
+  cutoff_in_s: 1337443.0
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 1337443.0
 svm_146212:
   bench_args:
     model: svm
@@ -130,6 +141,72 @@ svm_168330:
   main_fidelity: subsample
   mem_limit_in_mb: 6000
   time_limit_in_s: 2543596.0
+svm_168331:
+  bench_args:
+    model: svm
+    task_id: 168331
+  cutoff_in_s: 1917776.0
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 1917776.0
+svm_168335:
+  bench_args:
+    model: svm
+    task_id: 168335
+  cutoff_in_s: 1633199.0
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 1633199.0
+svm_168868:
+  bench_args:
+    model: svm
+    task_id: 168868
+  cutoff_in_s: 718155.0
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 718155.0
+svm_168908:
+  bench_args:
+    model: svm
+    task_id: 168908
+  cutoff_in_s: 25861.0
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 25861.0
+svm_168909:
+  bench_args:
+    model: svm
+    task_id: 168909
+  cutoff_in_s: 157575.0
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 157575.0
+svm_168910:
+  bench_args:
+    model: svm
+    task_id: 168910
+  cutoff_in_s: 47573.0
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 47573.0
 svm_168911:
   bench_args:
     model: svm
