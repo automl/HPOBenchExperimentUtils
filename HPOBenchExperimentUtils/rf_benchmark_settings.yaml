@@ -20,17 +20,6 @@ rf_12:
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
   time_limit_in_s: 4562.0
-rf_146195:
-  bench_args:
-    model: rf
-    task_id: 146195
-  cutoff_in_s: 27803.0
-  import_benchmark: TabularBenchmark
-  import_from: ml.tabular_benchmark
-  is_surrogate: true
-  main_fidelity: n_estimators
-  mem_limit_in_mb: 6000
-  time_limit_in_s: 27803.0
 rf_146212:
   bench_args:
     model: rf
@@ -141,28 +130,6 @@ rf_168330:
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
   time_limit_in_s: 206181.0
-rf_168908:
-  bench_args:
-    model: rf
-    task_id: 168908
-  cutoff_in_s: 115234.0
-  import_benchmark: TabularBenchmark
-  import_from: ml.tabular_benchmark
-  is_surrogate: true
-  main_fidelity: n_estimators
-  mem_limit_in_mb: 6000
-  time_limit_in_s: 115234.0
-rf_168910:
-  bench_args:
-    model: rf
-    task_id: 168910
-  cutoff_in_s: 30373.0
-  import_benchmark: TabularBenchmark
-  import_from: ml.tabular_benchmark
-  is_surrogate: true
-  main_fidelity: n_estimators
-  mem_limit_in_mb: 6000
-  time_limit_in_s: 30373.0
 rf_168911:
   bench_args:
     model: rf
