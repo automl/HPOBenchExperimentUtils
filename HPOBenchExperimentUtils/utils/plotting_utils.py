@@ -650,7 +650,7 @@ def export_legend(ax, filename: Path):
     fig2 = plt.figure()
     ax2 = fig2.add_subplot()
     ax2.axis('off')
-    legend = ax2.legend(*ax.get_legend_handles_labels(), frameon=False, loc='lower center', ncol=2, )
+    legend = ax2.legend(*ax.get_legend_handles_labels(), frameon=False, loc='lower center', ncol=2, fontsize='large')
     fig = legend.figure
     fig.canvas.draw()
     bbox = legend.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
