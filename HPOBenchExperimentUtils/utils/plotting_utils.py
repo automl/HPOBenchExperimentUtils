@@ -1,4 +1,7 @@
+from pathlib import Path
+
 import matplotlib.pyplot as plt
+from matplotlib import pyplot as plt
 
 plot_dc = {
     "BNNOnBostonHousing": {
@@ -517,41 +520,11 @@ color_dc = {
     "light_purple": '#cab2d6',
     }
 
-# color_per_opt = {
-#     "randomsearch": color_dc["blue"],
-#
-#     "hpbandster_bohb_eta_3": "darkgreen",
-#     "hpbandster_bohb_eta_2": "darkgreen",
-#     "hpbandster_tpe": "limegreen",
-#     "hpbandster_hb_eta_3": "lightseagreen",
-#
-#     "smac_hb_eta_3": "deeppink",
-#     "smac_hb_eta_2": "deeppink",
-#     "smac_sf": color_dc["purple"],
-#     "smac_bo": "magenta",
-#
-#     "dragonfly_default": "pink",
-#
-#     "dehb": "cyan",
-#     "de": "darkcyan",
-#
-#     "autogluon": "black",
-#
-#     "ray_hyperopt_asha": "saddlebrown",
-#     "ray_randomsearch": "chocolate",
-#     "ray_hyperopt": "sandybrown",
-#
-#     'optuna_cmaes_hb': "lightcoral",
-#     'optuna_tpe_hb': "red",
-#     'optuna_tpe_median': "darkred",
-# }
-
 color_per_opt = {
     "randomsearch": 'cornflowerblue',  # light blue
 
-    "hpbandster_bohb_eta_3": '#33a02c', # "darkgreen",
+    "hpbandster_bohb_eta_3": '#33a02c',  # "darkgreen",
     "hpbandster_hb_eta_3": '#b2df8a',  # "light green",
-    #
     "hpbandster_bohb_eta_2": '#33a02c',  # "darkgreen",
     "hpbandster_tpe": "darkgreen",
 
@@ -563,7 +536,6 @@ color_per_opt = {
     "dragonfly_default": "#ff7f00",  # dark orange
 
     "dehb": "black",
-    #
     "de": "dimgray",
 
     "autogluon": "#6a3d9a",  # dark purple
@@ -576,7 +548,6 @@ color_per_opt = {
     'optuna_tpe_hb': "blueviolet",
     'optuna_tpe_median': "slateblue",  # medium purple
 }
-
 
 
 marker_per_opt = {
@@ -629,7 +600,7 @@ benchmark_families = {
                   "NASBench1shot1SearchSpace3Benchmark", ],
     "pybnn": ["BNNOnBostonHousing", "BNNOnProteinStructure", "BNNOnYearPrediction", ],
     "rl": ["cartpolereduced"],
-    "learna": [# "metalearna",
+    "learna": ["metalearna",
                "learna"],
     "paramnettime": ["ParamNetAdultOnTimeBenchmark", "ParamNetHiggsOnTimeBenchmark",
                      "ParamNetLetterOnTimeBenchmark", "ParamNetMnistOnTimeBenchmark",

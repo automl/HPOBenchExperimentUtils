@@ -2,7 +2,8 @@ import logging
 from pathlib import Path
 from typing import Union, List
 
-from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc, color_per_opt, unify_layout, benchmark_dc
+from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc, color_per_opt, unify_layout, benchmark_dc, \
+    export_legend
 from HPOBenchExperimentUtils import _log as _main_log
 from HPOBenchExperimentUtils.utils.validation_utils import load_json_files, load_trajectories_as_df
 from HPOBenchExperimentUtils.utils.runner_utils import get_optimizer_setting, get_benchmark_settings
@@ -190,16 +191,6 @@ def plot_ranks(benchmarks: List[str], familyname: str, output_dir: Union[Path, s
     plt.tight_layout()
     filename = Path(output_dir) / f'ranks_{familyname}_{val_str}_{which}_{opts}.png'
     plt.savefig(filename)
-
-    def export_legend(ax, filename: Path):
-        fig2 = plt.figure()
-        ax2 = fig2.add_subplot()
-        ax2.axis('off')
-        legend = ax2.legend(*ax.get_legend_handles_labels(), frameon=False, loc='lower center', ncol=2, )
-        fig = legend.figure
-        fig.canvas.draw()
-        bbox = legend.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
-        fig.savefig(filename, dpi="figure", bbox_inches=bbox)
 
     legend_file = filename.parent / (filename.name.rstrip('png').rstrip('.') + '_legend.png')
     export_legend(ax, legend_file)

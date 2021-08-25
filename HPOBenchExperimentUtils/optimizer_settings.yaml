@@ -135,7 +135,7 @@ smac_sf:
 
 smac_bo:
   optimizer: smac_bo
-  display_name: "SMAC$_{GP}$"
+  display_name: "BO$_{GP}$"
 
 smac_hb_eta_3:
   optimizer: smac_hb
