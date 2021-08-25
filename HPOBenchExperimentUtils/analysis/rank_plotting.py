@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Union, List
 
 from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc, color_per_opt, unify_layout, benchmark_dc, \
-    export_legend
+    export_legend, linestyle_per_opt
 from HPOBenchExperimentUtils import _log as _main_log
 from HPOBenchExperimentUtils.utils.validation_utils import load_json_files, load_trajectories_as_df
 from HPOBenchExperimentUtils.utils.runner_utils import get_optimizer_setting, get_benchmark_settings
@@ -174,6 +174,7 @@ def plot_ranks(benchmarks: List[str], familyname: str, output_dir: Union[Path, s
         X_data = np.array(X_data)
         y_data.append(y)
         plt.plot(X_data, y_data, label=get_optimizer_setting(key).get("display_name", key),
+                 linestyle=linestyle_per_opt.get(key, 'solid'),
                  c=color_per_opt.get(key, "k"),
                  linewidth=2)
     if benchmark_settings["is_surrogate"]:
@@ -243,7 +244,8 @@ def plot_ecdf_per_family(benchmarks: List[str], familyname: str, output_dir: Uni
         x, y = ecdf(values)
         max_ = max(max_, max(values))
         min_ = min(min_, min(values))
-        plt.plot(x, y, c=color, linewidth=3, label=benchmark_dc[benchmark])
+        plt.plot(x, y, c=color, linewidth=3, label=benchmark_dc[benchmark],
+                 linestyle=linestyle_per_opt.get(benchmark, 'solid'))
 
 
     if y_best != 0:

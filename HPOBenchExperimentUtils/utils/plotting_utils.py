@@ -520,6 +520,7 @@ color_dc = {
     "light_purple": '#cab2d6',
     }
 
+
 color_per_opt = {
     "randomsearch": 'cornflowerblue',  # light blue
 
@@ -547,6 +548,35 @@ color_per_opt = {
     'optuna_cmaes_hb': "lightseagreen",
     'optuna_tpe_hb': "blueviolet",
     'optuna_tpe_median': "slateblue",  # medium purple
+}
+
+linestyle_per_opt = {
+    "randomsearch": 'dashed',  # light blue
+
+    "hpbandster_bohb_eta_3": 'solid',  # "darkgreen",
+    "hpbandster_hb_eta_3": 'solid',  # "light green",
+    "hpbandster_bohb_eta_2": 'solid',  # "darkgreen",
+    "hpbandster_tpe": "dashed",
+
+    "smac_hb_eta_3": 'solid',  # "light coral",
+    "smac_hb_eta_2": 'solid',  # "light coral",
+    "smac_sf": 'dashed',
+    "smac_bo": "dashed",
+
+    "dragonfly_default": "solid",  # dark orange
+
+    "dehb": "solid",
+    "de": "dashed",
+
+    "autogluon": "solid",  # dark purple
+
+    "ray_hyperopt_asha": "solid",  # brown
+    "ray_randomsearch": 'dashed',  # dark blue
+    "ray_hyperopt": "dashed",
+
+    'optuna_cmaes_hb': "solid",
+    'optuna_tpe_hb': "solid",
+    'optuna_tpe_median': "solid",  # medium purple
 }
 
 

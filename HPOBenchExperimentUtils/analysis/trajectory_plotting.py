@@ -2,7 +2,8 @@ import logging
 from pathlib import Path
 from typing import Union, List
 
-from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc, color_per_opt, unify_layout, export_legend
+from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc, color_per_opt, unify_layout, export_legend,\
+    linestyle_per_opt
 from HPOBenchExperimentUtils import _log as _main_log
 from HPOBenchExperimentUtils.utils.validation_utils import load_json_files, load_trajectories_as_df,\
     get_statistics_df, df_per_optimizer
@@ -77,7 +78,8 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
             _log.critical(f'Skip unknown optimizer {key}')
             continue
         color = color_per_opt.get(key, "k")
-        df[criterion].plot.line(drawstyle='steps-post', linewidth=2, ax=ax, label=label, c=color)
+        ls = linestyle_per_opt.get(key, '-')
+        df[criterion].plot.line(drawstyle='steps-post', linewidth=2, ax=ax, label=label, c=color, linestyle=ls)
         min_ = min(min_, df[criterion].min())
         max_ = max(max_, df['q25'].max())
         
