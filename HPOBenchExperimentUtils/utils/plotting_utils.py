@@ -520,6 +520,7 @@ color_dc = {
     "light_purple": '#cab2d6',
     }
 
+
 color_per_opt = {
     "randomsearch": 'cornflowerblue',  # light blue
 
@@ -547,6 +548,35 @@ color_per_opt = {
     'optuna_cmaes_hb': "lightseagreen",
     'optuna_tpe_hb': "blueviolet",
     'optuna_tpe_median': "slateblue",  # medium purple
+}
+
+linestyle_per_opt = {
+    "randomsearch": 'dashed',  # light blue
+
+    "hpbandster_bohb_eta_3": 'solid',  # "darkgreen",
+    "hpbandster_hb_eta_3": 'solid',  # "light green",
+    "hpbandster_bohb_eta_2": 'solid',  # "darkgreen",
+    "hpbandster_tpe": "dashed",
+
+    "smac_hb_eta_3": 'solid',  # "light coral",
+    "smac_hb_eta_2": 'solid',  # "light coral",
+    "smac_sf": 'dashed',
+    "smac_bo": "dashed",
+
+    "dragonfly_default": "solid",  # dark orange
+
+    "dehb": "solid",
+    "de": "dashed",
+
+    "autogluon": "solid",  # dark purple
+
+    "ray_hyperopt_asha": "solid",  # brown
+    "ray_randomsearch": 'dashed',  # dark blue
+    "ray_hyperopt": "dashed",
+
+    'optuna_cmaes_hb': "solid",
+    'optuna_tpe_hb': "solid",
+    'optuna_tpe_median': "solid",  # medium purple
 }
 
 
@@ -644,3 +674,14 @@ benchmark_dc = {
     "ParamNetReducedOptdigitsOnTimeBenchmark":  "Net - OptDigits",
     "ParamNetReducedPokerOnTimeBenchmark":   "Net - Poker",
 }
+
+
+def export_legend(ax, filename: Path):
+    fig2 = plt.figure()
+    ax2 = fig2.add_subplot()
+    ax2.axis('off')
+    legend = ax2.legend(*ax.get_legend_handles_labels(), frameon=False, loc='lower center', ncol=2, fontsize='large')
+    fig = legend.figure
+    fig.canvas.draw()
+    bbox = legend.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
+    fig.savefig(filename, dpi="figure", bbox_inches=bbox)

@@ -62,14 +62,15 @@ def main(args, opt_list, get_stats_flag: bool = True):
 if __name__ == "__main__":
     opt_list = dict()
     opt_list["rs"] = ["randomsearch"]
-    opt_list["smacpaper"] = ["dragonfly_default", "smac_sf", "smac_hb_eta_3", "randomsearch", "hpbandster_hb_eta_3"]
+    # opt_list["smacpaper"] = ["dragonfly_default", "smac_sf", "smac_hb_eta_3", "randomsearch", "hpbandster_hb_eta_3"]
 
-    opt_list['tab_main'] = ['randomsearch', 'smac_bo', 'smac_sf', 'ray_hyperopt', 'de',
+    opt_list['tab_main'] = ['randomsearch', 'smac_bo', 'smac_sf',
                             'hpbandster_hb_eta_3', 'smac_hb_eta_3', 'hpbandster_bohb_eta_3', 'dehb',
-                            'dragonfly_default', 'autogluon']
-    opt_list['tab_app_sf'] = ["randomsearch", "smac_bo", "smac_sf", "ray_hyperopt",  "de", "hpbandster_tpe"]
+                            'dragonfly_default', 'autogluon', "ray_hyperopt_asha", "optuna_tpe_median"]
+
+    opt_list['tab_app_sf'] = ["randomsearch", "smac_bo", "smac_sf", "hpbandster_tpe", "de", "ray_hyperopt"]
     opt_list['tab_app_mf'] = ["hpbandster_hb_eta_3", "smac_hb_eta_3", "hpbandster_bohb_eta_3", "dehb", "dragonfly_default",
-                              "autogluon", "optuna_tpe_hb", "optuna_tpe_median", "ray_hyperopt_asha"]
+                              "autogluon", "ray_hyperopt_asha", "optuna_tpe_median", "optuna_tpe_hb"]
 
     opt_list['sf'] = ['randomsearch', 'smac_bo', 'smac_sf', 'ray_hyperopt', 'de']
     opt_list['mf'] = ['hpbandster_hb_eta_3', 'smac_hb_eta_3', 'hpbandster_bohb_eta_3', 'dehb', 'dragonfly_default',
@@ -81,16 +82,18 @@ if __name__ == "__main__":
     opt_list["bohbs"] = opt_list["base"] + ["hpbandster_tpe", "hpbandster_bohb_eta_3"]
     opt_list["dehbs"] = opt_list["base"] + ["de", "dehb"]
 
-    opt_list['all'] = [
+    opt_list['all_opts'] = [
         # Random Search
         "randomsearch", "ray_randomsearch",
         # Single Fidelity
-        "hpbandster_tpe", "de", "ray_hyperopt", "smac_bo", "smac_sf",
+        "smac_bo", "smac_sf", "hpbandster_tpe", "de", "ray_hyperopt",
         # Multi Fidelity freiburg
-        "hpbandster_hb_eta_3", "hpbandster_bohb_eta_3", "dehb", "smac_hb_eta_3",
+        "hpbandster_hb_eta_3", "smac_hb_eta_3", "hpbandster_bohb_eta_3", "dehb",
         # Multi Fidelity Not-Freiburg
-        "dragonfly_default", "autogluon", "optuna_tpe_hb", "optuna_tpe_median", "optuna_cmaes_hb", "ray_hyperopt_asha"
+        "dragonfly_default", "autogluon", "ray_hyperopt_asha", "optuna_tpe_median", "optuna_tpe_hb"
     ]
+
+    opt_list['all'] = opt_list['all_opts']
 
     parser = argparse.ArgumentParser(prog='HPOBench Wrapper - Plotting tool',
                                      description='Plot the trajectories')
