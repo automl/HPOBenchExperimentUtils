@@ -254,6 +254,14 @@ nn_146821:
   yscale: log
   ystar_test: 0.0
   ystar_valid: 0.0
+nn_146822:
+  xlim_lo: 0.1
+  xscale: log
+  ylim_lo: 0
+  ylim_up: 1
+  yscale: log
+  ystar_test: 0.049350649350649325
+  ystar_valid: 0.031441048034934506
 nn_31:
   xlim_lo: 0.1
   xscale: log
@@ -278,6 +286,14 @@ nn_53:
   yscale: log
   ystar_test: 0.10117647058823527
   ystar_valid: 0.049206349206349184
+nn_9952:
+  xlim_lo: 0.1
+  xscale: log
+  ylim_lo: 0
+  ylim_up: 1
+  yscale: log
+  ystar_test: 0.09611829944547132
+  ystar_valid: 0.043738317757009336
 rf_10101:
   xlim_lo: 0.1
   xscale: log
@@ -294,6 +310,14 @@ rf_12:
   yscale: log
   ystar_test: 0.029000000000000026
   ystar_valid: 0.01279461279461278
+rf_146195:
+  xlim_lo: 0.1
+  xscale: log
+  ylim_lo: 0
+  ylim_up: 1
+  yscale: log
+  ystar_test: 0.1738306690349319
+  ystar_valid: 0.06473959631198604
 rf_146212:
   xlim_lo: 0.1
   xscale: log
@@ -302,6 +326,14 @@ rf_146212:
   yscale: log
   ystar_test: 0.00017241379310342086
   ystar_valid: 3.4831069313856486e-05
+rf_146606:
+  xlim_lo: 0.1
+  xscale: log
+  ylim_lo: 0
+  ylim_up: 1
+  yscale: log
+  ystar_test: 0.2755124936257012
+  ystar_valid: 0.10176848322516396
 rf_146818:
   xlim_lo: 0.1
   xscale: log
@@ -350,6 +382,38 @@ rf_167120:
   yscale: log
   ystar_test: 0.4837001661129568
   ystar_valid: 0.17634927293064875
+rf_168329:
+  xlim_lo: 0.1
+  xscale: log
+  ylim_lo: 0
+  ylim_up: 1
+  yscale: log
+  ystar_test: 0.6345092024539877
+  ystar_valid: 0.23547820698202848
+rf_168330:
+  xlim_lo: 0.1
+  xscale: log
+  ylim_lo: 0
+  ylim_up: 1
+  yscale: log
+  ystar_test: 0.29429185574396943
+  ystar_valid: 0.10816679400056295
+rf_168908:
+  xlim_lo: 0.1
+  xscale: log
+  ylim_lo: 0
+  ylim_up: 1
+  yscale: log
+  ystar_test: 0.2660516605166051
+  ystar_valid: 0.09689440993788818
+rf_168910:
+  xlim_lo: 0.1
+  xscale: log
+  ylim_lo: 0
+  ylim_up: 1
+  yscale: log
+  ystar_test: 0.3837378640776699
+  ystar_valid: 0.18757662443808745
 rf_168911:
   xlim_lo: 0.1
   xscale: log
@@ -398,6 +462,14 @@ rf_53:
   yscale: log
   ystar_test: 0.20941176470588235
   ystar_valid: 0.08492063492063488
+rf_7592:
+  xlim_lo: 0.1
+  xscale: log
+  ylim_lo: 0
+  ylim_up: 1
+  yscale: log
+  ystar_test: 0.13432958034800407
+  ystar_valid: 0.05483248311043709
 rf_9952:
   xlim_lo: 0.1
   xscale: log
@@ -406,6 +478,14 @@ rf_9952:
   yscale: log
   ystar_test: 0.10129390018484286
   ystar_valid: 0.03526479750778817
+rf_9977:
+  xlim_lo: 0.1
+  xscale: log
+  ylim_lo: 0
+  ylim_up: 1
+  yscale: log
+  ystar_test: 0.03191180736872643
+  ystar_valid: 0.012211801484955065
 rf_9981:
   xlim_lo: 0.1
   xscale: log
