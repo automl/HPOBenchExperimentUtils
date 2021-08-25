@@ -195,13 +195,13 @@ def plot_ranks(benchmarks: List[str], familyname: str, output_dir: Union[Path, s
         fig2 = plt.figure()
         ax2 = fig2.add_subplot()
         ax2.axis('off')
-        legend = ax2.legend(*ax.get_legend_handles_labels(), frameon=False, loc='lower center', ncol=5, )
+        legend = ax2.legend(*ax.get_legend_handles_labels(), frameon=False, loc='lower center', ncol=2, )
         fig = legend.figure
         fig.canvas.draw()
         bbox = legend.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
         fig.savefig(filename, dpi="figure", bbox_inches=bbox)
 
-    legend_file = filename.parent / (filename.name.rstrip('.png') + '_legend.png')
+    legend_file = filename.parent / (filename.name.rstrip('png').rstrip('.') + '_legend.png')
     export_legend(ax, legend_file)
 
     plt.close('all')
