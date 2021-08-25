@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from typing import Union, List
 
-from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc, color_per_opt, unify_layout
+from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc, color_per_opt, unify_layout, export_legend
 from HPOBenchExperimentUtils import _log as _main_log
 from HPOBenchExperimentUtils.utils.validation_utils import load_json_files, load_trajectories_as_df,\
     get_statistics_df, df_per_optimizer
@@ -67,7 +67,7 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
         what=whatobj,
     )
     # start plotting the trajectories:
-    f, ax = plt.subplots(1, 1, figsize=(12, 12))
+    f, ax = plt.subplots(1, 1)
     min_ = 100000
     max_ = -1
     for key, df in zip(optimizer_names, statistics_df):
@@ -122,8 +122,15 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
 
-    unify_layout(ax, title=f'{benchmark}')
+    unify_layout(ax,
+                 # title=f'{benchmark}',
+                 add_legend=False)
+
     plt.tight_layout()
     plt.savefig(filename)
+    legend_file = filename.parent / (filename.name.rstrip('png').rstrip('.') + '_legend.png')
+    export_legend(ax, legend_file)
+
     plt.close('all')
+
     return 1

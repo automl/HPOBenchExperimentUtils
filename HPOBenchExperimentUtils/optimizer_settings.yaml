@@ -3,40 +3,40 @@
 optuna_tpe_hb:
   optimizer: optuna_tpe_hb
   reduction_factor: 3
-  display_name: "optuna tpe hb"
+  display_name: "optuna$_{tpe}^{hb}$"
 
 optuna_cmaes_hb:
   optimizer: optuna_cmaes_hb
   reduction_factor: 3
-  display_name: "optuna cma-es hb"
+  display_name: "optuna$_{cma-es}^{hb}$"
 
 optuna_randomsearch:
   optimizer: optuna_randomsearch
   reduction_factor: 3
-  display_name: "optuna random search"
+  display_name: "optuna$_{RS}$"
 
 optuna_tpe_median:
   optimizer: optuna_tpe_median
   reduction_factor: 3
-  display_name: "optuna tpe median stopping rule"
+  display_name: "optuna$_{tpe}^{med}$"
 
 # RAY with HB ######################################################################################################## #
 ray_hyperopt:
   optimizer: ray_hyperopt
-  display_name: "ray hyperopt"
+  display_name: "ray$_{hyper}$"
 
 ray_randomsearch:
   optimizer: ray_randomsearch
-  display_name: "ray randomsearch"
+  display_name: "ray$_{RS}$"
 
 ray_hyperopt_asha:
   optimizer: ray_hyperopt_asha
-  display_name: "ray hyperopt asha"
+  display_name: "ray$_{hyper}^{asha}$"
   reduction_factor: 3
 
 ray_bayesopt_asha:
   optimizer: ray_bayesopt_asha
-  display_name: "ray bayesopt asha"
+  display_name: "ray$_{bayes}^{asha}$"
   reduction_factor: 3
 
 # PURE RANDOMSEARCH################################################################################################### #
@@ -131,11 +131,11 @@ fabolas_mumbo:
 # SMAC ##################################################################################################### #
 smac_sf:
   optimizer: smac_sf
-  display_name: "SMAC (RF)"
+  display_name: "BO$_{RF}$"
 
 smac_bo:
   optimizer: smac_bo
-  display_name: "SMAC (GP)"
+  display_name: "BO$_{GP}$"
 
 smac_hb_eta_3:
   optimizer: smac_hb
@@ -165,7 +165,7 @@ smac_sh_eta_2:
 
 hpbandster_tpe:
   optimizer: hpbandster_tpe
-  display_name: "BO (KDE)"
+  display_name: "BO$_{KDE}$"
 
 hpbandster_bohb_eta_3:
   optimizer: hpbandster_bohb
@@ -183,7 +183,7 @@ hpbandster_hb_eta_3:
   optimizer: hpbandster_hb
   eta: 3
   max_stages: 5
-  display_name: "HB"
+  display_name: "Hyperband"
 
 hpbandster_hb_eta_2:
   optimizer: hpbandster_hb

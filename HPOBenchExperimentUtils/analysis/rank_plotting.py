@@ -2,7 +2,8 @@ import logging
 from pathlib import Path
 from typing import Union, List
 
-from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc, color_per_opt, unify_layout, benchmark_dc
+from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc, color_per_opt, unify_layout, benchmark_dc, \
+    export_legend
 from HPOBenchExperimentUtils import _log as _main_log
 from HPOBenchExperimentUtils.utils.validation_utils import load_json_files, load_trajectories_as_df
 from HPOBenchExperimentUtils.utils.runner_utils import get_optimizer_setting, get_benchmark_settings
@@ -15,8 +16,20 @@ _main_log.setLevel(logging.DEBUG)
 _log = logging.getLogger(__name__)
 
 
-def read_trajectories(benchmark: str, input_dir: Path, train: bool=True,
-                      which: str="v1", opt_list: Union[List[str], None] = None):
+exclude = [['SurrogateSVMBenchmark', 'autogluon'],
+           ['SurrogateSVMBenchmark', 'optuna_tpe_hb'],
+           ['SurrogateSVMBenchmark', 'optuna_cmaes_hb'],
+           ['SurrogateSVMBenchmark', 'ray_hyperopt_asha'],
+
+           ['SliceLocalizationBenchmark', 'optuna_cmaes_hb'],
+           ['ProteinStructureBenchmark', 'optuna_cmaes_hb'],
+           ['NavalPropulsionBenchmark', 'optuna_cmaes_hb'],
+           ['ParkinsonsTelemonitoringBenchmark', 'optuna_cmaes_hb'],
+           ]
+
+
+def read_trajectories(benchmark: str, input_dir: Path, output_dir: Path, train: bool=True,
+                      which: str="v1", opt_list: Union[List[str], None] = None,):
     input_dir = Path(input_dir) / benchmark
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
 
@@ -31,6 +44,9 @@ def read_trajectories(benchmark: str, input_dir: Path, train: bool=True,
 
     trajectories = []
     for key in opt_list:
+        if [benchmark, key] in exclude:
+            continue
+
         if key not in optimizer_names:
             raise ValueError(f"Not the same opts for all benchmarks; {benchmark} missed {key}")
         trs = load_json_files(unique_optimizer[key])
@@ -44,9 +60,25 @@ def read_trajectories(benchmark: str, input_dir: Path, train: bool=True,
         series = series.fillna(method='ffill')
 
         vali = -1
+        nan_columns = []
         for c in series.columns:
-            vali = max(vali, series[c].first_valid_index())
-        series = series.loc[vali:]
+            # exclude nan columns.
+            first_valid_index = series[c].first_valid_index()
+            if first_valid_index is None:
+                missing_col = int(unique_optimizer[key][c].parent.name.lstrip('run-'))
+                nan_columns.append(missing_col)
+            else:
+                vali = max(vali, first_valid_index)
+
+        columns = [int(c) for c in np.setdiff1d(series.columns, nan_columns)]
+        series = series.loc[vali:, columns]
+        import logging
+        logger = logging.getLogger()
+        if len(nan_columns) != 0:
+            ex_str = f'{benchmark} - {key} - {nan_columns}\n'
+            logger.warning(ex_str)
+            (output_dir / 'missing_columns.txt').write_text(ex_str)
+
         trajectories.append(series)
     return trajectories
 
@@ -55,6 +87,16 @@ def plot_ranks(benchmarks: List[str], familyname: str, output_dir: Union[Path, s
                input_dir: Union[Path, str], opts: str, criterion: str = 'mean', unvalidated: bool = True,
                which: str = "v1", opt_list: Union[List[str], None] = None,  **kwargs):
     _log.info(f'Start plotting ranks of benchmarks {benchmarks}')
+
+    if 'SliceLocalizationBenchmark' in benchmarks \
+            or 'ProteinStructureBenchmark' in benchmarks \
+            or 'NavalPropulsionBenchmark' in benchmarks \
+            or 'ParkinsonsTelemonitoringBenchmark' in benchmarks:
+        opt_list = [opt for opt in opt_list if opt != 'optuna_cmaes_hb']
+
+    if 'SurrogateSVMBenchmark' in benchmarks:
+        not_allowed = ['autogluon', 'optuna_tpe_hb', 'optuna_cmaes_hb', 'ray_hyperopt_asha'],
+        opt_list = [opt for opt in opt_list if opt not in not_allowed]
 
     input_dir = Path(input_dir)
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
@@ -73,7 +115,7 @@ def plot_ranks(benchmarks: List[str], familyname: str, output_dir: Union[Path, s
         horizon.append(benchmark_settings['time_limit_in_s'])
         x_lo.append(benchmark_spec.get("xlim_lo", 1))
         tr = read_trajectories(benchmark=b, input_dir=input_dir, train=unvalidated, which=which,
-                               opt_list=opt_list)
+                               opt_list=opt_list, output_dir=output_dir)
         all_trajectories.append(tr)
     assert len(set(horizon)) == 1
     horizon = int(horizon[0])
@@ -147,7 +189,12 @@ def plot_ranks(benchmarks: List[str], familyname: str, output_dir: Union[Path, s
     unify_layout(ax, title=None, add_legend=False)
     val_str = 'optimized' if unvalidated else 'validated'
     plt.tight_layout()
-    plt.savefig(Path(output_dir) / f'ranks_{familyname}_{val_str}_{which}_{opts}.png')
+    filename = Path(output_dir) / f'ranks_{familyname}_{val_str}_{which}_{opts}.png'
+    plt.savefig(filename)
+
+    legend_file = filename.parent / (filename.name.rstrip('png').rstrip('.') + '_legend.png')
+    export_legend(ax, legend_file)
+
     plt.close('all')
     return 1
 

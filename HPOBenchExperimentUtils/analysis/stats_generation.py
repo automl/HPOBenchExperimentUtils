@@ -154,6 +154,8 @@ def plot_ecdf(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pat
               opt_list: Union[List[str], None] = None, **kwargs):
     _log.info(f'Start plotting ECDFs for benchmark {benchmark}')
     input_dir = Path(input_dir) / benchmark
+    Path(output_dir).mkdir(exist_ok=True, parents=True)
+
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
     opt_rh_dc = load_trajectories_as_df(input_dir=input_dir,
                                         which="runhistory")
@@ -207,6 +209,8 @@ def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Un
                      opt_list: Union[List[str], None] = None, **kwargs):
     _log.info(f'Start plotting correlations for benchmark {benchmark}')
     input_dir = Path(input_dir) / benchmark
+    Path(output_dir).mkdir(exist_ok=True, parents=True)
+
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
     opt_rh_dc = load_trajectories_as_df(input_dir=input_dir,
                                         which="runhistory")
@@ -308,14 +312,15 @@ def plot_correlation(benchmark: str, output_dir: Union[Path, str], input_dir: Un
 
 def get_stats(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str], opts: str,
               opt_list: Union[List[str], None] = None, **kwargs):
-    _log.info(f'Start plotting corralations for benchmark {benchmark}')
+    _log.info(f'Getting stats for benchmark {benchmark}')
     input_dir = Path(input_dir) / benchmark
     assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
     opt_rh_dc = load_trajectories_as_df(input_dir=input_dir,
                                         which="runhistory")
     benchmark_settings = get_benchmark_settings(benchmark)
 
-    stats = {"lowest_val": 10000000}
+    lowest_val = 10000000
+    stats = {}
 
     if opt_list is None:
         opt_list = list(opt_rh_dc.keys())
@@ -325,17 +330,22 @@ def get_stats(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pat
         if opt not in opt_list:
             _log.info(f'skip {opt}')
             continue
-        if len(opt_rh_dc[opt]) == 0: continue
+        if len(opt_rh_dc[opt]) == 0:
+            _log.info(f'skip: {opt} due to missing data')
+            continue
         stats[opt] = {
             "sim_wc_time": [],
             "diff_wc_time": [],
             "n_calls": [],
             "act_wc_time": [],
+            "run_id": []
         }
         for fl in opt_rh_dc[opt]:
             with open(fl, "r") as fh:
                 lines = fh.readlines()
             rh = [json.loads(line) for line in lines]
+
+            run_id = int(fl.parent.name.lstrip('run-'))
 
             # Some runhistories may have a boot-time entry while other dont.
             if 'boot_time' in rh[0]:
@@ -348,7 +358,7 @@ def get_stats(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pat
             vals = np.array([e["function_value"] for e in rh])
             high_fid = max(fids)
             lowest = np.min(vals[fids == high_fid])
-            stats["lowest_val"] = min(stats["lowest_val"], lowest)
+            lowest_val = min(lowest_val, lowest)
 
             sim_wc_time = rh[-1]["total_time_used"]
             diff_wc_time = benchmark_settings["time_limit_in_s"] - sim_wc_time
@@ -358,6 +368,26 @@ def get_stats(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Pat
             stats[opt]["diff_wc_time"].append(diff_wc_time)
             stats[opt]["n_calls"].append(n_calls)
             stats[opt]["act_wc_time"].append(act_wc_time)
+            stats[opt]['run_id'].append(run_id)
 
+    Path(output_dir).mkdir(exist_ok=True, parents=True)
+    missing = []
+    dfs = []
+    keys = []
+    for opt in opt_list:
+        keys.append(opt)
+        df = pd.DataFrame(stats[opt]).set_index('run_id')
+        dfs.append(df)
+        missing_runs = np.setdiff1d(np.arange(1, 33), df.index.values)
+        for run in missing_runs:
+            missing.append([benchmark, opt, int(run)])
+    df = pd.concat(dfs, axis=1, keys=keys)
+    df = df.sort_index()
+    df.to_csv(Path(output_dir) / f'stats2_{benchmark}_{opts}.csv')
+
+    stats = {'lowest_val': lowest_val, **stats}
     with open(Path(output_dir) / f'stats2_{benchmark}_{opts}.json', 'w') as fh:
         json.dump(stats, fh, indent=4, sort_keys=True)
+
+    with open(Path(output_dir) / f'stats_missing_{benchmark}_{opts}.json', 'w') as fh:
+        json.dump(missing, fh, indent=4, sort_keys=True)

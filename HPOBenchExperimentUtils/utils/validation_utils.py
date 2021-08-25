@@ -139,7 +139,7 @@ def load_json_files(file_paths: List[Path]) -> List:
         #file_content = [json.loads(line) for line in lines]
         data.append(file_content)
     dur = time.time() - start
-    _log.info("Reading %d files took %f sec" % (len(file_paths), dur))
+    _log.debug("Reading %d files took %f sec" % (len(file_paths), dur))
     return data
 
 
@@ -272,7 +272,7 @@ def df_per_optimizer(key, unvalidated_trajectories, y_best: float=0):
     }
 
     for id, traj in enumerate(unvalidated_trajectories):
-        _log.info("Handling input with %d records for %s" % (len(traj), key))
+        _log.debug("Handling input with %d records for %s" % (len(traj), key))
         function_values = [record['function_value']-y_best for record in traj[1:]]
         total_time_used = [record['total_time_used'] for record in traj[1:]]
         total_obj_costs = [record['total_objective_costs'] for record in traj[1:]]
