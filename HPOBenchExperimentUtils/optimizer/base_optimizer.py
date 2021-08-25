@@ -4,18 +4,18 @@ from pathlib import Path
 from typing import Union, Dict
 
 from ConfigSpace.hyperparameters import OrdinalHyperparameter, UniformIntegerHyperparameter
-from hpobench.abstract_benchmark import AbstractBenchmark
-from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 
 from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
 from HPOBenchExperimentUtils.utils.optimizer_utils import prepare_dict_for_sending, get_main_fidelity
+
+from uuid import uuid1
 
 _log = logging.getLogger(__name__)
 
 
 class Optimizer(ABC):
     """ Base class for the Optimizer classes for SMACOptimizer, BOHBOptimizer and DragonflyOptimizer """
-    def __init__(self, benchmark: Union[Bookkeeper, AbstractBenchmark, AbstractBenchmarkClient],
+    def __init__(self, benchmark: Bookkeeper,
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
         self.benchmark = benchmark
         self.cs = benchmark.get_configuration_space()
@@ -36,10 +36,18 @@ class Optimizer(ABC):
     def run(self):
         raise NotImplementedError()
 
+    def shutdown(self):
+        pass
+
+    @staticmethod
+    def _id_generator() -> str:
+        """ Helper function: Creates a unique run id """
+        return str(uuid1())
+
 
 class SingleFidelityOptimizer(Optimizer, ABC):
 
-    def __init__(self, benchmark: Union[AbstractBenchmark, AbstractBenchmarkClient],
+    def __init__(self, benchmark: Bookkeeper,
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
 
         # determine min and max budget from the fidelity space

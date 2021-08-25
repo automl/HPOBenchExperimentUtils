@@ -33,7 +33,7 @@ setuptools.setup(
                                                'tests.*', 'tests'],),
     package_data={'HPOBenchExperimentUtils': ['benchmark_settings.yaml', 'optimizer_settings.yaml']},
     include_package_data=True,
-    python_requires='>=3.6, <=3.8.3',
+    python_requires='>=3.6, <=3.10',
     install_requires=read_file('./requirements.txt').split('\n'),
     extras_require=get_extra_requirements(),
     test_suite='pytest',

@@ -11,14 +11,14 @@ from HPOBenchExperimentUtils.utils.validation_utils import load_json_files
 
 from HPOBenchExperimentUtils.utils import TRAJECTORY_V1_FILENAME, TRAJECTORY_V2_FILENAME, RUNHISTORY_FILENAME
 
-from HPOBenchExperimentUtils import _log as _main_log, _default_log_format
+from HPOBenchExperimentUtils import _log as _root_log
 
-_main_log.setLevel(level=logging.INFO)
+_root_log.setLevel(level=logging.INFO)
 _log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, format=_default_log_format)
 
 
-def extract_trajectory(output_dir: Union[Path, str], debug: Union[bool, None] = False):
+def extract_trajectory(output_dir: Union[Path, str], debug: Union[bool, None] = False,
+                       main_fidelity: Union[str, None] = None):
     """
     We want to create a trajectory from the results of the previous optimization run.
     This method collects all runhistories which are in a certain output directory. Note that we search recursively
@@ -56,12 +56,17 @@ def extract_trajectory(output_dir: Union[Path, str], debug: Union[bool, None] = 
 
     debug: bool, None
         Enables the debug message logging.
+
+    main_fidelity: str, None
+        Some benchmarks have multiple fidelities. But this trajectory extraction does currently only support benchmarks
+        with a single fidelity. Thus, we need to specify a `main_fidelity` to extract the correct value.
+        It is obligatory to specify this parameter only if multiple fidelities are present in the runhistory.
     """
 
     _log.info('Start extracting the trajectories')
 
     if debug:
-        _main_log.setLevel(level=logging.DEBUG)
+        _root_log.setLevel(level=logging.DEBUG)
 
     output_dir = Path(output_dir)
     assert output_dir.is_dir(), f'Result folder doesn\'t exist: {output_dir}'
@@ -79,11 +84,11 @@ def extract_trajectory(output_dir: Union[Path, str], debug: Union[bool, None] = 
 
     for i_rh, (runhistory, runhistory_path) in enumerate(zip(runhistories, runhistory_paths)):
 
-        trajectory = create_trajectory(runhistory, bigger_is_better=True)
+        trajectory = create_trajectory(runhistory, bigger_is_better=True, main_fidelity=main_fidelity)
         # print_traj(trajectory)
         write_list_of_dicts_to_file(runhistory_path.parent / TRAJECTORY_V1_FILENAME, trajectory)
 
-        trajectory = create_trajectory(runhistory, bigger_is_better=False)
+        trajectory = create_trajectory(runhistory, bigger_is_better=False, main_fidelity=main_fidelity)
         # print_traj(trajectory)
         write_list_of_dicts_to_file(runhistory_path.parent / TRAJECTORY_V2_FILENAME, trajectory)
 
@@ -107,5 +112,3 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     extract_trajectory(output_dir=Path(args.output_dir), debug=args.debug)
-
-

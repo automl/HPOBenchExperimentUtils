@@ -49,7 +49,8 @@ class DragonflyOptimizer(Optimizer):
         def objective(x):
             conf = parse_domain(x)
             _log.debug("Calling no-fidelity objective with configuration %s." % str(conf.get_dictionary()))
-            return self.benchmark.objective_function(conf)['function_value']
+            run_id = Optimizer._id_generator()
+            return self.benchmark.objective_function(configuration=conf, configuration_id=run_id)['function_value']
 
         self.parse_domain = parse_domain
         self.objective = objective
@@ -60,11 +61,16 @@ class DragonflyOptimizer(Optimizer):
                 return ret
 
             def objective_mf(z, x):
+                run_id = Optimizer._id_generator()
                 conf = parse_domain(x)
                 fidels = parse_fidelities(z)
                 _log.debug("Calling multi-fidelity objective with configuration %s at fidelity %s" % (
                     conf.get_dictionary(), fidels))
-                ret = self.benchmark.objective_function(conf, fidelity=fidels)
+                ret = self.benchmark.objective_function(configuration=conf,
+                                                        configuration_id=run_id,
+                                                        fidelity=fidels,
+                                                        **self.settings_for_sending,
+                                                        )
                 _log.debug("multi-fidelity objective returned %s" % (str(ret)))
                 return ret['function_value']
 

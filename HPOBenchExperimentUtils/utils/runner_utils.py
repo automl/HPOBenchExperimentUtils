@@ -101,10 +101,10 @@ def get_benchmark_settings(benchmark: str) -> Dict:
 
     experiment_settings = experiment_settings[benchmark]
 
-
     # Check that all mandatory fields are in the settings given:
     mandatory = ['time_limit_in_s', 'cutoff_in_s', 'mem_limit_in_mb', 'import_from', 'import_benchmark']
     found = [option in experiment_settings for option in mandatory]
+
     assert all(found), "Missing mandatory option(s) %s in benchmark settings %s" % \
                        (str([o for b, o in zip(found, mandatory) if not b]), str(experiment_settings))
 

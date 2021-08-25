@@ -1,8 +1,56 @@
 ---
+# OPTUNA ############################################################################################################# #
+optuna_tpe_hb:
+  optimizer: optuna_tpe_hb
+  reduction_factor: 3
+  display_name: "optuna$_{tpe}^{hb}$"
+
+optuna_cmaes_hb:
+  optimizer: optuna_cmaes_hb
+  reduction_factor: 3
+  display_name: "optuna$_{cma-es}^{hb}$"
+
+optuna_randomsearch:
+  optimizer: optuna_randomsearch
+  reduction_factor: 3
+  display_name: "optuna$_{RS}$"
+
+optuna_tpe_median:
+  optimizer: optuna_tpe_median
+  reduction_factor: 3
+  display_name: "optuna$_{tpe}^{med}$"
+
+# RAY with HB ######################################################################################################## #
+ray_hyperopt:
+  optimizer: ray_hyperopt
+  display_name: "ray$_{hyper}$"
+
+ray_randomsearch:
+  optimizer: ray_randomsearch
+  display_name: "ray$_{RS}$"
+
+ray_hyperopt_asha:
+  optimizer: ray_hyperopt_asha
+  display_name: "ray$_{hyper}^{asha}$"
+  reduction_factor: 3
+
+ray_bayesopt_asha:
+  optimizer: ray_bayesopt_asha
+  display_name: "ray$_{bayes}^{asha}$"
+  reduction_factor: 3
+
 # PURE RANDOMSEARCH################################################################################################### #
 randomsearch:
   optimizer: randomsearch
-  display_name: "random search"
+  display_name: "RS" #random search"
+
+# Autogluon HNAS ##################################################################################################### #
+autogluon:
+  optimizer: autogluon
+  reduction_factor: 3
+  scheduler: "hyperband_promotion"
+  searcher: "bayesopt"
+  display_name: "MoBster"
 
 # DEHB ############################################################################################################### #
 dehb:
@@ -17,25 +65,78 @@ dehb:
   eta: 3
   # Options for async_strategy: ['deferred', 'immediate', 'random', 'worst']
   async_strategy: immediate
+  display_name: "DEHB"
+
+de:
+  # From https://github.com/automl/DEHB/blob/tpami/dehb/examples/svm/run_de_svm.py
+  optimizer: de
+  pop_size: 20
+  mutation_factor: 0.5
+  crossover_prob: 0.5
+  strategy: rand1_bin
+  display_name: "DE"
 
 # DRAGONFLY DEFAULT ################################################################################################## #
 dragonfly_default:
   optimizer: dragonfly
   init_iter_per_dim: 10
   init_capital_frac: 0.1 # Ignored since 'init_iter_per_dim' is present
+  display_name: "Dragonfly" #DF"
 
 # DRAGONFLY REALTIME ################################################################################################# #
 dragonfly_realtime:
   optimizer: dragonfly
   init_capital_frac: 0.1
 
-# FABOLAS ############################################################################################################ #
-fabolas:
+# MUMBO ############################################################################################################## #
+mumbo:
+  optimizer: mumbo
+  init_samples_per_dim: 10
+  num_fidelity_values: 5 # Continuous fidelity parameters are discretized according to this; Same value as max_stages
+  initial_design: Latin # Two options: [Random, Latin]
+  # GP Settings
+  n_optimization_restarts: 5
+  update_interval: 1
+  batch_size: 1
+  kernel: matern52  # Can be one of ['rbf', 'matern52']
+  # MUMBO acquisition settings
+  num_mc_samples: 10
+  grid_size: 10000
+
+# FABOLAS MTBO ####################################################################################################### #
+fabolas_mtbo:
   optimizer: fabolas
-  num_init_evals: 10
+  acquisition: mtbo
+  init_samples_per_dim: 10
+  num_fidelity_values: 10 # Continuous fidelity parameters are discretized according to this
   marginalize_hypers: false
+  initial_design: Latin # Two options: [Random, Latin]
+  update_interval: 1
+  # MTBO acquisition specific settings
+  num_eval_points: 2000
+
+# FABOLAS MUMBO ###################################################################################################### #
+fabolas_mumbo:
+  optimizer: fabolas
+  acquisition: mumbo
+  init_samples_per_dim: 10
+  num_fidelity_values: 10 # Continuous fidelity parameters are discretized according to this
+  marginalize_hypers: false
+  initial_design: Latin # Two options: [Random, Latin]
+  update_interval: 1
+  # MUMBO acquisition specific settings
+  num_mc_samples: 10
+  grid_size: 10000
 
 # SMAC ##################################################################################################### #
+smac_sf:
+  optimizer: smac_sf
+  display_name: "BO$_{RF}$"
+
+smac_bo:
+  optimizer: smac_bo
+  display_name: "BO$_{GP}$"
+
 smac_hb_eta_3:
   optimizer: smac_hb
   eta: 3
@@ -46,13 +147,13 @@ smac_sh_eta_3:
   optimizer: smac_sh
   eta: 3
   max_stages: 5
-  display_name: "SMAC-HB"
+  display_name: "SMAC-SH"
 
 smac_hb_eta_2:
   optimizer: smac_hb
   eta: 2
   max_stages: 5
-  display_name: "SMAC-SH (eta2)"
+  display_name: "SMAC-HB (eta2)"
 
 smac_sh_eta_2:
   optimizer: smac_sh
@@ -61,6 +162,11 @@ smac_sh_eta_2:
   display_name: "SMAC-SH (eta2)"
 
 # HPBANDSTER BOHB #################################################################################################### #
+
+hpbandster_tpe:
+  optimizer: hpbandster_tpe
+  display_name: "BO$_{KDE}$"
+
 hpbandster_bohb_eta_3:
   optimizer: hpbandster_bohb
   eta: 3
@@ -77,24 +183,11 @@ hpbandster_hb_eta_3:
   optimizer: hpbandster_hb
   eta: 3
   max_stages: 5
-  display_name: "HB"
+  display_name: "Hyperband"
 
 hpbandster_hb_eta_2:
   optimizer: hpbandster_hb
   eta: 2
   max_stages: 5
   display_name: "HB (eta2)"
-
-hpbandster_sh_eta_3:
-  optimizer: hpbandster_sh
-  eta: 3
-  max_stages: 5
-  display_name: "SH"
-
-hpbandster_sh_eta_2:
-  optimizer: hpbandster_sh
-  eta: 2
-  max_stages: 5
-  display_name: "SH (eta2)"
-
 ...
