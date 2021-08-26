@@ -208,6 +208,7 @@ def plot_ranks(benchmarks: List[str], familyname: str, output_dir: Union[Path, s
 
     if familyname == "all":
         plt.xlabel("Fraction of budget")
+        ax.set_xlim([10**-6, 1])
     else:
         ax.set_xlim([x_lo, horizon])
     ax.set_xscale(benchmark_spec.get("xscale", "log"))
