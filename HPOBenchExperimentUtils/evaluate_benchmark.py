@@ -71,7 +71,6 @@ if __name__ == "__main__":
     opt_list['fig4_mf'] = opt_list['main_mf'] # ranking across all benchs
     opt_list['fig5bohb'] = ['randomsearch', 'hpbandster_tpe', 'hpbandster_hb_eta_3', 'hpbandster_bohb_eta_3'] # ranking across all benchs
     opt_list['fig5dehb'] = ['randomsearch', 'de', 'hpbandster_hb_eta_3', 'dehb'] # ranking across all benchs
-    opt_list['fig5all'] = opt_list['table3'] # ranking across all benchs
 
     # lists for the appendix
     opt_list['all_sf'] = ['randomsearch', 'de', 'smac_bo', 'smac_sf', 'ray_hyperopt', 'hpbandster_tpe'] # table + trajectory per bench + ranking per bench
