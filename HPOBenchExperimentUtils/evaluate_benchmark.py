@@ -64,6 +64,9 @@ if __name__ == "__main__":
     opt_list["rs"] = ["randomsearch"]
     # opt_list["smacpaper"] = ["dragonfly_default", "smac_sf", "smac_hb_eta_3", "randomsearch", "hpbandster_hb_eta_3"]
 
+    opt_list['katha'] = ['randomsearch', 'smac_bo', 'smac_sf', 'de', 'ray_hyperopt', 'hpbandster_tpe',
+                            'hpbandster_hb_eta_3', 'smac_hb_eta_3', 'hpbandster_bohb_eta_3', 'dehb',
+                            'dragonfly_default', 'autogluon', "ray_hyperopt_asha", "optuna_tpe_median"]
     opt_list['tab_main'] = ['randomsearch', 'smac_bo', 'smac_sf',
                             'hpbandster_hb_eta_3', 'smac_hb_eta_3', 'hpbandster_bohb_eta_3', 'dehb',
                             'dragonfly_default', 'autogluon', "ray_hyperopt_asha", "optuna_tpe_median"]
