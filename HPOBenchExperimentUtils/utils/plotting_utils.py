@@ -646,7 +646,7 @@ benchmark_families["all"] = benchmark_families["NAS201"] \
                                 + benchmark_families["NAS1SHOT1"] \
                                 + benchmark_families["pybnn"] \
                                 + benchmark_families["paramnettimered"] \
-                                + benchmark_families["cartpolereduced"]
+                                + benchmark_families["rl"]
 
 benchmark_dc = {
     "Cifar10ValidNasBench201Benchmark": "NB201 - Cifar10",

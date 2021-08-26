@@ -153,12 +153,12 @@ def plot_ranks(benchmarks: List[str], familyname: str, output_dir: Union[Path, s
     n_tasks = len(benchmarks)
     paired = False
 
-    n_iter = 500
+    n_iter = 5000
     if paired:
         n_iter = all_trajectories[0][0].shape[1]
 
     for i in range(n_iter):
-        if i % 50 == 0: print("%d / %d" % (i, n_iter))
+        if i % 500 == 0: print("%d / %d" % (i, n_iter))
         if paired:
             pick = np.ones(len(opt_list), dtype=np.int) * i
         else:
