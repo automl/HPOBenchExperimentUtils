@@ -85,7 +85,6 @@ def read_trajectories(benchmark: str, input_dir: Path, output_dir: Path, train: 
             # because we're handling a large ranking plot
             steps = 10**np.linspace(-6, 0, 200)
             series = series.transpose()
-            # Get data from csv
             for step in steps:
                 if step > 0:
                     series[step] = np.NaN
@@ -159,12 +158,12 @@ def plot_ranks(benchmarks: List[str], familyname: str, output_dir: Union[Path, s
 
     for i in range(n_iter):
         if i % 500 == 0: print("%d / %d" % (i, n_iter))
-        if paired:
-            pick = np.ones(len(opt_list), dtype=np.int) * i
-        else:
-            pick = np.random.choice(all_trajectories[0][0].shape[1],
-                                    size=(len(opt_list)))
         for j in range(n_tasks):
+            if paired:
+                pick = np.ones(len(opt_list), dtype=np.int) * i
+            else:
+                # Allow different amount of runs per optimizers
+                pick = [np.random.choice(all_trajectories[j][k].shape[1]) for k in range(len(opt_list))]
             all_trajectories_tmp = pd.DataFrame(
                 {opt_list[k]: at.iloc[:, pick[k]] for
                  k, at in enumerate(all_trajectories[j])}
