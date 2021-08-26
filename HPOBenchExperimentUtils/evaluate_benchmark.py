@@ -66,9 +66,9 @@ if __name__ == "__main__":
                            'smac_hb_eta_3', 'dragonfly_default', 'ray_hyperopt_asha'] # no 'optuna_tpe_median' and 'optuna_tpe_hb'
     
     # lists for the main paper
-    opt_list['table3'] = opt_list['main_table_sf'] + opt_list['main_table_mf'] # table
-    opt_list['fig4_sf'] = opt_list['main_table_sf'] # ranking across all benchs
-    opt_list['fig4_mf'] = opt_list['main_table_mf'] # ranking across all benchs
+    opt_list['table3'] = opt_list['main_sf'] + opt_list['main_mf'] # table
+    opt_list['fig4_sf'] = opt_list['main_sf'] # ranking across all benchs
+    opt_list['fig4_mf'] = opt_list['main_mf'] # ranking across all benchs
     opt_list['fig5bohb'] = ['randomsearch', 'hpbandster_tpe', 'hpbandster_hb_eta_3', 'hpbandster_bohb_eta_3'] # ranking across all benchs
     opt_list['fig5dehb'] = ['randomsearch', 'de', 'hpbandster_hb_eta_3', 'dehb'] # ranking across all benchs
     opt_list['fig5all'] = opt_list['table3'] # ranking across all benchs
