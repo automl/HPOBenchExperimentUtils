@@ -988,6 +988,15 @@ xgb_53:
   yscale: log
   ystar_test: 0.16705882352941176
   ystar_valid: 0.07936507936507935
+xgb_7592:
+  xlim_lo: 0.1
+  xscale: log
+  y_max: 0.14460223355852753
+  ylim_lo: 0
+  ylim_up: 1
+  yscale: log
+  ystar_test: 0.12491299897645854
+  ystar_valid: 0.05378464083827381
 xgb_9952:
   xlim_lo: 0.1
   xscale: log
@@ -997,6 +1006,15 @@ xgb_9952:
   yscale: log
   ystar_test: 0.09833641404805915
   ystar_valid: 0.03738317757009344
+xgb_9977:
+  xlim_lo: 0.1
+  xscale: log
+  y_max: 0.05117233294255567
+  ylim_lo: 0
+  ylim_up: 1
+  yscale: log
+  ystar_test: 0.025239338555265434
+  ystar_valid: 0.00951543571707698
 xgb_9981:
   xlim_lo: 0.1
   xscale: log

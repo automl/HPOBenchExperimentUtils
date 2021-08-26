@@ -174,6 +174,17 @@ xgb_53:
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
   time_limit_in_s: 1869.0
+xgb_7592:
+  bench_args:
+    model: xgb
+    task_id: 7592
+  cutoff_in_s: 269340.0
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 269340.0
 xgb_9952:
   bench_args:
     model: xgb
@@ -185,6 +196,17 @@ xgb_9952:
   main_fidelity: n_estimators
   mem_limit_in_mb: 6000
   time_limit_in_s: 3588.0
+xgb_9977:
+  bench_args:
+    model: xgb
+    task_id: 9977
+  cutoff_in_s: 183106.0
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 183106.0
 xgb_9981:
   bench_args:
     model: xgb
