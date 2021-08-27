@@ -74,8 +74,9 @@ if __name__ == "__main__":
 
     # lists for the appendix
     opt_list['all_sf'] = ['randomsearch', 'de', 'smac_bo', 'smac_sf', 'ray_hyperopt', 'hpbandster_tpe'] # table + trajectory per bench + ranking per bench
-    opt_list['all_sf'] = ['hpbandster_hb_eta_3', 'hpbandster_bohb_eta_3', 'dehb', 'smac_hb_eta_3', 
+    opt_list['all_mf'] = ['hpbandster_hb_eta_3', 'hpbandster_bohb_eta_3', 'dehb', 'smac_hb_eta_3', 
                           'dragonfly_default', 'ray_hyperopt_asha', 'optuna_tpe_median', 'optuna_tpe_hb'] # table + trajectory per bench + ranking per bench
+    opt_list['all_all'] = opt_list['all_sf'] + opt_list['all_mf']
 
     parser = argparse.ArgumentParser(prog='HPOBench Wrapper - Plotting tool',
                                      description='Plot the trajectories')
