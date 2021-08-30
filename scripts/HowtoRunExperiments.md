@@ -84,8 +84,6 @@ Now, it looks like that:
 
     cd HPOBenchExperimentUtils
 
-First, have a look at this [spreadsheet](https://docs.google.com/spreadsheets/d/1SYFAsL7bm9WhSHwdmdpxK4S7M8ASoAfl4TEA8AtrV4E/edit#gid=1492359258). Then pick an experiment that has not yet been run. There you can also see how much memory your experiment needs. If your experiment is not yet listed, please create a new row/column.
-
 We will first create cmd files and then submit them as batch jobs to the cluster. Please look at `scripts/create_cmd.py`; It is easier to read than to explain, if not ask me.
 
 Then created the files, e.g. 
@@ -119,22 +117,7 @@ To specify the result_dir and the validation directory, use:
 
 ### 6) Run experiments
 
-You'll do this with the metahelper. Either try to copy my scripts from `/home/eggenspk/scripts/metahelper/` or clone the repo from [here](https://github.com/automl/helper_scripts)
-
-    python /home/eggenspk/scripts/metahelper/slurm_helper.py -q bosch_cpu-cascadelake --memory 6000 --timelimit 345600 --startup scripts/startup.sh -o ./sgeout -l ./sgeout scripts/CMD/run_NAS201_smac_32.cmd
-
-Tip: Always submit all jobs for one experiment at once. Append `--hold` to put everything in the queue and then release them bit by bit via `scontrol release <jobid>`
-
-Rule of thumbs for surrogate experiments
-
-  * RS, DE, DEHB, HB, HPBAndSter are fast
-  * All versions of SMAC are slow
-  * Autogluon always takes 4 days (345600 seconds)
-  * Dragonfly mostly takes 4 days (345600 seconds)
-
-Rule of thumbs for other experiments: They will take exactly as long as described in [here](https://github.com/automl/HPOBenchExperimentUtils/blob/master/HPOBenchExperimentUtils/benchmark_settings.yaml)
-
-If the experiments run, mark them in the spreadsheet as `or` (optimization run)
+You'll do this with the metahelper.
 
 ### 7) Some sanity checks
 
@@ -172,8 +155,6 @@ Check the last line of the runhistory in this folder.
 The value of `total_time_used` tells you how much of the given budget the experiment used (=simulated runtime)
 If you subtract `boot_time` from `finish_time` you get the actual runtime for that job. In this case there is nothing you can do. 
 
-If this happened, add a note to the spreadsheet.
-
 ###### Reason 3: Other reasons
 If none of the above applies, check respective log of the missing run. If all runs of one optimizer are missing this is most likely because the optimizer does not run on this benchmark. If there are only a few runs missing, please rerun these (see fix1)
 
@@ -188,7 +169,7 @@ This will create all v2 trajectories, but please only do that if you are really 
 
 ### 8) Plotting
 
-Same here, please use your own version of the helper script. Here, it is *okay* to submit to the testqueue since the jobs are fast, but require a lot of memory.
+Same here, please use your own version of the helper script.
 
     python /home/eggenspk/scripts/metahelper/slurm_helper.py -q testbosch_cpu-cascadelake --memory 32000 --timelimit 3600 --startup scripts/startup.sh -o ./sgeout -l ./sgeout scripts/CMD/evalunv_NAS201_*.cmd
 
