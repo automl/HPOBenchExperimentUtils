@@ -97,16 +97,11 @@ class DehbOptimizer(SingleFidelityOptimizer):
     def run(self):
         np.random.seed(self.rng)
         # Running DE iterations
-        try:
-            traj, runtime, history = self.dehb.run(iterations=self.settings["iter"],
-                                                   verbose=self.settings["verbose"],
-                                                   debug=_log.level <= logging.DEBUG)
-        except TypeError as e:
-            # The interface has changed for the DEHB optimizer. The new version has brackets
-            # instead of iterations.
-            traj, runtime, history = self.dehb.run(brackets=self.settings["iter"],
-                                                   verbose=self.settings["verbose"] or
-                                                           _log.level <= logging.DEBUG)
+        # The interface has changed for the DEHB optimizer. The new version has brackets
+        # instead of iterations.
+        traj, runtime, history = self.dehb.run(brackets=self.settings["iter"],
+                                               verbose=self.settings["verbose"] or
+                                                       _log.level <= logging.DEBUG)
 
 
 class DeOptimizer(SingleFidelityOptimizer):
