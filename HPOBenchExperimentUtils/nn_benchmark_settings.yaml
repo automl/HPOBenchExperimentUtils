@@ -31,6 +31,17 @@ nn_146821:
   main_fidelity: iter
   mem_limit_in_mb: 6000
   time_limit_in_s: 51127.0
+nn_146822:
+  bench_args:
+    model: nn
+    task_id: 146822
+  cutoff_in_s: 81836.0
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 81836.0
 nn_31:
   bench_args:
     model: nn
@@ -64,3 +75,14 @@ nn_53:
   main_fidelity: iter
   mem_limit_in_mb: 6000
   time_limit_in_s: 29040.0
+nn_9952:
+  bench_args:
+    model: nn
+    task_id: 9952
+  cutoff_in_s: 272342.0
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 272342.0

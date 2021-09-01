@@ -1,6 +1,7 @@
 lr_10101:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.34708520179372193
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -9,6 +10,7 @@ lr_10101:
 lr_12:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.8447811447811449
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -17,6 +19,7 @@ lr_12:
 lr_146195:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.5780812359830552
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -25,6 +28,7 @@ lr_146195:
 lr_146212:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.2395332636711947
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -33,6 +37,7 @@ lr_146212:
 lr_146606:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.504927715394389
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -41,6 +46,7 @@ lr_146606:
 lr_146818:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.48292682926829267
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -49,6 +55,7 @@ lr_146818:
 lr_146821:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.2996108949416343
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -57,6 +64,7 @@ lr_146821:
 lr_146822:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.748471615720524
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -65,6 +73,7 @@ lr_146822:
 lr_14965:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.3035001489425082
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -73,6 +82,7 @@ lr_14965:
 lr_167119:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.47506009615384615
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -81,6 +91,7 @@ lr_167119:
 lr_167120:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.5021322706935123
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -89,6 +100,7 @@ lr_167120:
 lr_168329:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.950981202230944
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -97,6 +109,7 @@ lr_168329:
 lr_168330:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.6217379066307451
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -105,6 +118,7 @@ lr_168330:
 lr_168331:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.7894104740458456
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -113,6 +127,7 @@ lr_168331:
 lr_168335:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.2817934712262808
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -121,6 +136,7 @@ lr_168335:
 lr_168868:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.12896508949140525
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -129,6 +145,7 @@ lr_168868:
 lr_168908:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.4965217391304348
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -137,6 +154,7 @@ lr_168908:
 lr_168909:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.7875420875420875
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -145,6 +163,7 @@ lr_168909:
 lr_168910:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.8370249284838579
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -153,6 +172,7 @@ lr_168910:
 lr_168911:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.5003382187147689
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -161,6 +181,7 @@ lr_168911:
 lr_168912:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.4967148488830485
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -169,6 +190,7 @@ lr_168912:
 lr_3:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.4867368421052631
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -177,6 +199,7 @@ lr_3:
 lr_31:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.38249158249158255
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -185,6 +208,7 @@ lr_31:
 lr_3917:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.23094098883572567
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -193,6 +217,7 @@ lr_3917:
 lr_53:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.7365079365079364
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -201,6 +226,7 @@ lr_53:
 lr_7592:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.5178408934234111
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -209,6 +235,7 @@ lr_7592:
 lr_9952:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.41308411214953267
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -217,6 +244,7 @@ lr_9952:
 lr_9977:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.3288393903868698
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -225,6 +253,7 @@ lr_9977:
 lr_9981:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.8492211838006231
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -233,6 +262,7 @@ lr_9981:
 nn_10101:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.5282511210762332
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -241,6 +271,7 @@ nn_10101:
 nn_146818:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.5746341463414635
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -249,14 +280,25 @@ nn_146818:
 nn_146821:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.664591439688716
   ylim_lo: 0
   ylim_up: 1
   yscale: log
   ystar_test: 0.0
   ystar_valid: 0.0
+nn_146822:
+  xlim_lo: 0.1
+  xscale: log
+  y_max: 0.88646288209607
+  ylim_lo: 0
+  ylim_up: 1
+  yscale: log
+  ystar_test: 0.049350649350649325
+  ystar_valid: 0.031441048034934506
 nn_31:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.54006734006734
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -265,6 +307,7 @@ nn_31:
 nn_3917:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.5690590111642744
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -273,14 +316,25 @@ nn_3917:
 nn_53:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.8007936507936508
   ylim_lo: 0
   ylim_up: 1
   yscale: log
   ystar_test: 0.10117647058823527
   ystar_valid: 0.049206349206349184
+nn_9952:
+  xlim_lo: 0.1
+  xscale: log
+  y_max: 0.510404984423676
+  ylim_lo: 0
+  ylim_up: 1
+  yscale: log
+  ystar_test: 0.09611829944547132
+  ystar_valid: 0.043738317757009336
 rf_10101:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.24125560538116594
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -289,22 +343,43 @@ rf_10101:
 rf_12:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.5898989898989899
   ylim_lo: 0
   ylim_up: 1
   yscale: log
   ystar_test: 0.029000000000000026
   ystar_valid: 0.01279461279461278
+rf_146195:
+  xlim_lo: 0.1
+  xscale: log
+  y_max: 0.3416895090954398
+  ylim_lo: 0
+  ylim_up: 1
+  yscale: log
+  ystar_test: 0.1738306690349319
+  ystar_valid: 0.06473959631198604
 rf_146212:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.2140369209334727
   ylim_lo: 0
   ylim_up: 1
   yscale: log
   ystar_test: 0.00017241379310342086
   ystar_valid: 3.4831069313856486e-05
+rf_146606:
+  xlim_lo: 0.1
+  xscale: log
+  y_max: 0.47126128910408305
+  ylim_lo: 0
+  ylim_up: 1
+  yscale: log
+  ystar_test: 0.2755124936257012
+  ystar_valid: 0.10176848322516396
 rf_146818:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.304390243902439
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -313,6 +388,7 @@ rf_146818:
 rf_146821:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.2996108949416343
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -321,6 +397,7 @@ rf_146821:
 rf_146822:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.5705967976710336
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -329,6 +406,7 @@ rf_146822:
 rf_14965:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.11699434018468868
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -337,6 +415,7 @@ rf_14965:
 rf_167119:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.39606370192307694
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -345,14 +424,79 @@ rf_167119:
 rf_167120:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.48064876957494407
   ylim_lo: 0
   ylim_up: 1
   yscale: log
   ystar_test: 0.4837001661129568
   ystar_valid: 0.17634927293064875
+rf_168329:
+  xlim_lo: 0.1
+  xscale: log
+  y_max: 0.9025614542449908
+  ylim_lo: 0
+  ylim_up: 1
+  yscale: log
+  ystar_test: 0.6345092024539877
+  ystar_valid: 0.23547820698202848
+rf_168330:
+  xlim_lo: 0.1
+  xscale: log
+  y_max: 0.5399493345128473
+  ylim_lo: 0
+  ylim_up: 1
+  yscale: log
+  ystar_test: 0.29429185574396943
+  ystar_valid: 0.10816679400056295
+rf_168331:
+  xlim_lo: 0.1
+  xscale: log
+  y_max: 0.6167330677290837
+  ylim_lo: 0
+  ylim_up: 1
+  yscale: log
+  ystar_test: 0.3333904990567656
+  ystar_valid: 0.11762803857035627
+rf_168335:
+  xlim_lo: 0.1
+  xscale: log
+  y_max: 0.28061818840767294
+  ylim_lo: 0
+  ylim_up: 1
+  yscale: log
+  ystar_test: 0.06353501960482814
+  ystar_valid: 0.02286882911802015
+rf_168868:
+  xlim_lo: 0.1
+  xscale: log
+  y_max: 0.01811979443558387
+  ylim_lo: 0
+  ylim_up: 1
+  yscale: log
+  ystar_test: 0.005736842105263174
+  ystar_valid: 0.0022417153996101115
+rf_168908:
+  xlim_lo: 0.1
+  xscale: log
+  y_max: 0.32857142857142857
+  ylim_lo: 0
+  ylim_up: 1
+  yscale: log
+  ystar_test: 0.2660516605166051
+  ystar_valid: 0.09689440993788818
+rf_168910:
+  xlim_lo: 0.1
+  xscale: log
+  y_max: 0.7662443808745403
+  ylim_lo: 0
+  ylim_up: 1
+  yscale: log
+  ystar_test: 0.3837378640776699
+  ystar_valid: 0.18757662443808745
 rf_168911:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.25636978579481406
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -361,6 +505,7 @@ rf_168911:
 rf_168912:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.08265440210249672
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -369,6 +514,7 @@ rf_168912:
 rf_3:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.392
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -377,6 +523,7 @@ rf_3:
 rf_31:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.29966329966329963
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -385,6 +532,7 @@ rf_31:
 rf_3917:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.15470494417862835
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -393,22 +541,43 @@ rf_3917:
 rf_53:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.5563492063492064
   ylim_lo: 0
   ylim_up: 1
   yscale: log
   ystar_test: 0.20941176470588235
   ystar_valid: 0.08492063492063488
+rf_7592:
+  xlim_lo: 0.1
+  xscale: log
+  y_max: 0.2392802978078037
+  ylim_lo: 0
+  ylim_up: 1
+  yscale: log
+  ystar_test: 0.13432958034800407
+  ystar_valid: 0.05483248311043709
 rf_9952:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.2934579439252336
   ylim_lo: 0
   ylim_up: 1
   yscale: log
   ystar_test: 0.10129390018484286
   ystar_valid: 0.03526479750778817
+rf_9977:
+  xlim_lo: 0.1
+  xscale: log
+  y_max: 0.2856584603360688
+  ylim_lo: 0
+  ylim_up: 1
+  yscale: log
+  ystar_test: 0.03191180736872643
+  ystar_valid: 0.012211801484955065
 rf_9981:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.854828660436137
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -417,6 +586,7 @@ rf_9981:
 svm_10101:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.2986547085201794
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -425,6 +595,7 @@ svm_10101:
 svm_12:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.8993265993265993
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -433,6 +604,7 @@ svm_12:
 svm_146195:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.3416895090954398
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -441,6 +613,7 @@ svm_146195:
 svm_146212:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.2140369209334727
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -449,6 +622,7 @@ svm_146212:
 svm_146606:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.4714123828165242
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -457,6 +631,7 @@ svm_146606:
 svm_146818:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.4458536585365853
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -465,6 +640,7 @@ svm_146818:
 svm_146821:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.2996108949416343
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -473,6 +649,7 @@ svm_146821:
 svm_146822:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.8573508005822417
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -481,6 +658,7 @@ svm_146822:
 svm_14965:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.12618409294012511
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -489,6 +667,7 @@ svm_14965:
 svm_167119:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.4855018028846154
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -497,6 +676,7 @@ svm_167119:
 svm_167120:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.49735039149888144
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -505,6 +685,7 @@ svm_167120:
 svm_168329:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.938597397231977
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -513,6 +694,7 @@ svm_168329:
 svm_168330:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.5399493345128473
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -521,6 +703,7 @@ svm_168330:
 svm_168331:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.7803568335354235
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -529,6 +712,7 @@ svm_168331:
 svm_168335:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.28061818840767294
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -537,6 +721,7 @@ svm_168335:
 svm_168868:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.01811979443558387
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -545,6 +730,7 @@ svm_168868:
 svm_168908:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.5
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -553,6 +739,7 @@ svm_168908:
 svm_168909:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.7950841750841751
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -561,6 +748,7 @@ svm_168909:
 svm_168910:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.7662443808745403
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -569,6 +757,7 @@ svm_168910:
 svm_168911:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.4998872604284104
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -577,6 +766,7 @@ svm_168911:
 svm_168912:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.5
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -585,6 +775,7 @@ svm_168912:
 svm_3:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.47789473684210526
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -593,6 +784,7 @@ svm_3:
 svm_31:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.29966329966329963
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -601,6 +793,7 @@ svm_31:
 svm_3917:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.1853269537480064
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -609,6 +802,7 @@ svm_3917:
 svm_53:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.7507936507936508
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -617,6 +811,7 @@ svm_53:
 svm_7592:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.2392802978078037
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -625,6 +820,7 @@ svm_7592:
 svm_9952:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.2934579439252336
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -633,6 +829,7 @@ svm_9952:
 svm_9977:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.2856584603360688
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -641,6 +838,7 @@ svm_9977:
 svm_9981:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.8897196261682243
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -649,6 +847,7 @@ svm_9981:
 xgb_10101:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.2233183856502242
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -657,6 +856,7 @@ xgb_10101:
 xgb_12:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.02592592592592593
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -665,6 +865,7 @@ xgb_12:
 xgb_146212:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.0015325670498084198
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -673,6 +874,7 @@ xgb_146212:
 xgb_146606:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.3038769273033206
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -681,6 +883,7 @@ xgb_146606:
 xgb_146818:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.15414634146341466
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -689,6 +892,7 @@ xgb_146818:
 xgb_146821:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.1610894941634241
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -697,6 +901,7 @@ xgb_146821:
 xgb_146822:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.08646288209606989
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -705,6 +910,7 @@ xgb_146822:
 xgb_14965:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.09979148048853141
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -713,6 +919,7 @@ xgb_14965:
 xgb_167119:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.25817307692307695
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -721,6 +928,7 @@ xgb_167119:
 xgb_167120:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.46471616331096194
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -729,6 +937,7 @@ xgb_167120:
 xgb_168911:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.2040586245772266
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -737,6 +946,7 @@ xgb_168911:
 xgb_168912:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.06951379763469119
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -745,6 +955,7 @@ xgb_168912:
 xgb_3:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.05368421052631578
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -753,6 +964,7 @@ xgb_3:
 xgb_31:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.26262626262626265
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -761,6 +973,7 @@ xgb_31:
 xgb_3917:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.14258373205741628
   ylim_lo: 0
   ylim_up: 1
   yscale: log
@@ -769,22 +982,43 @@ xgb_3917:
 xgb_53:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.2682539682539683
   ylim_lo: 0
   ylim_up: 1
   yscale: log
   ystar_test: 0.16705882352941176
   ystar_valid: 0.07936507936507935
+xgb_7592:
+  xlim_lo: 0.1
+  xscale: log
+  y_max: 0.14460223355852753
+  ylim_lo: 0
+  ylim_up: 1
+  yscale: log
+  ystar_test: 0.12491299897645854
+  ystar_valid: 0.05378464083827381
 xgb_9952:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.17345794392523364
   ylim_lo: 0
   ylim_up: 1
   yscale: log
   ystar_test: 0.09833641404805915
   ystar_valid: 0.03738317757009344
+xgb_9977:
+  xlim_lo: 0.1
+  xscale: log
+  y_max: 0.05117233294255567
+  ylim_lo: 0
+  ylim_up: 1
+  yscale: log
+  ystar_test: 0.025239338555265434
+  ystar_valid: 0.00951543571707698
 xgb_9981:
   xlim_lo: 0.1
   xscale: log
+  y_max: 0.1738317757009346
   ylim_lo: 0
   ylim_up: 1
   yscale: log
