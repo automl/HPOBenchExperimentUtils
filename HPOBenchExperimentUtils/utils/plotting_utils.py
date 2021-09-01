@@ -523,31 +523,61 @@ color_dc = {
     }
 
 color_per_opt = {
-    "randomsearch": color_dc["blue"],
+    "randomsearch": 'cornflowerblue',  # light blue
 
-    "hpbandster_bohb_eta_3": "darkgreen",
-    "hpbandster_bohb_eta_2": "darkgreen",
-    "hpbandster_tpe": "lime",
-    "hpbandster_hb_eta_3": "greenyellow",
+    "hpbandster_bohb_eta_3": '#33a02c',  # "darkgreen",
+    "hpbandster_hb_eta_3": '#b2df8a',  # "light green",
+    "hpbandster_bohb_eta_2": '#33a02c',  # "darkgreen",
+    "hpbandster_tpe": "darkgreen",
 
-    "smac_hb_eta_3": "deeppink",
-    "smac_hb_eta_2": "deeppink",
-    "smac_sf": color_dc["purple"],
-    "smac_bo": "magenta",
+    "smac_hb_eta_3": '#fb9a99',  # "light coral",
+    "smac_hb_eta_2": '#fb9a99',  # "light coral",
+    "smac_sf": '#e31a1c',  # red
+    "smac_bo": "#fdbf6f",  # light orange
 
-    "dragonfly_default": "pink",
-    "dehb": "cyan",
-    "de": "darkcyan",
+    "dragonfly_default": "#ff7f00",  # dark orange
 
-    "autogluon": "yellow",
+    "dehb": "black",
+    "de": "dimgray",
 
-    "ray_hyperopt_asha": "saddlebrown",
-    "ray_randomsearch": "chocolate",
-    "ray_hyperopt": "sandybrown",
+    "autogluon": "#6a3d9a",  # dark purple
 
-    'optuna_cmaes_hb': "lightcoral",
-    'optuna_tpe_hb': "red",
-    'optuna_tpe_median': "darkred",
+    "ray_hyperopt_asha": "#b15928",  # brown
+    "ray_randomsearch": '#1f78b4',  # dark blue
+    "ray_hyperopt": "saddlebrown",
+
+    'optuna_cmaes_hb': "lightseagreen",
+    'optuna_tpe_hb': "blueviolet",
+    'optuna_tpe_median': "slateblue",  # medium purple
+}
+
+linestyle_per_opt = {
+    "randomsearch": 'dashed',  # light blue
+
+    "hpbandster_bohb_eta_3": 'solid',  # "darkgreen",
+    "hpbandster_hb_eta_3": 'solid',  # "light green",
+    "hpbandster_bohb_eta_2": 'solid',  # "darkgreen",
+    "hpbandster_tpe": "dashed",
+
+    "smac_hb_eta_3": 'solid',  # "light coral",
+    "smac_hb_eta_2": 'solid',  # "light coral",
+    "smac_sf": 'dashed',
+    "smac_bo": "dashed",
+
+    "dragonfly_default": "solid",  # dark orange
+
+    "dehb": "solid",
+    "de": "dashed",
+
+    "autogluon": "solid",  # dark purple
+
+    "ray_hyperopt_asha": "solid",  # brown
+    "ray_randomsearch": 'dashed',  # dark blue
+    "ray_hyperopt": "dashed",
+
+    'optuna_cmaes_hb': "solid",
+    'optuna_tpe_hb': "solid",
+    'optuna_tpe_median': "solid",  # medium purple
 }
 
 marker_per_opt = {

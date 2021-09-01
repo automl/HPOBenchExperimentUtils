@@ -255,7 +255,7 @@ def get_statistics_df(optimizer_df, what='total_time_used'):
     return stats
 
 
-def df_per_optimizer(key, unvalidated_trajectories, y_best: float=0):
+def df_per_optimizer(key, unvalidated_trajectories, y_best: float=0, y_max=None):
     if y_best != 0:
         _log.info("Found y_best = %g; Going to compute regret" % y_best)
     _log.info("Creating DataFrame for %d inputs" % len(unvalidated_trajectories))
@@ -271,9 +271,11 @@ def df_per_optimizer(key, unvalidated_trajectories, y_best: float=0):
         "finish_time": [],
     }
 
+    normalizer = 1 if y_max is None else y_max
+
     for id, traj in enumerate(unvalidated_trajectories):
         _log.info("Handling input with %d records for %s" % (len(traj), key))
-        function_values = [record['function_value']-y_best for record in traj[1:]]
+        function_values = [(record['function_value']-y_best) / normalizer for record in traj[1:]]
         total_time_used = [record['total_time_used'] for record in traj[1:]]
         total_obj_costs = [record['total_objective_costs'] for record in traj[1:]]
         costs = [record['cost'] for record in traj[1:]]

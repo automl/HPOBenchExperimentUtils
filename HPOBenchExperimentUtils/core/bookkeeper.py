@@ -163,6 +163,47 @@ class Bookkeeper:
 
             benchmark_settings_for_sending = self.__update_settings_for_sending(benchmark_settings_for_sending)
             benchmark = self.benchmark_partial()
+
+            fs = benchmark.get_fidelity_space()  # type: CS.ConfigurationSpace
+            for f_name, f_value in fidelity.items():
+                orig_fidelity = fs.get_hyperparameter(f_name)
+                # I think we only have to do something if the fidelity is a categorical one.
+                if isinstance(orig_fidelity,
+                              (CS.CategoricalHyperparameter, CS.OrdinalHyperparameter)):
+                    if isinstance(orig_fidelity, CS.CategoricalHyperparameter):
+                        fidelity_range = orig_fidelity.choices
+                    else:
+                        fidelity_range = orig_fidelity.sequence
+
+                    def find_nearest(array, value):
+                        # https://stackoverflow.com/questions/2566412/find-nearest-value-in-numpy-array
+                        array = np.asarray(array)
+                        idx = (np.abs(array - value)).argmin()
+                        return array[idx]
+
+                    new_value = find_nearest(fidelity_range, f_value)
+                    fidelity[f_name] = new_value
+
+            cs = benchmark.get_configuration_space()  # type: CS.ConfigurationSpace
+            for c_name, c_value in configuration.items():
+                orig_config = cs.get_hyperparameter(c_name)
+                # I think we only have to do something if the fidelity is a categorical one.
+                if isinstance(orig_config,
+                              (CS.CategoricalHyperparameter, CS.OrdinalHyperparameter)):
+                    if isinstance(orig_config, CS.CategoricalHyperparameter):
+                        config_range = orig_config.choices
+                    else:
+                        config_range = orig_config.sequence
+
+                    def find_nearest(array, value):
+                        # https://stackoverflow.com/questions/2566412/find-nearest-value-in-numpy-array
+                        array = np.asarray(array)
+                        idx = (np.abs(array - value)).argmin()
+                        return array[idx]
+
+                    new_value = find_nearest(config_range, c_value)
+                    configuration[c_name] = new_value
+
             result_dict = benchmark.objective_function(configuration=configuration,
                                                        fidelity=fidelity,
                                                        **benchmark_settings_for_sending)
