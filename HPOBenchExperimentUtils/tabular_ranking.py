@@ -57,6 +57,7 @@ def read_trajectories(benchmark: str, input_dir: Path, train: bool=True,
     else:
         y_max = 1
         ystar_valid = 0
+    normalizer = y_max - ystar_valid
 
     budget = 1 if "benchmark_settings" not in kwargs else \
         kwargs["benchmark_settings"]["time_limit_in_s"]
@@ -70,7 +71,7 @@ def read_trajectories(benchmark: str, input_dir: Path, train: bool=True,
         series_list = []
         for t in trs:
             times = np.array([r["total_time_used"]/budget for r in t[1:]])
-            vals = np.array([(r["function_value"] - ystar_valid) / y_max for r in t[1:]])
+            vals = np.array([(r["function_value"] - ystar_valid) / normalizer for r in t[1:]])
             series_list.append(pd.Series(data=vals, index=times))
         series = pd.concat(series_list, axis=1)
         # Fill missing performance values (NaNs) with last non-NaN value.

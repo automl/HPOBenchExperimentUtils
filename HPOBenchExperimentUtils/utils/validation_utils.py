@@ -271,7 +271,7 @@ def df_per_optimizer(key, unvalidated_trajectories, y_best: float=0, y_max=None)
         "finish_time": [],
     }
 
-    normalizer = 1 if y_max is None else y_max
+    normalizer = 1 if y_max is None else y_max - y_best
 
     for id, traj in enumerate(unvalidated_trajectories):
         _log.info("Handling input with %d records for %s" % (len(traj), key))
