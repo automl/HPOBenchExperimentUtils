@@ -15,12 +15,17 @@ all_task_ids_by_in_mem_size = [
     # 189356  # MemoryError: Unable to allocate 1.50 TiB; array size (256419, 802853) of type float64
 ]
 
+paper_tasks = [
+    10101, 53, 146818, 146821, 9952, 146822, 31, 3917, 168912, 3, 167119, 12, 146212, 168911,
+    9981, 167120, 14965, 146606, 7592, 9977
+]
+all_task_ids_by_in_mem_size = paper_tasks
 ntasks_done = dict(
-    svm=30,
-    lr=30,
-    rf=30,
-    xgb=30,
-    nn=30
+    svm=29,
+    lr=29,
+    rf=28,
+    xgb=22,
+    nn=8
 )
 
 expset_dc = {
@@ -80,13 +85,15 @@ opt_set = {
     "dehb": ["dehb", ],
     "hpband": ["hpbandster_bohb_eta_3", "hpbandster_hb_eta_3"],
     "smac": ["smac_hb_eta_3", "smac_sf"],
-    "autogluon": ["autogluon", ],
+    # "autogluon": ["autogluon", ],
     "dragonfly": ["dragonfly_default", ],
     "fabolas": ["fabolas_mtbo", "fabolas_mumbo"],
     "mumbo": ["mumbo", ],
     "sf": ["smac_bo", "hpbandster_tpe", "de"],
-    "optuna": ["optuna_tpe_hb", "optuna_cmaes_hb", "optuna_tpe_median"],
-    "ray": ["ray_hyperopt", "ray_randomsearch", "ray_hyperopt_asha"],
+    # "optuna": ["optuna_tpe_hb", "optuna_cmaes_hb", "optuna_tpe_median"],
+    "optuna": ["optuna_tpe_hb", "optuna_tpe_median"],
+    # "ray": ["ray_hyperopt", "ray_randomsearch", "ray_hyperopt_asha"],
+    "ray": ["ray_hyperopt", "ray_hyperopt_asha"],
 }
 
 
