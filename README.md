@@ -5,6 +5,10 @@ A small tool to easily run different optimizers on HPOBench-benchmarks with the 
 The HPOBenchExpUtils extract for each run a runhistory as well as a trajectory. 
 
 
+## Collecting tabular data for a benchmark
+
+Run tabular data collection using code available [here](https://github.com/Neeratyoy/MMFB).
+
 ## Running a benchmark
 
 The hpo run can be started from either the commandline:
