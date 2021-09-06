@@ -79,7 +79,6 @@ def read_trajectories(benchmark: str, input_dir: Path, output_dir: Path, train: 
             logger.warning(ex_str)
             (output_dir / 'missing_columns.txt').write_text(ex_str)
 
-
         if normalize_times_by != 1:
             # Here we assume max timestep is 1 and we discretize 
             # because we're handling a large ranking plot
@@ -120,13 +119,12 @@ def plot_ranks(benchmarks: List[str], familyname: str, output_dir: Union[Path, s
     benchmark_spec = plot_dc.get(benchmarks[0], {})
     benchmark_settings = get_benchmark_settings(benchmarks[0])
 
-
-
     all_trajectories = []
     horizon = []
     x_lo = []
     for b in benchmarks:
         benchmark_settings = get_benchmark_settings(b)
+
         tmp_horizon = benchmark_settings['time_limit_in_s']
         if familyname == "all":
             # we need to normalize time stamps and x-axis = fraction of budget
@@ -205,7 +203,6 @@ def plot_ranks(benchmarks: List[str], familyname: str, output_dir: Union[Path, s
         plt.xlabel("Simulated runtime in seconds")
     else:
         plt.xlabel("Runtime in seconds")
-
     if familyname == "all":
         plt.xlabel("Fraction of budget")
         ax.set_xlim([10**-6, 1])
@@ -215,7 +212,6 @@ def plot_ranks(benchmarks: List[str], familyname: str, output_dir: Union[Path, s
     ax.set_ylabel(f"{criterion.capitalize()} rank")
     ax.set_ylim([0.9, len(opt_list)+0.1])
     
-
     unify_layout(ax, title=None, add_legend=False)
     val_str = 'optimized' if unvalidated else 'validated'
     plt.tight_layout()

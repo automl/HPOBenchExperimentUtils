@@ -520,7 +520,6 @@ color_dc = {
     "light_purple": '#cab2d6',
     }
 
-
 color_per_opt = {
     "randomsearch": 'cornflowerblue',  # light blue
 
@@ -578,7 +577,6 @@ linestyle_per_opt = {
     'optuna_tpe_hb': "solid",
     'optuna_tpe_median': "solid",  # medium purple
 }
-
 
 marker_per_opt = {
     "hpbandster_bohb_eta_3": "o",
@@ -640,6 +638,7 @@ benchmark_families = {
         "ParamNetReducedLetterOnTimeBenchmark", "ParamNetReducedMnistOnTimeBenchmark",
         "ParamNetReducedOptdigitsOnTimeBenchmark", "ParamNetReducedPokerOnTimeBenchmark", ],
 }
+
 benchmark_families["all"] = benchmark_families["NAS201"] \
                                 + benchmark_families["NAS101"] \
                                 + benchmark_families["NASTAB"] \
