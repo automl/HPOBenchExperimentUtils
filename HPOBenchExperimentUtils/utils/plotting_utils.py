@@ -549,6 +549,34 @@ color_per_opt = {
     'optuna_tpe_median': "slateblue",  # medium purple
 }
 
+linestyle_per_opt = {
+    "randomsearch": 'dashed',  # light blue
+
+    "hpbandster_bohb_eta_3": 'solid',  # "darkgreen",
+    "hpbandster_hb_eta_3": 'solid',  # "light green",
+    "hpbandster_bohb_eta_2": 'solid',  # "darkgreen",
+    "hpbandster_tpe": "dashed",
+
+    "smac_hb_eta_3": 'solid',  # "light coral",
+    "smac_hb_eta_2": 'solid',  # "light coral",
+    "smac_sf": 'dashed',
+    "smac_bo": "dashed",
+
+    "dragonfly_default": "solid",  # dark orange
+
+    "dehb": "solid",
+    "de": "dashed",
+
+    "autogluon": "solid",  # dark purple
+
+    "ray_hyperopt_asha": "solid",  # brown
+    "ray_randomsearch": 'dashed',  # dark blue
+    "ray_hyperopt": "dashed",
+
+    'optuna_cmaes_hb': "solid",
+    'optuna_tpe_hb': "solid",
+    'optuna_tpe_median': "solid",  # medium purple
+}
 
 marker_per_opt = {
     "hpbandster_bohb_eta_3": "o",
@@ -598,7 +626,7 @@ benchmark_families = {
                "NavalPropulsionBenchmark", "ParkinsonsTelemonitoringBenchmark", ],
     "NAS1SHOT1": ["NASBench1shot1SearchSpace1Benchmark", "NASBench1shot1SearchSpace2Benchmark",
                   "NASBench1shot1SearchSpace3Benchmark", ],
-    "pybnn": ["BNNOnBostonHousing", "BNNOnProteinStructure", "BNNOnYearPrediction", ],
+    "pybnn": ["BNNOnProteinStructure", "BNNOnYearPrediction", ], # "BNNOnBostonHousing", 
     "rl": ["cartpolereduced"],
     "learna": ["metalearna",
                "learna"],
@@ -610,6 +638,14 @@ benchmark_families = {
         "ParamNetReducedLetterOnTimeBenchmark", "ParamNetReducedMnistOnTimeBenchmark",
         "ParamNetReducedOptdigitsOnTimeBenchmark", "ParamNetReducedPokerOnTimeBenchmark", ],
 }
+
+benchmark_families["all"] = benchmark_families["NAS201"] \
+                                + benchmark_families["NAS101"] \
+                                + benchmark_families["NASTAB"] \
+                                + benchmark_families["NAS1SHOT1"] \
+                                + benchmark_families["pybnn"] \
+                                + benchmark_families["paramnettimered"] \
+                                + benchmark_families["rl"]
 
 benchmark_dc = {
     "Cifar10ValidNasBench201Benchmark": "NB201 - Cifar10",
@@ -625,7 +661,7 @@ benchmark_dc = {
     "NASBench1shot1SearchSpace1Benchmark":  "NB1Shot1 - 1",
     "NASBench1shot1SearchSpace2Benchmark":  "NB1Shot1 - 2",
     "NASBench1shot1SearchSpace3Benchmark":  "NB1Shot1 - 3",
-    "BNNOnBostonHousing":  "BNN - Boston",
+    #"BNNOnBostonHousing":  "BNN - Boston",
     "BNNOnProteinStructure":  "BNN - Protein",
     "BNNOnYearPrediction":  "BNN - Year",
     "cartpolereduced":  "cartpole reduced",
@@ -644,3 +680,14 @@ benchmark_dc = {
     "ParamNetReducedOptdigitsOnTimeBenchmark":  "Net - OptDigits",
     "ParamNetReducedPokerOnTimeBenchmark":   "Net - Poker",
 }
+
+
+def export_legend(ax, filename: Path):
+    fig2 = plt.figure()
+    ax2 = fig2.add_subplot()
+    ax2.axis('off')
+    legend = ax2.legend(*ax.get_legend_handles_labels(), frameon=False, loc='lower center', ncol=2, fontsize='large')
+    fig = legend.figure
+    fig.canvas.draw()
+    bbox = legend.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
+    fig.savefig(filename, dpi="figure", bbox_inches=bbox)
