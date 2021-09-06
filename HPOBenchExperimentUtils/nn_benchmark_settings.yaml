@@ -86,3 +86,99 @@ nn_9952:
   main_fidelity: iter
   mem_limit_in_mb: 6000
   time_limit_in_s: 272342.0
+nn_10101_raw:
+  bench_args:
+    model: nn
+    task_id: 10101
+  cutoff_in_s: 31734.0
+  import_benchmark: TabularBenchmark
+  import_bencmark: NNBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 31734.0
+nn_146818_raw:
+  bench_args:
+    model: nn
+    task_id: 146818
+  cutoff_in_s: 19659.0
+  import_benchmark: TabularBenchmark
+  import_bencmark: NNBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 19659.0
+nn_146821_raw:
+  bench_args:
+    model: nn
+    task_id: 146821
+  cutoff_in_s: 51127.0
+  import_benchmark: TabularBenchmark
+  import_bencmark: NNBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 51127.0
+nn_146822_raw:
+  bench_args:
+    model: nn
+    task_id: 146822
+  cutoff_in_s: 81836.0
+  import_benchmark: TabularBenchmark
+  import_bencmark: NNBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 81836.0
+nn_31_raw:
+  bench_args:
+    model: nn
+    task_id: 31
+  cutoff_in_s: 32009.0
+  import_benchmark: TabularBenchmark
+  import_bencmark: NNBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 32009.0
+nn_3917_raw:
+  bench_args:
+    model: nn
+    task_id: 3917
+  cutoff_in_s: 88413.0
+  import_benchmark: TabularBenchmark
+  import_bencmark: NNBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 88413.0
+nn_53_raw:
+  bench_args:
+    model: nn
+    task_id: 53
+  cutoff_in_s: 29040.0
+  import_benchmark: TabularBenchmark
+  import_bencmark: NNBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 29040.0
+nn_9952_raw:
+  bench_args:
+    model: nn
+    task_id: 9952
+  cutoff_in_s: 272342.0
+  import_benchmark: TabularBenchmark
+  import_bencmark: NNBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 272342.0
