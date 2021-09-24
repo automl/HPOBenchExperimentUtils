@@ -1,0 +1,37 @@
+landscape_broad_lr:
+  benchmarks:
+  - lr_146818
+  - lr_67119
+  - lr_12
+  - lr_9981
+  - lr_168912
+  opt_list: &id001
+  - randomsearch
+  - de
+  - smac_bo
+  - smac_sf
+  - hpbandster_hb_eta_3
+  - hpbandster_bohb_eta_3
+  - dehb
+  - smac_hb_eta_3
+landscape_broad_svm:
+  benchmarks:
+  - svm_146212
+  - svm_146822
+  - svm_7592
+  opt_list: *id001
+landscape_narrow_lr:
+  benchmarks:
+  - lr_10101
+  - lr_31
+  - lr_168911
+  - lr_167120
+  - lr_14965
+  opt_list: *id001
+landscape_narrow_svm:
+  benchmarks:
+  - svm_146606
+  - svm_167120
+  - svm_31
+  - svm_146818
+  opt_list: *id001
