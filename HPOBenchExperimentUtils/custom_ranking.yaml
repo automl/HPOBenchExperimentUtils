@@ -1,10 +1,14 @@
-auc_lr:
+auc_lr_high:
   benchmarks:
-  - lr_53
-  - lr_31
-  - lr_168912
-  - lr_168911
-  - lr_7592
+  - lr_10101
+  - lr_146822
+  - lr_3917
+  - lr_167119
+  - lr_12
+  - lr_146212
+  - lr_9981
+  - lr_14965
+  - lr_146606
   opt_list: &id001
   - hpbandster_hb_eta_3
   - hpbandster_bohb_eta_3
@@ -15,13 +19,53 @@ auc_lr:
   - optuna_tpe_median
   - optuna_tpe_hb
   x_lo: 0.0001
-auc_svm:
+auc_lr_low:
+  benchmarks:
+  - lr_53
+  - lr_31
+  - lr_168912
+  - lr_168911
+  - lr_7592
+  opt_list: *id001
+  x_lo: 0.0001
+auc_svm_high:
+  benchmarks:
+  - svm_10101
+  - svm_53
+  - svm_146821
+  - svm_31
+  - svm_3917
+  - svm_168912
+  - svm_167119
+  - svm_12
+  - svm_146212
+  - svm_168911
+  - svm_9981
+  - svm_167120
+  - svm_14965
+  - svm_7592
+  - svm_9977
+  opt_list: *id001
+  x_lo: 1.0e-05
+auc_svm_low:
   benchmarks:
   - svm_146822
   - svm_3
   opt_list: *id001
   x_lo: 1.0e-05
-auc_xgb:
+auc_xgb_high:
+  benchmarks:
+  - xgb_53
+  - xgb_9952
+  - xgb_31
+  - xgb_146212
+  - xgb_14965
+  - xgb_146606
+  - xgb_7592
+  - xgb_9977
+  opt_list: *id001
+  x_lo: 0.0001
+auc_xgb_low:
   benchmarks:
   - lr_10101
   - lr_146818
