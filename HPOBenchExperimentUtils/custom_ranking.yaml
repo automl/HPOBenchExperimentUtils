@@ -28,6 +28,42 @@ auc_lr_low:
   - lr_7592
   opt_list: *id001
   x_lo: 0.0001
+auc_rf_rand1:
+  benchmarks:
+  - rf_3917
+  - rf_146821
+  - rf_146212
+  - rf_9977
+  - rf_7592
+  opt_list: *id001
+  x_lo: 0.0001
+auc_rf_rand2:
+  benchmarks:
+  - rf_146822
+  - rf_168912
+  - rf_146818
+  - rf_3
+  - rf_9981
+  opt_list: *id001
+  x_lo: 0.0001
+auc_rf_rand3:
+  benchmarks:
+  - rf_167120
+  - rf_14965
+  - rf_168911
+  - rf_146606
+  - rf_167119
+  opt_list: *id001
+  x_lo: 0.0001
+auc_rf_rand4:
+  benchmarks:
+  - rf_31
+  - rf_10101
+  - rf_9952
+  - rf_53
+  - rf_12
+  opt_list: *id001
+  x_lo: 0.0001
 auc_svm_high:
   benchmarks:
   - svm_10101
