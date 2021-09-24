@@ -313,6 +313,7 @@ if __name__ == "__main__":
             full_map = yaml.load(f, Loader=yaml.FullLoader)
         benchmarks = full_map[args.custom_key]["benchmarks"]
         list_of_opt_to_consider = full_map[args.custom_key]["opt_list"]
+        args.x_lo = full_map[args.custom_key]["x_lo"]
 
     plot_ranks(
         **vars(args), benchmarks=benchmarks, familyname=args.rank, opt_list=list_of_opt_to_consider
