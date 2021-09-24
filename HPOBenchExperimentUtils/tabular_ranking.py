@@ -308,7 +308,7 @@ if __name__ == "__main__":
     
     if args.custom:
         assert args.custom_key is not None
-        custom_bench = Path(__file__).absoulute().parent / "custom_ranking.yaml"
+        custom_bench = Path(__file__).absolute().parent / "custom_ranking.yaml"
         with open(custom_bench, "r") as f:
             full_map = yaml.load(f, Loader=yaml.FullLoader)
         benchmarks = full_map[args.custom_key]["benchmarks"]
