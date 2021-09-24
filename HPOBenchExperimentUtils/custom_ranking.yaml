@@ -15,6 +15,17 @@ auc_lr:
   - dehb
   - smac_hb_eta_3
   x_lo: 0.0001
+auc_svm:
+  benchmarks:
+  - svm_146822
+  - svm_3
+  opt_list: *id001
+  x_lo: 0.0001
+auc_xgb:
+  benchmarks:
+  - lr_10101
+  - lr_146818
+  - lr_12
 landscape_broad_lr:
   benchmarks:
   - lr_146818
