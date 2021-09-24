@@ -5,20 +5,6 @@ auc_lr_high:
   - lr_167119
   - lr_146818
   - lr_10101
-auc_lr_low:
-  benchmarks:
-  - lr_168912
-  - lr_146606
-  - lr_53
-  - lr_3
-  - lr_146821
-auc_rf_rand1:
-  benchmarks:
-  - rf_3917
-  - rf_146821
-  - rf_146212
-  - rf_9977
-  - rf_7592
   opt_list: &id001
   - hpbandster_hb_eta_3
   - hpbandster_bohb_eta_3
@@ -28,6 +14,22 @@ auc_rf_rand1:
   - ray_hyperopt_asha
   - optuna_tpe_median
   - optuna_tpe_hb
+auc_lr_low:
+  benchmarks:
+  - lr_168912
+  - lr_146606
+  - lr_53
+  - lr_3
+  - lr_146821
+  opt_list: *id001
+auc_rf_rand1:
+  benchmarks:
+  - rf_3917
+  - rf_146821
+  - rf_146212
+  - rf_9977
+  - rf_7592
+  opt_list: *id001
   x_lo: 0.0001
 auc_rf_rand2:
   benchmarks:
@@ -88,6 +90,7 @@ auc_xgb_high:
   - xgb_168912
   - xgb_53
   - xgb_168911
+  opt_list: *id001
 auc_xgb_low:
   benchmarks:
   - xgb_146212
@@ -95,6 +98,7 @@ auc_xgb_low:
   - xgb_3917
   - xgb_146818
   - xgb_9981
+  opt_list: *id001
 landscape_broad_lr:
   benchmarks:
   - lr_146818
