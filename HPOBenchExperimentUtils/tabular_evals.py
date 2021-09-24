@@ -158,6 +158,8 @@ def save_median_table_tabular(
         return False
 
     benchmarks = [name for name in benchmarks if check_task_id(name)]
+    if args.bench_type != "tab":
+        benchmarks = ["{}_{}".format(name, args.bench_type) for name in benchmarks]
 
     orig_input_dir = input_dir
     per_dataset_df = dict()
@@ -244,6 +246,12 @@ def save_median_table_tabular(
     result_df = result_df[0] / len(result_df)
     result_df = pd.DataFrame(result_df, columns=["function_values_median"])
 
+    # Computing ranks
+    _result_df = result_df.transpose.copy()
+    rank_df = pd.DataFrame(
+        [rankdata(_result_df.values, method="ordinal")], columns=_result_df.columns
+    )
+
     # Compute some statistics
     opt_keys = list(result_df.index)
     opt_keys.sort()
@@ -277,6 +285,10 @@ def save_median_table_tabular(
     result_df = result_df[header]
 
     val_str = 'unvalidated' if unvalidated else 'validated'
+    rank_df.to_pickle(
+        Path(output_dir) / f'result_table_tabular_{kwargs["tabular"]}_{val_str}_{which}_{opts}_{args.table_type}_{args.formatter}.pkl'
+    )
+    print(rank_df)
     if thresh < 1:
         ouptut_file = Path(output_dir) / f'result_table_tabular_{kwargs["tabular"]}_{val_str}_{which}_{int(thresh*100)}_{opts}_{args.formatter}.tex'
     else:
@@ -301,6 +313,8 @@ def input_args():
     parser.add_argument('--tabular', choices=["svm", "lr", "rf", "xgb", "nn"], default=None)
     parser.add_argument('--table_type', choices=opt_list.keys(),
                         default="table3")
+    parser.add_argument('--bench_type', choices=["tab", "raw", "surr"], type=str,
+                        default="tab", help="type of benchmark")
     parser.add_argument('--formatter', choices=["orig", "numpy"],
                         default="orig")
     args, unknown = parser.parse_known_args()

@@ -53,6 +53,7 @@ expset_dc = {
     "seeds": ["NASCifar10ABenchmark_fixed_seed_0", "NASCifar10ABenchmark_random_seed",
               "ProteinStructureBenchmark_fixed_seed_0", "ProteinStructureBenchmark_random_seed",
               "Cifar10ValidNasBench201Benchmark_fixed_seed_777", "Cifar10ValidNasBench201Benchmark_random_seed", ],
+    # tabular benchmarks
     "tabular_svm": [
         "{}_{}".format(x[0], x[1]) for x in itertools.product(
             *[["svm"], all_task_ids_by_in_mem_size[:ntasks_done["svm"]]]
@@ -78,6 +79,32 @@ expset_dc = {
             *[["rf"], all_task_ids_by_in_mem_size[:ntasks_done["rf"]]]
         )
     ],
+    # raw benchmarks
+    "raw_svm": [
+        "{}_{}_raw".format(x[0], x[1]) for x in itertools.product(
+            *[["svm"], all_task_ids_by_in_mem_size[:ntasks_done["svm"]]]
+        )
+    ],
+    "raw_lr": [
+        "{}_{}_raw".format(x[0], x[1]) for x in itertools.product(
+            *[["lr"], all_task_ids_by_in_mem_size[:ntasks_done["lr"]]]
+        )
+    ],
+    "raw_nn": [
+        "{}_{}_raw".format(x[0], x[1]) for x in itertools.product(
+            *[["nn"], all_task_ids_by_in_mem_size[:ntasks_done["nn"]]]
+        )
+    ],
+    "raw_xgb": [
+        "{}_{}_raw".format(x[0], x[1]) for x in itertools.product(
+            *[["xgb"], all_task_ids_by_in_mem_size[:ntasks_done["xgb"]]]
+        )
+    ],
+    "raw_rf": [
+        "{}_{}_raw".format(x[0], x[1]) for x in itertools.product(
+            *[["rf"], all_task_ids_by_in_mem_size[:ntasks_done["rf"]]]
+        )
+    ],
 }
 
 opt_set = {
@@ -87,8 +114,8 @@ opt_set = {
     "smac": ["smac_hb_eta_3", "smac_sf"],
     # "autogluon": ["autogluon", ],
     "dragonfly": ["dragonfly_default", ],
-    "fabolas": ["fabolas_mtbo", "fabolas_mumbo"],
-    "mumbo": ["mumbo", ],
+    # "fabolas": ["fabolas_mtbo", "fabolas_mumbo"],
+    # "mumbo": ["mumbo", ],
     "sf": ["smac_bo", "hpbandster_tpe", "de"],
     # "optuna": ["optuna_tpe_hb", "optuna_cmaes_hb", "optuna_tpe_median"],
     "optuna": ["optuna_tpe_hb", "optuna_tpe_median"],
