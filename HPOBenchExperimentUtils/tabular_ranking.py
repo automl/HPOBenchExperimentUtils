@@ -227,7 +227,7 @@ def plot_ranks(benchmarks: List[str], familyname: str, output_dir: Union[Path, s
         filename = Path(output_dir) / \
                    f'all_ranks_tabular_{familyname}_{val_str}_{which}_{opts}_{args.fig_type}.png'
     if args.custom:
-        filename = Path(output_dir) / "rebuttal_{}_{}.png".format(_, _)
+        filename = Path(output_dir) / "rebuttal_{}.png".format(args.custom_key)
     print(filename)
     plt.savefig(filename)
     plt.close('all')
