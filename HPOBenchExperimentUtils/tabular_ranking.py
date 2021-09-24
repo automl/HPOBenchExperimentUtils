@@ -306,7 +306,7 @@ if __name__ == "__main__":
 
     benchmarks = [name for name in benchmarks if check_task_id(name)]
     
-    if custom:
+    if args.custom:
         assert args.custom_key is not None
         custom_bench = Path(__file__).absoulute().parent / "custom_ranking.yaml"
         with open(custom_bench, "r") as f:
