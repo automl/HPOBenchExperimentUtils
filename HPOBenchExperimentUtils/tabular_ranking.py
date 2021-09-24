@@ -2,6 +2,7 @@
 Script to generate the average ranking plots for the chosen optimizer families
 """
 
+import yaml
 import pickle
 import logging
 import argparse
@@ -225,6 +226,8 @@ def plot_ranks(benchmarks: List[str], familyname: str, output_dir: Union[Path, s
     else:
         filename = Path(output_dir) / \
                    f'all_ranks_tabular_{familyname}_{val_str}_{which}_{opts}_{args.fig_type}.png'
+    if args.custom:
+        filename = Path(output_dir) / "rebuttal_{}_{}.png".format(_, _)
     print(filename)
     plt.savefig(filename)
     plt.close('all')
@@ -247,6 +250,8 @@ def input_args():
     parser.add_argument('--tabular', choices=["svm", "lr", "rf", "xgb", "nn"], default=None)
     parser.add_argument('--fig_type', choices=list(opt_list.keys()), default="fig4_sf")
     parser.add_argument('--x_lo', type=float, default=10**-6)
+    parser.add_argument('--custom', action='store_true', default=False)
+    parser.add_argument('--custom_key', default=False, type=str)
     args, unknown = parser.parse_known_args()
     return args
 
@@ -276,7 +281,6 @@ if __name__ == "__main__":
                           'dragonfly_default', 'ray_hyperopt_asha', 'optuna_tpe_median',
                           'optuna_tpe_hb']  # table + trajectory per bench + ranking per bench
     opt_list['all_all'] = opt_list['all_sf'] + opt_list['all_mf']
-
     args = input_args()
 
     list_of_opt_to_consider = opt_list[args.fig_type]
@@ -301,6 +305,14 @@ if __name__ == "__main__":
         return False
 
     benchmarks = [name for name in benchmarks if check_task_id(name)]
+    
+    if custom:
+        assert args.custom_key is not None
+        custom_bench = Path(__file__).absoulute().parent / "custom_ranking.yaml"
+        with open(custom_bench, "r") as f:
+            full_map = yaml.load(f, Loader=yaml.FullLoader)
+        benchmarks = full_map[args.custom_key]["benchmarks"]
+        list_of_opt_to_consider = full_map[args.custom_key]["opt_list"]
 
     plot_ranks(
         **vars(args), benchmarks=benchmarks, familyname=args.rank, opt_list=list_of_opt_to_consider
