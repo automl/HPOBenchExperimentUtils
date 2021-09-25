@@ -24,6 +24,24 @@ auc_lr_low:
   - lr_146821
   opt_list: *id001
   x_lo: 0.0001
+auc_rf_high:
+  benchmarks:
+  - rf_168911
+  - rf_53
+  - rf_167120
+  - rf_146822
+  - rf_10101
+  opt_list: *id001
+  x_lo: 0.0001
+auc_rf_low:
+  benchmarks:
+  - rf_14965
+  - rf_146821
+  - rf_9952
+  - rf_9977
+  - rf_3
+  opt_list: *id001
+  x_lo: 0.0001
 auc_rf_rand1:
   benchmarks:
   - rf_3917
