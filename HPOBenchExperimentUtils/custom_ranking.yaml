@@ -24,6 +24,15 @@ auc_lr_low:
   - lr_146821
   opt_list: *id001
   x_lo: 0.0001
+auc_lr_med:
+  benchmarks:
+  - lr_9977
+  - lr_7592
+  - lr_31
+  - lr_146822
+  - lr_167120
+  opt_list: *id001
+  x_lo: 0.0001
 auc_rf_high:
   benchmarks:
   - rf_168911
@@ -119,6 +128,15 @@ auc_xgb_low:
   - xgb_3917
   - xgb_146818
   - xgb_9981
+  opt_list: *id001
+  x_lo: 0.0001
+auc_xgb_med:
+  benchmarks:
+  - xgb_31
+  - xgb_146822
+  - xgb_146606
+  - xgb_167119
+  - xgb_7592
   opt_list: *id001
   x_lo: 0.0001
 landscape_broad_lr:
