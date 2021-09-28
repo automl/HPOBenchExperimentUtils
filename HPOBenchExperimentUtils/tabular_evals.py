@@ -143,7 +143,7 @@ def df_per_optimizer(key, unvalidated_trajectories, y_best: float=0, y_max=None)
 
 
 def save_median_table_tabular(
-        benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str], opts: str,
+        benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
         unvalidated: bool = True, which: str = "v1", opt_list: Union[List[str], None] = None,
         thresh=1, **kwargs
 ):
@@ -291,18 +291,18 @@ def save_median_table_tabular(
 
     val_str = 'unvalidated' if unvalidated else 'validated'
     rank_df.to_pickle(
-        Path(output_dir) / f'result_table_tabular_{kwargs["tabular"]}_{val_str}_{which}_{opts}_{args.table_type}_{args.formatter}.pkl'
+        Path(output_dir) / f'result_table_tabular_{kwargs["tabular"]}_{val_str}_{which}_{args.table_type}_{args.formatter}.pkl'
     )
     print(rank_df)
     if thresh < 1:
-        ouptut_file = Path(output_dir) / f'result_table_tabular_{kwargs["tabular"]}_{val_str}_{which}_{int(thresh*100)}_{opts}_{args.formatter}.tex'
+        ouptut_file = Path(output_dir) / f'result_table_tabular_{kwargs["tabular"]}_{val_str}_{which}_{int(thresh*100)}_{args.formatter}.tex'
     else:
-        output_file = Path(output_dir) / f'result_table_tabular_{kwargs["tabular"]}_{val_str}_{which}_{opts}_{args.table_type}_{args.formatter}.tex'
+        output_file = Path(output_dir) / f'result_table_tabular_{kwargs["tabular"]}_{val_str}_{which}_{args.table_type}_{args.formatter}.tex'
     write_latex(result_df=result_df, output_file=output_file, col_list=opt_list)
 
 
 def save_median_table_tabular_expanded(
-        benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str], opts: str,
+        benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str],
         unvalidated: bool = True, which: str = "v1", opt_list: Union[List[str], None] = None,
         thresh=1, **kwargs
 ):
