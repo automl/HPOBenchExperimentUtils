@@ -441,7 +441,7 @@ def input_args():
                         default="tab", help="type of benchmark")
     parser.add_argument('--formatter', choices=["orig", "numpy"],
                         default="orig")
-    parser.add_argument('--expand', actions="store_true", default=False)
+    parser.add_argument('--expand', action="store_true", default=False)
     args, unknown = parser.parse_known_args()
     return args
 
