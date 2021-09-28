@@ -434,7 +434,6 @@ def input_args():
     parser.add_argument('--agg', choices=["mean", "median"], default="median")
     parser.add_argument('--unvalidated', action='store_true', default=False)
     parser.add_argument('--which', choices=["v1", "v2"], default="v1")
-    parser.add_argument('--opts', choices=list_of_opt_to_consider, default="all")
     parser.add_argument('--tabular', choices=["svm", "lr", "rf", "xgb", "nn"], default=None)
     parser.add_argument('--table_type', choices=opt_list.keys(),
                         default="table3")
