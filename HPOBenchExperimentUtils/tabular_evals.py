@@ -3,6 +3,7 @@ Script to generate the LaTex table with final performances for the chose optimiz
 """
 
 import sys
+import time
 import logging
 import argparse
 import numpy as np
@@ -148,7 +149,11 @@ def save_median_table_tabular(
 ):
     assert 0 < thresh <= 1, f"thresh needs to be in [0, 1], but is {thresh}"
 
-    if kwargs["tabular"] is not None:
+    if kwargs["tabular"] is None:
+        benchmarks = []
+        for model in ntasks_done.keys():
+            benchmarks.extend(benchmark_families["tabular_{}".format(model)])
+    else:
         benchmarks = benchmark_families["tabular_{}".format(kwargs["tabular"])]
 
     def check_task_id(benchmark_name):
@@ -296,6 +301,126 @@ def save_median_table_tabular(
     write_latex(result_df=result_df, output_file=output_file, col_list=opt_list)
 
 
+def save_median_table_tabular_expanded(
+        benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str], opts: str,
+        unvalidated: bool = True, which: str = "v1", opt_list: Union[List[str], None] = None,
+        thresh=1, **kwargs
+):
+
+    assert 0 < thresh <= 1, f"thresh needs to be in [0, 1], but is {thresh}"
+
+    if kwargs["tabular"] is None:
+        benchmarks = []
+        for model in ntasks_done.keys():
+            benchmarks.extend(benchmark_families["tabular_{}".format(model)])
+    else:
+        benchmarks = benchmark_families["tabular_{}".format(kwargs["tabular"])]
+
+    def check_task_id(benchmark_name):
+        model, tid = benchmark_name.split("_")
+        if int(tid) in paper_tasks[:ntasks_done[model]]:
+            return True
+        return False
+
+    benchmarks = [name for name in benchmarks if check_task_id(name)]
+    if args.bench_type != "tab":
+        benchmarks = ["{}_{}".format(name, args.bench_type) for name in benchmarks]
+
+    # _log.info(f'Start creating table of benchmark {benchmark}')
+    orig_input_dir = input_dir
+    per_dataset_df = dict()
+    for i, benchmark in enumerate(benchmarks, start=1):
+        print("\n{:<2}/{:<2}\n".format(i, len(benchmarks)))
+        time.sleep(1)
+        # assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
+        input_dir = Path(orig_input_dir) / benchmark
+        if not input_dir.is_dir():
+            print(f'Result folder doesn\"t exist: {input_dir}')
+        unique_optimizer = load_trajectories_as_df(input_dir=input_dir,
+                                                   which=f'train_{which}' if unvalidated else
+                                                   f'test_{which}')
+        benchmark_spec = plot_dc.get(benchmark, {})
+        y_best_val = benchmark_spec.get("ystar_valid", 0)
+        y_best_test = benchmark_spec.get("ystar_test", 0)
+        y_max = benchmark_spec.get("y_max", 0)
+        benchmark_settings = get_benchmark_settings(benchmark)
+        time_limit_in_s = benchmark_settings["time_limit_in_s"]
+        cut_time_step = thresh * time_limit_in_s
+        _log.info(f"Cut to {thresh} percent -> {time_limit_in_s} sec")
+
+        keys = list(unique_optimizer.keys())
+        if opt_list is None:
+            opt_list = keys
+        result_df = pd.DataFrame()
+        for key in opt_list:
+            if key not in keys:
+                _log.info(f'Skip {key}')
+                continue
+            trajectories = load_json_files(unique_optimizer[key])
+            optimizer_df = df_per_optimizer(
+                key=key,
+                unvalidated_trajectories=trajectories,
+                y_best=y_best_val if unvalidated else y_best_test
+            )
+
+            unique_ids = np.unique(optimizer_df['id'])
+            for unique_id in unique_ids:
+                df = optimizer_df[optimizer_df['id'] == unique_id]
+                df2 = pd.DataFrame([[key, unique_id, 0, 0, np.inf, df["fidel_values"].max(), 0, 0, 1], ], columns=df.columns)
+                df = df.append(df2, ignore_index=True)
+                df = df.sort_values(by='total_time_used')
+                df = df.drop(df[df["total_time_used"] > cut_time_step].index)
+                last_inc = df.tail(1)
+                if len(last_inc) < 1:
+                    _log.critical(f"{key} has not enough runs at timestep {cut_time_step}")
+
+                result_df = result_df.append(last_inc)
+
+        def q1(x):
+            return x.quantile(0.25)
+
+        def q3(x):
+            return x.quantile(0.75)
+
+        def lst(x):
+            x = np.array(x)
+            #x[x < 1e-6] = 1e-6
+            return list(x)
+
+        def median(x):
+            x = np.array(x)
+            #x[x < 1e-6] = 1e-6
+            return np.median(x)
+
+        # q1 = lambda x: x.quantile(0.25)
+        # q3 = lambda x: x.quantile(0.75)
+        aggregate_funcs = [median, q1, q3, lst]
+        result_df = result_df.groupby('optimizer').agg({'function_values': aggregate_funcs,
+                                                        'total_time_used': ['median']})
+        result_df.columns = ["_".join(x) for x in result_df.columns.ravel()]
+        result_df["value_lst_len"] = [len(v) for v in result_df.function_values_lst.values]
+        per_dataset_df[benchmark] = result_df
+
+    # Collating into a DataFrame
+    _dfs = {k: per_dataset_df[k]["function_values_median"] for k in per_dataset_df.keys()}
+    result_df = pd.DataFrame.from_dict(_dfs).transpose()[opt_list]
+
+    def fix_precision(val):
+        if val < 1e-3:
+            val = "%.2e" % val
+        else:
+            val = "%.3g" % np.round(val, 3)
+        return val
+
+    for opt in opt_list:
+        df[opt] = [fix_precision(val) for val in df[opt].values]
+
+    with open(Path(output_dir) / "aggregate.tex", "w") as f:
+        f.writelines(result_df.to_latex())
+
+    return
+
+
 def input_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--output_dir', type=str,
@@ -317,6 +442,7 @@ def input_args():
                         default="tab", help="type of benchmark")
     parser.add_argument('--formatter', choices=["orig", "numpy"],
                         default="orig")
+    parser.add_argument('--expand', actions="store_true", default=False)
     args, unknown = parser.parse_known_args()
     return args
 
@@ -349,7 +475,13 @@ if __name__ == "__main__":
     args = input_args()
 
     list_of_opt_to_consider = opt_list[args.table_type]
-    if args.tabular == "svm" and "optuna_tpe_hb" in list_of_opt_to_consider:
-        list_of_opt_to_consider.remove("optuna_tpe_hb")
-    
-    save_median_table_tabular(**vars(args), opt_list=list_of_opt_to_consider, thresh=1.0)
+
+    if args.expand:
+        args.tabular = None
+        save_median_table_tabular_expanded(
+            **vars(args), opt_list=list_of_opt_to_consider, thresh=1.0
+        )
+    else:
+        if args.tabular == "svm" and "optuna_tpe_hb" in list_of_opt_to_consider:
+            list_of_opt_to_consider.remove("optuna_tpe_hb")
+        save_median_table_tabular(**vars(args), opt_list=list_of_opt_to_consider, thresh=1.0)
