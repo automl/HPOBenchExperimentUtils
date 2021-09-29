@@ -466,8 +466,8 @@ def save_median_table_tabular_expanded(
 
     filename = "{}_{}_{}".format(args.tabular, args.table_type, args.thresh)
     with open(Path(output_dir) / "{}.tex".format(filename), "w") as f:
-        f.writelines(result_df.to_latex())
-    result_df.to_pickle(Path(output_dir) / "{}.pkl".format(filename))
+        f.writelines(result_df_complete.to_latex())
+    result_df_complete.to_pickle(Path(output_dir) / "{}.pkl".format(filename))
 
     return
 
@@ -528,7 +528,6 @@ if __name__ == "__main__":
     list_of_opts = opt_list[args.table_type]
 
     if args.expand:
-        args.tabular = None
         save_median_table_tabular_expanded(
             **vars(args), opt_list=list_of_opts
         )
