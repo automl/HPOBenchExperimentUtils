@@ -331,7 +331,7 @@ def save_median_table_tabular_expanded(
     per_dataset_df = dict()
     for i, benchmark in enumerate(benchmarks, start=1):
         print("\n{:<2}/{:<2}\n".format(i, len(benchmarks)))
-        time.sleep(1)
+        # time.sleep(1)
         # assert input_dir.is_dir(), f'Result folder doesn\"t exist: {input_dir}'
         input_dir = Path(orig_input_dir) / benchmark
         if not input_dir.is_dir():
@@ -403,21 +403,71 @@ def save_median_table_tabular_expanded(
 
     # Collating into a DataFrame
     _dfs = {k: per_dataset_df[k]["function_values_median"] for k in per_dataset_df.keys()}
-    result_df = pd.DataFrame.from_dict(_dfs).transpose()[opt_list]
+    result_df_complete = pd.DataFrame.from_dict(_dfs).transpose()[opt_list]
 
-    def fix_precision(val):
-        if val < 1e-3:
-            val = "%.2e" % val
-        else:
-            val = "%.3g" % np.round(val, 3)
-        return val
+    # Compute some statistics
+    for i in range(result_df_complete.shape[0]):
+        result_df = result_df_complete.iloc[i]
+        opt_keys = list(result_df.index)
+        opt_keys.sort()
 
-    for opt in opt_list:
-        result_df[opt] = [fix_precision(val) for val in result_df[opt].values]
+        # get best optimizer
+        best_opt = result_df.index[result_df.values.argmin()]
+        best_opt_ls = [best_opt, ]
+        # best_val = np.array(result_df["function_values_lst"][best_opt])
+        best_val = np.array(per_dataset_df[result_df.name]["function_values_lst"][best_opt])
+        _log.info(f"{best_opt} is the best optimizer; found {len(best_val)} runs")
+        not_worse = []
+        for opt in opt_keys:
+            if opt == best_opt:
+                continue
+            opt_val = np.array(per_dataset_df[result_df.name]["function_values_lst"][opt])
+            if not len(opt_val) == len(best_val):
+                _log.warning(
+                    f"There are not {len(best_val)} but {len(opt_val)} repetitions for {opt}")
+                continue
 
-    with open(Path(output_dir) / "aggregate_{}.tex".format(args.table_type), "w") as f:
+            if np.sum(best_val - opt_val) == 0:
+                # Results are identical
+                best_opt_ls.append(opt)
+            else:
+                # The two-sided test has the null hypothesis that the median of the differences is zero
+                # against the alternative that it is different from zero.
+                s, p = scst.wilcoxon(best_val, opt_val, alternative="two-sided")
+                if p > 0.05:
+                    not_worse.append(opt)
+
+        for opt in opt_keys:
+            val = result_df[opt]
+
+            if val < 1e-3:
+                val = "%.2e" % val
+            else:
+                val = "%.3g" % np.round(val, 3)
+
+            if opt in best_opt_ls:
+                val = r"underline{textbf{%s}}" % val
+            elif opt in not_worse:
+                val = r"underline{%s}" % val
+
+            result_df[opt] = val
+
+        result_df_complete.iloc[i] = result_df
+
+    # def fix_precision(val):
+    #     if val < 1e-3:
+    #         val = "%.2e" % val
+    #     else:
+    #         val = "%.3g" % np.round(val, 3)
+    #     return val
+    #
+    # for opt in opt_list:
+    #     result_df[opt] = [fix_precision(val) for val in result_df[opt].values]
+
+    filename = "{}_{}_{}".format(args.tabular, args.table_type, args.thresh)
+    with open(Path(output_dir) / "{}.tex".format(filename), "w") as f:
         f.writelines(result_df.to_latex())
-    result_df.to_pickle(Path(output_dir) / "aggregate_{}.pkl".format(args.table_type))
+    result_df.to_pickle(Path(output_dir) / "{}.pkl".format(filename))
 
     return
 
@@ -480,9 +530,9 @@ if __name__ == "__main__":
     if args.expand:
         args.tabular = None
         save_median_table_tabular_expanded(
-            **vars(args), opt_list=list_of_opts, thresh=args.thresh
+            **vars(args), opt_list=list_of_opts
         )
     else:
         if args.tabular == "svm" and "optuna_tpe_hb" in list_of_opt_to_consider:
             list_of_opt_to_consider.remove("optuna_tpe_hb")
-        save_median_table_tabular(**vars(args), opt_list=list_of_opts, thresh=args.thresh)
+        save_median_table_tabular(**vars(args), opt_list=list_of_opts)
