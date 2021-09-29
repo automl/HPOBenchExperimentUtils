@@ -526,12 +526,10 @@ if __name__ == "__main__":
     args = input_args()
 
     list_of_opts = opt_list[args.table_type]
+    if args.tabular == "svm" and "optuna_tpe_hb" in list_of_opts:
+        list_of_opts.remove("optuna_tpe_hb")
 
     if args.expand:
-        save_median_table_tabular_expanded(
-            **vars(args), opt_list=list_of_opts
-        )
+        save_median_table_tabular_expanded(**vars(args), opt_list=list_of_opts)
     else:
-        if args.tabular == "svm" and "optuna_tpe_hb" in list_of_opt_to_consider:
-            list_of_opt_to_consider.remove("optuna_tpe_hb")
         save_median_table_tabular(**vars(args), opt_list=list_of_opts)
