@@ -443,6 +443,7 @@ def input_args():
     parser.add_argument('--formatter', choices=["orig", "numpy"],
                         default="orig")
     parser.add_argument('--expand', action="store_true", default=False)
+    parser.add_argument('--thresh', default=1.0, type=float, help="fraction of budget")
     args, unknown = parser.parse_known_args()
     return args
 
@@ -474,14 +475,14 @@ if __name__ == "__main__":
     opt_list['all_all'] = opt_list['all_sf'] + opt_list['all_mf']
     args = input_args()
 
-    list_of_opt_to_consider = opt_list[args.table_type]
+    list_of_opts = opt_list[args.table_type]
 
     if args.expand:
         args.tabular = None
         save_median_table_tabular_expanded(
-            **vars(args), opt_list=list_of_opt_to_consider, thresh=1.0
+            **vars(args), opt_list=list_of_opts, thresh=args.thresh
         )
     else:
         if args.tabular == "svm" and "optuna_tpe_hb" in list_of_opt_to_consider:
             list_of_opt_to_consider.remove("optuna_tpe_hb")
-        save_median_table_tabular(**vars(args), opt_list=list_of_opt_to_consider, thresh=1.0)
+        save_median_table_tabular(**vars(args), opt_list=list_of_opts, thresh=args.thresh)
