@@ -454,19 +454,14 @@ def save_median_table_tabular_expanded(
 
         result_df_complete.iloc[i] = result_df
 
-    # def fix_precision(val):
-    #     if val < 1e-3:
-    #         val = "%.2e" % val
-    #     else:
-    #         val = "%.3g" % np.round(val, 3)
-    #     return val
-    #
-    # for opt in opt_list:
-    #     result_df[opt] = [fix_precision(val) for val in result_df[opt].values]
-
     filename = "{}_{}_{}".format(args.tabular, args.table_type, args.thresh)
+    latex = result_df_complete.to_latex()
+    latex = latex.replace("\\}", "}")
+    latex = latex.replace("\\{", "{")
+    latex = latex.replace("textbf", "\\textbf")
+    latex = latex.replace("underline", "\\underline")
     with open(Path(output_dir) / "{}.tex".format(filename), "w") as f:
-        f.writelines(result_df_complete.to_latex())
+        f.writelines(latex)
     result_df_complete.to_pickle(Path(output_dir) / "{}.pkl".format(filename))
 
     return
