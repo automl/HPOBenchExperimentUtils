@@ -413,10 +413,11 @@ def save_median_table_tabular_expanded(
         return val
 
     for opt in opt_list:
-        df[opt] = [fix_precision(val) for val in df[opt].values]
+        result_df[opt] = [fix_precision(val) for val in result_df[opt].values]
 
-    with open(Path(output_dir) / "aggregate.tex", "w") as f:
+    with open(Path(output_dir) / "aggregate_{}.tex".format(args.table_type), "w") as f:
         f.writelines(result_df.to_latex())
+    result_df.to_pickle(Path(output_dir) / "aggregate_{}.pkl".format(args.table_type))
 
     return
 
