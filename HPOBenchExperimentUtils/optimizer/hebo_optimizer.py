@@ -55,7 +55,7 @@ class HEBOOptimizer(SingleFidelityOptimizer):
                 if hp.log:
                     param = {"name": hp.name, 'type': 'pow', 'lb': hp.lower, 'ub': hp.upper}
                 else:
-                    param = {"name": hp.name, 'type': 'int', 'lb': hp.lower, 'ub': hp.upper}
+                    param = {"name": hp.name, 'type': 'num', 'lb': hp.lower, 'ub': hp.upper}
             elif isinstance(hp, CS.CategoricalHyperparameter):
                 param = {"name": hp.name, 'type': 'cat', 'categories': hp.choices}
             else:
@@ -76,6 +76,8 @@ class HEBOOptimizer(SingleFidelityOptimizer):
             for h in self.cs.get_hyperparameters():
                 if isinstance(h, CS.OrdinalHyperparameter):
                     params[h.name] = h.sequence[int(params[h.name])]
+                elif isinstance(h, CS.UniformIntegerHyperparameter):
+                    params[h.name] = int(np.rint(params[h.name]))
 
             result_dict = self.benchmark.objective_function(configuration=params,
                                                             configuration_id=run_id,
