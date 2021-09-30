@@ -360,7 +360,8 @@ def save_median_table_tabular_expanded(
             optimizer_df = df_per_optimizer(
                 key=key,
                 unvalidated_trajectories=trajectories,
-                y_best=y_best_val if unvalidated else y_best_test
+                y_best=y_best_val if unvalidated else y_best_test,
+                y_max=y_max
             )
 
             unique_ids = np.unique(optimizer_df['id'])
