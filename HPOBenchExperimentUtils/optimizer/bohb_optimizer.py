@@ -27,25 +27,16 @@ class HpBandSterBaseOptimizer(SingleFidelityOptimizer):
                  settings: Dict, output_dir: Path, rng: Union[int, None] = 0):
         super().__init__(benchmark, settings, output_dir, rng)
 
-        # Hpbandster does not handle ordinal hyperparameter.
-        # cast them to categorical.
-        hps = self.cs.get_hyperparameters()
+        # Hpbandster does not handle ordinal hyperparameter. Cast them to integer.
+        self.new_cs = CS.ConfigurationSpace()
+        self.new_cs.seed(self.rng)
 
-        ordinal_hp = any([isinstance(hp, CS.OrdinalHyperparameter) for hp in hps])
-
-        if ordinal_hp:
-            new_cs = CS.ConfigurationSpace()
-            new_cs.seed(self.rng)
-            for hp in hps:
-                if isinstance(hp, CS.OrdinalHyperparameter):
-                    values = [hp.get_value(index) for index in hp.get_seq_order()]
-                    cat_hp = CS.CategoricalHyperparameter(hp.name, choices=values, default_value=hp.default_value)
-                    new_cs.add_hyperparameter(cat_hp)
-                    _log.info(f'Convert Ordinal Hyperparameter: {hp.name} to categorical.')
-                else:
-                    new_cs.add_hyperparameter(hp)
-            self.cs = new_cs
-
+        for hp in self.cs.get_hyperparameters():
+            if isinstance(hp, CS.OrdinalHyperparameter):
+                p = CS.UniformIntegerHyperparameter(hp.name, lower=0, upper=len(hp.sequence)-1)
+                self.new_cs.add_hyperparameter(p)
+            else:
+                self.new_cs.add_hyperparameter(hp)
         self.run_id = f'BOHB_optimization_seed_{self.rng}'
         self.intensifier = intensifier
 
@@ -67,7 +58,9 @@ class HpBandSterBaseOptimizer(SingleFidelityOptimizer):
                               settings_for_sending=self.settings_for_sending,
                               nameserver=ns_host,
                               nameserver_port=ns_port,
-                              run_id=self.run_id)
+                              run_id=self.run_id,
+                              orig_cs=self.cs,
+                              )
 
         worker.run(background=True)
 
@@ -78,7 +71,7 @@ class HpBandSterBaseOptimizer(SingleFidelityOptimizer):
         if tmp > self.min_budget:
             self.min_budget = tmp
         
-        master = self.intensifier(configspace=self.cs,
+        master = self.intensifier(configspace=self.new_cs,
                                   run_id=self.run_id,
                                   host=ns_host,
                                   nameserver=ns_host,
@@ -124,13 +117,13 @@ class CustomWorker(Worker):
     def __init__(self, benchmark: Bookkeeper,
                  main_fidelity: CS.Configuration,
                  settings: Dict,
-                 settings_for_sending: Dict, *args, **kwargs):
+                 settings_for_sending: Dict, orig_cs: CS.ConfigurationSpace, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.benchmark = benchmark
         self.main_fidelity = main_fidelity
         self.settings = settings
         self.settings_for_sending = settings_for_sending
-
+        self.orig_cs = orig_cs
         self.main_fidelity = get_main_fidelity(fidelity_space=benchmark.get_fidelity_space(),
                                                settings=settings)
 
@@ -138,6 +131,10 @@ class CustomWorker(Worker):
         """Here happens the work in the optimization step. """
 
         run_id = SingleFidelityOptimizer._id_generator()
+
+        for h in self.orig_cs.get_hyperparameters():
+            if isinstance(h, CS.OrdinalHyperparameter):
+                config[h.name] = h.sequence[int(config[h.name])]
 
         if isinstance(self.main_fidelity, CS.hyperparameters.UniformIntegerHyperparameter) \
                 or isinstance(self.main_fidelity, CS.hyperparameters.NormalIntegerHyperparameter) \
