@@ -251,7 +251,7 @@ def configspace_to_ray_cs(cs: ConfigurationSpace):
             ray_hp = tune.choice(hp.choices)
 
         elif isinstance(hp, CS.OrdinalHyperparameter):
-            ray_hp = tune.choice(hp.sequence)
+            ray_hp = tune.quniform(0, len(hp.sequence)-1, q=1.0)
 
         ray_cs[hp.name] = ray_hp
     return ray_cs
@@ -263,11 +263,13 @@ def fix_config_data_types(configuration: Dict, configuration_space: CS.Configura
     for hp_name, value in configuration.items():
         hp = configuration_space.get_hyperparameter(hp_name)
         new_value = None
-        if isinstance(hp, (CSH.IntegerHyperparameter, CSH.OrdinalHyperparameter)):
+        if isinstance(hp, CS.IntegerHyperparameter):
             new_value = int(value)
-        elif isinstance(hp, CSH.FloatHyperparameter):
+        elif isinstance(hp, CS.OrdinalHyperparameter):
+            new_value = hp.sequence[int(value)]
+        elif isinstance(hp, CS.FloatHyperparameter):
             new_value = float(value)
-        elif isinstance(hp, CSH.CategoricalHyperparameter):
+        elif isinstance(hp, CS.CategoricalHyperparameter):
             hp_type = type(hp.default_value)
             new_value = hp_type(value)
         else:
