@@ -15,6 +15,7 @@ class OptimizerEnum(Enum):
     def __str__(self):
         return str(self.value)
 
+    HEBO = "hebo"
     HPBANDSTER_HB = 'hpbandster_hyperband'
     HPBANDSTER_BOHB = 'hpbandster_bohb'
     HPBANDSTER_TPE = 'hpbandster_tpe'
@@ -58,6 +59,9 @@ def optimizer_str_to_enum(optimizer: Union[OptimizerEnum, str]) -> OptimizerEnum
 
     fail = False
     if isinstance(optimizer, str):
+        if optimizer == "hebo":
+            return OptimizerEnum.HEBO
+
         if 'hpbandster' in optimizer:
             if 'bohb' in optimizer:
                 return OptimizerEnum.HPBANDSTER_BOHB
@@ -197,6 +201,9 @@ def get_optimizer(optimizer_enum):
     elif optimizer_enum is OptimizerEnum.OPTUNA_TPE_MEDIAN:
         from HPOBenchExperimentUtils.optimizer.optuna_optimizer import OptunaTPEMedianStoppingOptimizer
         optimizer = OptunaTPEMedianStoppingOptimizer
+    elif optimizer_enum is OptimizerEnum.HEBO:
+        from HPOBenchExperimentUtils.optimizer.hebo_optimizer import HEBOOptimizer
+        optimizer = HEBOOptimizer
     else:
         raise ValueError(f'Unknown optimizer: {optimizer_enum}')
     return optimizer
