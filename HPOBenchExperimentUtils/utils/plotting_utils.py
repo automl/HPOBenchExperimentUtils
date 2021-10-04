@@ -522,8 +522,10 @@ color_dc = {
     "light_purple": '#cab2d6',
     }
 
+
 color_per_opt = {
     "randomsearch": 'cornflowerblue',  # light blue
+    'hebo': "#253494", # dark blue
 
     "hpbandster_bohb_eta_3": '#33a02c',  # "darkgreen",
     "hpbandster_hb_eta_3": '#b2df8a',  # "light green",
@@ -553,6 +555,7 @@ color_per_opt = {
 
 linestyle_per_opt = {
     "randomsearch": 'dashed',  # light blue
+    'hebo': "dashed",
 
     "hpbandster_bohb_eta_3": 'solid',  # "darkgreen",
     "hpbandster_hb_eta_3": 'solid',  # "light green",
@@ -580,6 +583,7 @@ linestyle_per_opt = {
     'optuna_tpe_median': "solid",  # medium purple
 }
 
+
 marker_per_opt = {
     "hpbandster_bohb_eta_3": "o",
     "hpbandster_bohb_eta_2": "o",
@@ -603,6 +607,7 @@ marker_per_opt = {
     'optuna_cmaes_hb': "X",
     'optuna_randomsearch': "X",
     'optuna_tpe_median': "X",
+    'hebo': "o",
 }
 
 
@@ -680,7 +685,6 @@ benchmark_families = {
         'nn_189354', 'nn_34539', 'nn_3945'
     ],
 }
-
 benchmark_families["all"] = benchmark_families["NAS201"] \
                                 + benchmark_families["NAS101"] \
                                 + benchmark_families["NASTAB"] \
