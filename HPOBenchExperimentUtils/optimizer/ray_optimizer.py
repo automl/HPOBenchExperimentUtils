@@ -263,11 +263,11 @@ def fix_config_data_types(configuration: Dict, configuration_space: CS.Configura
     for hp_name, value in configuration.items():
         hp = configuration_space.get_hyperparameter(hp_name)
         new_value = None
-        if isinstance(hp, CS.IntegerHyperparameter):
+        if isinstance(hp, CS.UniformIntegerHyperparameter):
             new_value = int(value)
         elif isinstance(hp, CS.OrdinalHyperparameter):
             new_value = hp.sequence[int(value)]
-        elif isinstance(hp, CS.FloatHyperparameter):
+        elif isinstance(hp, CS.UniformFloatHyperparameter):
             new_value = float(value)
         elif isinstance(hp, CS.CategoricalHyperparameter):
             hp_type = type(hp.default_value)
