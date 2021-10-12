@@ -413,30 +413,32 @@ def save_median_table_tabular_expanded(
         opt_keys.sort()
 
         # get best optimizer
-        best_opt = result_df.index[result_df.values.argmin()]
-        best_opt_ls = [best_opt, ]
+        # best_opt = result_df.index[result_df.values.argmin()]
+        best_idxs = np.where(result_df.values == result_df.min())[0]
+        best_opts = result_df.index[best_idxs]
+        # best_opt_ls = [best_opt, ]
         # best_val = np.array(result_df["function_values_lst"][best_opt])
-        best_val = np.array(per_dataset_df[result_df.name]["function_values_lst"][best_opt])
-        _log.info(f"{best_opt} is the best optimizer; found {len(best_val)} runs")
-        not_worse = []
-        for opt in opt_keys:
-            if opt == best_opt:
-                continue
-            opt_val = np.array(per_dataset_df[result_df.name]["function_values_lst"][opt])
-            if not len(opt_val) == len(best_val):
-                _log.warning(
-                    f"There are not {len(best_val)} but {len(opt_val)} repetitions for {opt}")
-                continue
-
-            if np.sum(best_val - opt_val) == 0:
-                # Results are identical
-                best_opt_ls.append(opt)
-            else:
-                # The two-sided test has the null hypothesis that the median of the differences is zero
-                # against the alternative that it is different from zero.
-                s, p = scst.wilcoxon(best_val, opt_val, alternative="two-sided")
-                if p > 0.05:
-                    not_worse.append(opt)
+        # best_val = np.array(per_dataset_df[result_df.name]["function_values_lst"][best_opt])
+        # _log.info(f"{best_opt} is the best optimizer; found {len(best_val)} runs")
+        # not_worse = []
+        # for opt in opt_keys:
+        #     if opt == best_opt:
+        #         continue
+        #     opt_val = np.array(per_dataset_df[result_df.name]["function_values_lst"][opt])
+        #     if not len(opt_val) == len(best_val):
+        #         _log.warning(
+        #             f"There are not {len(best_val)} but {len(opt_val)} repetitions for {opt}")
+        #         continue
+        #
+        #     if np.sum(best_val - opt_val) == 0:
+        #         # Results are identical
+        #         best_opt_ls.append(opt)
+        #     else:
+        #         # The two-sided test has the null hypothesis that the median of the differences is zero
+        #         # against the alternative that it is different from zero.
+        #         s, p = scst.wilcoxon(best_val, opt_val, alternative="two-sided")
+        #         if p > 0.05:
+        #             not_worse.append(opt)
 
         for opt in opt_keys:
             val = result_df[opt]
@@ -446,10 +448,11 @@ def save_median_table_tabular_expanded(
             else:
                 val = "%.3g" % np.round(val, 3)
 
-            if opt in best_opt_ls:
-                val = r"underline{textbf{%s}}" % val
-            elif opt in not_worse:
-                val = r"underline{%s}" % val
+            if opt in best_opts:
+                # val = r"underline{textbf{%s}}" % val
+                val = r"textbf{%s}" % val
+            # elif opt in not_worse:
+            #     val = r"underline{%s}" % val
 
             result_df[opt] = val
 
@@ -514,7 +517,7 @@ if __name__ == "__main__":
 
     # lists for the appendix
     opt_list['all_sf'] = ['randomsearch', 'de', 'smac_bo', 'smac_sf', 'ray_hyperopt',
-                          'hpbandster_tpe']  # table + trajectory per bench + ranking per bench
+                          'hpbandster_tpe', 'hebo']  # table + trajectory per bench + ranking per bench
     opt_list['all_mf'] = ['hpbandster_hb_eta_3', 'hpbandster_bohb_eta_3', 'dehb', 'smac_hb_eta_3',
                           'dragonfly_default', 'ray_hyperopt_asha', 'optuna_tpe_median',
                           'optuna_tpe_hb']  # table + trajectory per bench + ranking per bench
