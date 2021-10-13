@@ -202,11 +202,14 @@ def plot_ranks(benchmarks: List[str], familyname: str, output_dir: Union[Path, s
         
     if familyname == "all":
         plt.xlabel("Fraction of budget")
+        ax.set_xscale(benchmark_spec.get("xscale", "log"))
         ax.set_xlim([kwargs["x_lo"], kwargs["horizon"]])
+        size = np.ceil(np.log10(kwargs["horizon"] / kwargs["x_lo"])).astype(int)
+        ax.set_xticks(np.linspace(kwargs["x_lo"], kwargs["horizon"], size+1), minor=True)
     else:
         ax.set_xlim([x_lo, horizon])
 
-    ax.set_xscale(benchmark_spec.get("xscale", "log"))
+    # ax.set_xscale(benchmark_spec.get("xscale", "log"))
     ax.set_ylabel(f"{criterion.capitalize()} rank")
     ax.set_ylim([0.9, len(opt_list) + 0.1])
 
@@ -247,7 +250,7 @@ def input_args():
     parser.add_argument('--fig_type', choices=list(opt_list.keys()), default="fig4_sf")
     parser.add_argument('--x_lo', type=float, default=10**-6)
     parser.add_argument('--benches', nargs="+", default=None, help="explicit list of benchmarks")
-    parser.add_argument('--horizon', type=int, default=1)
+    parser.add_argument('--horizon', type=float, default=1)
     parser.add_argument('--name', type=str, default=None)
     args, unknown = parser.parse_known_args()
     return args
@@ -295,7 +298,7 @@ if __name__ == "__main__":
     list_of_opt_to_consider = opt_list[args.fig_type]
     if args.tabular is not None:
         benchmarks = benchmark_families["tabular_{}".format(args.tabular)]
-        args.name = args.tabular
+        args.name = args.tabular if args.name is None else args.name
         args.tabular = [args.tabular]
     else:
         args.tabular = ["lr", "svm", "rf", "xgb", "nn"]
