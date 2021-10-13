@@ -289,7 +289,7 @@ if __name__ == "__main__":
     opt_list["sec5.3.3"] = [
         "randomsearch", "hpbandster_hb_eta_3",
         "hpbandster_tpe", "hpbandster_bohb_eta_3",
-        "smac_sf", "smac_hb_eta_3"
+        "smac_sf", "smac_hb_eta_3",
         "de", "dehb"
     ]
 

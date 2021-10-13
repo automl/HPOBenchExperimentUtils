@@ -9,6 +9,7 @@ export OMP_NUM_THREADS=1
 export MKL_NUM_THREADS=1
 export PATH=/usr/local/kislurm/singularity-3.5/bin/:$PATH
 export PYTHONPATH=/work/dlclarge1/mallik-hpobench/DEHB:$PYTHONPATH
+export PYTHONPATH=/work/dlclarge1/mallik-hpobench/HPOBench:$PYTHONPATH
 
 # export HTTP_PROXY=http://tfproxy.informatik.uni-freiburg.de:8080
 # export HTTPS_PROXY=http://tfproxy.informatik.uni-freiburg.de:8080
