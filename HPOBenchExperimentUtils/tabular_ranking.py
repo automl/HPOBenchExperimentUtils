@@ -202,7 +202,7 @@ def plot_ranks(benchmarks: List[str], familyname: str, output_dir: Union[Path, s
         
     if familyname == "all":
         plt.xlabel("Fraction of budget")
-        ax.set_xlim([kwargs["x_lo"], 1])
+        ax.set_xlim([kwargs["x_lo"], kwargs["horizon"]])
     else:
         ax.set_xlim([x_lo, horizon])
 
@@ -217,13 +217,13 @@ def plot_ranks(benchmarks: List[str], familyname: str, output_dir: Union[Path, s
     unify_layout(ax, title=None, add_legend=False)
     val_str = 'optimized' if unvalidated else 'validated'
     plt.tight_layout()
-    if "name" in kwargs:
+    if kwargs["name"] is not None:
         name = kwargs["name"]
         filename = Path(output_dir) / \
-                   f'{name}_ranks_tabular_{familyname}_{val_str}_{which}_{opts}_{args.fig_type}.png'
+                   f'{name}_ranks_tabular_{familyname}_{val_str}_{which}_{opts}_{kwargs["fig_type"]}_{kwargs["horizon"]}.png'
     else:
         filename = Path(output_dir) / \
-                   f'all_ranks_tabular_{familyname}_{val_str}_{which}_{opts}_{args.fig_type}.png'
+                   f'all_ranks_tabular_{familyname}_{val_str}_{which}_{opts}_{kwargs["fig_type"]}_{kwargs["horizon"]}.png'
     print(filename)
     plt.savefig(filename, bbox_inches="tight")
     plt.close('all')
@@ -238,7 +238,7 @@ def input_args():
                         default="/work/dlclarge1/mallik-hpobench/opt-results/runs/")
     parser.add_argument('--what', choices=["all", "best_found", "over_time", "other",
                                            "ecdf", "correlation", "stats"], default="best_found")
-    parser.add_argument('--rank', default="all")
+    parser.add_argument('--rank', default="all", help="familyname parameter")
     parser.add_argument('--agg', choices=["mean", "median"], default="median")
     parser.add_argument('--unvalidated', action='store_true', default=False)
     parser.add_argument('--which', choices=["v1", "v2"], default="v1")
@@ -246,6 +246,9 @@ def input_args():
     parser.add_argument('--tabular', choices=["svm", "lr", "rf", "xgb", "nn"], default=None)
     parser.add_argument('--fig_type', choices=list(opt_list.keys()), default="fig4_sf")
     parser.add_argument('--x_lo', type=float, default=10**-6)
+    parser.add_argument('--benches', nargs="+", default=None, help="explicit list of benchmarks")
+    parser.add_argument('--horizon', type=int, default=1)
+    parser.add_argument('--name', type=str, default=None)
     args, unknown = parser.parse_known_args()
     return args
 
@@ -277,6 +280,16 @@ if __name__ == "__main__":
                           'optuna_tpe_median', 'optuna_tpe_hb']  # table + trajectory per bench + ranking per bench
     opt_list['all_all'] = opt_list['all_sf'] + opt_list['all_mf']
 
+    # thesis opt_lists
+    opt_list["sec5.3.1"] = ["randomsearch", "hpbandster_bohb_eta_3", "dehb"]
+    opt_list["sec5.3.2"] = ["randomsearch", "hpbandster_tpe", "smac_sf", "de"]
+    opt_list["sec5.3.3"] = [
+        "randomsearch", "hpbandster_hb_eta_3",
+        "hpbandster_tpe", "hpbandster_bohb_eta_3",
+        "smac_sf", "smac_hb_eta_3"
+        "de", "dehb"
+    ]
+
     args = input_args()
 
     list_of_opt_to_consider = opt_list[args.fig_type]
@@ -301,6 +314,8 @@ if __name__ == "__main__":
         return False
 
     benchmarks = [name for name in benchmarks if check_task_id(name)]
+    if args.benches is not None:
+        benchmarks = args.benches
 
     plot_ranks(
         **vars(args), benchmarks=benchmarks, familyname=args.rank, opt_list=list_of_opt_to_consider
