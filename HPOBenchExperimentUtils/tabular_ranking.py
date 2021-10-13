@@ -2,7 +2,6 @@
 Script to generate the average ranking plots for the chosen optimizer families
 """
 
-import yaml
 import pickle
 import logging
 import argparse
@@ -60,8 +59,7 @@ def read_trajectories(benchmark: str, input_dir: Path, train: bool=True,
         ystar_valid = 0
     normalizer = y_max - ystar_valid
 
-    budget = 1 if "benchmark_settings" not in kwargs else \
-        kwargs["benchmark_settings"]["time_limit_in_s"]
+    budget = 1 if "benchmark_settings" not in kwargs else kwargs["benchmark_settings"]["time_limit_in_s"]
 
     trajectories = []
     # trajectories = dict()
@@ -204,7 +202,7 @@ def plot_ranks(benchmarks: List[str], familyname: str, output_dir: Union[Path, s
         
     if familyname == "all":
         plt.xlabel("Fraction of budget")
-        ax.set_xlim([kwargs["x_lo"], 1])
+        ax.set_xlim([kwargs["x_lo"], kwargs["horizon"]])
     else:
         ax.set_xlim([x_lo, horizon])
 
@@ -219,17 +217,15 @@ def plot_ranks(benchmarks: List[str], familyname: str, output_dir: Union[Path, s
     unify_layout(ax, title=None, add_legend=False)
     val_str = 'optimized' if unvalidated else 'validated'
     plt.tight_layout()
-    if "name" in kwargs:
+    if kwargs["name"] is not None:
         name = kwargs["name"]
         filename = Path(output_dir) / \
-                   f'{name}_ranks_tabular_{familyname}_{val_str}_{which}_{opts}_{args.fig_type}.png'
+                   f'{name}_ranks_tabular_{familyname}_{val_str}_{which}_{opts}_{kwargs["fig_type"]}_{kwargs["horizon"]}.png'
     else:
         filename = Path(output_dir) / \
-                   f'all_ranks_tabular_{familyname}_{val_str}_{which}_{opts}_{args.fig_type}.png'
-    if args.custom:
-        filename = Path(output_dir) / "rebuttal_{}.png".format(args.custom_key)
+                   f'all_ranks_tabular_{familyname}_{val_str}_{which}_{opts}_{kwargs["fig_type"]}_{kwargs["horizon"]}.png'
     print(filename)
-    plt.savefig(filename)
+    plt.savefig(filename, bbox_inches="tight")
     plt.close('all')
     return 1
 
@@ -237,12 +233,12 @@ def plot_ranks(benchmarks: List[str], familyname: str, output_dir: Union[Path, s
 def input_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--output_dir', type=str,
-                        default="/work/dlclarge1/mallik-hpobench/opt-results/evals/ranks")
+                        default="/work/dlclarge1/mallik-hpobench/opt-results/thesis/ranks")
     parser.add_argument('--input_dir', type=str,
                         default="/work/dlclarge1/mallik-hpobench/opt-results/runs/")
     parser.add_argument('--what', choices=["all", "best_found", "over_time", "other",
                                            "ecdf", "correlation", "stats"], default="best_found")
-    parser.add_argument('--rank', default="all")
+    parser.add_argument('--rank', default="all", help="familyname parameter")
     parser.add_argument('--agg', choices=["mean", "median"], default="median")
     parser.add_argument('--unvalidated', action='store_true', default=False)
     parser.add_argument('--which', choices=["v1", "v2"], default="v1")
@@ -250,8 +246,9 @@ def input_args():
     parser.add_argument('--tabular', choices=["svm", "lr", "rf", "xgb", "nn"], default=None)
     parser.add_argument('--fig_type', choices=list(opt_list.keys()), default="fig4_sf")
     parser.add_argument('--x_lo', type=float, default=10**-6)
-    parser.add_argument('--custom', action='store_true', default=False)
-    parser.add_argument('--custom_key', default=False, type=str)
+    parser.add_argument('--benches', nargs="+", default=None, help="explicit list of benchmarks")
+    parser.add_argument('--horizon', type=int, default=1)
+    parser.add_argument('--name', type=str, default=None)
     args, unknown = parser.parse_known_args()
     return args
 
@@ -276,11 +273,23 @@ if __name__ == "__main__":
 
     # lists for the appendix
     opt_list['all_sf'] = ['randomsearch', 'de', 'smac_bo', 'smac_sf', 'ray_hyperopt',
-                          'hpbandster_tpe']  # table + trajectory per bench + ranking per bench
+                          'hpbandster_tpe', 'hebo']  # table + trajectory per bench + ranking per bench
     opt_list['all_mf'] = ['hpbandster_hb_eta_3', 'hpbandster_bohb_eta_3', 'dehb', 'smac_hb_eta_3',
-                          'dragonfly_default', 'ray_hyperopt_asha', 'optuna_tpe_median',
-                          'optuna_tpe_hb']  # table + trajectory per bench + ranking per bench
+                          'dragonfly_default',
+                          'ray_hyperopt_asha',
+                          'optuna_tpe_median', 'optuna_tpe_hb']  # table + trajectory per bench + ranking per bench
     opt_list['all_all'] = opt_list['all_sf'] + opt_list['all_mf']
+
+    # thesis opt_lists
+    opt_list["sec5.3.1"] = ["randomsearch", "hpbandster_bohb_eta_3", "dehb"]
+    opt_list["sec5.3.2"] = ["randomsearch", "hpbandster_tpe", "smac_sf", "de"]
+    opt_list["sec5.3.3"] = [
+        "randomsearch", "hpbandster_hb_eta_3",
+        "hpbandster_tpe", "hpbandster_bohb_eta_3",
+        "smac_sf", "smac_hb_eta_3"
+        "de", "dehb"
+    ]
+
     args = input_args()
 
     list_of_opt_to_consider = opt_list[args.fig_type]
@@ -305,16 +314,10 @@ if __name__ == "__main__":
         return False
 
     benchmarks = [name for name in benchmarks if check_task_id(name)]
-    
-    if args.custom:
-        assert args.custom_key is not None
-        custom_bench = Path(__file__).absolute().parent / "custom_ranking.yaml"
-        with open(custom_bench, "r") as f:
-            full_map = yaml.load(f, Loader=yaml.FullLoader)
-        benchmarks = full_map[args.custom_key]["benchmarks"]
-        list_of_opt_to_consider = full_map[args.custom_key]["opt_list"]
-        args.x_lo = full_map[args.custom_key]["x_lo"]
+    if args.benches is not None:
+        benchmarks = args.benches
 
     plot_ranks(
         **vars(args), benchmarks=benchmarks, familyname=args.rank, opt_list=list_of_opt_to_consider
     )
+
