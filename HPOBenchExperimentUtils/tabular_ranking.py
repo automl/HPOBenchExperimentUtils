@@ -298,7 +298,7 @@ if __name__ == "__main__":
     list_of_opt_to_consider = opt_list[args.fig_type]
     if args.tabular is not None:
         benchmarks = benchmark_families["tabular_{}".format(args.tabular)]
-        args.name = args.tabular if args.name is None else args.name
+        args.name = args.tabular if args.name is None else "{}_{}".format(args.name, args.tabular)
         args.tabular = [args.tabular]
     else:
         args.tabular = ["lr", "svm", "rf", "xgb", "nn"]
