@@ -292,6 +292,9 @@ if __name__ == "__main__":
         "smac_sf", "smac_hb_eta_3",
         "de", "dehb"
     ]
+    opt_list["sec5.3.3_auc"] = [
+        "hpbandster_hb_eta_3", "hpbandster_bohb_eta_3", "smac_hb_eta_3", "dehb"
+    ]
 
     args = input_args()
 
