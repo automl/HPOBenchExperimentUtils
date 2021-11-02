@@ -1,4 +1,4 @@
-import os
+mport os
 import argparse
 import itertools
 from hpobench.util.openml_data_manager import get_openmlcc18_taskids
@@ -121,6 +121,9 @@ opt_set = {
     "optuna": ["optuna_tpe_hb", "optuna_tpe_median"],
     # "ray": ["ray_hyperopt", "ray_randomsearch", "ray_hyperopt_asha"],
     "ray": ["ray_hyperopt", "ray_hyperopt_asha"],
+    #"optuna": ["optuna_tpe_hb", "optuna_cmaes_hb", "optuna_tpe_median"],
+    #"ray": ["ray_hyperopt", "ray_randomsearch", "ray_hyperopt_asha"],
+    "hebo": ["hebo"],
 }
 
 

@@ -10,8 +10,8 @@ import ray
 
 from HPOBenchExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
 from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
-import ConfigSpace.hyperparameters as CSH
 
+import numpy as np
 from typing import Union, Dict, Any
 from pathlib import Path
 
@@ -50,9 +50,13 @@ class RayBaseOptimizer(SingleFidelityOptimizer):
 
     @staticmethod
     def _setup_ray():
-        ray.init(local_mode=True,
-                 log_to_driver=False,
-                 include_dashboard=False)
+        tmp_dir = os.environ.get('TMPDIR', '/tmp/')
+
+        #ray.init(local_mode=True,
+        #         log_to_driver=False,
+        #         include_dashboard=False,
+        #         num_cpus=1,
+        #         _temp_dir=tmp_dir)
 
     @staticmethod
     def _training_function(config, benchmark, main_fidelity_name, valid_budgets, configspace: ConfigurationSpace):
@@ -264,7 +268,7 @@ def fix_config_data_types(configuration: Dict, configuration_space: CS.Configura
         hp = configuration_space.get_hyperparameter(hp_name)
         new_value = None
         if isinstance(hp, CS.UniformIntegerHyperparameter):
-            new_value = int(value)
+            new_value = np.rint(value)
         elif isinstance(hp, CS.OrdinalHyperparameter):
             new_value = hp.sequence[int(value)]
         elif isinstance(hp, CS.UniformFloatHyperparameter):
