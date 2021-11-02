@@ -50,9 +50,13 @@ class RayBaseOptimizer(SingleFidelityOptimizer):
 
     @staticmethod
     def _setup_ray():
-        ray.init(local_mode=True,
-                 log_to_driver=False,
-                 include_dashboard=False)
+        tmp_dir = os.environ.get('TMPDIR', '/tmp/')
+
+        #ray.init(local_mode=True,
+        #         log_to_driver=False,
+        #         include_dashboard=False,
+        #         num_cpus=1,
+        #         _temp_dir=tmp_dir)
 
     @staticmethod
     def _training_function(config, benchmark, main_fidelity_name, valid_budgets, configspace: ConfigurationSpace):
