@@ -126,7 +126,7 @@ def plot_ranks(benchmarks: List[str], familyname: str, output_dir: Union[Path, s
         benchmark_settings = get_benchmark_settings(b)
 
         tmp_horizon = benchmark_settings['time_limit_in_s']
-        if familyname == "all":
+        if familyname.startswith("all"):
             # we need to normalize time stamps and x-axis = fraction of budget
             normalize_times_by = tmp_horizon
             tmp_horizon = 1
@@ -203,7 +203,7 @@ def plot_ranks(benchmarks: List[str], familyname: str, output_dir: Union[Path, s
         plt.xlabel("Simulated runtime in seconds")
     else:
         plt.xlabel("Runtime in seconds")
-    if familyname == "all":
+    if familyname.startswith("all"):
         plt.xlabel("Fraction of budget")
         ax.set_xlim([10**-6, 1])
     else:
