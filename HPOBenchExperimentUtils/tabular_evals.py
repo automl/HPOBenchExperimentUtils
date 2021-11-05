@@ -499,11 +499,12 @@ def input_args():
 
 if __name__ == "__main__":
     opt_list = dict()
-    opt_list['main_sf'] = ['randomsearch', 'de', 'smac_bo', 'smac_sf', 'ray_hyperopt',
+    opt_list['main_sf'] = ['randomsearch', 'de', 'smac_bo', 'smac_sf', #'ray_hyperopt',
                            'hpbandster_tpe']
     opt_list['main_mf'] = ['hpbandster_hb_eta_3', 'hpbandster_bohb_eta_3', 'dehb',
                            'smac_hb_eta_3', 'dragonfly_default',
-                           'ray_hyperopt_asha']  # no 'optuna_tpe_median' and 'optuna_tpe_hb'
+                           #'ray_hyperopt_asha'
+                           ]  # no 'optuna_tpe_median' and 'optuna_tpe_hb'
 
     # lists for the main paper
     opt_list['table3'] = opt_list['main_sf'] + opt_list['main_mf']  # table
@@ -516,10 +517,12 @@ if __name__ == "__main__":
     opt_list['fig5all'] = opt_list['main_sf'] + opt_list['main_mf']
 
     # lists for the appendix
-    opt_list['all_sf'] = ['randomsearch', 'de', 'smac_bo', 'smac_sf', 'ray_hyperopt',
+    opt_list['all_sf'] = ['randomsearch', 'de', 'smac_bo', 'smac_sf', #'ray_hyperopt',
                           'hpbandster_tpe', 'hebo']  # table + trajectory per bench + ranking per bench
     opt_list['all_mf'] = ['hpbandster_hb_eta_3', 'hpbandster_bohb_eta_3', 'dehb', 'smac_hb_eta_3',
-                          'dragonfly_default', 'ray_hyperopt_asha', 'optuna_tpe_median',
+                          'dragonfly_default',
+                          #'ray_hyperopt_asha',
+                          'optuna_tpe_median',
                           'optuna_tpe_hb']  # table + trajectory per bench + ranking per bench
     opt_list['all_all'] = opt_list['all_sf'] + opt_list['all_mf']
     args = input_args()
