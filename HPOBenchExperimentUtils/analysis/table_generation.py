@@ -162,10 +162,11 @@ def save_median_table(benchmark: str, output_dir: Union[Path, str], input_dir: U
     for opt in opt_keys:
         val = result_df["function_values_median"][opt]
 
-        if val < 1e-3:
-            val = "%.2e" % val
-        else:
-            val = "%.3g" % np.round(val, 3)
+        #if val < 1e-3:
+        #    val = "%.2e" % val
+        #else:
+        #    val = "%.3g" % np.round(val, 3)
+        val = "%.5f" % np.round(val, 5)
 
         if opt in best_opt_ls:
             val = r"underline{textbf{%s}}" % val
