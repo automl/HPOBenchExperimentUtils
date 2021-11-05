@@ -11,21 +11,21 @@ if __name__ == "__main__":
 
     # manually selected list
     benchs = ["ParamNetReducedAdultOnTimeBenchmark",
-              "SliceLocalizationBenchmark",
+              "SliceLocalizationBenchmarkOriginal",
               "NASCifar10ABenchmark",
-              "Cifar100NasBench201Benchmark",
+              "Cifar100NasBench201BenchmarkOriginal",
               "NASBench1shot1SearchSpace1Benchmark",
               ]
 
     time_unit = 60*60
-    calls_unit = 1
+    calls_unit = 100
 
     res_dc = {}
     table_header = []
     assert os.path.isdir(args.inp)
 
     for b in benchs:
-        inp_path = os.path.join(args.inp, f"{b}/stats2_{b}_all.json")
+        inp_path = os.path.join(args.inp, f"stats2_{b}_all_all.json")
         if not os.path.isfile(inp_path):
             print(f"Skipping {b}, {inp_path} does not exist")
             continue
