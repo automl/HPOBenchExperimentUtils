@@ -268,7 +268,7 @@ def fix_config_data_types(configuration: Dict, configuration_space: CS.Configura
         hp = configuration_space.get_hyperparameter(hp_name)
         new_value = None
         if isinstance(hp, CS.UniformIntegerHyperparameter):
-            new_value = np.rint(value)
+            new_value = int(np.rint(value))
         elif isinstance(hp, CS.OrdinalHyperparameter):
             new_value = hp.sequence[int(value)]
         elif isinstance(hp, CS.UniformFloatHyperparameter):
