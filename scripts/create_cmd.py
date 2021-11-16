@@ -1,42 +1,21 @@
-mport os
 import argparse
-import itertools
+import os
 from hpobench.util.openml_data_manager import get_openmlcc18_taskids
-
-
-all_task_ids_by_in_mem_size = [
-    10101, 53, 146818, 146821, 9952, 146822, 31, 3917, 168912, 3, 167119, 12, 146212, 168911,
-    9981, 168329, 167120, 14965, 146606,  # < 30 MB
-    168330, 7592, 9977, 168910, 168335, 146195, 168908, 168331,  # 30-100 MB
-    168868, 168909, 189355, 146825, 7593,  # 100-500 MB
-    168332, 168337, 168338,  # > 500 MB
-    189354, 34539,  # > 2.5k MB
-    3945,  # >20k MB
-    # 189356  # MemoryError: Unable to allocate 1.50 TiB; array size (256419, 802853) of type float64
-]
-
-paper_tasks = [
-    10101, 53, 146818, 146821, 9952, 146822, 31, 3917, 168912, 3, 167119, 12, 146212, 168911,
-    9981, 167120, 14965, 146606, 7592, 9977
-]
-all_task_ids_by_in_mem_size = paper_tasks
-ntasks_done = dict(
-    svm=29,
-    lr=29,
-    rf=28,
-    xgb=22,
-    nn=8
-)
 
 expset_dc = {
     "NAS201": ["Cifar10ValidNasBench201Benchmark", "Cifar100NasBench201Benchmark",
                "ImageNetNasBench201Benchmark"],
+    "NAS201ORIG": ["Cifar10ValidNasBench201BenchmarkOriginal", "Cifar100NasBench201BenchmarkOriginal",
+               "ImageNetNasBench201BenchmarkOriginal"],
     "NAS101": ["NASCifar10ABenchmark", "NASCifar10BBenchmark", "NASCifar10CBenchmark"],
     "NASTAB": ["SliceLocalizationBenchmark", "ProteinStructureBenchmark",
                "NavalPropulsionBenchmark", "ParkinsonsTelemonitoringBenchmark", ],
+    "NASTABORIG": ["SliceLocalizationBenchmarkOriginal", "ProteinStructureBenchmarkOriginal",
+               "NavalPropulsionBenchmarkOriginal", "ParkinsonsTelemonitoringBenchmarkOriginal", ],
     "NAS1SHOT1": ["NASBench1shot1SearchSpace1Benchmark", "NASBench1shot1SearchSpace2Benchmark",
                   "NASBench1shot1SearchSpace3Benchmark", ],
-    "pybnn": ["BNNOnBostonHousing", "BNNOnProteinStructure", "BNNOnYearPrediction", ],
+    "pybnn": [#"BNNOnBostonHousing", 
+              "BNNOnProteinStructure", "BNNOnYearPrediction", ],
     "rl": ["cartpolereduced"],
     "learna": ["metalearna", "learna"],
     "paramnettime": ["ParamNetAdultOnTimeBenchmark", "ParamNetHiggsOnTimeBenchmark",
@@ -53,76 +32,23 @@ expset_dc = {
     "seeds": ["NASCifar10ABenchmark_fixed_seed_0", "NASCifar10ABenchmark_random_seed",
               "ProteinStructureBenchmark_fixed_seed_0", "ProteinStructureBenchmark_random_seed",
               "Cifar10ValidNasBench201Benchmark_fixed_seed_777", "Cifar10ValidNasBench201Benchmark_random_seed", ],
-    # tabular benchmarks
-    "tabular_svm": [
-        "{}_{}".format(x[0], x[1]) for x in itertools.product(
-            *[["svm"], all_task_ids_by_in_mem_size[:ntasks_done["svm"]]]
-        )
-    ],
-    "tabular_lr": [
-        "{}_{}".format(x[0], x[1]) for x in itertools.product(
-            *[["lr"], all_task_ids_by_in_mem_size[:ntasks_done["lr"]]]
-        )
-    ],
-    "tabular_nn": [
-        "{}_{}".format(x[0], x[1]) for x in itertools.product(
-            *[["nn"], all_task_ids_by_in_mem_size[:ntasks_done["nn"]]]
-        )
-    ],
-    "tabular_xgb": [
-        "{}_{}".format(x[0], x[1]) for x in itertools.product(
-            *[["xgb"], all_task_ids_by_in_mem_size[:ntasks_done["xgb"]]]
-        )
-    ],
-    "tabular_rf": [
-        "{}_{}".format(x[0], x[1]) for x in itertools.product(
-            *[["rf"], all_task_ids_by_in_mem_size[:ntasks_done["rf"]]]
-        )
-    ],
-    # raw benchmarks
-    "raw_svm": [
-        "{}_{}_raw".format(x[0], x[1]) for x in itertools.product(
-            *[["svm"], all_task_ids_by_in_mem_size[:ntasks_done["svm"]]]
-        )
-    ],
-    "raw_lr": [
-        "{}_{}_raw".format(x[0], x[1]) for x in itertools.product(
-            *[["lr"], all_task_ids_by_in_mem_size[:ntasks_done["lr"]]]
-        )
-    ],
-    "raw_nn": [
-        "{}_{}_raw".format(x[0], x[1]) for x in itertools.product(
-            *[["nn"], all_task_ids_by_in_mem_size[:ntasks_done["nn"]]]
-        )
-    ],
-    "raw_xgb": [
-        "{}_{}_raw".format(x[0], x[1]) for x in itertools.product(
-            *[["xgb"], all_task_ids_by_in_mem_size[:ntasks_done["xgb"]]]
-        )
-    ],
-    "raw_rf": [
-        "{}_{}_raw".format(x[0], x[1]) for x in itertools.product(
-            *[["rf"], all_task_ids_by_in_mem_size[:ntasks_done["rf"]]]
-        )
-    ],
 }
 
 opt_set = {
     "rs": ["randomsearch", ],
     "dehb": ["dehb", ],
-    "hpband": ["hpbandster_bohb_eta_3", "hpbandster_hb_eta_3"],
+    "hpband": ["hpbandster_tpe", "hpbandster_bohb_eta_3", "hpbandster_hb_eta_3"],
     "smac": ["smac_hb_eta_3", "smac_sf"],
-    # "autogluon": ["autogluon", ],
+    #"autogluon": ["autogluon", ],
     "dragonfly": ["dragonfly_default", ],
-    # "fabolas": ["fabolas_mtbo", "fabolas_mumbo"],
-    # "mumbo": ["mumbo", ],
+    #"fabolas": ["fabolas_mtbo", "fabolas_mumbo"],
+    #"mumbo": ["mumbo", ],
     "sf": ["smac_bo", "hpbandster_tpe", "de"],
-    # "optuna": ["optuna_tpe_hb", "optuna_cmaes_hb", "optuna_tpe_median"],
-    "optuna": ["optuna_tpe_hb", "optuna_tpe_median"],
-    # "ray": ["ray_hyperopt", "ray_randomsearch", "ray_hyperopt_asha"],
-    "ray": ["ray_hyperopt", "ray_hyperopt_asha"],
-    #"optuna": ["optuna_tpe_hb", "optuna_cmaes_hb", "optuna_tpe_median"],
-    #"ray": ["ray_hyperopt", "ray_randomsearch", "ray_hyperopt_asha"],
+    "optuna": ["optuna_tpe_hb", "optuna_tpe_median"], #"optuna_cmaes_hb",
+    "ray": ["ray_hyperopt", "ray_hyperopt_asha"], #"ray_randomsearch", 
+    "deall": ["dehb", "de"],
+    "smacall": ["smac_bo", "smac_hb_eta_3", "smac_sf"],
+    "hpbandall": ["hpbandster_bohb_eta_3", "hpbandster_hb_eta_3", "hpbandster_tpe"],
     "hebo": ["hebo"],
 }
 
