@@ -9,7 +9,7 @@ import argparse
 import numpy as np
 import pandas as pd
 from pathlib import Path
-import scipy.stats as scst
+import scipy.stats as scst, rankdata
 from typing import Union, List
 import matplotlib.pyplot as plt
 
@@ -25,28 +25,10 @@ from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc, color_per_opt,
 from HPOBenchExperimentUtils.utils.validation_utils import load_json_files, \
     load_trajectories_as_df, df_per_optimizer
 
+from utils.util import tasks_available, ntasks_done
+
 _root_log.setLevel(logging.DEBUG)
 _log = logging.getLogger(__name__)
-
-
-# list_of_opt_to_consider = [
-#     'randomsearch','de','smac_bo','smac_sf','ray_hyperopt','hpbandster_tpe','hpbandster_hb_eta_3',
-#     'hpbandster_bohb_eta_3','dehb','smac_hb_eta_3','dragonfly_default','ray_hyperopt_asha'
-# ]
-# opt_families = ["rs", "dehb", "hpband", "smac", "dragonfly", "sf", "ray"]
-
-
-paper_tasks = [
-    10101, 53, 146818, 146821, 9952, 146822, 31, 3917, 168912, 3, 167119, 12, 146212, 168911,
-    9981, 167120, 14965, 146606, 7592, 9977
-]
-ntasks_done = dict(
-    svm=29,
-    lr=29,
-    rf=28,
-    xgb=22,
-    nn=8
-)
 
 
 def write_latex(result_df, output_file, col_list):
@@ -158,7 +140,7 @@ def save_median_table_tabular(
 
     def check_task_id(benchmark_name):
         model, tid = benchmark_name.split("_")
-        if int(tid) in paper_tasks[:ntasks_done[model]]:
+        if int(tid) in tasks_available(model):
             return True
         return False
 
@@ -206,7 +188,11 @@ def save_median_table_tabular(
             unique_ids = np.unique(optimizer_df['id'])
             for unique_id in unique_ids:
                 df = optimizer_df[optimizer_df['id'] == unique_id]
-                df2 = pd.DataFrame([[key, unique_id, 0, 0, np.inf, df["fidel_values"].max(), 0, 0, 1], ], columns=df.columns)
+                df2 = pd.DataFrame(
+                    [[
+                        key, unique_id, 0, 0, np.inf, df["fidel_values"].max(), 0, 0, 1
+                    ], ], columns=df.columns
+                )
                 df = df.append(df2, ignore_index=True)
                 df = df.sort_values(by='total_time_used')
                 df = df.drop(df[df["total_time_used"] > cut_time_step].index)
@@ -237,8 +223,9 @@ def save_median_table_tabular(
         # q1 = lambda x: x.quantile(0.25)
         # q3 = lambda x: x.quantile(0.75)
         aggregate_funcs = [median, q1, q3, lst]
-        result_df = result_df.groupby('optimizer').agg({'function_values': aggregate_funcs,
-                                                        'total_time_used': ['median']})
+        result_df = result_df.groupby('optimizer').agg(
+            {'function_values': aggregate_funcs, 'total_time_used': ['median']}
+        )
         result_df.columns = ["_".join(x) for x in result_df.columns.ravel()]
         result_df["value_lst_len"] = [len(v) for v in result_df.function_values_lst.values]
         per_dataset_df[benchmark] = result_df
@@ -318,7 +305,7 @@ def save_median_table_tabular_expanded(
 
     def check_task_id(benchmark_name):
         model, tid = benchmark_name.split("_")
-        if int(tid) in paper_tasks[:ntasks_done[model]]:
+        if int(tid) in tasks_available(model):
             return True
         return False
 
