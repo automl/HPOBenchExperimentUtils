@@ -1,0 +1,220 @@
+nn_10101:
+  bench_args:
+    model: nn
+    task_id: 10101
+  cutoff_in_s: 53807.15503410013
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 53807.15503410013
+nn_10101_raw:
+  bench_args:
+    model: nn
+    task_id: 10101
+  cutoff_in_s: 53807.15503410013
+  import_benchmark: NNBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 53807.15503410013
+nn_146818:
+  bench_args:
+    model: nn
+    task_id: 146818
+  cutoff_in_s: 35166.77635549442
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 35166.77635549442
+nn_146818_raw:
+  bench_args:
+    model: nn
+    task_id: 146818
+  cutoff_in_s: 35166.77635549442
+  import_benchmark: NNBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 35166.77635549442
+nn_146821:
+  bench_args:
+    model: nn
+    task_id: 146821
+  cutoff_in_s: 117017.900788478
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 117017.900788478
+nn_146821_raw:
+  bench_args:
+    model: nn
+    task_id: 146821
+  cutoff_in_s: 117017.900788478
+  import_benchmark: NNBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 117017.900788478
+nn_146822:
+  bench_args:
+    model: nn
+    task_id: 146822
+  cutoff_in_s: 141728.26118702587
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 141728.26118702587
+nn_146822_raw:
+  bench_args:
+    model: nn
+    task_id: 146822
+  cutoff_in_s: 141728.26118702587
+  import_benchmark: NNBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 141728.26118702587
+nn_168912:
+  bench_args:
+    model: nn
+    task_id: 168912
+  cutoff_in_s: 327561.7667450508
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 327561.7667450508
+nn_168912_raw:
+  bench_args:
+    model: nn
+    task_id: 168912
+  cutoff_in_s: 327561.7667450508
+  import_benchmark: NNBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 327561.7667450508
+nn_3:
+  bench_args:
+    model: nn
+    task_id: 3
+  cutoff_in_s: 211305.7489769552
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 211305.7489769552
+nn_31:
+  bench_args:
+    model: nn
+    task_id: 31
+  cutoff_in_s: 60206.98863175098
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 60206.98863175098
+nn_31_raw:
+  bench_args:
+    model: nn
+    task_id: 31
+  cutoff_in_s: 60206.98863175098
+  import_benchmark: NNBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 60206.98863175098
+nn_3917:
+  bench_args:
+    model: nn
+    task_id: 3917
+  cutoff_in_s: 152729.2156335381
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 152729.2156335381
+nn_3917_raw:
+  bench_args:
+    model: nn
+    task_id: 3917
+  cutoff_in_s: 152729.2156335381
+  import_benchmark: NNBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 152729.2156335381
+nn_3_raw:
+  bench_args:
+    model: nn
+    task_id: 3
+  cutoff_in_s: 211305.7489769552
+  import_benchmark: NNBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 211305.7489769552
+nn_53:
+  bench_args:
+    model: nn
+    task_id: 53
+  cutoff_in_s: 42963.45927654115
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 42963.45927654115
+nn_53_raw:
+  bench_args:
+    model: nn
+    task_id: 53
+  cutoff_in_s: 42963.45927654115
+  import_benchmark: NNBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 42963.45927654115
+nn_9952:
+  bench_args:
+    model: nn
+    task_id: 9952
+  cutoff_in_s: 345000.0
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 345000.0
+nn_9952_raw:
+  bench_args:
+    model: nn
+    task_id: 9952
+  cutoff_in_s: 345000.0
+  import_benchmark: NNBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: iter
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 345000.0

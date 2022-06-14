@@ -1,0 +1,440 @@
+rf_10101:
+  bench_args:
+    model: rf
+    task_id: 10101
+  cutoff_in_s: 27083.40295835845
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 27083.40295835845
+rf_10101_raw:
+  bench_args:
+    model: rf
+    task_id: 10101
+  cutoff_in_s: 27083.40295835845
+  import_benchmark: RandomForestBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 27083.40295835845
+rf_12:
+  bench_args:
+    model: rf
+    task_id: 12
+  cutoff_in_s: 5054.647469742457
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 5054.647469742457
+rf_12_raw:
+  bench_args:
+    model: rf
+    task_id: 12
+  cutoff_in_s: 5054.647469742457
+  import_benchmark: RandomForestBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 5054.647469742457
+rf_146212:
+  bench_args:
+    model: rf
+    task_id: 146212
+  cutoff_in_s: 8845.662324240366
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 8845.662324240366
+rf_146212_raw:
+  bench_args:
+    model: rf
+    task_id: 146212
+  cutoff_in_s: 8845.662324240366
+  import_benchmark: RandomForestBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 8845.662324240366
+rf_146606:
+  bench_args:
+    model: rf
+    task_id: 146606
+  cutoff_in_s: 130509.30233153439
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 130509.30233153439
+rf_146606_raw:
+  bench_args:
+    model: rf
+    task_id: 146606
+  cutoff_in_s: 130509.30233153439
+  import_benchmark: RandomForestBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 130509.30233153439
+rf_146818:
+  bench_args:
+    model: rf
+    task_id: 146818
+  cutoff_in_s: 28040.659301012995
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 28040.659301012995
+rf_146818_raw:
+  bench_args:
+    model: rf
+    task_id: 146818
+  cutoff_in_s: 28040.659301012995
+  import_benchmark: RandomForestBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 28040.659301012995
+rf_146821:
+  bench_args:
+    model: rf
+    task_id: 146821
+  cutoff_in_s: 30081.8523085893
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 30081.8523085893
+rf_146821_raw:
+  bench_args:
+    model: rf
+    task_id: 146821
+  cutoff_in_s: 30081.8523085893
+  import_benchmark: RandomForestBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 30081.8523085893
+rf_146822:
+  bench_args:
+    model: rf
+    task_id: 146822
+  cutoff_in_s: 53343.058429165205
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 53343.058429165205
+rf_146822_raw:
+  bench_args:
+    model: rf
+    task_id: 146822
+  cutoff_in_s: 53343.058429165205
+  import_benchmark: RandomForestBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 53343.058429165205
+rf_14965:
+  bench_args:
+    model: rf
+    task_id: 14965
+  cutoff_in_s: 15447.206253725688
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 15447.206253725688
+rf_14965_raw:
+  bench_args:
+    model: rf
+    task_id: 14965
+  cutoff_in_s: 15447.206253725688
+  import_benchmark: RandomForestBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 15447.206253725688
+rf_167119:
+  bench_args:
+    model: rf
+    task_id: 167119
+  cutoff_in_s: 134000.65847334225
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 134000.65847334225
+rf_167119_raw:
+  bench_args:
+    model: rf
+    task_id: 167119
+  cutoff_in_s: 134000.65847334225
+  import_benchmark: RandomForestBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 134000.65847334225
+rf_167120:
+  bench_args:
+    model: rf
+    task_id: 167120
+  cutoff_in_s: 104363.77088720861
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 104363.77088720861
+rf_167120_raw:
+  bench_args:
+    model: rf
+    task_id: 167120
+  cutoff_in_s: 104363.77088720861
+  import_benchmark: RandomForestBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 104363.77088720861
+rf_168911:
+  bench_args:
+    model: rf
+    task_id: 168911
+  cutoff_in_s: 2182.8756748139062
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 2182.8756748139062
+rf_168911_raw:
+  bench_args:
+    model: rf
+    task_id: 168911
+  cutoff_in_s: 2182.8756748139062
+  import_benchmark: RandomForestBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 2182.8756748139062
+rf_168912:
+  bench_args:
+    model: rf
+    task_id: 168912
+  cutoff_in_s: 108877.4486942924
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 108877.4486942924
+rf_168912_raw:
+  bench_args:
+    model: rf
+    task_id: 168912
+  cutoff_in_s: 108877.4486942924
+  import_benchmark: RandomForestBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 108877.4486942924
+rf_3:
+  bench_args:
+    model: rf
+    task_id: 3
+  cutoff_in_s: 39614.549048377994
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 39614.549048377994
+rf_31:
+  bench_args:
+    model: rf
+    task_id: 31
+  cutoff_in_s: 30820.179877741808
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 30820.179877741808
+rf_31_raw:
+  bench_args:
+    model: rf
+    task_id: 31
+  cutoff_in_s: 30820.179877741808
+  import_benchmark: RandomForestBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 30820.179877741808
+rf_3917:
+  bench_args:
+    model: rf
+    task_id: 3917
+  cutoff_in_s: 41700.63944901434
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 41700.63944901434
+rf_3917_raw:
+  bench_args:
+    model: rf
+    task_id: 3917
+  cutoff_in_s: 41700.63944901434
+  import_benchmark: RandomForestBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 41700.63944901434
+rf_3_raw:
+  bench_args:
+    model: rf
+    task_id: 3
+  cutoff_in_s: 39614.549048377994
+  import_benchmark: RandomForestBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 39614.549048377994
+rf_53:
+  bench_args:
+    model: rf
+    task_id: 53
+  cutoff_in_s: 32026.863001036007
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 32026.863001036007
+rf_53_raw:
+  bench_args:
+    model: rf
+    task_id: 53
+  cutoff_in_s: 32026.863001036007
+  import_benchmark: RandomForestBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 32026.863001036007
+rf_7592:
+  bench_args:
+    model: rf
+    task_id: 7592
+  cutoff_in_s: 15267.579562346777
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 15267.579562346777
+rf_7592_raw:
+  bench_args:
+    model: rf
+    task_id: 7592
+  cutoff_in_s: 15267.579562346777
+  import_benchmark: RandomForestBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 15267.579562346777
+rf_9952:
+  bench_args:
+    model: rf
+    task_id: 9952
+  cutoff_in_s: 74173.33108775616
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 74173.33108775616
+rf_9952_raw:
+  bench_args:
+    model: rf
+    task_id: 9952
+  cutoff_in_s: 74173.33108775616
+  import_benchmark: RandomForestBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 74173.33108775616
+rf_9977:
+  bench_args:
+    model: rf
+    task_id: 9977
+  cutoff_in_s: 25637.973371386208
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 25637.973371386208
+rf_9977_raw:
+  bench_args:
+    model: rf
+    task_id: 9977
+  cutoff_in_s: 25637.973371386208
+  import_benchmark: RandomForestBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 25637.973371386208
+rf_9981:
+  bench_args:
+    model: rf
+    task_id: 9981
+  cutoff_in_s: 1289.7314287236532
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 1289.7314287236532
+rf_9981_raw:
+  bench_args:
+    model: rf
+    task_id: 9981
+  cutoff_in_s: 1289.7314287236532
+  import_benchmark: RandomForestBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 1289.7314287236532

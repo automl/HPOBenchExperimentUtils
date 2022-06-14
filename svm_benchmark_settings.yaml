@@ -1,0 +1,440 @@
+svm_10101:
+  bench_args:
+    model: svm
+    task_id: 10101
+  cutoff_in_s: 120.0
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 120.0
+svm_10101_raw:
+  bench_args:
+    model: svm
+    task_id: 10101
+  cutoff_in_s: 120.0
+  import_benchmark: SVMBenchmark
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 120.0
+svm_12:
+  bench_args:
+    model: svm
+    task_id: 12
+  cutoff_in_s: 329.6253527427206
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 329.6253527427206
+svm_12_raw:
+  bench_args:
+    model: svm
+    task_id: 12
+  cutoff_in_s: 329.6253527427206
+  import_benchmark: SVMBenchmark
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 329.6253527427206
+svm_146212:
+  bench_args:
+    model: svm
+    task_id: 146212
+  cutoff_in_s: 39998.95001003801
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 39998.95001003801
+svm_146212_raw:
+  bench_args:
+    model: svm
+    task_id: 146212
+  cutoff_in_s: 39998.95001003801
+  import_benchmark: SVMBenchmark
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 39998.95001003801
+svm_146606:
+  bench_args:
+    model: svm
+    task_id: 146606
+  cutoff_in_s: 345000.0
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 345000.0
+svm_146606_raw:
+  bench_args:
+    model: svm
+    task_id: 146606
+  cutoff_in_s: 345000.0
+  import_benchmark: SVMBenchmark
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 345000.0
+svm_146818:
+  bench_args:
+    model: svm
+    task_id: 146818
+  cutoff_in_s: 120.0
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 120.0
+svm_146818_raw:
+  bench_args:
+    model: svm
+    task_id: 146818
+  cutoff_in_s: 120.0
+  import_benchmark: SVMBenchmark
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 120.0
+svm_146821:
+  bench_args:
+    model: svm
+    task_id: 146821
+  cutoff_in_s: 120.0
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 120.0
+svm_146821_raw:
+  bench_args:
+    model: svm
+    task_id: 146821
+  cutoff_in_s: 120.0
+  import_benchmark: SVMBenchmark
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 120.0
+svm_146822:
+  bench_args:
+    model: svm
+    task_id: 146822
+  cutoff_in_s: 181.23145411614658
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 181.23145411614658
+svm_146822_raw:
+  bench_args:
+    model: svm
+    task_id: 146822
+  cutoff_in_s: 181.23145411614658
+  import_benchmark: SVMBenchmark
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 181.23145411614658
+svm_14965:
+  bench_args:
+    model: svm
+    task_id: 14965
+  cutoff_in_s: 64442.060099653645
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 64442.060099653645
+svm_14965_raw:
+  bench_args:
+    model: svm
+    task_id: 14965
+  cutoff_in_s: 64442.060099653645
+  import_benchmark: SVMBenchmark
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 64442.060099653645
+svm_167119:
+  bench_args:
+    model: svm
+    task_id: 167119
+  cutoff_in_s: 53346.7763548265
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 53346.7763548265
+svm_167119_raw:
+  bench_args:
+    model: svm
+    task_id: 167119
+  cutoff_in_s: 53346.7763548265
+  import_benchmark: SVMBenchmark
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 53346.7763548265
+svm_167120:
+  bench_args:
+    model: svm
+    task_id: 167120
+  cutoff_in_s: 345000.0
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 345000.0
+svm_167120_raw:
+  bench_args:
+    model: svm
+    task_id: 167120
+  cutoff_in_s: 345000.0
+  import_benchmark: SVMBenchmark
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 345000.0
+svm_168911:
+  bench_args:
+    model: svm
+    task_id: 168911
+  cutoff_in_s: 613.5317953157318
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 613.5317953157318
+svm_168911_raw:
+  bench_args:
+    model: svm
+    task_id: 168911
+  cutoff_in_s: 613.5317953157318
+  import_benchmark: SVMBenchmark
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 613.5317953157318
+svm_168912:
+  bench_args:
+    model: svm
+    task_id: 168912
+  cutoff_in_s: 691.0380594746596
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 691.0380594746596
+svm_168912_raw:
+  bench_args:
+    model: svm
+    task_id: 168912
+  cutoff_in_s: 691.0380594746596
+  import_benchmark: SVMBenchmark
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 691.0380594746596
+svm_3:
+  bench_args:
+    model: svm
+    task_id: 3
+  cutoff_in_s: 356.42007589880836
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 356.42007589880836
+svm_31:
+  bench_args:
+    model: svm
+    task_id: 31
+  cutoff_in_s: 120.0
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 120.0
+svm_31_raw:
+  bench_args:
+    model: svm
+    task_id: 31
+  cutoff_in_s: 120.0
+  import_benchmark: SVMBenchmark
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 120.0
+svm_3917:
+  bench_args:
+    model: svm
+    task_id: 3917
+  cutoff_in_s: 120.0
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 120.0
+svm_3917_raw:
+  bench_args:
+    model: svm
+    task_id: 3917
+  cutoff_in_s: 120.0
+  import_benchmark: SVMBenchmark
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 120.0
+svm_3_raw:
+  bench_args:
+    model: svm
+    task_id: 3
+  cutoff_in_s: 356.42007589880836
+  import_benchmark: SVMBenchmark
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 356.42007589880836
+svm_53:
+  bench_args:
+    model: svm
+    task_id: 53
+  cutoff_in_s: 120.0
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 120.0
+svm_53_raw:
+  bench_args:
+    model: svm
+    task_id: 53
+  cutoff_in_s: 120.0
+  import_benchmark: SVMBenchmark
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 120.0
+svm_7592:
+  bench_args:
+    model: svm
+    task_id: 7592
+  cutoff_in_s: 141793.97714508904
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 141793.97714508904
+svm_7592_raw:
+  bench_args:
+    model: svm
+    task_id: 7592
+  cutoff_in_s: 141793.97714508904
+  import_benchmark: SVMBenchmark
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 141793.97714508904
+svm_9952:
+  bench_args:
+    model: svm
+    task_id: 9952
+  cutoff_in_s: 548.2650081911324
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 548.2650081911324
+svm_9952_raw:
+  bench_args:
+    model: svm
+    task_id: 9952
+  cutoff_in_s: 548.2650081911324
+  import_benchmark: SVMBenchmark
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 548.2650081911324
+svm_9977:
+  bench_args:
+    model: svm
+    task_id: 9977
+  cutoff_in_s: 68444.49851268543
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 68444.49851268543
+svm_9977_raw:
+  bench_args:
+    model: svm
+    task_id: 9977
+  cutoff_in_s: 68444.49851268543
+  import_benchmark: SVMBenchmark
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 68444.49851268543
+svm_9981:
+  bench_args:
+    model: svm
+    task_id: 9981
+  cutoff_in_s: 248.2226283966549
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 248.2226283966549
+svm_9981_raw:
+  bench_args:
+    model: svm
+    task_id: 9981
+  cutoff_in_s: 248.2226283966549
+  import_benchmark: SVMBenchmark
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: subsample
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 248.2226283966549
