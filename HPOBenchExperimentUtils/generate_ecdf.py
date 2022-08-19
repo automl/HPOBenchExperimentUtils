@@ -99,7 +99,7 @@ def plot_ecdf_tabular(
 def input_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--output_dir', type=str,
-                        default="/work/dlclarge1/mallik-hpobench/opt-results/evals/ecdf")
+                        default="/work/dlclarge1/mallik-hpobench/opt-results/aug2022/ecdf")
     parser.add_argument('--input_dir', type=str,
                         default="/work/dlclarge1/mallik-hpobench/DataDir/Data/TabularData/")
     parser.add_argument('--model', choices=["svm", "lr", "rf", "xgb", "nn"], default=None)
