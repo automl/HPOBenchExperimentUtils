@@ -122,7 +122,7 @@ if __name__ == "__main__":
         lr=29,
         rf=28,
         xgb=22,
-        nn=8
+        nn=10
     )
     base_path = Path("/work/dlclarge1/mallik-hpobench/opt-results/runs/")
     for model in ntasks_done.keys():

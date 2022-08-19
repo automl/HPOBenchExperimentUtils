@@ -34,7 +34,7 @@ ntasks_done = dict(
     lr=29,
     rf=28,
     xgb=22,
-    nn=8
+    nn=10
 )
 
 
