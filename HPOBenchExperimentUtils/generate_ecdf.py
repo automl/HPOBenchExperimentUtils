@@ -66,10 +66,10 @@ def plot_ecdf_tabular(
     for benchmark_name in benchmarks:
         print(benchmark_name)
         model, task_id = benchmark_name.split("_")
+        task_id = int(task_id)
         if task_id not in all_task_ids_by_in_mem_size[:ntasks_done[model]]:
             print("Skipping {}...".format(task_id))
             continue
-        task_id = int(task_id)
         benchmark_spec = plot_dc.get(benchmark_name, {})
         y_best = benchmark_spec.get("ystar_valid", 0)
         y_max = benchmark_spec.get("y_max", 0)
