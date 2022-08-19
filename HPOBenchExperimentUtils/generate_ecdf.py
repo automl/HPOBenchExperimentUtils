@@ -93,7 +93,8 @@ def plot_ecdf_tabular(
         x, y = ecdf(regrets)
         plt.plot(x, y, alpha=0.3, color="#984ea3")
     plt.xlabel("Normalized regret", fontsize=25)
-    plt.ylabel(r"$P(X \le x)$", fontsize=25)
+    # plt.ylabel(r"$P(X \le x)$", fontsize=25)
+    plt.ylabel("P(X <= x)", fontsize=25)
     plt.savefig(output_dir / "{}.{}".format(family_name, format), bbox_tight="inches")
 
 
