@@ -29,10 +29,10 @@ paper_tasks = [
     9981, 167120, 14965, 146606, 7592, 9977
 ]
 ntasks_done = dict(
-    svm=29,
-    lr=29,
-    rf=28,
-    xgb=22,
+    svm=20,
+    lr=20,
+    rf=20,
+    xgb=20,
     nn=8
 )
 
