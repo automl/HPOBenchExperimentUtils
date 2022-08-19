@@ -67,7 +67,7 @@ def plot_ecdf_tabular(
         print(benchmark_name)
         model, task_id = benchmark_name.split("_")
         task_id = int(task_id)
-        if task_id not in all_task_ids_by_in_mem_size[:ntasks_done[model]]:
+        if task_id not in paper_tasks[:ntasks_done[model]]:
             print("Skipping {}...".format(task_id))
             continue
         benchmark_spec = plot_dc.get(benchmark_name, {})
