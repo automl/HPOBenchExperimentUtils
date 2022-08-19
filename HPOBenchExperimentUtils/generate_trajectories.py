@@ -21,6 +21,19 @@ _root_log.setLevel(level=logging.INFO)
 _log = logging.getLogger(__name__)
 
 
+paper_tasks = [
+    10101, 53, 146818, 146821, 9952, 146822, 31, 3917, 168912, 3, 167119, 12, 146212, 168911,
+    9981, 167120, 14965, 146606, 7592, 9977
+]
+ntasks_done = dict(
+    svm=29,
+    lr=29,
+    rf=28,
+    xgb=22,
+    nn=8
+)
+
+
 def extract_trajectory(output_dir: Union[Path, str], debug: Union[bool, None] = False,
                        main_fidelity: Union[str, None] = None):
     """
@@ -113,17 +126,7 @@ if __name__ == "__main__":
     opt_list['all_mf'] = ['hpbandster_hb_eta_3', 'hpbandster_bohb_eta_3', 'dehb', 'smac_hb_eta_3',
                           'dragonfly_default', 'ray_hyperopt_asha', 'optuna_tpe_median',
                           'optuna_tpe_hb']
-    paper_tasks = [
-        10101, 53, 146818, 146821, 9952, 146822, 31, 3917, 168912, 3, 167119, 12, 146212, 168911,
-        9981, 167120, 14965, 146606, 7592, 9977
-    ]
-    ntasks_done = dict(
-        svm=29,
-        lr=29,
-        rf=28,
-        xgb=22,
-        nn=10
-    )
+
     base_path = Path("/work/dlclarge1/mallik-hpobench/opt-results/runs/")
     for model in ntasks_done.keys():
         task_ids = paper_tasks[:ntasks_done[model]]

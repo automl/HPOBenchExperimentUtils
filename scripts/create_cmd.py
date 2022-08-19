@@ -16,7 +16,7 @@ ntasks_done = dict(
     lr=20,
     rf=20,
     xgb=20,
-    nn=10
+    nn=8
 )
 
 fidelity_names = dict(
