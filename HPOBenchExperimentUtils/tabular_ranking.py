@@ -236,7 +236,7 @@ def plot_ranks(benchmarks: List[str], familyname: str, output_dir: Union[Path, s
 def input_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--output_dir', type=str,
-                        default="/work/dlclarge1/mallik-hpobench/opt-results/crc_sans_ray/ranks")
+                        default="/work/dlclarge1/mallik-hpobench/opt-results/aug2022/")
     parser.add_argument('--input_dir', type=str,
                         default="/work/dlclarge1/mallik-hpobench/opt-results/runs/")
     parser.add_argument('--what', choices=["all", "best_found", "over_time", "other",

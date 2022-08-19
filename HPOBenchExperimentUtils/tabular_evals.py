@@ -461,7 +461,7 @@ def save_median_table_tabular_expanded(
 def input_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--output_dir', type=str,
-                        default="/work/dlclarge1/mallik-hpobench/opt-results/evals/")
+                        default="/work/dlclarge1/mallik-hpobench/opt-results/aug2022/")
     parser.add_argument('--input_dir', type=str,
                         default="/work/dlclarge1/mallik-hpobench/opt-results/runs/")
     parser.add_argument('--benchmark', choices=get_benchmark_names(), type=str, default=None)
