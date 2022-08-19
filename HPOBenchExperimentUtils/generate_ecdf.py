@@ -87,7 +87,8 @@ def plot_ecdf_tabular(
         values /= len(seeds)
         values_per_dataset[task_id] = values
         # calculating normalized regrets
-        regrets = (values - y_best) / (y_max - y_best)
+        # using y_best, y_max might not bound regret in [0,1] as mean is taken here for values
+        regrets = (values - np.min(values)) / (np.max(values) - np.min(values))
         # plotting regret ecdf
         x, y = ecdf(regrets)
         plt.plot(x, y, alpha=0.3, color="#984ea3")
