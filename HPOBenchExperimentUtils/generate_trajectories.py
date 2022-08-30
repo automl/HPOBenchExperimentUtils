@@ -133,7 +133,7 @@ if __name__ == "__main__":
         task_ids = paper_tasks[:ntasks_done[model]]
         for task_id in task_ids:
             for opt in opt_list['all_sf'] + opt_list['all_mf']:
-                output_dir = base_path / "{}_{}".format(model, task_id) / task_id / opt
+                output_dir = base_path / "{}_{}".format(model, task_id) / str(task_id) / opt
                 try:
                     extract_trajectory(output_dir=output_dir, debug=True)
                 except:
