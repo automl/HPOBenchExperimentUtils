@@ -251,7 +251,7 @@ def save_median_table_tabular(
     result_df = pd.DataFrame(result_df, columns=["function_values_median"])
 
     # Computing ranks
-    _result_df = result_df.transpose.copy()
+    _result_df = result_df.transpose().copy()
     rank_df = pd.DataFrame(
         [rankdata(_result_df.values, method="ordinal")], columns=_result_df.columns
     )
