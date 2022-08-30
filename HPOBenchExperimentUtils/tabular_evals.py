@@ -25,10 +25,22 @@ from HPOBenchExperimentUtils.utils.plotting_utils import plot_dc, color_per_opt,
 from HPOBenchExperimentUtils.utils.validation_utils import load_json_files, \
     load_trajectories_as_df, df_per_optimizer
 
-from utils.util import tasks_available, ntasks_done
 
 _root_log.setLevel(logging.DEBUG)
 _log = logging.getLogger(__name__)
+
+
+paper_tasks = [
+    10101, 53, 146818, 146821, 9952, 146822, 31, 3917, 168912, 3, 167119, 12, 146212, 168911,
+    9981, 167120, 14965, 146606, 7592, 9977
+]
+ntasks_done = dict(
+    svm=20,
+    lr=20,
+    rf=20,
+    xgb=20,
+    nn=8
+)
 
 
 def write_latex(result_df, output_file, col_list):
@@ -140,7 +152,7 @@ def save_median_table_tabular(
 
     def check_task_id(benchmark_name):
         model, tid = benchmark_name.split("_")
-        if int(tid) in tasks_available(model):
+        if int(tid) in paper_tasks[:ntasks_done[model]]:
             return True
         return False
 
@@ -305,7 +317,7 @@ def save_median_table_tabular_expanded(
 
     def check_task_id(benchmark_name):
         model, tid = benchmark_name.split("_")
-        if int(tid) in tasks_available(model):
+        if int(tid) in paper_tasks[:ntasks_done[model]]:
             return True
         return False
 
