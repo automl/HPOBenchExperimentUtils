@@ -9,7 +9,7 @@ import argparse
 import numpy as np
 import pandas as pd
 from pathlib import Path
-import scipy.stats as scst, rankdata
+from scipy.stats import rankdata
 from typing import Union, List
 import matplotlib.pyplot as plt
 
