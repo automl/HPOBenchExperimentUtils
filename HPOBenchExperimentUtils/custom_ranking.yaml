@@ -1,0 +1,182 @@
+auc_lr_high:
+  benchmarks:
+  - lr_168911
+  - lr_14965
+  - lr_167119
+  - lr_146818
+  - lr_10101
+  opt_list: &id001
+  - hpbandster_hb_eta_3
+  - hpbandster_bohb_eta_3
+  - dehb
+  - smac_hb_eta_3
+  - dragonfly_default
+  - ray_hyperopt_asha
+  - optuna_tpe_median
+  - optuna_tpe_hb
+  x_lo: 0.0001
+auc_lr_low:
+  benchmarks:
+  - lr_168912
+  - lr_146606
+  - lr_53
+  - lr_3
+  - lr_146821
+  opt_list: *id001
+  x_lo: 0.0001
+auc_lr_med:
+  benchmarks:
+  - lr_9977
+  - lr_7592
+  - lr_31
+  - lr_146822
+  - lr_167120
+  opt_list: *id001
+  x_lo: 0.0001
+auc_rf_high:
+  benchmarks:
+  - rf_168911
+  - rf_53
+  - rf_167120
+  - rf_146822
+  - rf_10101
+  opt_list: *id001
+  x_lo: 0.0001
+auc_rf_low:
+  benchmarks:
+  - rf_14965
+  - rf_146821
+  - rf_9952
+  - rf_9977
+  - rf_3
+  opt_list: *id001
+  x_lo: 0.0001
+auc_rf_rand1:
+  benchmarks:
+  - rf_3917
+  - rf_146821
+  - rf_146212
+  - rf_9977
+  - rf_7592
+  opt_list: *id001
+  x_lo: 0.0001
+auc_rf_rand2:
+  benchmarks:
+  - rf_146822
+  - rf_168912
+  - rf_146818
+  - rf_3
+  - rf_9981
+  opt_list: *id001
+  x_lo: 0.0001
+auc_rf_rand3:
+  benchmarks:
+  - rf_167120
+  - rf_14965
+  - rf_168911
+  - rf_146606
+  - rf_167119
+  opt_list: *id001
+  x_lo: 0.0001
+auc_rf_rand4:
+  benchmarks:
+  - rf_31
+  - rf_10101
+  - rf_9952
+  - rf_53
+  - rf_12
+  opt_list: *id001
+  x_lo: 0.0001
+auc_svm_high:
+  benchmarks:
+  - svm_10101
+  - svm_53
+  - svm_146821
+  - svm_31
+  - svm_3917
+  - svm_168912
+  - svm_167119
+  - svm_12
+  - svm_146212
+  - svm_168911
+  - svm_9981
+  - svm_167120
+  - svm_14965
+  - svm_7592
+  - svm_9977
+  opt_list: *id001
+  x_lo: 1.0e-05
+auc_svm_low:
+  benchmarks:
+  - svm_146822
+  - svm_3
+  opt_list: *id001
+  x_lo: 1.0e-05
+auc_xgb_high:
+  benchmarks:
+  - xgb_146821
+  - xgb_10101
+  - xgb_168912
+  - xgb_53
+  - xgb_168911
+  opt_list: *id001
+  x_lo: 0.0001
+auc_xgb_low:
+  benchmarks:
+  - xgb_146212
+  - xgb_14965
+  - xgb_3917
+  - xgb_146818
+  - xgb_9981
+  opt_list: *id001
+  x_lo: 0.0001
+auc_xgb_med:
+  benchmarks:
+  - xgb_31
+  - xgb_146822
+  - xgb_146606
+  - xgb_167119
+  - xgb_7592
+  opt_list: *id001
+  x_lo: 0.0001
+landscape_broad_lr:
+  benchmarks:
+  - lr_146818
+  - lr_167119
+  - lr_12
+  - lr_9981
+  - lr_168912
+  opt_list: &id002
+  - randomsearch
+  - de
+  - smac_bo
+  - smac_sf
+  - hpbandster_hb_eta_3
+  - hpbandster_bohb_eta_3
+  - dehb
+  - smac_hb_eta_3
+  x_lo: 1.0e-06
+landscape_broad_svm:
+  benchmarks:
+  - svm_146212
+  - svm_146822
+  - svm_7592
+  opt_list: *id002
+  x_lo: 1.0e-06
+landscape_narrow_lr:
+  benchmarks:
+  - lr_10101
+  - lr_31
+  - lr_168911
+  - lr_167120
+  - lr_14965
+  opt_list: *id002
+  x_lo: 0.0001
+landscape_narrow_svm:
+  benchmarks:
+  - svm_146606
+  - svm_167120
+  - svm_31
+  - svm_146818
+  opt_list: *id002
+  x_lo: 1.0e-06

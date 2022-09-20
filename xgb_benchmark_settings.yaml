@@ -1,0 +1,440 @@
+xgb_10101:
+  bench_args:
+    model: xgb
+    task_id: 10101
+  cutoff_in_s: 597.7412208576202
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 597.7412208576202
+xgb_10101_raw:
+  bench_args:
+    model: xgb
+    task_id: 10101
+  cutoff_in_s: 597.7412208576202
+  import_benchmark: XGBoostBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 597.7412208576202
+xgb_12:
+  bench_args:
+    model: xgb
+    task_id: 12
+  cutoff_in_s: 72302.78166394234
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 72302.78166394234
+xgb_12_raw:
+  bench_args:
+    model: xgb
+    task_id: 12
+  cutoff_in_s: 72302.78166394234
+  import_benchmark: XGBoostBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 72302.78166394234
+xgb_146212:
+  bench_args:
+    model: xgb
+    task_id: 146212
+  cutoff_in_s: 105767.37957978979
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 105767.37957978979
+xgb_146212_raw:
+  bench_args:
+    model: xgb
+    task_id: 146212
+  cutoff_in_s: 105767.37957978979
+  import_benchmark: XGBoostBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 105767.37957978979
+xgb_146606:
+  bench_args:
+    model: xgb
+    task_id: 146606
+  cutoff_in_s: 345000.0
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 345000.0
+xgb_146606_raw:
+  bench_args:
+    model: xgb
+    task_id: 146606
+  cutoff_in_s: 345000.0
+  import_benchmark: XGBoostBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 345000.0
+xgb_146818:
+  bench_args:
+    model: xgb
+    task_id: 146818
+  cutoff_in_s: 1083.4413893308638
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 1083.4413893308638
+xgb_146818_raw:
+  bench_args:
+    model: xgb
+    task_id: 146818
+  cutoff_in_s: 1083.4413893308638
+  import_benchmark: XGBoostBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 1083.4413893308638
+xgb_146821:
+  bench_args:
+    model: xgb
+    task_id: 146821
+  cutoff_in_s: 4698.773854231198
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 4698.773854231198
+xgb_146821_raw:
+  bench_args:
+    model: xgb
+    task_id: 146821
+  cutoff_in_s: 4698.773854231198
+  import_benchmark: XGBoostBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 4698.773854231198
+xgb_146822:
+  bench_args:
+    model: xgb
+    task_id: 146822
+  cutoff_in_s: 9691.171584544816
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 9691.171584544816
+xgb_146822_raw:
+  bench_args:
+    model: xgb
+    task_id: 146822
+  cutoff_in_s: 9691.171584544816
+  import_benchmark: XGBoostBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 9691.171584544816
+xgb_14965:
+  bench_args:
+    model: xgb
+    task_id: 14965
+  cutoff_in_s: 137159.98200742342
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 137159.98200742342
+xgb_14965_raw:
+  bench_args:
+    model: xgb
+    task_id: 14965
+  cutoff_in_s: 137159.98200742342
+  import_benchmark: XGBoostBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 137159.98200742342
+xgb_167119:
+  bench_args:
+    model: xgb
+    task_id: 167119
+  cutoff_in_s: 98484.80633877785
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 98484.80633877785
+xgb_167119_raw:
+  bench_args:
+    model: xgb
+    task_id: 167119
+  cutoff_in_s: 98484.80633877785
+  import_benchmark: XGBoostBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 98484.80633877785
+xgb_167120:
+  bench_args:
+    model: xgb
+    task_id: 167120
+  cutoff_in_s: 345000.0
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 345000.0
+xgb_167120_raw:
+  bench_args:
+    model: xgb
+    task_id: 167120
+  cutoff_in_s: 345000.0
+  import_benchmark: XGBoostBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 345000.0
+xgb_168911:
+  bench_args:
+    model: xgb
+    task_id: 168911
+  cutoff_in_s: 21982.635793508845
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 21982.635793508845
+xgb_168911_raw:
+  bench_args:
+    model: xgb
+    task_id: 168911
+  cutoff_in_s: 21982.635793508845
+  import_benchmark: XGBoostBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 21982.635793508845
+xgb_168912:
+  bench_args:
+    model: xgb
+    task_id: 168912
+  cutoff_in_s: 6501.197891344389
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 6501.197891344389
+xgb_168912_raw:
+  bench_args:
+    model: xgb
+    task_id: 168912
+  cutoff_in_s: 6501.197891344389
+  import_benchmark: XGBoostBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 6501.197891344389
+xgb_3:
+  bench_args:
+    model: xgb
+    task_id: 3
+  cutoff_in_s: 6944.890624798457
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 6944.890624798457
+xgb_31:
+  bench_args:
+    model: xgb
+    task_id: 31
+  cutoff_in_s: 2184.4457216189703
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 2184.4457216189703
+xgb_31_raw:
+  bench_args:
+    model: xgb
+    task_id: 31
+  cutoff_in_s: 2184.4457216189703
+  import_benchmark: XGBoostBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 2184.4457216189703
+xgb_3917:
+  bench_args:
+    model: xgb
+    task_id: 3917
+  cutoff_in_s: 2795.0850567591983
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 2795.0850567591983
+xgb_3917_raw:
+  bench_args:
+    model: xgb
+    task_id: 3917
+  cutoff_in_s: 2795.0850567591983
+  import_benchmark: XGBoostBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 2795.0850567591983
+xgb_3_raw:
+  bench_args:
+    model: xgb
+    task_id: 3
+  cutoff_in_s: 6944.890624798457
+  import_benchmark: XGBoostBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 6944.890624798457
+xgb_53:
+  bench_args:
+    model: xgb
+    task_id: 53
+  cutoff_in_s: 2902.5509197327297
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 2902.5509197327297
+xgb_53_raw:
+  bench_args:
+    model: xgb
+    task_id: 53
+  cutoff_in_s: 2902.5509197327297
+  import_benchmark: XGBoostBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 2902.5509197327297
+xgb_7592:
+  bench_args:
+    model: xgb
+    task_id: 7592
+  cutoff_in_s: 313832.2082775304
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 313832.2082775304
+xgb_7592_raw:
+  bench_args:
+    model: xgb
+    task_id: 7592
+  cutoff_in_s: 313832.2082775304
+  import_benchmark: XGBoostBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 313832.2082775304
+xgb_9952:
+  bench_args:
+    model: xgb
+    task_id: 9952
+  cutoff_in_s: 4424.862430650393
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 4424.862430650393
+xgb_9952_raw:
+  bench_args:
+    model: xgb
+    task_id: 9952
+  cutoff_in_s: 4424.862430650393
+  import_benchmark: XGBoostBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 4424.862430650393
+xgb_9977:
+  bench_args:
+    model: xgb
+    task_id: 9977
+  cutoff_in_s: 219870.9923537143
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 219870.9923537143
+xgb_9977_raw:
+  bench_args:
+    model: xgb
+    task_id: 9977
+  cutoff_in_s: 219870.9923537143
+  import_benchmark: XGBoostBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 219870.9923537143
+xgb_9981:
+  bench_args:
+    model: xgb
+    task_id: 9981
+  cutoff_in_s: 142195.24476261582
+  import_benchmark: TabularBenchmark
+  import_from: ml.tabular_benchmark
+  is_surrogate: true
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 142195.24476261582
+xgb_9981_raw:
+  bench_args:
+    model: xgb
+    task_id: 9981
+  cutoff_in_s: 142195.24476261582
+  import_benchmark: XGBoostBenchmarkMF
+  import_from: ml
+  is_surrogate: false
+  main_fidelity: n_estimators
+  mem_limit_in_mb: 6000
+  time_limit_in_s: 142195.24476261582

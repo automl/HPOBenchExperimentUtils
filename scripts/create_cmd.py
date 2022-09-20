@@ -1,6 +1,31 @@
 import argparse
+import itertools
 import os
+
 from hpobench.util.openml_data_manager import get_openmlcc18_taskids
+
+
+# tabular benchmarks info
+paper_tasks = [
+    10101, 53, 146818, 146821, 9952, 146822, 31, 3917, 168912, 3,
+    167119, 12, 146212, 168911, 9981, 167120, 14965, 146606, 7592, 9977
+]
+
+ntasks_done = dict(
+    svm=20,
+    lr=20,
+    rf=20,
+    xgb=20,
+    nn=8
+)
+
+fidelity_names = dict(
+    rf="n_estimators",
+    lr="iter",
+    xgb="n_estimators",
+    svm="subsample",
+    nn="iter"
+)
 
 expset_dc = {
     "NAS201": ["Cifar10ValidNasBench201Benchmark", "Cifar100NasBench201Benchmark",
@@ -32,6 +57,59 @@ expset_dc = {
     "seeds": ["NASCifar10ABenchmark_fixed_seed_0", "NASCifar10ABenchmark_random_seed",
               "ProteinStructureBenchmark_fixed_seed_0", "ProteinStructureBenchmark_random_seed",
               "Cifar10ValidNasBench201Benchmark_fixed_seed_777", "Cifar10ValidNasBench201Benchmark_random_seed", ],
+
+    # tabular benchmarks
+    "tabular_svm": [
+        "{}_{}".format(x[0], x[1]) for x in itertools.product(
+            *[["svm"], paper_tasks[:ntasks_done["svm"]]]
+        )
+    ],
+    "tabular_lr": [
+        "{}_{}".format(x[0], x[1]) for x in itertools.product(
+            *[["lr"], paper_tasks[:ntasks_done["lr"]]]
+        )
+    ],
+    "tabular_nn": [
+        "{}_{}".format(x[0], x[1]) for x in itertools.product(
+            *[["nn"], paper_tasks[:ntasks_done["nn"]]]
+        )
+    ],
+    "tabular_xgb": [
+        "{}_{}".format(x[0], x[1]) for x in itertools.product(
+            *[["xgb"], paper_tasks[:ntasks_done["xgb"]]]
+        )
+    ],
+    "tabular_rf": [
+        "{}_{}".format(x[0], x[1]) for x in itertools.product(
+            *[["rf"], paper_tasks[:ntasks_done["rf"]]]
+        )
+    ],
+    # raw benchmarks
+    "raw_svm": [
+        "{}_{}_raw".format(x[0], x[1]) for x in itertools.product(
+            *[["svm"], paper_tasks[:ntasks_done["svm"]]]
+        )
+    ],
+    "raw_lr": [
+        "{}_{}_raw".format(x[0], x[1]) for x in itertools.product(
+            *[["lr"], paper_tasks[:ntasks_done["lr"]]]
+        )
+    ],
+    "raw_nn": [
+        "{}_{}_raw".format(x[0], x[1]) for x in itertools.product(
+            *[["nn"], paper_tasks[:ntasks_done["nn"]]]
+        )
+    ],
+    "raw_xgb": [
+        "{}_{}_raw".format(x[0], x[1]) for x in itertools.product(
+            *[["xgb"], paper_tasks[:ntasks_done["xgb"]]]
+        )
+    ],
+    "raw_rf": [
+        "{}_{}_raw".format(x[0], x[1]) for x in itertools.product(
+            *[["rf"], paper_tasks[:ntasks_done["rf"]]]
+        )
+    ],
 }
 
 opt_set = {
