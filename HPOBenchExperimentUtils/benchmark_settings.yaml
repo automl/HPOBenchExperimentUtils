@@ -284,8 +284,6 @@ NASCifar10CBenchmark:
   import_benchmark: NASCifar10CBenchmark
   is_surrogate: true
 
-
-
 # surrogate benchmarks - nashpo
 
 SliceLocalizationBenchmark:
@@ -320,6 +318,38 @@ ParkinsonsTelemonitoringBenchmark:
   import_benchmark: ParkinsonsTelemonitoringBenchmark
   is_surrogate: true
 
+SliceLocalizationBenchmarkOriginal:
+  time_limit_in_s: 10000000
+  cutoff_in_s: 10000000
+  mem_limit_in_mb: 6000
+  import_from: nas.tabular_benchmarks
+  import_benchmark: SliceLocalizationBenchmarkOriginal
+  is_surrogate: true
+  
+ProteinStructureBenchmarkOriginal:
+  time_limit_in_s: 10000000
+  cutoff_in_s: 500000
+  mem_limit_in_mb: 6000
+  import_from: nas.tabular_benchmarks
+  import_benchmark: ProteinStructureBenchmarkOriginal
+  is_surrogate: true
+  
+NavalPropulsionBenchmarkOriginal:
+  time_limit_in_s: 10000000
+  cutoff_in_s: 10000000
+  mem_limit_in_mb: 6000
+  import_from: nas.tabular_benchmarks
+  import_benchmark: NavalPropulsionBenchmarkOriginal
+  is_surrogate: true
+  
+ParkinsonsTelemonitoringBenchmarkOriginal:
+  time_limit_in_s: 10000000
+  cutoff_in_s: 10000000
+  mem_limit_in_mb: 6000
+  import_from: nas.tabular_benchmarks
+  import_benchmark: ParkinsonsTelemonitoringBenchmarkOriginal
+  is_surrogate: true
+
 # surrogate benchmarks - nas201
 
 Cifar10ValidNasBench201Benchmark:
@@ -344,6 +374,30 @@ ImageNetNasBench201Benchmark:
   mem_limit_in_mb: 6000
   import_from: nas.nasbench_201
   import_benchmark: ImageNetNasBench201Benchmark
+  is_surrogate: true
+
+Cifar10ValidNasBench201BenchmarkOriginal:
+  time_limit_in_s: 10000000
+  cutoff_in_s: 10000000
+  mem_limit_in_mb: 6000
+  import_from: nas.nasbench_201
+  import_benchmark: Cifar10ValidNasBench201BenchmarkOriginal
+  is_surrogate: true
+  
+Cifar100NasBench201BenchmarkOriginal:
+  time_limit_in_s: 10000000
+  cutoff_in_s: 10000000
+  mem_limit_in_mb: 6000
+  import_from: nas.nasbench_201
+  import_benchmark: Cifar100NasBench201BenchmarkOriginal
+  is_surrogate: true
+  
+ImageNetNasBench201BenchmarkOriginal:
+  time_limit_in_s: 10000000
+  cutoff_in_s: 10000000
+  mem_limit_in_mb: 6000
+  import_from: nas.nasbench_201
+  import_benchmark: ImageNetNasBench201BenchmarkOriginal
   is_surrogate: true
 
 # surrogate benchmarks - nas1shot1

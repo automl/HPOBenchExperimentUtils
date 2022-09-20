@@ -43,7 +43,8 @@ def read_trajectories(benchmark: str, input_dir: Path, train: bool=True, y_best:
 
 def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Union[Path, str], opts: str,
                     criterion: str = 'mean', unvalidated: bool = True, which: str = "v1",
-                    opt_list: Union[List[str], None] = None, whatobj: str='total_time_used', **kwargs):
+                    opt_list: Union[List[str], None] = None, whatobj: str='total_time_used',
+                    plot_unknown: bool = False, **kwargs):
     _log.info(f'Start plotting trajectories of benchmark {benchmark}')
 
     input_dir = Path(input_dir)
@@ -75,8 +76,11 @@ def plot_trajectory(benchmark: str, output_dir: Union[Path, str], input_dir: Uni
         try:
             label = get_optimizer_setting(key).get("display_name", key)
         except:
-            _log.critical(f'Skip unknown optimizer {key}')
-            continue
+            if plot_unknown:
+                label = key
+            else:
+                _log.critical(f'Skip unknown optimizer {key}')
+                continue
         color = color_per_opt.get(key, "k")
         ls = linestyle_per_opt.get(key, '-')
         df[criterion].plot.line(drawstyle='steps-post', linewidth=2, ax=ax, label=label, c=color, linestyle=ls)

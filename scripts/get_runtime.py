@@ -10,10 +10,10 @@ benchs_list = {
 "surro": ["ParamNetReducedAdultOnTimeBenchmark", "ParamNetReducedHiggsOnTimeBenchmark",
     "ParamNetReducedLetterOnTimeBenchmark", "ParamNetReducedMnistOnTimeBenchmark",
     "ParamNetReducedOptdigitsOnTimeBenchmark", "ParamNetReducedPokerOnTimeBenchmark",
-    "Cifar10ValidNasBench201Benchmark", "Cifar100NasBench201Benchmark",
-    "ImageNetNasBench201Benchmark", "NASCifar10ABenchmark", "NASCifar10BBenchmark", "NASCifar10CBenchmark",
-    "SliceLocalizationBenchmark", "ProteinStructureBenchmark",
-    "NavalPropulsionBenchmark", "ParkinsonsTelemonitoringBenchmark",
+    "Cifar10ValidNasBench201BenchmarkOriginal", "Cifar100NasBench201BenchmarkOriginal",
+    "ImageNetNasBench201BenchmarkOriginal", "NASCifar10ABenchmark", "NASCifar10BBenchmark", "NASCifar10CBenchmark",
+    "SliceLocalizationBenchmarkOriginal", "ProteinStructureBenchmarkOriginal",
+    "NavalPropulsionBenchmarkOriginal", "ParkinsonsTelemonitoringBenchmarkOriginal",
     "NASBench1shot1SearchSpace1Benchmark", "NASBench1shot1SearchSpace2Benchmark",
     "NASBench1shot1SearchSpace3Benchmark",
     ]
@@ -37,7 +37,7 @@ if __name__ == "__main__":
         assert os.path.isdir(args.inp)
 
         for b in benchs_list[lsname]:
-            inp_path = os.path.join(args.inp, f"{b}/stats2_{b}_all.json")
+            inp_path = os.path.join(args.inp, f"stats2_{b}_all_all.json")
             if not os.path.isfile(inp_path):
                 print(f"Skipping {b}, {inp_path} does not exist")
                 continue

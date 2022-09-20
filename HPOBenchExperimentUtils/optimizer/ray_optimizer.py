@@ -10,8 +10,8 @@ import ray
 
 from HPOBenchExperimentUtils.optimizer.base_optimizer import SingleFidelityOptimizer
 from HPOBenchExperimentUtils.core.bookkeeper import Bookkeeper
-import ConfigSpace.hyperparameters as CSH
 
+import numpy as np
 from typing import Union, Dict, Any
 from pathlib import Path
 
@@ -50,9 +50,13 @@ class RayBaseOptimizer(SingleFidelityOptimizer):
 
     @staticmethod
     def _setup_ray():
-        ray.init(local_mode=True,
-                 log_to_driver=False,
-                 include_dashboard=False)
+        tmp_dir = os.environ.get('TMPDIR', '/tmp/')
+
+        #ray.init(local_mode=True,
+        #         log_to_driver=False,
+        #         include_dashboard=False,
+        #         num_cpus=1,
+        #         _temp_dir=tmp_dir)
 
     @staticmethod
     def _training_function(config, benchmark, main_fidelity_name, valid_budgets, configspace: ConfigurationSpace):
@@ -251,7 +255,7 @@ def configspace_to_ray_cs(cs: ConfigurationSpace):
             ray_hp = tune.choice(hp.choices)
 
         elif isinstance(hp, CS.OrdinalHyperparameter):
-            ray_hp = tune.choice(hp.sequence)
+            ray_hp = tune.quniform(0, len(hp.sequence)-1, q=1.0)
 
         ray_cs[hp.name] = ray_hp
     return ray_cs
@@ -263,11 +267,13 @@ def fix_config_data_types(configuration: Dict, configuration_space: CS.Configura
     for hp_name, value in configuration.items():
         hp = configuration_space.get_hyperparameter(hp_name)
         new_value = None
-        if isinstance(hp, (CSH.IntegerHyperparameter, CSH.OrdinalHyperparameter)):
-            new_value = int(value)
-        elif isinstance(hp, CSH.FloatHyperparameter):
+        if isinstance(hp, CS.UniformIntegerHyperparameter):
+            new_value = int(np.rint(value))
+        elif isinstance(hp, CS.OrdinalHyperparameter):
+            new_value = hp.sequence[int(value)]
+        elif isinstance(hp, CS.UniformFloatHyperparameter):
             new_value = float(value)
-        elif isinstance(hp, CSH.CategoricalHyperparameter):
+        elif isinstance(hp, CS.CategoricalHyperparameter):
             hp_type = type(hp.default_value)
             new_value = hp_type(value)
         else:
