@@ -18,8 +18,8 @@ from HPOBenchExperimentUtils import validate_benchmark, run_benchmark
 from hpobench.util.openml_data_manager import get_openmlcc18_taskids
 
 
-benchmark = 'xgboost'
-output_dir = Path('../example_dir/xgboost')
+benchmark = 'xgboostsub'
+output_dir = Path('example_dir/xgboost')
 rng = 1
 task_id = get_openmlcc18_taskids()[0]
 
@@ -30,7 +30,7 @@ task_id = get_openmlcc18_taskids()[0]
 
 # Each configuration has a predefined cutoff time limit. And each optimization run has a global time limit.
 # Both timelimits are definied in the benchmark_settings.
-run_benchmark(optimizer='hpbandster_h2bo_eta_3_test',
+run_benchmark(optimizer='smac_sf',
               benchmark=benchmark,
               output_dir=output_dir,
               rng=rng,

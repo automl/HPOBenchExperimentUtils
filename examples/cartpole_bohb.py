@@ -20,7 +20,7 @@ benchmark = 'cartpolereduced'
 output_dir = Path('../example_dir/cartpole')
 rng = 1
 
-run_benchmark(optimizer='hpbandster_rs_eta_3_test',
+run_benchmark(optimizer='smac_sf',
               benchmark=benchmark,
               output_dir=output_dir,
               rng=rng,
