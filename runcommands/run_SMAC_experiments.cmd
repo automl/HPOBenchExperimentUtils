@@ -1,0 +1,12 @@
+bash runcommands/run_NAS1SHOT1_dragonfly_10.cmd
+bash runcommands/run_NAS1SHOT1_hpband_10.cmd
+bash runcommands/run_NAS1SHOT1_rs_10.cmd
+bash runcommands/run_NAS1SHOT1_smac_10.cmd
+bash runcommands/run_NASTABORIG_dragonfly_10.cmd
+bash runcommands/run_NASTABORIG_hpband_10.cmd
+bash runcommands/run_NASTABORIG_rs_10.cmd
+bash runcommands/run_NASTABORIG_smac_10.cmd
+bash runcommands/run_paramnettime_dragonfly_10.cmd
+bash runcommands/run_paramnettime_hpband_10.cmd
+bash runcommands/run_paramnettime_rs_10.cmd
+bash runcommands/run_paramnettime_smac_10.cmd
