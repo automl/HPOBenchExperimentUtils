@@ -72,49 +72,62 @@ def main(args):
     eval_cmd = []
     evalu_cmd = []
 
-    base = f"python {args.root}/HPOBenchExperimentUtils"
+    base = f"{' '.join(args.python_cmd)} {args.root}/HPOBenchExperimentUtils"
 
     for benchmark in expset_dc[exp]:
         for optimizer in opt_set[opt]:
             for seed in range(1, nrep + 1):
                 if benchmark in ["svm", "xgboostsub", "xgboostest"]:
                     for tid in get_openmlcc18_taskids():
-                        cmd = "%s/run_benchmark.py --output_dir %s --optimizer %s --benchmark %s" \
-                              " --rng %s --task_id %d" % \
-                              (base, args.out_run, optimizer, benchmark, seed, tid)
+                        cmd = (
+                            "%s/run_benchmark.py --output_dir %s --optimizer %s --benchmark %s"
+                            " --rng %s --task_id %d" % (base, args.out_run, optimizer, benchmark, seed, tid)
+                        )
                         run_cmd.append(cmd)
                 else:
-                    cmd = "%s/run_benchmark.py --output_dir %s --optimizer %s --benchmark %s " \
-                          "--rng %s" % (base, args.out_run, optimizer, benchmark, seed)
+                    cmd = "%s/run_benchmark.py --output_dir %s --optimizer %s --benchmark %s " "--rng %s" % (
+                        base,
+                        args.out_run,
+                        optimizer,
+                        benchmark,
+                        seed,
+                    )
                     run_cmd.append(cmd)
 
         if opt == "rs":
             # We only need this once since it works for all optimizers
-            cmd = f"{base}/evaluate_benchmark.py --output_dir {args.out_eval}/ --input_dir {args.out_run}/ --benchmark {benchmark} " \
-                  "--agg median --what all"
+            cmd = (
+                f"{base}/evaluate_benchmark.py --output_dir {args.out_eval}/ --input_dir {args.out_run}/ --benchmark {benchmark} "
+                "--agg median --what all"
+            )
             eval_cmd.append(cmd)
             cmd += " --unvalidated"
             evalu_cmd.append(cmd)
 
             # Do this only once
             if benchmark == expset_dc[exp][-1]:
-                cmd = f"{base}/evaluate_benchmark.py --output_dir {args.out_eval}/ --input_dir {args.out_run}/ " \
-                      f"--agg median --rank {exp}"
+                cmd = (
+                    f"{base}/evaluate_benchmark.py --output_dir {args.out_eval}/ --input_dir {args.out_run}/ "
+                    f"--agg median --rank {exp}"
+                )
                 eval_cmd.append(cmd)
                 cmd += " --unvalidated"
                 evalu_cmd.append(cmd)
 
-            cmd = "%s/validate_benchmark.py start_scheduler --interface eno1 --recompute_all --benchmark %s " \
-                  "--output_dir %s/%s --run_id %s --worker_id 0" % (base, benchmark, args.out_run, benchmark, benchmark)
+            cmd = (
+                "%s/validate_benchmark.py start_scheduler --interface eno1 --recompute_all --benchmark %s "
+                "--output_dir %s/%s --run_id %s --worker_id 0" % (base, benchmark, args.out_run, benchmark, benchmark)
+            )
             val_cmd.append(cmd)
             for i in range(nworker):
-                cmd = "sleep 360; %s/validate_benchmark.py start_worker --interface eno1 --benchmark %s " \
-                      "--output_dir %s/%s --run_id %s --worker_id %d" % (
-                      base, benchmark, args.out_run, benchmark, benchmark, i + 1)
+                cmd = (
+                    "sleep 360; %s/validate_benchmark.py start_worker --interface eno1 --benchmark %s "
+                    "--output_dir %s/%s --run_id %s --worker_id %d"
+                    % (base, benchmark, args.out_run, benchmark, benchmark, i + 1)
+                )
                 val_cmd.append(cmd)
 
-    for c, f in [[run_cmd, run_fl], [eval_cmd, eval_fl],
-                 [evalu_cmd, evalu_fl], [val_cmd, val_fl]]:
+    for c, f in [[run_cmd, run_fl], [eval_cmd, eval_fl], [evalu_cmd, evalu_fl], [val_cmd, val_fl]]:
         if len(c) > 0:
             write_cmd(c, f)
 
@@ -134,14 +147,15 @@ def write_cmd(cmd_list, out_fl):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--exp', required=True, choices=expset_dc.keys())
-    parser.add_argument('--opt', default="def", choices=opt_set.keys())
-    parser.add_argument('--nrep', default=10, type=int)
-    parser.add_argument('--out-run', default="./exp_outputs", type=str)
-    parser.add_argument('--out-eval', default="./plots", type=str)
-    parser.add_argument('--out-cmd', default=".", type=str)
-    parser.add_argument('--root', default=".")
-    parser.add_argument('--nworker', default=50)
+    parser.add_argument("--exp", required=True, choices=expset_dc.keys())
+    parser.add_argument("--opt", default="def", choices=opt_set.keys())
+    parser.add_argument("--nrep", default=10, type=int)
+    parser.add_argument("--out-run", default="./exp_outputs", type=str)
+    parser.add_argument("--out-eval", default="./plots", type=str)
+    parser.add_argument("--out-cmd", default=".", type=str)
+    parser.add_argument("--root", default=".")
+    parser.add_argument("--nworker", default=50)
+    parser.add_argument("--python-cmd", type=str, nargs="*", default=["python"], help="Command to run python")
 
     args, unknown = parser.parse_known_args()
     main(args)
