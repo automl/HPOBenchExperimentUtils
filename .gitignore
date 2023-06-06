@@ -133,3 +133,6 @@ dmypy.json
 experiments/
 test/
 local_scripts/
+exp_output
+exp_outputs
+*.cmd
