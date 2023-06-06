@@ -137,7 +137,8 @@ def run_benchmark(optimizer: str,
     if use_local:
         benchmark = benchmark_obj(rng=rng, **benchmark_params)
     else:
-        container_source = config_file.container_source
+        # container_source = config_file.container_source
+        container_source = 'oras://gitlab.tf.uni-freiburg.de:5050/muelleph/hpobench-registry'
         benchmark = benchmark_obj(rng=rng, container_source=container_source, **benchmark_params)
     _log.info(f'Benchmark successfully initialized.')
 
