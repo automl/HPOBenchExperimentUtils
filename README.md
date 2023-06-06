@@ -4,6 +4,9 @@ HPOBenchExperimentUtils
 A small tool to easily run different optimizers on HPOBench-benchmarks with the same settings. 
 The HPOBenchExpUtils extract for each run a runhistory as well as a trajectory. 
 
+## SMAC Journal Experiments
+For reproducing the experiments in our [SMAC JMLR article](https://jmlr.org/papers/v23/21-0888.html), please check out `SMAC_Experiments.md`.
+
 
 ## Running a benchmark
 
