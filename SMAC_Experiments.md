@@ -1,4 +1,6 @@
 # Installation and Setup
+For the setup just follow the instructions. The general setup is described in more detail 
+in `scripts/HowtoRunExperiments.md´.
 
 ```bash
 # Create conda environment
