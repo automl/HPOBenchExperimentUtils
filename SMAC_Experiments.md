@@ -2,7 +2,7 @@
 
 ```bash
 # Create conda environment
-conda create -n hpobexp pyrhon=3.10 -y
+conda create -n hpobexp python=3.10 -y
 conda activate hpobexp
 
 # Clone and install HPOBench experiment utils
